@@ -1,0 +1,36 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../vendor/awcodes/filament-quick-create/resources/**/*.blade.php';
+@source "../../../../vendor/relaticle/flowforge/resources/views/**/*.blade.php";
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+
+ ::-webkit-scrollbar {
+    height: 5px;
+    width: 5px
+}
+
+::-webkit-scrollbar-track {
+    background: #e5e7eb
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d1d5db
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af
+}
+
+.dark ::-webkit-scrollbar-track {
+    background: #4140404a
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #475569
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #334155
+}
