@@ -12,11 +12,12 @@ use App\Models\VarianteProduit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class CartController extends Controller
 {
-    public function index(Request $request)
+    public function cartIndex(Request $request)
     {
         $cart = $this->getOrCreateCart($request);
 
@@ -25,7 +26,7 @@ class CartController extends Controller
         ]);
     }
 
-    public function add(Request $request, Produit $produit)
+    public function cartAdd(Request $request, Produit $produit)
     {
         $validated = $request->validate([
             'quantite' => 'integer|min:1',
@@ -41,10 +42,10 @@ class CartController extends Controller
             return response()->json(['success' => true, 'cart' => $this->formatCart($cart)]);
         }
 
-        return redirect()->route('shop.cart.index')->with('success', 'Produit ajouté au panier');
+        return redirect()->route('cart.index')->with('success', 'Produit ajouté au panier');
     }
 
-    public function update(Request $request, ItemPanier $item)
+    public function cartUpdate(Request $request, ItemPanier $item)
     {
         $request->validate(['quantite' => 'required|integer|min:1']);
 
@@ -54,10 +55,17 @@ class CartController extends Controller
 
         $item->panier->recalculerTotaux();
 
+        // Réponse pour les requêtes AJAX (utilisée par le hook useCart)
+        if ($request->wantsJson()) {
+            return response()->json([
+                'cart' => $this->formatCart($item->panier),
+            ]);
+        }
+
         return back()->with('success', 'Panier mis à jour');
     }
 
-    public function remove(ItemPanier $item)
+    public function cartRemove(ItemPanier $item)
     {
         $item->delete();
         $item->panier->recalculerTotaux();
@@ -65,7 +73,7 @@ class CartController extends Controller
         return back()->with('success', 'Article retiré du panier');
     }
 
-    public function clear(Request $request)
+    public function cartClear(Request $request)
     {
         $cart = $this->getOrCreateCart($request);
         $cart->vider();
@@ -73,7 +81,7 @@ class CartController extends Controller
         return back()->with('success', 'Panier vidé');
     }
 
-    public function applyCoupon(Request $request)
+    public function cartApplyCoupon(Request $request)
     {
         $request->validate(['code' => 'required|string']);
         $cart = $this->getOrCreateCart($request);
@@ -101,7 +109,7 @@ class CartController extends Controller
         return back()->with('success', 'Code promo appliqué');
     }
 
-    public function removeCoupon(Request $request)
+    public function cartRemoveCoupon(Request $request)
     {
         $cart = $this->getOrCreateCart($request);
         $cart->promotions()->detach();
@@ -126,6 +134,7 @@ class CartController extends Controller
                 ]);
             }
             $cart = Panier::firstOrCreate(
+                // ['user_id' => $user->id],
                 ['client_id' => $client->id, 'statut' => Panier::STATUT_ACTIF],
                 ['date_creation' => now(), 'expires_at' => now()->addDays(7)]
             );
@@ -148,26 +157,26 @@ class CartController extends Controller
         return [
             'id' => $cart->id,
             'nb_articles' => $cart->nb_articles,
-            'sous_total' => (float) $cart->sous_total,
-            'total_taxes' => (float) $cart->total_taxes,
-            'total_livraison' => (float) $cart->total_livraison,
-            'total_remises' => (float) $cart->total_remises,
-            'total_general' => (float) $cart->total_general,
+            'sous_total' => $cart->sous_total,
+            'total_taxes' => $cart->total_taxes,
+            'total_livraison' => $cart->total_livraison,
+            'total_remises' => $cart->total_remises,
+            'total_general' => $cart->total_general,
             'items' => $cart->items->map(fn ($item) => [
                 'id' => $item->id,
                 'produit' => [
                     'id' => $item->produit->id,
                     'nom' => $item->nom_produit,
                     'slug' => $item->produit->slug,
-                    'image' => $item->image,
-                ],
+                    'image' => $item->produit->getFirstMediaUrl('images', 'small')
+                        ?: Storage::url('images/getting-business.jpg'),                ],
                 'quantite' => (int) $item->quantite,
-                'prix_unitaire' => (float) $item->prix_unitaire,   // ✅ cast explicite
-                'prix_total' => (float) $item->prix_total,         // ✅ cast explicite
+                'prix_unitaire' => (float) $item->prix_unitaire,
+                'prix_total' => (float) $item->prix_total,
             ])->values(),
             'promotions' => $cart->promotions->map(fn ($p) => [
                 'code' => $p->code,
-                'montant' => (float) $p->pivot->montant_applique,   // ✅ cast explicite
+                'montant' => (float) $p->pivot->montant_applique,
             ])->values(),
         ];
     }
@@ -180,6 +189,7 @@ class CartController extends Controller
                 $client = FacadesAuth::user()->client()->create();
             }
             $cart = Panier::firstOrCreate(
+                // ['user_id' => $client->id],
                 ['client_id' => $client->id, 'statut' => Panier::STATUT_ACTIF],
                 ['date_creation' => now(), 'expires_at' => now()->addDays(7)]
             );
@@ -194,46 +204,23 @@ class CartController extends Controller
         return $cart;
     }
 
-    // public function calculate(Request $request)
-    // {
-    //     $request->validate([
-    //         'item_ids' => 'array',
-    //         'item_ids.*' => 'integer|exists:item_paniers,id',
-    //     ]);
-
-    //     $cart = $this->getOrCreateCart($request);
-    //     $selectedIds = $request->input('item_ids', []);
-
-    //     $selectedItems = $cart->items()->whereIn('id', $selectedIds)->get();
-
-    //     $sousTotal = $selectedItems->sum('prix_total');
-    //     $totalTaxes = $selectedItems->sum(fn ($item) => $item->taxe_unitaire * $item->quantite);
-    //     $totalLivraison = $cart->total_livraison;
-    //     $totalRemises = $cart->total_remises;
-    //     $totalGeneral = $sousTotal + $totalTaxes + $totalLivraison - $totalRemises;
-
-    //     return response()->json([
-    //         'calculatedTotals' => [
-    //             'sous_total' => round($sousTotal, 2),
-    //             'total_taxes' => round($totalTaxes, 2),
-    //             'total_livraison' => round($totalLivraison, 2),
-    //             'total_remises' => round($totalRemises, 2),
-    //             'total_general' => round($totalGeneral, 2),
-    //             'selected_count' => $selectedItems->sum('quantite'),
-    //         ],
-    //     ])->header('X-Inertia', 'false'); // 👈 LIGE MAGIQUE
-    // }
-    public function calculate(Request $request)
+    public function cartCalculate(Request $request)
     {
         $request->validate([
-            'item_ids' => 'array',
-            'item_ids.*' => 'integer|exists:item_paniers,id',
+            'item_ids' => 'sometimes|array',
+            'item_ids.*' => 'string', // ← Changement ici
         ]);
 
         $cart = $this->getOrCreateCart($request);
         $selectedIds = $request->input('item_ids', []);
 
-        if (empty($selectedIds)) {
+        // 🔥 sécurisation anti-422
+        $validIds = $cart->items()
+            ->whereIn('id', $selectedIds)
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($validIds)) {
             return response()->json([
                 'calculatedTotals' => [
                     'sous_total' => 0,
@@ -243,26 +230,23 @@ class CartController extends Controller
                     'total_general' => 0,
                     'selected_count' => 0,
                 ],
-            ])->header('X-Inertia', 'false');
+            ]);
         }
 
-        $selectedItems = $cart->items()->whereIn('id', $selectedIds)->get();
+        $selectedItems = $cart->items()->whereIn('id', $validIds)->get();
 
         $sousTotal = $selectedItems->sum('prix_total');
-        $totalTaxes = $selectedItems->sum(fn ($item) => $item->taxe_unitaire * $item->quantite);
-        $totalLivraison = $cart->total_livraison;
-        $totalRemises = $cart->total_remises;
-        $totalGeneral = $sousTotal + $totalTaxes + $totalLivraison - $totalRemises;
+        $totalTaxes = $selectedItems->sum(fn ($item) => ($item->taxe_unitaire ?? 0) * $item->quantite);
 
         return response()->json([
             'calculatedTotals' => [
                 'sous_total' => round($sousTotal, 2),
                 'total_taxes' => round($totalTaxes, 2),
-                'total_livraison' => round($totalLivraison, 2),
-                'total_remises' => round($totalRemises, 2),
-                'total_general' => round($totalGeneral, 2),
+                'total_livraison' => (float) $cart->total_livraison,
+                'total_remises' => (float) $cart->total_remises,
+                'total_general' => round($sousTotal + $totalTaxes + $cart->total_livraison - $cart->total_remises, 2),
                 'selected_count' => $selectedItems->sum('quantite'),
             ],
-        ])->header('X-Inertia', 'false');
+        ]);
     }
 }

@@ -10,14 +10,23 @@ class UserPreferences implements JsonSerializable
 
     // Constantes pour les clés de préférences
     public const KEY_NOTIFICATIONS = 'notifications';
+
     public const KEY_THEME = 'theme';
+
     public const KEY_LANGUAGE = 'language';
+
     public const KEY_TIMEZONE = 'timezone';
+
     public const KEY_DATE_FORMAT = 'date_format';
+
     public const KEY_CURRENCY = 'currency';
+
     public const KEY_PAGE_SIZE = 'page_size';
+
     public const KEY_DASHBOARD_WIDGETS = 'dashboard_widgets';
+
     public const KEY_EMAIL_FREQUENCY = 'email_frequency';
+
     public const KEY_MARKETING_CONSENT = 'marketing_consent';
 
     // Valeurs par défaut
@@ -79,7 +88,7 @@ class UserPreferences implements JsonSerializable
         // Valider le thème
         if (
             isset($this->preferences[self::KEY_THEME]) &&
-            !in_array($this->preferences[self::KEY_THEME], self::AVAILABLE_THEMES)
+            ! in_array($this->preferences[self::KEY_THEME], self::AVAILABLE_THEMES)
         ) {
             $this->preferences[self::KEY_THEME] = self::DEFAULTS[self::KEY_THEME];
         }
@@ -87,7 +96,7 @@ class UserPreferences implements JsonSerializable
         // Valider la langue
         if (
             isset($this->preferences[self::KEY_LANGUAGE]) &&
-            !in_array($this->preferences[self::KEY_LANGUAGE], self::AVAILABLE_LANGUAGES)
+            ! in_array($this->preferences[self::KEY_LANGUAGE], self::AVAILABLE_LANGUAGES)
         ) {
             $this->preferences[self::KEY_LANGUAGE] = self::DEFAULTS[self::KEY_LANGUAGE];
         }
@@ -95,7 +104,7 @@ class UserPreferences implements JsonSerializable
         // Valider le fuseau horaire
         if (
             isset($this->preferences[self::KEY_TIMEZONE]) &&
-            !in_array($this->preferences[self::KEY_TIMEZONE], array_keys(self::AVAILABLE_TIMEZONES))
+            ! in_array($this->preferences[self::KEY_TIMEZONE], array_keys(self::AVAILABLE_TIMEZONES))
         ) {
             $this->preferences[self::KEY_TIMEZONE] = self::DEFAULTS[self::KEY_TIMEZONE];
         }
@@ -103,7 +112,7 @@ class UserPreferences implements JsonSerializable
         // Valider le format de date
         if (
             isset($this->preferences[self::KEY_DATE_FORMAT]) &&
-            !in_array($this->preferences[self::KEY_DATE_FORMAT], array_keys(self::AVAILABLE_DATE_FORMATS))
+            ! in_array($this->preferences[self::KEY_DATE_FORMAT], array_keys(self::AVAILABLE_DATE_FORMATS))
         ) {
             $this->preferences[self::KEY_DATE_FORMAT] = self::DEFAULTS[self::KEY_DATE_FORMAT];
         }
@@ -111,7 +120,7 @@ class UserPreferences implements JsonSerializable
         // Valider la fréquence d'email
         if (
             isset($this->preferences[self::KEY_EMAIL_FREQUENCY]) &&
-            !in_array($this->preferences[self::KEY_EMAIL_FREQUENCY], array_keys(self::AVAILABLE_EMAIL_FREQUENCIES))
+            ! in_array($this->preferences[self::KEY_EMAIL_FREQUENCY], array_keys(self::AVAILABLE_EMAIL_FREQUENCIES))
         ) {
             $this->preferences[self::KEY_EMAIL_FREQUENCY] = self::DEFAULTS[self::KEY_EMAIL_FREQUENCY];
         }
@@ -148,6 +157,7 @@ class UserPreferences implements JsonSerializable
     {
         $this->preferences[$key] = $value;
         $this->validate();
+
         return $this;
     }
 
@@ -165,6 +175,7 @@ class UserPreferences implements JsonSerializable
     public function remove(string $key): self
     {
         unset($this->preferences[$key]);
+
         return $this;
     }
 
@@ -182,6 +193,7 @@ class UserPreferences implements JsonSerializable
     public function reset(): self
     {
         $this->preferences = self::DEFAULTS;
+
         return $this;
     }
 
@@ -192,6 +204,7 @@ class UserPreferences implements JsonSerializable
     {
         $this->preferences = array_merge($this->preferences, $preferences);
         $this->validate();
+
         return $this;
     }
 

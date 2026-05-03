@@ -7,7 +7,6 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
 class ProduitFournisseursTable
@@ -16,14 +15,7 @@ class ProduitFournisseursTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.raison_sociale')
-                    ->label('Organisation')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable()
-                    ->badge()
-                    ->color('info')
-                    ->icon('heroicon-o-building-office'),
+
             ])
             ->filters([
             ])

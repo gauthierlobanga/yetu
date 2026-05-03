@@ -4,8 +4,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AuditLog extends Model
 {
-    use BelongsToTenant, HasUuids, SoftDeletes;
+    use HasUuids, SoftDeletes;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -33,7 +31,6 @@ class AuditLog extends Model
     protected $table = 'audit_logs';
 
     protected $fillable = [
-        'tenant_id',
         'user_id',
         'action',
         'entite_type',

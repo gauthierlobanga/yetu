@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import ShopAccountShell from '@/components/shop/ShopAccountShell';
+import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -90,7 +90,7 @@ export default function ShopWishlistPage() {
                                             onClick={() =>
                                                 router.delete(
                                                     route(
-                                                        'shop.wishlist.remove',
+                                                        'products.wishlist.remove',
                                                         item.produit.id,
                                                     ),
                                                 )

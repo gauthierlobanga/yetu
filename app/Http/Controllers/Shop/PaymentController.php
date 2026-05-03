@@ -10,7 +10,7 @@ use Inertia\Inertia;
 
 class PaymentController extends Controller
 {
-    public function pay(Commande $commande)
+    public function paymentPay(Commande $commande)
     {
         /** @var AuthorizesRequests $this */
         $this->authorize('pay', $commande);
@@ -22,16 +22,16 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function callback(Request $request)
+    public function PaymentCallback(Request $request)
     {
         /** @var Commande $commande */
         $commande = Commande::find($request->input('commande_id'));
         if ($commande) {
             $commande->marquerPayee();
 
-            return redirect()->route('shop.checkout.success', $commande);
+            return redirect()->route('checkout.success', $commande);
         }
 
-        return redirect()->route('shop.cart.index')->with('error', 'Paiement échoué');
+        return redirect()->route('cart.index')->with('error', 'Paiement échoué');
     }
 }

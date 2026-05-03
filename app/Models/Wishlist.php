@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +11,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Wishlist extends Model
 {
-    use BelongsToTenant;
     use HasFactory, SoftDeletes;
     use HasUuids;
 
@@ -32,7 +29,6 @@ class Wishlist extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'tenant_id',
         'client_id',
         'nom',
         'est_publique',

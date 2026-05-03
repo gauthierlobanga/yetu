@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class CommentController extends Controller
 {
-    public function index(Request $request)
+    public function commentsIndex(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'commentable_type' => 'required|string',
@@ -31,7 +31,7 @@ class CommentController extends Controller
         return response()->json($comments);
     }
 
-    public function store(Request $request)
+    public function commentsStore(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'commentable_type' => 'required|string',
@@ -63,7 +63,7 @@ class CommentController extends Controller
         ], 201);
     }
 
-    public function like(Comment $comment)
+    public function commentsLike(Comment $comment)
     {
         $result = $comment->toggleLike(Auth::user());
 
@@ -74,7 +74,7 @@ class CommentController extends Controller
         ]);
     }
 
-    public function report(Comment $comment, Request $request)
+    public function commentsReport(Comment $comment, Request $request)
     {
         $validator = Validator::make($request->all(), [
             'reason' => 'required|string|max:255',

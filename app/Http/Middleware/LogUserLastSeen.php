@@ -18,7 +18,7 @@ class LogUserLastSeen
             $user = Auth::user();
 
             // Mettre à jour la dernière activité toutes les 5 minutes
-            if (!$user->dernier_connexion || $user->dernier_connexion->lt(now()->subMinutes(5))) {
+            if (! $user->dernier_connexion || $user->dernier_connexion->lt(now()->subMinutes(5))) {
                 event(new UserLoggedIn($user));
             }
         }

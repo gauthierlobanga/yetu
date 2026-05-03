@@ -29,6 +29,8 @@ class CommandeAchatResource extends Resource
 
     protected static ?string $cluster = AchatsCluster::class;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return CommandeAchatForm::configure($schema);
@@ -63,7 +65,7 @@ class CommandeAchatResource extends Resource
             ]);
     }
 
-    public static function getNavigationBadge(): ?string
+     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
     }

@@ -148,8 +148,9 @@ class UsersTable
                     ->requiresConfirmation()
                     ->modalHeading('Connexion impersonnelle')
                     ->modalDescription('Vous allez vous connecter en tant que cet utilisateur. Vous pourrez revenir à votre compte en cliquant sur "Arrêter l\'impersonation".')
-                    ->guard('web') // Garde par défaut, à adapter si besoin
-                    ->redirectTo(route('dashboard')), // Où rediriger après impersonation
+                    ->guard('web')
+                    ->redirectTo('/dashboard'), // Garde par défaut, à adapter si besoin
+                // ->redirectTo(redirect(uri('/dashboard'))), // Où rediriger après impersonation
 
                 ActionGroup::make([
                     ViewAction::make()

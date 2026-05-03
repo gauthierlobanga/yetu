@@ -1,14 +1,17 @@
 <?php
 
+// app/Models/TenantDocumentLegal.php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TenantDocumentLegal extends Model
 {
-    use HasUuids;
+    use HasUuids, SoftDeletes;
 
     protected $table = 'tenant_documents_legaux';
 
@@ -24,6 +27,7 @@ class TenantDocumentLegal extends Model
         'est_verifie',
         'verifie_le',
         'verifie_par',
+        'vendor_request_id',  // ✅ déjà présent
     ];
 
     protected $casts = [
@@ -36,7 +40,7 @@ class TenantDocumentLegal extends Model
 
     public function tenant(): BelongsTo
     {
-        return $this->belongsTo(Tenant::class);
+        return $this->belongsTo(Tenant::class, 'tenant_id', 'id');
     }
 
     public function typeDocument(): BelongsTo
@@ -47,5 +51,10 @@ class TenantDocumentLegal extends Model
     public function verifiePar(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verifie_par');
+    }
+
+    public function vendorRequest(): BelongsTo
+    {
+        return $this->belongsTo(VendorRequest::class, 'vendor_request_id');
     }
 }

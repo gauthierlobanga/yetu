@@ -1,9 +1,14 @@
 import { Link } from '@inertiajs/react';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { Product } from '@/types/ecommerce/products';
 import ProductCard from './ProductCard';
 
-export default function TrendingProducts({ products }) {
+interface TrendingProductsProps {
+    products: Product[];
+}
+
+export default function TrendingProducts({ products }: TrendingProductsProps) {
     return (
         <section className="bg-muted/30 py-16 lg:py-24">
             <div className="mx-auto max-w-7xl px-4">
@@ -18,7 +23,7 @@ export default function TrendingProducts({ products }) {
                     </div>
                     <Button variant="link" className="gap-1" asChild>
                         <Link
-                            href={route('shop.products.index', {
+                            href={route('product.index', {
                                 sort: 'popular',
                             })}
                         >

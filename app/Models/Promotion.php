@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +13,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Promotion extends Model implements HasMedia
 {
-    use BelongsToTenant, HasFactory, InteractsWithMedia, SoftDeletes;
+    use HasFactory, InteractsWithMedia, SoftDeletes;
     use HasUuids;
 
     /**

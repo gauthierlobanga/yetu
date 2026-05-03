@@ -15,8 +15,6 @@ class PostSeeder extends Seeder
 
     private array $usedSlugs = [];
 
-    private $tenantId = '019db819-64d0-73e0-88d0-f474494ce127';
-
     public function run(): void
     {
         if (User::count() === 0) {
@@ -434,7 +432,7 @@ class PostSeeder extends Seeder
         $this->usedSlugs[] = $slug;
 
         $postId = DB::table('posts')->insertGetId([
-            'tenant_id' => $this->tenantId,
+            'id' => Str::uuid(),
             'user_id' => $userId,
             'title' => $data['title'],
             'slug' => $slug,
@@ -461,8 +459,7 @@ class PostSeeder extends Seeder
         if (! empty($data['categories'])) {
             foreach ($data['categories'] as $index => $categoryId) {
                 if (in_array($categoryId, $categoryIds)) {
-                    DB::table('category_post')->insert([
-                        'tenant_id' => $this->tenantId,
+                    DB::table('posts_categories_pivot')->insert([
                         'category_id' => $categoryId,
                         'post_id' => $postId,
                         'is_primary' => ($index === 0),

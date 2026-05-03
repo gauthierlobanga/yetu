@@ -11,17 +11,17 @@ use Inertia\Response;
 
 class ContactController extends Controller
 {
-    public function index(): Response
+    public function contactIndex(): Response
     {
         return Inertia::render('main/contact/Contact', $this->getPageProps());
     }
 
-    public function create(): Response
+    public function contactCreate(): Response
     {
         return Inertia::render('main/contact/Contact', $this->getPageProps());
     }
 
-    public function store(StoreContactRequest $request): RedirectResponse
+    public function contactStore(StoreContactRequest $request): RedirectResponse
     {
         $validated = $request->validated();
 
@@ -44,7 +44,7 @@ class ContactController extends Controller
             ]),
         ]);
 
-        return to_route('contact.index')->with('success', 'Votre message a bien ete envoye. Notre equipe vous recontactera tres vite.');
+        return to_route('page.contact')->with('success', 'Votre message a bien ete envoye. Notre equipe vous recontactera tres vite.');
     }
 
     private function getPageProps(): array

@@ -12,7 +12,7 @@ use Inertia\Inertia;
 
 class ReturnController extends Controller
 {
-    public function index()
+    public function returnsIndex()
     {
         $client = Auth::user()->client;
         $returns = Retour::whereHas('commande', fn ($q) => $q->where('client_id', $client->id))
@@ -21,7 +21,7 @@ class ReturnController extends Controller
         return Inertia::render('Shop/Returns/Index', ['returns' => $returns]);
     }
 
-    public function create(Commande $commande)
+    public function returnsCreate(Commande $commande)
     {
         /** @var AuthorizesRequests $this */
         $this->authorize('return', $commande);
@@ -30,7 +30,7 @@ class ReturnController extends Controller
         return Inertia::render('Shop/Returns/Create', ['commande' => $commande]);
     }
 
-    public function store(Request $request)
+    public function returnsStore(Request $request)
     {
         $validated = $request->validate([
             'commande_id' => 'required|exists:commandes,id',
@@ -61,10 +61,10 @@ class ReturnController extends Controller
             ]);
         }
 
-        return redirect()->route('shop.returns.show', $retour)->with('success', 'Demande de retour enregistrée');
+        return redirect()->route('return.show', $retour)->with('success', 'Demande de retour enregistrée');
     }
 
-    public function show(Retour $retour)
+    public function returnsShow(Retour $retour)
     {
         /** @var AuthorizesRequests $this */
         $this->authorize('view', $retour);

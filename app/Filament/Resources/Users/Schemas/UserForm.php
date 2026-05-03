@@ -93,9 +93,9 @@ class UserForm
                                     ->revealable()
                                     ->minLength(8)
                                     ->same('passwordConfirmation')
-                                    ->dehydrated(fn($state) => filled($state))
-                                    ->dehydrateStateUsing(fn($state) => Hash::make($state))
-                                    ->required(fn(string $operation): bool => $operation === 'create')
+                                    ->dehydrated(fn ($state) => filled($state))
+                                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                                    ->required(fn (string $operation): bool => $operation === 'create')
                                     ->placeholder('••••••••'),
 
                                 TextInput::make('passwordConfirmation')
@@ -103,7 +103,7 @@ class UserForm
                                     ->password()
                                     ->revealable()
                                     ->dehydrated(false)
-                                    ->required(fn(string $operation): bool => $operation === 'create'),
+                                    ->required(fn (string $operation): bool => $operation === 'create'),
                             ]),
 
                         Section::make('Statut du compte')

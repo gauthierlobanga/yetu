@@ -12,7 +12,8 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Hash;
+
+// use Illuminate\Support\Facades\Hash;
 
 class UserForm
 {
@@ -65,19 +66,25 @@ class UserForm
                         Section::make('Avatar')
                             ->icon('heroicon-o-photo')
                             ->components([
+
                                 SpatieMediaLibraryFileUpload::make('avatar')
-                                    ->label('Photo de profil')
-                                    ->avatar()
-                                    ->image()
-                                    ->imageEditor()
-                                    ->circleCropper()
                                     ->collection('avatar')
-                                    ->disk('public')
-                                    ->directory('users/avatars')
+                                    ->image()
+                                    ->avatar()
+                                    ->circleCropper()
+                                    ->disk(tenancy()->initialized ? 'tenant' : 'public') // 🔥 clé
+                                    ->directory(fn () => tenancy()->initialized
+                                        ? tenant('id')
+                                        : 'central'
+                                    )
                                     ->visibility('public')
-                                    ->maxSize(2048)
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                    ->reorderable()
+                                    ->downloadable()
+                                    ->previewable()
+                                    ->maxSize(2048)
                                     ->columnSpanFull(),
+
                             ]),
                     ]),
 

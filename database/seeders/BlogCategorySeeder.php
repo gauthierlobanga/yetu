@@ -36,6 +36,7 @@ class BlogCategorySeeder extends Seeder
             $keywordsArray = explode(' ', strtolower($catData['nom']));
 
             $categorieId = DB::table('posts_categories')->insertGetId([
+                'id' => Str::uuid(),
                 'parent_id' => null,
                 'nom' => $catData['nom'],
                 'slug' => Str::slug($catData['nom']),
@@ -87,6 +88,7 @@ class BlogCategorySeeder extends Seeder
                 );
 
                 DB::table('posts_categories')->insert([
+                    'id' => Str::uuid(),
                     'parent_id' => $parent->id,
                     'nom' => $nomSousCat,
                     'slug' => Str::slug($parent->slug.'-'.$nomSousCat),
@@ -128,6 +130,7 @@ class BlogCategorySeeder extends Seeder
                 $keywordsArray = $faker->words(3);
 
                 DB::table('posts_categories')->insert([
+                    'id' => Str::uuid(),
                     'parent_id' => $parent->id,
                     'nom' => $nomSousCat,
                     'slug' => Str::slug($parent->slug.'-'.$nomSousCat),
@@ -168,6 +171,7 @@ class BlogCategorySeeder extends Seeder
             $keywordsArray = $faker->words(5);
 
             DB::table('posts_categories')->insert([
+                'id' => Str::uuid(),
                 'parent_id' => $parentId,
                 'nom' => $nom,
                 'slug' => Str::slug($parent->slug.'-'.$nom),

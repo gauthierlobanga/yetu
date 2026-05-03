@@ -13,7 +13,7 @@ class EnsureUserIsSuperAdmin
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -30,8 +30,8 @@ class EnsureUserIsSuperAdmin
         }
 
         // Vérification des conditions : rôle Super Admin ET email se terminant par @admin.com
-        if (! $user->hasRole('Super Admin')
-            && (! str_ends_with($user->email, '@admin.com'))) {
+        if (! $user->hasRole('super_admin')
+            && (! str_ends_with($user->email, '@gmail.com'))) {
             Log::info('Accès refusé au panel admin.', [
                 'user_id' => $user->id,
                 'email' => $user->email,

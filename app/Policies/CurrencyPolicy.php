@@ -17,7 +17,7 @@ class CurrencyPolicy
      */
     public function before(AuthUser $user, string $ability): ?bool
     {
-        if ($user->hasRole('uzana')) {
+        if ($user->hasRole('super_admin')) {
             return true;
         }
 

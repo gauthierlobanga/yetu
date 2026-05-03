@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/hooks/useAuth.js
 import { usePage } from '@inertiajs/react';
 import { useCallback, useMemo } from 'react';
@@ -32,11 +33,15 @@ export function useAuth() {
 
     // Vérification d'une permission spécifique
     const can = useCallback(
-        (permission) => {
-            if (!user) return false;
+        (permission: string | any[]) => {
+            if (!user) {
+                return false;
+            }
 
             // Super-admin bypass (optionnel selon ta sécurité)
-            if (rolesSet.has('super_admin')) return true;
+            if (rolesSet.has('super_admin')) {
+                return true;
+            }
 
             if (Array.isArray(permission)) {
                 return permission.some((p) => permissionsSet.has(p));
@@ -49,9 +54,15 @@ export function useAuth() {
 
     // Vérification nécessitant TOUTES les permissions
     const canAll = useCallback(
-        (permissions) => {
-            if (!user) return false;
-            if (rolesSet.has('super_admin')) return true;
+        (permissions: any[]) => {
+            if (!user) {
+                return false;
+            }
+
+            if (rolesSet.has('super_admin')) {
+                return true;
+            }
+
             return permissions.every((p) => permissionsSet.has(p));
         },
         [user, permissionsSet, rolesSet],
@@ -59,11 +70,15 @@ export function useAuth() {
 
     // Vérification d'un rôle spécifique
     const isRole = useCallback(
-        (role) => {
-            if (!user) return false;
+        (role: string | any[]) => {
+            if (!user) {
+                return false;
+            }
+
             if (Array.isArray(role)) {
                 return role.some((r) => rolesSet.has(r));
             }
+
             return rolesSet.has(role);
         },
         [user, rolesSet],
@@ -71,26 +86,40 @@ export function useAuth() {
 
     // Vérification de rôle avec OR
     const hasAnyRole = useCallback(
-        (roles) => {
-            if (!user) return false;
-            return roles.some((r) => rolesSet.has(r));
+        (roles: any[]) => {
+            if (!user) {
+                return false;
+            }
+
+            return roles.some((r: string) => rolesSet.has(r));
         },
         [user, rolesSet],
     );
 
     // Vérification de permission sur ressource spécifique
     const canOnResource = useCallback(
-        (permission, resourceId, resourceType = 'general') => {
-            if (!user) return false;
-            if (rolesSet.has('super_admin')) return true;
+        (permission: string, resourceId: any, resourceType = 'general') => {
+            if (!user) {
+                return false;
+            }
+
+            if (rolesSet.has('super_admin')) {
+                return true;
+            }
 
             // Format: "edit product:123"
             const specificPermission = `${permission} ${resourceType}:${resourceId}`;
-            if (permissionsSet.has(specificPermission)) return true;
+
+            if (permissionsSet.has(specificPermission)) {
+                return true;
+            }
 
             // Wildcard: "edit product:*"
             const wildcardPermission = `${permission} ${resourceType}:*`;
-            if (permissionsSet.has(wildcardPermission)) return true;
+
+            if (permissionsSet.has(wildcardPermission)) {
+                return true;
+            }
 
             return permissionsSet.has(permission);
         },
@@ -99,9 +128,18 @@ export function useAuth() {
 
     // Vérification si l'utilisateur est propriétaire d'une ressource
     const isOwner = useCallback(
-        (resource) => {
-            if (!user || !resource) return false;
-            if (rolesSet.has('super_admin')) return true;
+        (resource: {
+            user_id: number;
+            created_by: number;
+            author_id: number;
+        }) => {
+            if (!user || !resource) {
+                return false;
+            }
+
+            if (rolesSet.has('super_admin')) {
+                return true;
+            }
 
             // Pattern standard: la ressource a un user_id ou created_by
             return (

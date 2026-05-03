@@ -2,11 +2,8 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use App\Traits\HasComments;
 use Carbon\Carbon;
-use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,7 +21,6 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Tags\HasTags;
 
 #[Fillable([
-    'tenant_id',
     'user_id',
     'title',
     'slug',
@@ -48,8 +44,8 @@ use Spatie\Tags\HasTags;
 ])]
 class Post extends Model implements HasMedia
 {
-    use BelongsToTenant,HasUuids;
     use HasComments, HasFactory, HasTags, InteractsWithMedia , SoftDeletes;
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -128,35 +124,9 @@ class Post extends Model implements HasMedia
     {
         return $this->belongsToMany(PostCategory::class, 'posts_categories_pivot')
             ->using(PostCategoryPivot::class)
-            ->withPivot('id', 'is_primary', 'est_principale', 'order', 'tenant_id')
+            ->withPivot('id', 'is_primary', 'est_principale', 'order')
             ->withTimestamps()
             ->orderByPivot('order');
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function syncCategoriesWithTenant(array $categoryIds, ?string $mainCategoryId = null, ?string $tenantId = null): void
-    {
-        if (! $tenantId) {
-            $tenantId = $this->tenant_id ?? Filament::getTenant()?->id;
-        }
-
-        if (! $tenantId) {
-            throw new \Exception('Tenant ID is required for category synchronization');
-        }
-
-        $syncData = [];
-        foreach ($categoryIds as $index => $categoryId) {
-            $syncData[$categoryId] = [
-                'id' => (string) Str::uuid(),
-                'tenant_id' => $tenantId,
-                'est_principale' => $categoryId === $mainCategoryId,
-                'ordre' => $index,
-            ];
-        }
-
-        $this->categories()->sync($syncData);
     }
 
     public function categoriePrincipale()
@@ -478,7 +448,12 @@ class Post extends Model implements HasMedia
 
     public function getUrlAttribute(): string
     {
-        return route('post.show', $this->slug);
+        return route('posts.show', $this->slug);
+    }
+
+    public function getUrlBlogAttribute(): string
+    {
+        return route('blog.show', $this->slug);
     }
 
     public function getStatusLabelAttribute(): string

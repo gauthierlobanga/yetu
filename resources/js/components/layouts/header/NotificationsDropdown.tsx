@@ -88,7 +88,7 @@ export function NotificationsDropdown() {
                 <DropdownMenuSeparator />
                 <div className="p-2">
                     <Link
-                        href={route('blog.index')}
+                        href="#"
                         className="block w-full rounded-md px-2 py-1.5 text-center text-sm hover:bg-accent"
                     >
                         Voir toutes les notifications

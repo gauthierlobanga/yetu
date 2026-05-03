@@ -3,11 +3,8 @@
 namespace App\Models;
 
 use App\Concerns\HasUserPreferences;
-use App\Concerns\Traits\BelongsToTenantUser;
-use App\Support\Tenancy\TenantContext;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
-use Filament\Models\Contracts\HasDefaultTenant;
 use Filament\Models\Contracts\HasName;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
@@ -17,29 +14,30 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Spatie\Activitylog\Models\Concerns\HasActivity;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
+use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
-class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaultTenant, HasMedia, HasName, HasTenants // , MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, HasName, HasTenants // , MustVerifyEmail
 {
-    use BelongsToTenantUser,HasUserPreferences;
-    use HasActivity, HasUuids;
+    // use BelongsToTenant;
 
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     use HasRoles, InteractsWithMedia;
+    use HasUserPreferences;
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -122,6 +120,33 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
 
     public const STATUS_INACTIVE = 'inactive';
 
+    public function adresses(): MorphMany
+    {
+        return $this->morphMany(Adresse::class, 'addressable');
+    }
+
+    public function adresseFacturation()
+    {
+        return $this->adresses()
+            ->where('type', 'facturation')
+            ->where('est_defaut', true)
+            ->first();
+    }
+
+    public function adresseLivraison()
+    {
+        return $this->adresses()
+            ->where('type', 'livraison')
+            ->where('est_defaut', true)
+            ->first();
+    }
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(Tenant::class, 'user_tenant')
+            ->withTimestamps();
+    }
+
     /**
      * Relations avec les autres modèles
      */
@@ -135,6 +160,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
      */
     public function registerMediaCollections(): void
     {
+        $disk = tenancy()->initialized ? 'tenant' : 'public';
+
         $this->addMediaCollection('avatar')
             ->singleFile()
             ->useDisk('public')
@@ -179,14 +206,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
     public function canAccessPanel(Panel $panel): bool
     {
         if ($panel->getId() === 'admin') {
-            return $this->is_active && $this->hasRole('uzana');
+            return str_ends_with($this->email, '@gmail.com')
+            && $this->is_active && $this->hasRole('super_admin');
         }
 
         if ($panel->getId() === 'vendeur') {
             return $this->is_active && ($this->hasRole(['super_admin', 'vendeur']) || $this->tenants()->exists());
         }
 
-        return $this->is_active;
+        return false;
     }
 
     /**
@@ -345,22 +373,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
     }
 
     /**
-     * Activity Log
-     */
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logOnly(['name', 'prenom', 'email', 'is_active'])
-            ->logOnlyDirty()
-            ->useLogName('user');
-    }
-
-    public function getActivityLogTitle(): string
-    {
-        return "{$this->email}";
-    }
-
-    /**
      * Boot method
      */
     protected static function boot()
@@ -373,11 +385,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
             }
         });
 
-        static::created(function ($user) {
-            activity()
-                ->performedOn($user)
-                ->log('User created');
-        });
     }
 
     /**
@@ -441,24 +448,13 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
     {
         if ($this->hasRole('super_admin')) {
             return Tenant::query()
-                ->orderBy('raison_sociale')
+                ->orderByDesc('raison_sociale')
                 ->get();
         }
 
         return $this->tenants()
             ->orderBy('raison_sociale')
             ->get();
-    }
-
-    public function getDefaultTenant(Panel $panel): ?Model
-    {
-        $currentTenant = app(TenantContext::class)->current();
-
-        if ($currentTenant && $this->canAccessTenant($currentTenant)) {
-            return $currentTenant;
-        }
-
-        return collect($this->getTenants($panel))->first();
     }
 
     public function canAccessTenant(Model $tenant): bool
@@ -474,17 +470,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasDefaul
         return $this->tenants()
             ->whereKey($tenant->getKey())
             ->exists();
-    }
-
-    public function getCurrentTenant(): ?Tenant
-    {
-        $tenant = app(TenantContext::class)->current();
-
-        if ($tenant && $this->canAccessTenant($tenant)) {
-            return $tenant;
-        }
-
-        return $this->tenants()->first();
     }
 
     /**

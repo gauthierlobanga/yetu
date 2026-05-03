@@ -1,10 +1,6 @@
+import { Check, LoaderCircleIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-import OrderItem from './order-item';
-import DeliveryCard from './delivery-card';
-import PaymentMethodCard from './payment-method-card';
-import OrderSummary from './order-summary';
-import { orderItems, deliveryAddress, deliveryInfo } from './data';
 import {
     Stepper,
     StepperIndicator,
@@ -13,12 +9,16 @@ import {
     StepperSeparator,
     StepperTrigger,
 } from '@/components/ui/stepper';
-import { Check, LoaderCircleIcon } from 'lucide-react';
+import { orderItems, deliveryAddress, deliveryInfo } from './data';
+import DeliveryCard from './delivery-card';
+import OrderItem from './order-item';
+import OrderSummary from './order-summary';
+import PaymentMethodCard from './payment-method-card';
 
 const steps = [1, 2, 3, 4];
 
-export default function CheckoutPage() {
-    const ApplePayIcon = () => (
+export function ApplePayIcon() {
+    return (
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -33,7 +33,8 @@ export default function CheckoutPage() {
             </svg>
         </div>
     );
-
+}
+export default function CheckoutPage() {
     return (
         <section className="py-10 lg:py-20">
             <div className="px-4 lg:px-6">

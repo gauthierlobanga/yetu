@@ -8,15 +8,18 @@ use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
-    public function index()
+    public function categoriesIndex()
     {
-        $categories = ProductCategory::active()->parents()->ordered()->with('media')->get()
+        $categories = ProductCategory::active()->ordered()->with('media')->get()
             ->map(fn ($c) => $this->formatCategory($c));
+
+        // $categories = ProductCategory::active()->parents()->ordered()->with('media')->get()
+        //     ->map(fn ($c) => $this->formatCategory($c));
 
         return Inertia::render('Shop/Categories/Index', ['categories' => $categories]);
     }
 
-    public function show(ProductCategory $category)
+    public function categoriesShow(ProductCategory $category)
     {
         $category->load('media');
         $products = $category->products()->published()->inStock()->paginate(24)
@@ -44,7 +47,7 @@ class CategoryController extends Controller
             'icon' => $category->icon,
             'banner' => $category->banner,
             'image_thumb' => $category->image_thumb,
-            'url' => route('shop.categories.show', $category->slug),
+            'url' => route('product.category.show', $category->slug),
             'products_count' => $category->products_count,
         ];
     }

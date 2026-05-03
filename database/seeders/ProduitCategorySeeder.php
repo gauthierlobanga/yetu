@@ -39,7 +39,7 @@ class ProduitCategorySeeder extends Seeder
         // Créer les catégories racines
         foreach ($racines as $index => $catData) {
             $categorie = ProductCategory::create([
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'nom' => $catData['nom'],
                 'slug' => Str::slug($catData['nom']),
                 'description' => $catData['description'],
@@ -174,7 +174,7 @@ class ProduitCategorySeeder extends Seeder
 
                     // Créer la catégorie de niveau 2 (groupe)
                     $catNiveau2 = ProductCategory::create([
-                        'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                         'nom' => $nomGroupe,
                         'slug' => Str::slug($parent->slug.'-'.$nomGroupe),
                         'description' => 'Découvrez notre collection '.strtolower($nomGroupe).' dans la catégorie '.$racineNom,
@@ -196,7 +196,7 @@ class ProduitCategorySeeder extends Seeder
                     // Créer les catégories de niveau 3
                     foreach ($sousSousCats as $nomNiveau3) {
                         ProductCategory::create([
-                            'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                             'nom' => $nomNiveau3,
                             'slug' => Str::slug($catNiveau2->slug.'-'.$nomNiveau3),
                             'description' => $faker->sentence(15),
@@ -217,7 +217,7 @@ class ProduitCategorySeeder extends Seeder
                     // Catégorie simple de niveau 2
                     $nom = $value;
                     ProductCategory::create([
-                        'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                         'nom' => $nom,
                         'slug' => Str::slug($parent->slug.'-'.$nom),
                         'description' => $faker->sentence(15),
@@ -243,57 +243,57 @@ class ProduitCategorySeeder extends Seeder
         // ==========================================
         // COMPLÉTER JUSQU'À 500 CATÉGORIES
         // ==========================================
-        $categoriesNeeded = 500 - $totalCategories;
+        // $categoriesNeeded = 500 - $totalCategories;
 
-        if ($categoriesNeeded > 0) {
-            $this->command->info("Création de {$categoriesNeeded} catégories supplémentaires...");
+        // if ($categoriesNeeded > 0) {
+        //     $this->command->info("Création de {$categoriesNeeded} catégories supplémentaires...");
 
-            $niveaux = ['Tendance', 'Saisonnier', 'Promotions', 'Nouveautés', 'Best-sellers'];
-            $marques = ['Nike', 'Adidas', 'Samsung', 'Apple', 'Sony', 'Dyson', 'Levis'];
-            $styles = ['Vintage', 'Moderne', 'Classique', 'Design', 'Minimaliste', 'Bohème', 'Industriel'];
+        //     $niveaux = ['Tendance', 'Saisonnier', 'Promotions', 'Nouveautés', 'Best-sellers'];
+        //     $marques = ['Nike', 'Adidas', 'Samsung', 'Apple', 'Sony', 'Dyson', 'Levis'];
+        //     $styles = ['Vintage', 'Moderne', 'Classique', 'Design', 'Minimaliste', 'Bohème', 'Industriel'];
 
-            $parentsExistants = ProductCategory::whereNotNull('parente_id')->pluck('id')->toArray();
+        //     $parentsExistants = ProductCategory::whereNotNull('parente_id')->pluck('id')->toArray();
 
-            for ($i = 0; $i < $categoriesNeeded; $i++) {
-                $type = $faker->randomElement(['niveau', 'marque', 'style', 'thematique']);
+        //     for ($i = 0; $i < $categoriesNeeded; $i++) {
+        //         $type = $faker->randomElement(['niveau', 'marque', 'style', 'thematique']);
 
-                if ($type === 'niveau' && ! empty($parentsExistants)) {
-                    $nom = $faker->randomElement($niveaux).' '.$faker->word();
-                    $parentId = $faker->randomElement($parentsExistants);
-                } elseif ($type === 'marque') {
-                    $nom = $faker->randomElement($marques).' '.$faker->word();
-                    $parentId = $faker->randomElement($parentsExistants);
-                } elseif ($type === 'style') {
-                    $nom = $faker->randomElement($styles).' '.$faker->word();
-                    $parentId = $faker->randomElement($parentsExistants);
-                } else {
-                    $nom = ucfirst($faker->words(2, true));
-                    $parentId = $faker->randomElement($parentsExistants);
-                }
+        //         if ($type === 'niveau' && ! empty($parentsExistants)) {
+        //             $nom = $faker->randomElement($niveaux).' '.$faker->word();
+        //             $parentId = $faker->randomElement($parentsExistants);
+        //         } elseif ($type === 'marque') {
+        //             $nom = $faker->randomElement($marques).' '.$faker->word();
+        //             $parentId = $faker->randomElement($parentsExistants);
+        //         } elseif ($type === 'style') {
+        //             $nom = $faker->randomElement($styles).' '.$faker->word();
+        //             $parentId = $faker->randomElement($parentsExistants);
+        //         } else {
+        //             $nom = ucfirst($faker->words(2, true));
+        //             $parentId = $faker->randomElement($parentsExistants);
+        //         }
 
-                ProductCategory::create([
-                    'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
-                    'nom' => $nom,
-                    'slug' => Str::slug($nom.'-'.$faker->randomNumber(3)),
-                    'description' => $faker->paragraph(3),
-                    'short_description' => $faker->sentence(8),
-                    'parente_id' => $parentId,
-                    'est_active' => $faker->boolean(85),
-                    'is_featured' => $faker->boolean(15),
-                    'show_in_menu' => $faker->boolean(70),
-                    'order' => $faker->numberBetween(0, 200),
-                    'color' => $faker->hexColor(),
-                    'seo_title' => $nom.' - Qualité et prix bas',
-                    'seo_description' => $faker->text(150),
-                    'seo_keywords' => json_encode($faker->words(4)),
-                    'metadata' => json_encode([
-                        'type' => $type,
-                        'created_by' => 'seeder',
-                        'timestamp' => now()->toDateTimeString(),
-                    ]),
-                ]);
-            }
-        }
+        //         ProductCategory::create([
+
+        //             'nom' => $nom,
+        //             'slug' => Str::slug($nom.'-'.$faker->randomNumber(3)),
+        //             'description' => $faker->paragraph(3),
+        //             'short_description' => $faker->sentence(8),
+        //             'parente_id' => $parentId,
+        //             'est_active' => $faker->boolean(85),
+        //             'is_featured' => $faker->boolean(15),
+        //             'show_in_menu' => $faker->boolean(70),
+        //             'order' => $faker->numberBetween(0, 200),
+        //             'color' => $faker->hexColor(),
+        //             'seo_title' => $nom.' - Qualité et prix bas',
+        //             'seo_description' => $faker->text(150),
+        //             'seo_keywords' => json_encode($faker->words(4)),
+        //             'metadata' => json_encode([
+        //                 'type' => $type,
+        //                 'created_by' => 'seeder',
+        //                 'timestamp' => now()->toDateTimeString(),
+        //             ]),
+        //         ]);
+        //     }
+        // }
 
         $finalCount = ProductCategory::count();
         $this->command->info("✅ {$finalCount} catégories créées avec succès !");

@@ -24,14 +24,7 @@ class AdressesTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.raison_sociale')
-                    ->label('Organisation')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable()
-                    ->badge()
-                    ->color('info')
-                    ->icon('heroicon-o-building-office'),
+
                 // Remplacer adresse_complete par des colonnes réelles
                 TextColumn::make('rue')
                     ->label('Rue')

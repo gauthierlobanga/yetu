@@ -30,23 +30,18 @@ export default function CheckoutSuccessPage() {
                             </h1>
                             <p className="text-muted-foreground">
                                 Votre commande {commande.numero_commande} a bien
-                                ete enregistree pour un total de {commande.total}{' '}
-                                €.
+                                ete enregistree pour un total de{' '}
+                                {commande.total} €.
                             </p>
                         </div>
                         <div className="flex flex-wrap justify-center gap-3">
                             <Button asChild>
-                                <Link
-                                    href={route(
-                                        'shop.orders.show',
-                                        commande.id,
-                                    )}
-                                >
+                                <Link href={route('orders.show', commande.id)}>
                                     Voir ma commande
                                 </Link>
                             </Button>
                             <Button variant="outline" asChild>
-                                <Link href={route('shop.products.index')}>
+                                <Link href={route('product.index')}>
                                     Continuer mes achats
                                 </Link>
                             </Button>

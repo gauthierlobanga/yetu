@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,8 +21,8 @@ use Spatie\Tags\HasTags;
 
 class ProductCategory extends Model implements HasMedia, Sitemapable
 {
-    use BelongsToTenant,HasUuids;
     use HasFactory, HasTags, InteractsWithMedia, SoftDeletes;
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -43,7 +41,6 @@ class ProductCategory extends Model implements HasMedia, Sitemapable
     protected $table = 'produit_categories';
 
     protected $fillable = [
-        'tenant_id',
         'parente_id',
         'nom',
         'slug',
@@ -308,7 +305,7 @@ class ProductCategory extends Model implements HasMedia, Sitemapable
 
     public function getUrlAttribute(): string
     {
-        return route('shop.categories.show', $this->slug);
+        return route('product.category.show', $this->slug);
     }
 
     public function getFullPathAttribute(): string

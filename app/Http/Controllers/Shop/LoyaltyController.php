@@ -9,7 +9,7 @@ use Inertia\Inertia;
 
 class LoyaltyController extends Controller
 {
-    public function index()
+    public function loyaltyIndex()
     {
         $client = Auth::user()->client;
         $compte = $client->compteFidelite ?? $client->compteFidelite()->create(['points' => 0, 'points_cumules' => 0, 'niveau' => 'bronze']);
@@ -17,7 +17,7 @@ class LoyaltyController extends Controller
         return Inertia::render('Shop/Loyalty/Index', ['compte' => $compte->load('transactions')]);
     }
 
-    public function redeem(Request $request)
+    public function loyaltyRedeem(Request $request)
     {
         $client = Auth::user()->client;
         $compte = $client->compteFidelite;

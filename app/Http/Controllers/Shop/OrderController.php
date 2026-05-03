@@ -10,7 +10,7 @@ use Inertia\Inertia;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function ordersIndex()
     {
         $client = Auth::user()->client;
         $orders = $client->commandes()->with('lignes.produit')->latest()->paginate(10);
@@ -18,7 +18,7 @@ class OrderController extends Controller
         return Inertia::render('Shop/Orders/Index', ['orders' => $orders]);
     }
 
-    public function show(Commande $commande)
+    public function ordersShow(Commande $commande)
     {
         /** @var AuthorizesRequests $this */
         $this->authorize('view', $commande);
@@ -27,7 +27,7 @@ class OrderController extends Controller
         return Inertia::render('Shop/Orders/Show', ['order' => $commande]);
     }
 
-    public function cancel(Commande $commande)
+    public function ordersCancel(Commande $commande)
     {
         /** @var AuthorizesRequests $this */
         $this->authorize('cancel', $commande);
@@ -39,7 +39,7 @@ class OrderController extends Controller
         return back()->with('success', 'Commande annulée');
     }
 
-    public function invoice(Commande $commande)
+    public function ordersInvoice(Commande $commande)
     {
         /** @var AuthorizesRequests $this */
         $this->authorize('view', $commande);

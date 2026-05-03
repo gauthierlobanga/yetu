@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class NewsletterController extends Controller
 {
-    public function subscribe(Request $request)
+    public function newsletterSubscribe(Request $request)
     {
         $request->validate(['email' => 'required|email|unique:newsletters,email']);
         Newsletter::create(['email' => $request->email, 'is_subscribed' => true]);
@@ -16,7 +16,7 @@ class NewsletterController extends Controller
         return back()->with('success', 'Inscription réussie');
     }
 
-    public function unsubscribe(Request $request)
+    public function newsletterUnsubscribe(Request $request)
     {
         $request->validate(['email' => 'required|email']);
         Newsletter::where('email', $request->email)->update(['is_subscribed' => false]);

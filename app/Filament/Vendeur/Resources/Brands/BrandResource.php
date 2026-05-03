@@ -29,6 +29,8 @@ class BrandResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return BrandForm::configure($schema);
@@ -63,7 +65,7 @@ class BrandResource extends Resource
             ]);
     }
 
-    public static function getNavigationBadge(): ?string
+     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
     }

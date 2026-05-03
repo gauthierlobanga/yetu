@@ -31,6 +31,8 @@ class ProgrammeFideliteResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return ProgrammeFideliteForm::configure($schema);

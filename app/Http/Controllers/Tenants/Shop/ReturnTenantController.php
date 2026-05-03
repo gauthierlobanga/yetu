@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Http\Controllers\Tenants\Shop;
+
+use App\Http\Controllers\Controller;
+use App\Models\Commande;
+use App\Models\Retour;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+
+class ReturnTenantController extends Controller
+{
+    public function index()
+    {
+        $client = Auth::user()->client;
+        $returns = Retour::whereHas('commande', fn ($q) => $q->where('client_id', $client->id))
+            ->with('commande')->latest()->paginate(10);
+
+        return Inertia::render('tenants/Shop/Returns/Index', ['returns' => $returns]);
+    }
+
+    public function create(Commande $commande)
+    {
+        /** @var AuthorizesRequests $this */
+        $this->authorize('return', $commande);
+        $commande->load('lignes.produit');
+
+        return Inertia::render('tenants/Shop/Returns/Create', ['commande' => $commande]);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'commande_id' => 'required|exists:commandes,id',
+            'motif' => 'required|string',
+            'lignes' => 'required|array',
+            'lignes.*.ligne_commande_id' => 'required|exists:ligne_commandes,id',
+            'lignes.*.quantite' => 'required|integer|min:1',
+            'lignes.*.etat' => 'required|in:conforme,defectueux,endommage,incomplet',
+        ]);
+        $commande = Commande::findOrFail($validated['commande_id']);
+
+        /** @var AuthorizesRequests $this */
+        $this->authorize('return', $commande);
+
+        $retour = Retour::create([
+            'commande_id' => $commande->id,
+            'motif' => $validated['motif'],
+            'statut' => Retour::STATUT_EN_ATTENTE,
+            'date_demande' => now(),
+        ]);
+        foreach ($validated['lignes'] as $ligneData) {
+            $ligne = $commande->lignes()->find($ligneData['ligne_commande_id']);
+            $retour->lignes()->create([
+                'ligne_commande_id' => $ligne->id,
+                'quantite' => $ligneData['quantite'],
+                'montant' => $ligne->prix_total * ($ligneData['quantite'] / $ligne->quantite),
+                'etat' => $ligneData['etat'],
+            ]);
+        }
+
+        return redirect()->route('tenant.returns.show', $retour)->with('success', 'Demande de retour enregistrée');
+    }
+
+    public function show(Retour $retour)
+    {
+        /** @var AuthorizesRequests $this */
+        $this->authorize('view', $retour);
+        $retour->load(['lignes.ligneCommande.produit', 'commande']);
+
+        return Inertia::render('tenants/Shop/Returns/Show', ['return' => $retour]);
+    }
+}

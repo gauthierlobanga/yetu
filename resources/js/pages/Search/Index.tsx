@@ -1,11 +1,12 @@
 // resources/js/Pages/Search/Index.tsx
 
 import { Head, Link } from '@inertiajs/react';
-import MainLayout from '@/layouts/main-layout';
-import { SearchResult } from '@/components/search-my-input';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Badge, Calendar, Folder, User } from 'lucide-react';
+import type { SearchResult } from '@/components/search-my-input';
+import MainLayout from '@/layouts/main-layout';
+import { home } from '@/routes';
 
 interface Props {
     results: SearchResult[];
@@ -14,7 +15,7 @@ interface Props {
 
 export default function SearchIndex({ results, query }: Props) {
     const breadcrumbs = [
-        { title: 'Accueil', href: '/' },
+        { title: 'Accueil', href: home() },
         { title: 'Recherche', href: '/search' },
         { title: `"${query}"`, href: `/search?q=${query}` },
     ];

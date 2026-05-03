@@ -10,7 +10,7 @@ use Inertia\Inertia;
 
 class WishlistController extends Controller
 {
-    public function index()
+    public function wishlistIndex()
     {
         $client = Auth::user()->client;
         $wishlist = $client->wishlists()->firstOrCreate(['nom' => 'Ma liste'], ['est_publique' => false]);
@@ -27,7 +27,24 @@ class WishlistController extends Controller
         ]);
     }
 
-    public function toggle(Request $request, Produit $produit)
+    public function wishlistAdd()
+    {
+        $client = Auth::user()->client;
+        $wishlist = $client->wishlists()->firstOrCreate(['nom' => 'Ma liste'], ['est_publique' => false]);
+        $items = $wishlist->items()->with('produit')->get();
+
+        return Inertia::render('Shop/Wishlist/Index', [
+            'wishlist' => $wishlist,
+            'items' => $items->map(fn ($i) => [
+                'id' => $i->id,
+                'produit' => app(ProductController::class)->formatProduct($i->produit),
+                'quantite' => $i->quantite,
+                'note' => $i->note,
+            ]),
+        ]);
+    }
+
+    public function wishlistToggle(Request $request, Produit $produit)
     {
         $client = Auth::user()->client;
         $wishlist = $client->wishlists()->firstOrCreate(['nom' => 'Ma liste']);
@@ -47,7 +64,7 @@ class WishlistController extends Controller
         return back()->with('success', $message);
     }
 
-    public function remove(Produit $produit)
+    public function wishlistRemove(Produit $produit)
     {
         $client = Auth::user()->client;
         $wishlist = $client->wishlists()->first();

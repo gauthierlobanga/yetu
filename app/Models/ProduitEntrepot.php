@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProduitEntrepot extends Pivot
 {
-    use BelongsToTenant, HasUuids,SoftDeletes;
+    use HasUuids,SoftDeletes;
 
     protected $table = 'produit_entrepot';
 
@@ -19,7 +17,6 @@ class ProduitEntrepot extends Pivot
     public $incrementing = false;
 
     protected $fillable = [
-        'tenant_id',
         'produit_id',
         'entrepot_id',
         'quantite',

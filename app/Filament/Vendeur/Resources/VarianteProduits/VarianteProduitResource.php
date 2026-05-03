@@ -27,7 +27,7 @@ class VarianteProduitResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nom';
 
-    protected static ?string $tenantOwnershipRelationshipName = 'tenant';
+    protected static bool $isScopedToTenant = false;
 
     protected static ?int $navigationSort = 3;
 

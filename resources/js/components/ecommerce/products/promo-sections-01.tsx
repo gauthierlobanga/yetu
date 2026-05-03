@@ -142,10 +142,10 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                                         {unit === 'days'
                                             ? 'J'
                                             : unit === 'hours'
-                                              ? 'H'
-                                              : unit === 'minutes'
-                                                ? 'M'
-                                                : 'S'}
+                                                ? 'H'
+                                                : unit === 'minutes'
+                                                    ? 'M'
+                                                    : 'S'}
                                     </span>
                                 </motion.div>
                             ))}
@@ -190,7 +190,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                                                     )}
                                                 >
                                                     {copiedCode ===
-                                                    coupon.code ? (
+                                                        coupon.code ? (
                                                         <Check className="h-3.5 w-3.5" />
                                                     ) : (
                                                         <Copy className="h-3.5 w-3.5" />
@@ -205,7 +205,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
 
                         {/* Bouton CTA */}
                         <Button size="lg" className="shadow-md" asChild>
-                            <Link href={route('shop.promotions.index')}>
+                            <Link href={route('promotions.index')}>
                                 Voir toutes les offres
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>

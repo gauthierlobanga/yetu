@@ -29,14 +29,7 @@ class ContactsTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.raison_sociale')
-                    ->label('Organisation')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable()
-                    ->badge()
-                    ->color('info')
-                    ->icon('heroicon-o-building-office'),
+
                 TextColumn::make('full_name')
                     ->label('Expéditeur')
                     ->searchable(['prenom', 'nom', 'email'])

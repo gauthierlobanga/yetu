@@ -12,6 +12,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Spatie\Tags\Tag;
 
 class TagsTable
 {
@@ -75,7 +76,7 @@ class TagsTable
                 SelectFilter::make('type')
                     ->label('Type')
                     ->options(function () {
-                        return \Spatie\Tags\Tag::distinct()
+                        return Tag::distinct()
                             ->pluck('type', 'type')
                             ->filter()
                             ->mapWithKeys(fn ($type) => [$type => $type ?: 'Général'])

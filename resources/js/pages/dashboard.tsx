@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/pages/dashboard.tsx
 import { AppSidebar } from '@/components/app-sidebar';
 import { ChartAreaInteractive } from '@/components/chart-area-interactive';
@@ -5,7 +6,6 @@ import { DataTable } from '@/components/data-table-post';
 import { SectionCards } from '@/components/section-cards-post';
 import { SiteHeader } from '@/components/site-header';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
 import { ChartBarMixed } from './board/BarChartMixed';
 import { ChartCategoryPerformance } from './board/chart-category-performance';
 import { ChartHourlyPosts } from './board/chart-hourly-posts';
@@ -248,7 +248,7 @@ Dashboard.layout = {
     breadcrumbs: [
         {
             title: 'Dashboard',
-            href: dashboard(),
+            href: route('dashboard.index'),
         },
     ],
 };

@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Spatie\Tags\Tag as SpatieTag;
 
 class Tag extends SpatieTag
 {
-    use BelongsToTenant, HasUuids;
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -27,7 +25,6 @@ class Tag extends SpatieTag
     public $incrementing = false;
 
     protected $fillable = [
-        'tenant_id',
         'name',
         'slug',
         'type',

@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
+import { login, register } from '@/routes';
 import type { User } from '@/types';
 
 interface UserNavigationProps {
@@ -27,13 +28,13 @@ export function UserNavigation({ user }: UserNavigationProps) {
                     asChild
                     className="hidden sm:flex"
                 >
-                    <Link href={route('login')}>
+                    <Link href={login()}>
                         <LogIn className="mr-2 h-4 w-4" />
                         Connexion
                     </Link>
                 </Button>
                 <Button size="sm" asChild>
-                    <Link href={route('register')}>
+                    <Link href={register()}>
                         <UserPlus className="mr-2 h-4 w-4" />
                         <span className="hidden sm:inline">Inscription</span>
                         <span className="sm:hidden">S'inscrire</span>
@@ -50,7 +51,7 @@ export function UserNavigation({ user }: UserNavigationProps) {
 
         const url = String(user.avatar_url);
 
-        return url.startsWith('https') || url.startsWith('/') ? url : undefined;
+        return url.startsWith('http') || url.startsWith('/') ? url : undefined;
     })();
 
     const userName =

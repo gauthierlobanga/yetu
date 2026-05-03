@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +12,7 @@ use Illuminate\Support\Facades\Cache;
 
 class VarianteProduit extends Model
 {
-    use BelongsToTenant, HasFactory,SoftDeletes;
+    use HasFactory,SoftDeletes;
 
     protected $table = 'variante_produits';
 

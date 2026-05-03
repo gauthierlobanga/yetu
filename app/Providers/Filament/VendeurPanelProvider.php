@@ -7,7 +7,6 @@ use App\Filament\Pages\Tenancy\RegisterVendeur;
 use App\Http\Middleware\EnsureUserIsVendeur;
 use App\Models\Tenant;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use BezhanSalleh\FilamentShield\Middleware\SyncShieldTenant;
 use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -29,6 +28,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 
 // use Stancl\Tenancy\Middleware\InitializeTenancyByPath;
 
@@ -128,10 +128,12 @@ class VendeurPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+
             ])
             ->authMiddleware([
                 Authenticate::class,
                 EnsureUserIsVendeur::class,
+                // InitializeTenancyByDomain::class,
             ])
             ->plugins(plugins: [
                 FilamentShieldPlugin::make()
@@ -139,8 +141,8 @@ class VendeurPanelProvider extends PanelProvider
                     ->navigationIcon('heroicon-o-home')         // string|Closure|null
                     ->activeNavigationIcon('heroicon-s-home')   // string|Closure|null
                     // ->navigationGroup('Group')                  // string|Closure|null
-                    ->tenantRelationshipName('roles')           // string|Closure|null
-                    ->tenantOwnershipRelationshipName('tenant') // string|Closure|null
+                    ->tenantRelationshipName(null)           // string|Closure|null
+                    ->tenantOwnershipRelationshipName(null) // string|Closure|null
                     ->navigationSort(10)                        // int|Closure|null
                     ->navigationBadge('5')                      // string|Closure|null
                     ->globallySearchable(true)                  // bool|Closure
@@ -163,13 +165,10 @@ class VendeurPanelProvider extends PanelProvider
                     ]),
 
             ])
-            ->tenant(Tenant::class, 'slug')
+            ->tenant(Tenant::class, 'id')
             ->tenantDomain('{tenant:slug}.'.config('app.domain'))
             ->tenantRegistration(RegisterVendeur::class)
             ->tenantProfile(EditVendeurProfile::class)
-            ->tenantMiddleware([
-                SyncShieldTenant::class,
-            ], isPersistent: true)
             ->tenantMenuItems([
                 'register' => fn (Action $action): Action => $action
                     ->label('Ajouter un vendeur')

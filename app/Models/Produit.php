@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use App\Traits\HasComments;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,7 +23,8 @@ use Spatie\Tags\HasTags;
 
 class Produit extends Model implements HasMedia, Sitemapable
 {
-    use BelongsToTenant, HasComments, HasFactory, HasTags;
+    // use BelongsToTenant;
+    use HasComments, HasFactory, HasTags;
     use HasUuids, InteractsWithMedia, SoftDeletes;
 
     protected $table = 'produits';
@@ -45,7 +44,6 @@ class Produit extends Model implements HasMedia, Sitemapable
     public $incrementing = false;
 
     protected $fillable = [
-        'tenant_id',
         'brand_id',
         'currency_id',
         'reference',
@@ -82,9 +80,9 @@ class Produit extends Model implements HasMedia, Sitemapable
         'published_at',
         'scheduled_for',
         'expires_at',
-        'search_document',
-        'image_search_metadata',
-        'search_embedding_synced_at',
+        // 'search_document',
+        // 'image_search_metadata',
+        // 'search_embedding_synced_at',
     ];
 
     protected $casts = [
@@ -110,8 +108,8 @@ class Produit extends Model implements HasMedia, Sitemapable
         'published_at' => 'datetime',
         'scheduled_for' => 'datetime',
         'expires_at' => 'datetime',
-        'image_search_metadata' => 'array',
-        'search_embedding_synced_at' => 'datetime',
+        // 'image_search_metadata' => 'array',
+        // 'search_embedding_synced_at' => 'datetime',
     ];
 
     const STATUS_DRAFT = 'brouillon';
@@ -172,7 +170,7 @@ class Produit extends Model implements HasMedia, Sitemapable
             'produit_id',
             'category_id')
             ->using(ProductCategoryPivot::class)
-            ->withPivot('id', 'is_primary', 'order', 'tenant_id')
+            ->withPivot('is_primary', 'order')
             ->withTimestamps()
             ->orderByPivot('order');
     }
@@ -332,9 +330,6 @@ class Produit extends Model implements HasMedia, Sitemapable
     }
 
     // ========== MEDIA ACCESSORS AVEC CACHE ==========
-
-    // Dans Produit.php
-
     public function getImageUrl(string $conversion = 'medium'): ?string
     {
         $cacheKey = "product_{$this->id}_image_{$conversion}";
@@ -469,7 +464,7 @@ class Produit extends Model implements HasMedia, Sitemapable
 
     public function getUrlAttribute(): string
     {
-        return route('shop.products.show', $this->slug);
+        return route('product.show', $this->slug);
     }
 
     public function getSeoTitleAttribute(): string
@@ -723,17 +718,17 @@ class Produit extends Model implements HasMedia, Sitemapable
             }
         });
 
-        static::saved(function ($produit) {
-            $searchDocument = $produit->buildSearchDocument();
+        // static::saved(function ($produit) {
+        //     $searchDocument = $produit->buildSearchDocument();
 
-            if ($produit->search_document !== $searchDocument) {
-                $produit->forceFill([
-                    'search_document' => $searchDocument,
-                ])->saveQuietly();
-            }
+        //     if ($produit->search_document !== $searchDocument) {
+        //         $produit->forceFill([
+        //             'search_document' => $searchDocument,
+        //         ])->saveQuietly();
+        //     }
 
-            $produit->clearCache();
-        });
+        //     $produit->clearCache();
+        // });
 
         static::deleted(function ($produit) {
             $produit->clearCache();

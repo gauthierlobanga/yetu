@@ -13,8 +13,8 @@ import {
     useSearchBox,
 } from 'react-instantsearch';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation';
+import { cn } from '@/lib/utils';
 
 export interface SearchConfig {
     /** Algolia Application ID (required) */
@@ -56,18 +56,29 @@ type HitsAttributesMapping = {
 };
 
 function toAttributePath(attribute?: string): string | string[] | undefined {
-    if (!attribute) return undefined;
+    if (!attribute) {
+        return undefined;
+    }
+
     return attribute.includes('.') ? attribute.split('.') : attribute;
 }
 
 function getByPath<T = unknown>(obj: unknown, path?: string): T | undefined {
-    if (!obj || !path) return undefined;
+    if (!obj || !path) {
+        return undefined;
+    }
+
     const parts = path.split('.');
     let current: unknown = obj;
+
     for (const part of parts) {
-        if (current == null || typeof current !== 'object') return undefined;
+        if (current == null || typeof current !== 'object') {
+            return undefined;
+        }
+
         current = (current as Record<string, unknown>)[part];
     }
+
     return current as T | undefined;
 }
 
@@ -75,7 +86,7 @@ function getByPath<T = unknown>(obj: unknown, path?: string): T | undefined {
 // Internal Components
 // ============================================================================
 
-interface SearchButtonProps extends React.ComponentProps<typeof Button> {}
+type SearchButtonProps = React.ComponentProps<typeof Button>;
 
 export const SearchButton: React.FC<SearchButtonProps> = ({
     className,
@@ -86,8 +97,12 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
     const [isKPressed, setIsKPressed] = useState(false);
 
     useEffect(() => {
-        if (typeof navigator === 'undefined') return;
+        if (typeof navigator === 'undefined') {
+            return;
+        }
+
         const isMac = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setModifierLabel(isMac ? '⌘' : 'Ctrl');
     }, []);
 
@@ -96,6 +111,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
             if (event.metaKey || event.ctrlKey) {
                 setIsModifierPressed(true);
             }
+
             if (event.key.toLowerCase() === 'k') {
                 setIsKPressed(true);
             }
@@ -105,6 +121,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
             if (!event.metaKey && !event.ctrlKey) {
                 setIsModifierPressed(false);
             }
+
             if (event.key.toLowerCase() === 'k') {
                 setIsKPressed(false);
             }
@@ -250,7 +267,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
         };
     }, [isOpen, onClose]);
 
-    if (!isOpen) return null;
+    if (!isOpen) {
+        return null;
+    }
 
     return createPortal(
         <div
@@ -322,6 +341,7 @@ const HitsList = memo(function HitsList({
                 const hasImage = Boolean(imageUrl);
                 const isImageFailed = failedImages[hit.objectID] || !hasImage;
                 const primaryVal = getByPath<string>(hit, mapping.primaryText);
+
                 return (
                     <a
                         key={hit.objectID}
@@ -341,11 +361,17 @@ const HitsList = memo(function HitsList({
                             sendEvent?.('click', hit, 'Hit Clicked');
                         }}
                         onMouseEnter={() => {
-                            if (!hoverEnabled) return;
+                            if (!hoverEnabled) {
+                                return;
+                            }
+
                             onHoverIndex?.(idx);
                         }}
                         onMouseMove={() => {
-                            if (!hoverEnabled) return;
+                            if (!hoverEnabled) {
+                                return;
+                            }
+
                             onHoverIndex?.(idx);
                         }}
                     >
@@ -433,6 +459,7 @@ const SearchInput = memo(function SearchInput(props: SearchInputProps) {
 
     return (
         <search
+            // eslint-disable-next-line react-hooks/refs
             className={props.className}
             onSubmit={(event) => {
                 event.preventDefault();
@@ -443,6 +470,7 @@ const SearchInput = memo(function SearchInput(props: SearchInputProps) {
                 event.stopPropagation();
 
                 setQuery('');
+
                 if (props.inputRef.current) {
                     props.inputRef.current.focus();
                 }
@@ -478,13 +506,17 @@ const SearchInput = memo(function SearchInput(props: SearchInputProps) {
                     if (e.key === 'ArrowDown') {
                         e.preventDefault();
                         props.onArrowDown?.();
+
                         return;
                     }
+
                     if (e.key === 'ArrowUp') {
                         e.preventDefault();
                         props.onArrowUp?.();
+
                         return;
                     }
+
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         props.onEnter?.();
@@ -501,6 +533,7 @@ const SearchInput = memo(function SearchInput(props: SearchInputProps) {
                     hidden={!query || query.length === 0 || isSearchStalled}
                     onClick={() => {
                         setQuery('');
+
                         if (props.inputRef.current) {
                             props.inputRef.current.focus();
                         }
@@ -512,6 +545,7 @@ const SearchInput = memo(function SearchInput(props: SearchInputProps) {
                     type="button"
                     variant="outline"
                     className="px-2 text-muted-foreground"
+                    // eslint-disable-next-line react-hooks/refs
                     onClick={props.onClose}
                 >
                     esc
@@ -608,13 +642,23 @@ const ResultsPanel = memo(function ResultsPanel({
 
     // biome-ignore lint/correctness/useExhaustiveDependencies: expected
     useEffect(() => {
-        if (!scrollOnSelectionChange) return;
+        if (!scrollOnSelectionChange) {
+            return;
+        }
+
         const container = containerRef.current;
-        if (!container) return;
+
+        if (!container) {
+            return;
+        }
+
         const selectedEl = container.querySelector(
             '[aria-selected="true"]',
         ) as HTMLElement | null;
-        if (!selectedEl) return;
+
+        if (!selectedEl) {
+            return;
+        }
 
         const padding = 8;
         const cRect = container.getBoundingClientRect();
@@ -630,12 +674,18 @@ const ResultsPanel = memo(function ResultsPanel({
     // Enable hover selection only after the user moves the pointer inside the list
     useEffect(() => {
         const container = containerRef.current;
-        if (!container) return;
+
+        if (!container) {
+            return;
+        }
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setHoverEnabled(false);
         const enable = () => setHoverEnabled(true);
         container.addEventListener('pointermove', enable, {
             once: true,
         } as any);
+
         return () => {
             container.removeEventListener('pointermove', enable as any);
         };
@@ -691,6 +741,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
         // Send click event for keyboard navigation before activating
         if (selectedIndex >= 0 && selectedIndex < items.length) {
             const hit = items[selectedIndex];
+
             if (hit) {
                 sendEvent?.('click', hit, 'Hit Clicked');
             }
@@ -699,6 +750,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
         if (activateSelection()) {
             return true;
         }
+
         return false;
     }, [activateSelection, selectedIndex, items, sendEvent]);
 
@@ -741,6 +793,7 @@ export function SearchModal({ onClose, config }: SearchModalProps) {
                         query={query}
                         onClear={() => {
                             refine('');
+
                             if (inputRef.current) {
                                 inputRef.current.focus();
                             }
@@ -760,6 +813,7 @@ const Footer = memo(function Footer() {
         typeof window !== 'undefined'
             ? `${basePoweredByUrl}&utm_source=${encodeURIComponent(window.location.hostname)}`
             : basePoweredByUrl;
+
     return (
         <div className="flex items-center justify-between rounded-b-sm bg-background p-4">
             <div className="inline-flex items-center gap-4 text-sm">
@@ -819,6 +873,7 @@ export default function SearchExperience(config: SearchConfig) {
         };
 
         document.addEventListener('keydown', handleKeyDown);
+
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };

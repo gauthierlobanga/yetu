@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
 import { Head, Link, router } from '@inertiajs/react';
@@ -26,21 +28,24 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
-import MainLayout from '@/layouts/main-layout';
+import { blogIndex } from '@/actions/App/Http/Controllers/Blog/BlogController';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { Separator } from '@/components/ui/separator';
 import { useInitials } from '@/hooks/use-initials';
+import NewsletterSection from '@/layouts/app/app-newsletters-footer';
+import MainLayout from '@/layouts/main-layout';
+import { home } from '@/routes';
+import blog from '@/routes/blog';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 import type { Post, RelatedPost } from '@/types/posts/posts';
-import NewsletterSection from '@/layouts/app/app-newsletters-footer';
 
 interface Props {
     post: {
@@ -73,7 +78,9 @@ const TableOfContents = ({ content }: { content: string }) => {
     const [activeId, setActiveId] = useState<string>('');
 
     useEffect(() => {
-        if (!content) return;
+        if (!content) {
+            return;
+        }
 
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = content;
@@ -85,6 +92,7 @@ const TableOfContents = ({ content }: { content: string }) => {
                 const id = `heading-${index}-${text
                     .toLowerCase()
                     .replace(/[^a-z0-9]+/g, '-')}`;
+
                 return { id, text, level: parseInt(el.tagName[1]) };
             },
         );
@@ -108,6 +116,7 @@ const TableOfContents = ({ content }: { content: string }) => {
             );
             realHeadings.forEach((el, index) => {
                 const generatedId = generatedHeadings[index]?.id;
+
                 if (generatedId) {
                     el.id = generatedId;
                     observer.observe(el);
@@ -118,7 +127,9 @@ const TableOfContents = ({ content }: { content: string }) => {
         return () => observer.disconnect();
     }, [content]);
 
-    if (headings.length === 0) return null;
+    if (headings.length === 0) {
+        return null;
+    }
 
     return (
         <div className="rounded-lg border bg-card">
@@ -149,6 +160,7 @@ const TableOfContents = ({ content }: { content: string }) => {
                                     const element = document.getElementById(
                                         heading.id,
                                     );
+
                                     if (element) {
                                         const offset = 80;
                                         const elementPosition =
@@ -199,6 +211,7 @@ const ReadingProgressBar = () => {
         };
 
         window.addEventListener('scroll', updateProgress);
+
         return () => window.removeEventListener('scroll', updateProgress);
     }, []);
 
@@ -221,10 +234,13 @@ const ScrollToTop = () => {
             setVisible(window.scrollY > 500);
         };
         window.addEventListener('scroll', toggleVisibility);
+
         return () => window.removeEventListener('scroll', toggleVisibility);
     }, []);
 
-    if (!visible) return null;
+    if (!visible) {
+        return null;
+    }
 
     return (
         <Button
@@ -263,6 +279,7 @@ export default function Show({
 
     if (!post?.data) {
         console.error('Post data is missing');
+
         return (
             <MainLayout breadcrumbs={[]}>
                 <div className="container mx-auto px-4 py-12">
@@ -281,9 +298,9 @@ export default function Show({
         Math.ceil((post.data.content?.length || 0) / 1500);
 
     const breadcrumbs: BreadcrumbItemType[] = [
-        { title: 'Accueil', href: '/' },
-        { title: 'Blog', href: '/blog' },
-        { title: post.data.title, href: `/blog/${post.data.slug}` },
+        { title: 'Accueil', href: home() },
+        { title: 'Blog', href: blog.index().url },
+        { title: post.data.title, href: blog.show(post.data.slug) },
     ];
 
     const handleLike = async () => {
@@ -291,11 +308,12 @@ export default function Show({
         setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
 
         try {
-            await router.post(
-                `/posts/${post.data.id}/like`,
+            router.post(
+                blog.like(post.data.id),
                 {},
                 {
                     preserveScroll: true,
+
                     onError: () => {
                         setIsLiked(!isLiked);
                         setLikesCount((prev) =>
@@ -312,6 +330,7 @@ export default function Show({
 
     const handleShare = async () => {
         const url = window.location.href;
+
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -402,9 +421,13 @@ export default function Show({
                                     {post.data.categories.map((category) => (
                                         <Link
                                             key={category.id}
-                                            href={route('blog.index', {
-                                                tag: category.slug,
-                                            })}
+                                            href={
+                                                blogIndex({
+                                                    query: {
+                                                        tag: category.slug,
+                                                    },
+                                                }).url
+                                            }
                                             className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-muted/80"
                                         >
                                             <Folder className="h-3 w-3" />
@@ -637,7 +660,9 @@ export default function Show({
                                         )}
                                         {nextPost && (
                                             <Link
-                                                href={`/blog/${nextPost.slug}`}
+                                                href={
+                                                    blog.show(nextPost.slug).url
+                                                }
                                                 className="group flex flex-col rounded-lg border p-3 text-right transition-all hover:border-primary hover:shadow-sm"
                                             >
                                                 <span className="text-xs text-muted-foreground">
@@ -732,7 +757,8 @@ export default function Show({
                                 {relatedPosts.map((relatedPost) => (
                                     <Link
                                         key={relatedPost.id}
-                                        href={`/blog/${relatedPost.slug}`}
+                                        href={blog.show(relatedPost.slug).url}
+                                        // href={`/blog/${relatedPost.slug}`}
                                         className="group overflow-hidden rounded-lg border bg-card transition-shadow hover:shadow-md"
                                     >
                                         {relatedPost.featured_image_url && (
@@ -769,7 +795,7 @@ export default function Show({
                 )}
 
                 {/* Commentaires */}
-                {/* <div className="border-t">
+                <div className="border-t">
                     <div className="container mx-auto max-w-6xl px-4 py-8">
                         <div className="flex items-center justify-between">
                             <h2 className="text-xl font-bold">Commentaires</h2>
@@ -792,7 +818,7 @@ export default function Show({
                             </Button>
                         </div>
                     </div>
-                </div> */}
+                </div>
             </article>
             <NewsletterSection />
         </MainLayout>

@@ -2,15 +2,12 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class PostCategoryPivot extends Pivot
 {
-    use BelongsToTenant;
     use HasUuids;
 
     protected $table = 'posts_categories_pivot';
@@ -20,7 +17,6 @@ class PostCategoryPivot extends Pivot
     public $incrementing = false;
 
     protected $fillable = [
-        'tenant_id',
         'post_id',
         'category_id',
         'est_principale',

@@ -1,6 +1,6 @@
 // resources/js/components/section-cards-post.tsx
 
-import { useEffect, useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import {
     IconTrendingDown,
     IconTrendingUp,
@@ -14,7 +14,8 @@ import {
     IconClock,
     IconChartBar,
 } from '@tabler/icons-react';
-import { usePage } from '@inertiajs/react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
     Card,
@@ -83,6 +84,7 @@ export function SectionCards() {
 
     const getDaysSinceLastPost = () => {
         const days = stats.days_since_last_post;
+
         if (
             days === null ||
             days === undefined ||
@@ -92,6 +94,7 @@ export function SectionCards() {
         ) {
             return null;
         }
+
         return days;
     };
 

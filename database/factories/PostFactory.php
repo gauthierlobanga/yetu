@@ -27,7 +27,7 @@ class PostFactory extends Factory
         return [
             'user_id' => User::factory(),
             'title' => $title,
-            'slug' => Str::slug($title) . '-' . uniqid(),
+            'slug' => Str::slug($title).'-'.uniqid(),
             'content' => $this->faker->paragraphs(5, true),
             'status' => $status,
             'is_pinned' => $this->faker->boolean(10),

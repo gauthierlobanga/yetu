@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NewsletterSend extends Model
 {
-    use BelongsToTenant,HasFactory;
+    use HasFactory;
     use HasUuids;
 
     /**
@@ -31,7 +29,6 @@ class NewsletterSend extends Model
     protected $table = 'newsletter_sends';
 
     protected $fillable = [
-        'tenant_id',
         'campaign_id',
         'newsletter_id',
         'email',

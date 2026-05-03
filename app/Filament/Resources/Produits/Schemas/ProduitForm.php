@@ -2,9 +2,6 @@
 
 namespace App\Filament\Resources\Produits\Schemas;
 
-use App\Models\ProductCategory;
-use App\Models\Tenant;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
@@ -21,7 +18,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class ProduitForm
@@ -107,45 +103,13 @@ class ProduitForm
 
                                         Select::make('categories')
                                             ->label('Catégories')
-                                            // ->options(ProductCategory::active()->orderBy('nom')->pluck('nom', 'id'))
                                             ->relationship('categories', 'nom')
                                             ->multiple()
                                             ->searchable()
                                             ->preload()
                                             ->required()
                                             ->helperText('Sélectionnez les catégories du produit'),
-                                        Select::make('tenant_id')
-                                            ->label('Organisation')
-                                            ->relationship('tenant', 'raison_sociale')
-                                            ->preload()
-                                            ->searchable()
-                                            ->options(function () {
-                                                $user = Auth::user();
 
-                                                // Si l'utilisateur est Super Admin, il voit toutes les Vendeurs
-                                                if ($user->hasRole(['super_admin'])) {
-                                                    return Tenant::pluck('raison_sociale', 'id');
-                                                }
-
-                                                // Sinon, il voit seulement ses Vendeurs
-                                                return $user->tenants()->pluck('raison_sociale', 'tenants.id');
-                                            })
-                                            ->default(function () {
-                                                $user = Auth::user();
-
-                                                // Si on est dans un contexte tenant, pré-remplir avec la Vendeur actuelle
-                                                if (Filament::hasTenancy() && Filament::getTenant()) {
-                                                    return Filament::getTenant()->id;
-                                                }
-
-                                                // Si l'utilisateur n'a qu'une seule Vendeur, la sélectionner par défaut
-                                                if ($user->tenants()->count() === 1) {
-                                                    return $user->tenants()->first()->id;
-                                                }
-
-                                                return null;
-                                            })
-                                            ->required(),
                                     ]),
 
                                 Group::make()

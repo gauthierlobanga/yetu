@@ -12,7 +12,7 @@ use Inertia\Inertia;
 
 class ReviewController extends Controller
 {
-    public function index(Produit $produit)
+    public function productsReviewsIndex(Produit $produit)
     {
         $reviews = $produit->approvedAvis()->with('client')->latest()->paginate(10);
 
@@ -22,7 +22,7 @@ class ReviewController extends Controller
         ]);
     }
 
-    public function store(Request $request, Produit $produit)
+    public function productsReviewsStore(Request $request, Produit $produit)
     {
         $validated = $request->validate([
             'note' => 'required|integer|min:1|max:5',
@@ -40,7 +40,7 @@ class ReviewController extends Controller
         return back()->with('success', 'Votre avis a été soumis et sera publié après modération');
     }
 
-    public function update(Request $request, AvisClient $avis)
+    public function productsReviewsUpdate(Request $request, AvisClient $avis)
     {
         /** @var AuthorizesRequests $this */
         $this->authorize('update', $avis);
@@ -54,5 +54,14 @@ class ReviewController extends Controller
         $avis->save();
 
         return back()->with('success', 'Avis mis à jour');
+    }
+
+    public function productsReviewsDestroy(AvisClient $avis)
+    {
+        /** @var AuthorizesRequests $this */
+        $this->authorize('delete', $avis);
+        $avis->delete($avis);
+
+        return back()->with('success', 'Avis supprimé');
     }
 }

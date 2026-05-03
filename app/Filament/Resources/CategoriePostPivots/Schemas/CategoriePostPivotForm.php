@@ -13,10 +13,6 @@ class CategoriePostPivotForm
     {
         return $schema
             ->components([
-                Select::make('tenant_id')
-                    ->relationship('tenant', 'raison_sociale')
-                    ->preload()
-                    ->searchable(),
                 Select::make('post_id')
                     ->relationship('post', 'title')
                     ->preload()

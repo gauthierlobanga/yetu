@@ -28,6 +28,8 @@ class TaxeResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'taux';
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return TaxeForm::configure($schema);

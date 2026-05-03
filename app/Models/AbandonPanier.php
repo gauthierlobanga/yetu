@@ -14,8 +14,9 @@ use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class AbandonPanier extends Model
 {
-    use BelongsToTenant,HasUuids;
+    use BelongsToTenant;
     use HasFactory, SoftDeletes;
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -34,7 +35,6 @@ class AbandonPanier extends Model
     protected $table = 'abandon_paniers';
 
     protected $fillable = [
-        'tenant_id',
         'panier_id',
         'raison',
         'etape_abandon',

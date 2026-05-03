@@ -28,6 +28,8 @@ class DeviseResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'symbole';
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return DeviseForm::configure($schema);

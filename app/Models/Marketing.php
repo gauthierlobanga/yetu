@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +13,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Marketing extends Model implements HasMedia
 {
-    use BelongsToTenant, HasUuids, InteractsWithMedia,SoftDeletes;
+    use HasUuids, InteractsWithMedia,SoftDeletes;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -34,7 +32,6 @@ class Marketing extends Model implements HasMedia
     protected $table = 'campagne_marketings';
 
     protected $fillable = [
-        'tenant_id',
         'nom',
         'type',
         'canal',

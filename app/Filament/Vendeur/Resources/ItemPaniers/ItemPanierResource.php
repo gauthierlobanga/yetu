@@ -27,6 +27,8 @@ class ItemPanierResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'panier_id';
 
+    protected static bool $isScopedToTenant = false;
+
     protected static ?int $navigationSort = 2;
 
     public static function getNavigationBadge(): ?string

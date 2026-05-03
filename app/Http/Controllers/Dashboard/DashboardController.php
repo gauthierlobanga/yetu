@@ -17,7 +17,7 @@ use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    public function adminDashboardIndex(Request $request)
     {
         if (! $this->hasDashboardSchema()) {
             return Inertia::render('dashboard', $this->emptyDashboardPayload($request));
@@ -1391,7 +1391,7 @@ class DashboardController extends Controller
         return redirect()->back()->with('success', 'Article dupliqué avec succès');
     }
 
-    public function reorder(Request $request)
+    public function postsReorder(Request $request)
     {
         $request->validate([
             'ordered_ids' => 'required|array',

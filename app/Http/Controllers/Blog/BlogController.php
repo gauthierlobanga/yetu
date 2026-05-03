@@ -16,7 +16,7 @@ class BlogController extends Controller
     /**
      * Affiche la liste des posts de l'utilisateur connecté.
      */
-    public function index(Request $request)
+    public function blogIndex(Request $request)
     {
         if ($request->filled('category_id') && ! $request->filled('tag')) {
             $legacyCategory = PostCategory::query()
@@ -25,8 +25,8 @@ class BlogController extends Controller
 
             if ($legacyCategory) {
                 return redirect()->route('blog.index', [
-                    ...$request->except('category_id'),
                     'tag' => $legacyCategory->slug,
+                    ...$request->except('category_id'),
                 ]);
             }
         }
@@ -106,7 +106,7 @@ class BlogController extends Controller
     /**
      * Affiche un post spécifique.
      */
-    public function show(Post $post, Request $request)
+    public function blogShow(Post $post, Request $request)
     {
         $post->incrementViews();
         $post->load(['categories', 'media', 'user', 'tags']);
@@ -127,8 +127,12 @@ class BlogController extends Controller
         return Inertia::render('main/blog/show/Show', $data);
     }
 
-    public function byCategory(PostCategory $category)
+    public function blogByCategory(PostCategory $category)
     {
-        return redirect()->route('blog.index', ['tag' => $category->slug]);
+        return route('blog.index', ['tag' => $category->slug]);
     }
+
+    public function blogComment() {}
+
+    public function blogLike() {}
 }

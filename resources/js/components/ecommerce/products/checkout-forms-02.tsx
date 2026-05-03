@@ -19,7 +19,7 @@ const steps = [1, 2, 3, 4];
 
 export default function CheckoutPage() {
     const ApplePayIcon = () => (
-        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-muted">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -75,7 +75,7 @@ export default function CheckoutPage() {
                                 </h2>
                             </div>
                             <div>
-                                {orderItems.map((item, index) => (
+                                {orderItems.map((item: any, index: any) => (
                                     <OrderItem key={index} {...item} />
                                 ))}
                             </div>

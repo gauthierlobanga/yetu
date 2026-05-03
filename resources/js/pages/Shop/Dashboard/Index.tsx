@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { ArrowRight, Heart, ShoppingBag, Sparkles } from 'lucide-react';
-import ShopAccountShell from '@/components/shop/ShopAccountShell';
+import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,7 +77,7 @@ export default function ShopDashboardPage() {
                             </p>
                         </div>
                         <Button variant="outline" asChild>
-                            <Link href={route('shop.orders.index')}>
+                            <Link href={route('orders.index')}>
                                 Tout voir
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
@@ -88,7 +88,7 @@ export default function ShopDashboardPage() {
                             recentOrders.map((order) => (
                                 <Link
                                     key={order.id}
-                                    href={route('shop.orders.show', order.id)}
+                                    href={route('orders.show', order.id)}
                                     className="flex items-center justify-between rounded-2xl border px-4 py-3 transition hover:bg-muted/40"
                                 >
                                     <div className="space-y-1">
@@ -124,21 +124,21 @@ export default function ShopDashboardPage() {
                         </CardHeader>
                         <CardContent className="grid gap-3">
                             <Link
-                                href={route('shop.wishlist.index')}
+                                href={route('wishlist.index')}
                                 className="flex items-center gap-3 rounded-2xl border px-4 py-3 hover:bg-muted/40"
                             >
                                 <Heart className="h-4 w-4 text-primary" />
                                 <span>Revoir mes favoris</span>
                             </Link>
                             <Link
-                                href={route('shop.loyalty.index')}
+                                href={route('loyalty.index')}
                                 className="flex items-center gap-3 rounded-2xl border px-4 py-3 hover:bg-muted/40"
                             >
                                 <Sparkles className="h-4 w-4 text-primary" />
                                 <span>Utiliser mes points fidelite</span>
                             </Link>
                             <Link
-                                href={route('shop.orders.index')}
+                                href={route('orders.index')}
                                 className="flex items-center gap-3 rounded-2xl border px-4 py-3 hover:bg-muted/40"
                             >
                                 <ShoppingBag className="h-4 w-4 text-primary" />

@@ -2,11 +2,6 @@
 import { Link } from '@inertiajs/react';
 import { motion, useInView } from 'framer-motion';
 import {
-    Facebook,
-    Twitter,
-    Instagram,
-    Linkedin,
-    Youtube,
     ShieldCheckIcon,
     TruckIcon,
     CreditCardIcon,
@@ -15,13 +10,20 @@ import {
     Globe,
 } from 'lucide-react';
 import { useRef } from 'react';
+import {
+    FaFacebook,
+    FaInstagram,
+    FaLinkedin,
+    FaTwitter,
+    FaYoutube,
+} from 'react-icons/fa';
 import AppLogo from '@/components/app-logo';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 const Logo = () => (
     <Link
-        href="/"
+        href={route('home')}
         className="group flex items-center space-x-2 transition-opacity hover:opacity-80"
     >
         <AppLogo />
@@ -29,11 +31,11 @@ const Logo = () => (
 );
 
 const socialLinks = [
-    { name: 'Facebook', href: '#', icon: Facebook, color: '#1877f2' },
-    { name: 'Instagram', href: '#', icon: Instagram, color: '#e4405f' },
-    { name: 'Twitter', href: '#', icon: Twitter, color: '#1da1f2' },
-    { name: 'LinkedIn', href: '#', icon: Linkedin, color: '#0a66c2' },
-    { name: 'YouTube', href: '#', icon: Youtube, color: '#ff0000' },
+    { name: 'Facebook', href: '#', icon: FaFacebook, color: '#1877f2' },
+    { name: 'Instagram', href: '#', icon: FaInstagram, color: '#e4405f' },
+    { name: 'Twitter', href: '#', icon: FaTwitter, color: '#1da1f2' },
+    { name: 'LinkedIn', href: '#', icon: FaLinkedin, color: '#0a66c2' },
+    { name: 'YouTube', href: '#', icon: FaYoutube, color: '#ff0000' },
 ];
 
 const guarantees = [
@@ -51,47 +53,50 @@ const footerSections = [
     {
         title: 'Explorer',
         links: [
-            { name: 'Produits', href: route('shop.products.index') },
+            { name: 'Produits', href: route('product.index') },
             {
                 name: 'Promotions',
-                href: route('shop.promotions.index'),
+                href: route('promotions.index'),
                 badge: '🔥',
             },
             {
                 name: 'Nouveautés',
-                href: route('shop.products.index', { sort: 'newest' }),
+                href: route('product.index', { sort: 'newest' }),
                 badge: '✨',
             },
             {
                 name: 'Meilleures ventes',
-                href: route('shop.products.index', { sort: 'bestseller' }),
+                href: route('product.index', { sort: 'bestseller' }),
             },
         ],
     },
     {
         title: 'Entreprise',
         links: [
-            { name: 'À propos', href: route('nmarket.about') },
+            { name: 'À propos', href: route('page.about') },
             { name: 'Blog', href: route('blog.index') },
             { name: 'Carrières', href: '#' },
-            { name: 'Devenir vendeur', href: '#' },
+            { name: 'Devenir vendeur', href: route('vendor.register') },
         ],
     },
     {
         title: 'Support',
         links: [
-            { name: 'Contact', href: route('contact.index') },
-            { name: 'FAQ', href: route('nmarket.faq') },
-            { name: 'Suivi de commande', href: route('shop.orders.index') },
-            { name: 'Retours', href: route('shop.returns.index') },
+            { name: 'Contact', href: route('page.contact') },
+            { name: 'FAQ', href: route('page.faq') },
+            {
+                name: 'Suivi de commande',
+                href: route('orders.index'),
+            },
+            { name: 'Retours', href: route('return.index') },
         ],
     },
     {
         title: 'Légal',
         links: [
-            { name: 'Conditions', href: route('nmarket.terms') },
-            { name: 'Confidentialité', href: route('nmarket.privacy') },
-            { name: 'Cookies', href: route('nmarket.cookies') },
+            { name: 'Conditions', href: route('page.terms') },
+            { name: 'Confidentialité', href: route('page.privacy') },
+            { name: 'Cookies', href: route('page.cookies') },
         ],
     },
 ];
@@ -113,17 +118,17 @@ export default function FooterSection() {
         visible: {
             opacity: 1,
             y: 0,
-            transition: { duration: 0.5, ease: 'easeOut' },
+            transition: { duration: 0.5, ease: 'easeOut' as const },
         },
     };
 
     return (
         <footer
             ref={ref}
-            className="relative border-t border-border/40 bg-gradient-to-b from-background via-background to-muted/20 dark:border-white/10"
+            className="relative border-t border-border/40 bg-linear-to-b from-background via-background to-muted/20 dark:border-white/10"
         >
             {/* Glow supérieur */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-primary/5 to-transparent blur-3xl" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-linear-to-b from-primary/5 to-transparent blur-3xl" />
 
             {/* Garanties */}
             <motion.div
@@ -179,8 +184,8 @@ export default function FooterSection() {
                     <motion.div variants={itemVariants} className="space-y-5">
                         <Logo />
                         <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-                            Nmarket – Une expérience e‑commerce premium, rapide
-                            et fiable.
+                            shop – Une expérience e‑commerce premium, rapide et
+                            fiable.
                         </p>
                         <div className="flex gap-2">
                             {socialLinks.map((social) => (
@@ -260,10 +265,7 @@ export default function FooterSection() {
                         <CreditCardIcon className="h-4 w-4" />
                         Visa • Mastercard • PayPal
                     </div>
-                    <p>
-                        © {new Date().getFullYear()} Nmarket. Tous droits
-                        réservés.
-                    </p>
+                    <p>© {new Date().getFullYear()} Tous droits réservés.</p>
                 </div>
             </motion.div>
         </footer>

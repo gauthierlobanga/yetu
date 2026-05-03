@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,7 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Panier extends Model
 {
-    use BelongsToTenant,HasUuids, SoftDeletes;
+    use HasUuids, SoftDeletes;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -48,7 +46,6 @@ class Panier extends Model
     protected $table = 'paniers';
 
     protected $fillable = [
-        'tenant_id',
         'client_id',
         'user_id',
         'session_id',

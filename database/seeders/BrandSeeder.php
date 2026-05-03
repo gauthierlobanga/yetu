@@ -12,7 +12,7 @@ class BrandSeeder extends Seeder
         $brands = [
             // Mode & Accessoires
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Boreal',
                 'slug' => 'boreal',
                 'website' => 'boreal-nature.com',
@@ -33,7 +33,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Lumina Atelier',
                 'slug' => 'lumina-atelier',
                 'website' => 'lumina-atelier.fr',
@@ -54,7 +54,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Studio Cobalt',
                 'slug' => 'studio-cobalt',
                 'website' => 'studiocobalt.design',
@@ -75,7 +75,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Le Chanvrier',
                 'slug' => 'le-chanvrier',
                 'website' => 'lechanvrier-bio.com',
@@ -95,7 +95,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Velvet Racer',
                 'slug' => 'velvet-racer',
                 'website' => 'velvetracer.shop',
@@ -115,7 +115,7 @@ class BrandSeeder extends Seeder
 
             // Tech & Électronique
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Aether Lab',
                 'slug' => 'aether-lab',
                 'website' => 'aether-lab.tech',
@@ -136,7 +136,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Pixel & Kraft',
                 'slug' => 'pixel-and-kraft',
                 'website' => 'pixelandkraft.com',
@@ -156,7 +156,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Solaris Charge',
                 'slug' => 'solaris-charge',
                 'website' => 'solaris-charge.com',
@@ -179,7 +179,7 @@ class BrandSeeder extends Seeder
 
             // Maison & Déco
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Argile & Mer',
                 'slug' => 'argile-et-mer',
                 'website' => 'argile-et-mer.fr',
@@ -200,7 +200,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Papier Mûrier',
                 'slug' => 'papier-murier',
                 'website' => 'papiermurier-paris.com',
@@ -220,7 +220,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'La Savonnerie des Alpes',
                 'slug' => 'savonnerie-des-alpes',
                 'website' => 'savonnerie-alpes.fr',
@@ -242,7 +242,7 @@ class BrandSeeder extends Seeder
 
             // Sport & Plein Air
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Altitude',
                 'slug' => 'altitude-equipment',
                 'website' => 'altitude-equipment.com',
@@ -263,7 +263,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Rivage Paddle',
                 'slug' => 'rivage-paddle',
                 'website' => 'rivage-paddle.co',
@@ -286,7 +286,7 @@ class BrandSeeder extends Seeder
 
             // Alimentation & Épicerie Fine
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Torréfaction L\'Écume',
                 'slug' => 'torrefaction-lecume',
                 'website' => 'cafe-lecume.fr',
@@ -306,7 +306,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Le Chai Nomade',
                 'slug' => 'le-chai-nomade',
                 'website' => 'lechainomade.com',
@@ -329,7 +329,7 @@ class BrandSeeder extends Seeder
 
             // Grands noms fictifs pour compléter
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Nexus Gear',
                 'slug' => 'nexus-gear',
                 'website' => 'nexus-gear.io',
@@ -347,7 +347,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Mimosa',
                 'slug' => 'mimosa-parfums',
                 'website' => 'mimosa-parfums.fr',
@@ -365,7 +365,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Atelier Guimauve',
                 'slug' => 'atelier-guimauve',
                 'website' => 'atelier-guimauve.fr',
@@ -383,7 +383,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Les Forges de Mercure',
                 'slug' => 'forges-de-mercure',
                 'website' => 'forgesdemercure.com',
@@ -401,7 +401,7 @@ class BrandSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'tenant_id' => '019db819-64d0-73e0-88d0-f474494ce127',
+
                 'name' => 'Komorebi',
                 'slug' => 'komorebi-lifestyle',
                 'website' => 'komorebi-lifestyle.com',

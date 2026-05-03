@@ -27,6 +27,8 @@ class RemboursementResource extends Resource
 
     protected static ?string $cluster = CommandesCluster::class;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return RemboursementForm::configure($schema);

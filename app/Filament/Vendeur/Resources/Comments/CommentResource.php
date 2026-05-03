@@ -29,6 +29,8 @@ class CommentResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Share;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::where('status', 'pending')

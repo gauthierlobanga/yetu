@@ -86,7 +86,7 @@ export interface Product {
 }
 
 export interface Category {
-    [x: string]: number;
+    // [x: string]: number;
     id: number;
     nom: string;
     slug: string;
@@ -94,6 +94,7 @@ export interface Category {
     image: string | null;
     icon?: string | null;
     url: string;
+    products_count: number;
     children: Category[];
 }
 

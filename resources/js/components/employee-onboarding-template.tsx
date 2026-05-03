@@ -1,19 +1,16 @@
 'use client';
-import * as z from 'zod';
-import { formSchema } from '@/lib/form-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, Controller } from 'react-hook-form';
-import { motion } from 'motion/react';
 import { Check } from 'lucide-react';
-import {
-    Field,
-    FieldGroup,
-    FieldContent,
-    FieldLabel,
-    FieldDescription,
-    FieldError,
-    FieldSeparator,
-} from '@/components/ui/field';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useForm, Controller } from 'react-hook-form';
+
+import type {
+    ControllerFieldState,
+    ControllerRenderProps,
+} from 'react-hook-form';
+import * as z from 'zod';
+import { FileUpload } from '@/components/file-upload';
 import {
     FormHeader,
     FormFooter,
@@ -23,11 +20,19 @@ import {
     SubmitButton,
     MultiStepFormContent,
 } from '@/components/multi-step-viewer';
-import { MultiStepFormProvider } from '@/hooks/use-multi-step-viewer';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+    Field,
+    FieldGroup,
+    FieldContent,
+    FieldLabel,
+    FieldDescription,
+    FieldError,
+    FieldSeparator,
+} from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
     Select,
     SelectContent,
@@ -35,14 +40,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import type {
-    ControllerFieldState,
-    ControllerRenderProps,
-} from 'react-hook-form';
-import { FileUpload } from '@/components/file-upload';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { MultiStepFormProvider } from '@/hooks/use-multi-step-viewer';
+import { formSchema } from '@/lib/form-schema';
 
 //------------------------------
 type Schema = z.infer<typeof formSchema>;
@@ -321,6 +321,7 @@ export function EmployeeForm() {
                                         value: 'operations',
                                     },
                                 ];
+
                                 return (
                                     <Field
                                         data-invalid={fieldState.invalid}
@@ -398,6 +399,7 @@ export function EmployeeForm() {
                                 { label: 'Contract', value: 'contract' },
                                 { label: 'Intern', value: 'intern' },
                             ];
+
                             return (
                                 <Field
                                     data-invalid={fieldState.invalid}
@@ -528,6 +530,7 @@ export function EmployeeForm() {
                                     { label: 'Friend', value: 'friend' },
                                     { label: 'Other', value: 'other' },
                                 ];
+
                                 return (
                                     <Field
                                         data-invalid={fieldState.invalid}
@@ -876,6 +879,7 @@ export function EmployeeForm() {
             </div>
         );
     }
+
     return (
         <div>
             <form
@@ -886,6 +890,7 @@ export function EmployeeForm() {
                     stepsFields={stepsFields}
                     onStepValidation={async (step) => {
                         const isValid = await form.trigger(step.fields);
+
                         return isValid;
                     }}
                 >

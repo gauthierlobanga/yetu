@@ -130,7 +130,7 @@ export default function Login({
                                     )}
                                 </span>
                                 {/* Effet de survol lumineux */}
-                                <span className="absolute inset-0 -z-0 bg-gradient-to-r from-primary to-primary-foreground opacity-0 transition-opacity group-hover:opacity-20" />
+                                <span className="absolute inset-0 z-0 bg-linear-to-r from-primary to-primary-foreground opacity-0 transition-opacity group-hover:opacity-20" />
                             </Button>
                         </div>
 

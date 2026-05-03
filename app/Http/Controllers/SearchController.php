@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Post;
+use App\Models\PostCategory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,7 +13,7 @@ class SearchController extends Controller
     /**
      * Page de résultats de recherche
      */
-    public function search(Request $request)
+    public function shopSearch(Request $request)
     {
         $query = $request->input('q', '');
         $limit = $request->input('limit', 12);
@@ -29,7 +29,7 @@ class SearchController extends Controller
     /**
      * API pour les requêtes AJAX (recherche en temps réel)
      */
-    public function api(Request $request)
+    public function shopApi(Request $request)
     {
         $query = $request->input('q', '');
         $limit = $request->input('limit', 8);
@@ -80,7 +80,7 @@ class SearchController extends Controller
             }
 
             // Recherche dans les catégories
-            $categories = Category::where('est_active', true)
+            $categories = PostCategory::where('est_active', true)
                 ->where('nom', 'LIKE', "%{$query}%")
                 ->limit(3)
                 ->get();

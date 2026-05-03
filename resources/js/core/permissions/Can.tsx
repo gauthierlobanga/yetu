@@ -1,6 +1,8 @@
+/* eslint-disable @stylistic/brace-style */
 // resources/js/components/Permissions/Can.tsx
+import type { ReactNode } from 'react';
+import { memo } from 'react';
 import { usePermissions } from './usePermissions';
-import { memo, ReactNode } from 'react';
 
 // Définition des props pour le composant Can
 interface CanProps {
@@ -55,6 +57,7 @@ export const Can = memo<CanProps>(
         if (permission) {
             hasAccess = can(permission);
         }
+
         // Mode 2: Modèle + Action (recommandé pour tes policies)
         else if (model && action) {
             if (resource) {
@@ -93,6 +96,7 @@ interface CanAllProps {
 export const CanAll = memo<CanAllProps>(
     ({ model, actions, children, fallback = null }) => {
         const { canOnModelAll } = usePermissions();
+
         return canOnModelAll(model, actions) ? (
             <>{children}</>
         ) : (
@@ -130,6 +134,7 @@ export const CanRole = memo<CanRoleProps>(
     ({ roles, children, fallback = null }) => {
         const { hasAnyRole } = usePermissions();
         const rolesArray = Array.isArray(roles) ? roles : [roles];
+
         return hasAnyRole(rolesArray) ? <>{children}</> : <>{fallback}</>;
     },
 );
@@ -167,6 +172,7 @@ interface CanOwnProps {
 export const CanOwn = memo<CanOwnProps>(
     ({ model, action, resource, children, fallback = null }) => {
         const { canOnResource } = usePermissions();
+
         return canOnResource(model, action, resource) ? (
             <>{children}</>
         ) : (

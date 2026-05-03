@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import { Minus, Plus, Trash2, Loader2 } from 'lucide-react';
+import { Minus, Plus, Trash2, Loader2, X } from 'lucide-react';
 import { useState } from 'react';
 import {
     AlertDialog,
@@ -187,7 +187,7 @@ export function CartItem({ item, compact = false, onUpdate }: CartItemProps) {
                                 {formatPrice(item.price)}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                                ×
+                                <X />
                             </span>
                             <span className="text-sm">{quantity}</span>
                         </div>
@@ -429,7 +429,7 @@ export function CartItem({ item, compact = false, onUpdate }: CartItemProps) {
                                     className="h-8 w-8"
                                     onClick={() => {
                                         router.post(
-                                            route('wishlist.add', {
+                                            route('wishlist.toggle', {
                                                 product: item.product_id,
                                             }),
                                             {},

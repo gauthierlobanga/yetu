@@ -1,5 +1,5 @@
 import { useForm, usePage } from '@inertiajs/react';
-import ShopAccountShell from '@/components/shop/ShopAccountShell';
+import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -74,9 +74,7 @@ export default function ShopLoyaltyPage() {
                         />
                         <Button
                             disabled={form.processing}
-                            onClick={() =>
-                                form.post(route('shop.loyalty.redeem'))
-                            }
+                            onClick={() => form.post(route('loyalty.redeem'))}
                         >
                             Echanger mes points
                         </Button>

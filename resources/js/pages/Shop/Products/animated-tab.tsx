@@ -2,9 +2,9 @@ import { Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, Search, X } from 'lucide-react';
 import { useState } from 'react';
+import ProductCardCompact from '@/components/ecommerce/products/ProductCardCompact';
 import { Button } from '@/components/ui/button';
 import type { Category, Product } from '@/types/ecommerce/products';
-import ProductCardCompact from '@/components/ecommerce/products/ProductCardCompact';
 
 interface CategoryTabsProps {
     categories: Category[];
@@ -115,7 +115,7 @@ export default function ProductShowTab({
                                             <Link
                                                 href={
                                                     activeCategory?.url ||
-                                                    route('shop.products.index')
+                                                    route('product.index')
                                                 }
                                             >
                                                 Voir toute la collection
@@ -234,7 +234,7 @@ export default function ProductShowTab({
                                         >
                                             <Link
                                                 href={route(
-                                                    'shop.categories.index',
+                                                    'product.category.index',
                                                 )}
                                             >
                                                 Parcourir les catégories
@@ -252,7 +252,7 @@ export default function ProductShowTab({
                                     >
                                         Besoin d'aide ?{' '}
                                         <Link
-                                            href={route('contact.index')}
+                                            href={route('page.contact')}
                                             className="font-medium text-primary hover:underline"
                                         >
                                             Contactez notre support

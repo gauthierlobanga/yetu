@@ -9,7 +9,7 @@ use Inertia\Inertia;
 
 class AccountDashboardController extends Controller
 {
-    public function index()
+    public function AccountDashboardIndex()
     {
         $client = Auth::user()?->client;
 

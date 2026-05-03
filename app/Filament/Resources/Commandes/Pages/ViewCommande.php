@@ -17,7 +17,7 @@ class ViewCommande extends ViewRecord
             Actions\Action::make('invoice')
                 ->label('Facture')
                 ->icon('heroicon-o-document')
-                ->url(fn ($record) => route('shop.admin.orders.invoice', $record))
+                // ->url(fn ($record) => route('admin.orders.invoice', $record))
                 ->openUrlInNewTab(),
             Actions\Action::make('markAsPaid')
                 ->label('Marquer payée')

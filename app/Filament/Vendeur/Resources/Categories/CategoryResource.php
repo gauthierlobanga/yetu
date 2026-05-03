@@ -31,6 +31,8 @@ class CategoryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nom';
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return CategoryForm::configure($schema);
@@ -65,7 +67,7 @@ class CategoryResource extends Resource
             ]);
     }
 
-    public static function getNavigationBadge(): ?string
+     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
     }

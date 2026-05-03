@@ -29,6 +29,8 @@ class RelancePanierResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return RelancePanierForm::configure($schema);

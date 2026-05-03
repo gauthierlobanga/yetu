@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/core/permissions/usePermissions.ts
 import { usePage } from '@inertiajs/react';
 import { useCallback, useMemo } from 'react';
@@ -63,10 +64,14 @@ export function usePermissions() {
      */
     const can = useCallback(
         (permission: string | string[]): boolean => {
-            if (!user) return false;
+            if (!user) {
+                return false;
+            }
 
             // Super-admin bypass
-            if (roles.has('super_admin')) return true;
+            if (roles.has('super_admin')) {
+                return true;
+            }
 
             // Vérification multiple
             if (Array.isArray(permission)) {
@@ -84,10 +89,16 @@ export function usePermissions() {
      */
     const canOnModel = useCallback(
         (model: string, action: string): boolean => {
-            if (!user) return false;
-            if (roles.has('super_admin')) return true;
+            if (!user) {
+                return false;
+            }
+
+            if (roles.has('super_admin')) {
+                return true;
+            }
 
             const permission = `${action} ${model}`;
+
             return permissionsSet.has(permission);
         },
         [user, permissionsSet, roles],
@@ -99,11 +110,17 @@ export function usePermissions() {
      */
     const canOnModelAll = useCallback(
         (model: string, actions: string[]): boolean => {
-            if (!user) return false;
-            if (roles.has('super_admin')) return true;
+            if (!user) {
+                return false;
+            }
+
+            if (roles.has('super_admin')) {
+                return true;
+            }
 
             return actions.every((action) => {
                 const permission = `${action} ${model}`;
+
                 return permissionsSet.has(permission);
             });
         },
@@ -117,7 +134,10 @@ export function usePermissions() {
     const getModelPermissions = useCallback(
         (model: string): string[] => {
             const modelPermissions = permissionsMap[model];
-            if (!modelPermissions) return [];
+
+            if (!modelPermissions) {
+                return [];
+            }
 
             return Object.keys(modelPermissions);
         },
@@ -133,10 +153,14 @@ export function usePermissions() {
             action: string,
             resource: ResourceInterface,
         ): boolean => {
-            if (!user) return false;
+            if (!user) {
+                return false;
+            }
 
             // Vérification permission de base
-            if (!canOnModel(model, action)) return false;
+            if (!canOnModel(model, action)) {
+                return false;
+            }
 
             // Vérification ownership
             const isOwner =
@@ -147,7 +171,10 @@ export function usePermissions() {
 
             // Permission spéciale pour ses propres ressources
             const ownPermission = `${action}:own:${model}`;
-            if (isOwner && permissionsSet.has(ownPermission)) return true;
+
+            if (isOwner && permissionsSet.has(ownPermission)) {
+                return true;
+            }
 
             return true;
         },
@@ -159,10 +186,14 @@ export function usePermissions() {
      */
     const isRole = useCallback(
         (role: string | string[]): boolean => {
-            if (!user) return false;
+            if (!user) {
+                return false;
+            }
+
             if (Array.isArray(role)) {
                 return role.some((r) => roles.has(r));
             }
+
             return roles.has(role);
         },
         [user, roles],
@@ -173,7 +204,10 @@ export function usePermissions() {
      */
     const hasAnyRole = useCallback(
         (roleList: string[]): boolean => {
-            if (!user) return false;
+            if (!user) {
+                return false;
+            }
+
             return roleList.some((role) => roles.has(role));
         },
         [user, roles],
@@ -273,18 +307,29 @@ export const createPermissionsHelper = (auth: Auth) => {
         user,
         isAuthenticated: !!user,
         can: (permission: string | string[]): boolean => {
-            if (!user) return false;
-            if (rolesSet.has('super_admin')) return true;
+            if (!user) {
+                return false;
+            }
+
+            if (rolesSet.has('super_admin')) {
+                return true;
+            }
+
             if (Array.isArray(permission)) {
                 return permission.some((p) => permissionsSet.has(p));
             }
+
             return permissionsSet.has(permission);
         },
         isRole: (role: string | string[]): boolean => {
-            if (!user) return false;
+            if (!user) {
+                return false;
+            }
+
             if (Array.isArray(role)) {
                 return role.some((r) => rolesSet.has(r));
             }
+
             return rolesSet.has(role);
         },
     };

@@ -27,6 +27,8 @@ class LigneCommandeResource extends Resource
 
     protected static ?string $cluster = CommandesCluster::class;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return LigneCommandeForm::configure($schema);

@@ -12,7 +12,6 @@ return new class extends Migration
     // {
     //     Schema::create('tickets', function (Blueprint $table) {
     //         $table->uuid('id')->primary();
-    //         $table->foreignUuid('tenant_id')->constrained()->cascadeOnDelete();
     //         $table->foreignUuid('client_id')->constrained()->cascadeOnDelete();
     //         $table->foreignUuid('user_id')->nullable()->constrained()->nullOnDelete();
     //         $table->string('categorie');
@@ -47,7 +46,6 @@ return new class extends Migration
 
     //     Schema::create('devis', function (Blueprint $table) {
     //         $table->uuid('id')->primary();
-    //         $table->foreignUuid('tenant_id')->constrained()->cascadeOnDelete();
     //         $table->foreignUuid('user_id')->nullable()->constrained()->nullOnDelete();
     //         $table->foreignUuid('client_id')->constrained()->cascadeOnDelete();
     //         $table->foreignUuid('adresse_facturation_id')->nullable()->constrained('adresses')->nullOnDelete();

@@ -32,10 +32,7 @@ export function ChartMonthlyPosts({ data }: { data: MonthlyPost[] }) {
                 <CardDescription>{new Date().getFullYear()}</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer
-                    config={chartConfig}
-                    className="h-[300px] w-full"
-                >
+                <ChartContainer config={chartConfig} className="h-75 w-full">
                     <LineChart data={data}>
                         <CartesianGrid vertical={false} />
                         <XAxis

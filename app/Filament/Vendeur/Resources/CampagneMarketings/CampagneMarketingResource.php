@@ -31,6 +31,8 @@ class CampagneMarketingResource extends Resource
 
     protected static ?int $navigationSort = 6;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return CampagneMarketingForm::configure($schema);

@@ -46,7 +46,7 @@ class CommentObserver
         }
 
         // Vérifier le nombre de liens
-        $linkCount = preg_match_all('/https?:\/\//', $content);
+        $linkCount = preg_match_all('/http?:\/\//', $content);
         if ($linkCount > config('comments.spam.max_links', 2)) {
             $comment->markAsSpam();
         }

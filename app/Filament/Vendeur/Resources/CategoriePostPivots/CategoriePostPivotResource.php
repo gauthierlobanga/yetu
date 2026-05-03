@@ -29,6 +29,8 @@ class CategoriePostPivotResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return CategoriePostPivotForm::configure($schema);

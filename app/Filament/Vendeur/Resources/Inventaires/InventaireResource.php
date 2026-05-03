@@ -27,6 +27,8 @@ class InventaireResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'reference';
 
+    protected static bool $isScopedToTenant = false;
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();

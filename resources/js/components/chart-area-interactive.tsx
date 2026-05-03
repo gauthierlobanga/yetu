@@ -1,11 +1,11 @@
 'use client';
 // resources/js/components/chart-area-interactive.tsx
 
-import * as React from 'react';
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 import { usePage } from '@inertiajs/react';
+import * as React from 'react';
+import { useCallback } from 'react';
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 
-import { useIsMobile } from '@/hooks/use-mobile';
 import {
     Card,
     CardAction,
@@ -18,7 +18,6 @@ import {
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
-    type ChartConfig,
 } from '@/components/ui/chart';
 import {
     Select,
@@ -28,6 +27,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Types
 interface ChartDataPoint {
@@ -59,8 +59,14 @@ export function ChartAreaInteractive({
 
     // NE PLUS GÉNÉRER DE DONNÉES MOCK - retourner un tableau vide si pas de données
     const chartData = React.useMemo(() => {
-        if (propChartData && propChartData.length > 0) return propChartData;
-        if (chartStats && chartStats.length > 0) return chartStats;
+        if (propChartData && propChartData.length > 0) {
+            return propChartData;
+        }
+
+        if (chartStats && chartStats.length > 0) {
+            return chartStats;
+        }
+
         // Retourner un tableau vide au lieu de générer des données factices
         return [];
     }, [propChartData, chartStats]);
@@ -73,13 +79,16 @@ export function ChartAreaInteractive({
 
     // Filtrer les données par période - utiliser la date réelle la plus récente
     const filteredData = React.useMemo(() => {
-        if (chartData.length === 0) return [];
+        if (chartData.length === 0) {
+            return [];
+        }
 
         // Trouver la date la plus récente dans les données
-        const dates = chartData.map(item => new Date(item.date).getTime());
+        const dates = chartData.map((item) => new Date(item.date).getTime());
         const maxDate = new Date(Math.max(...dates));
-        
+
         let daysToSubtract = 90;
+
         if (timeRange === '30d') {
             daysToSubtract = 30;
         } else if (timeRange === '7d') {
@@ -91,6 +100,7 @@ export function ChartAreaInteractive({
 
         return chartData.filter((item) => {
             const date = new Date(item.date);
+
             return date >= startDate;
         });
     }, [chartData, timeRange]);
@@ -100,6 +110,7 @@ export function ChartAreaInteractive({
         if (chartData.length === 0) {
             return { views: 0, likes: 0, comments: 0 };
         }
+
         return chartData.reduce(
             (acc, item) => ({
                 views: acc.views + (item.views || 0),
@@ -111,14 +122,15 @@ export function ChartAreaInteractive({
     }, [chartData]);
 
     // Obtenir le titre de la métrique
-    const getMetricTitle = (): string => {
+    const getMetricTitle = useCallback((): string => {
         const titles: Record<MetricType, string> = {
             views: 'Vues des articles',
             likes: "J'aime",
             comments: 'Commentaires',
         };
+
         return titles[selectedMetric];
-    };
+    });
 
     // Obtenir le total de la métrique sélectionnée
     const getMetricTotal = (): string => {
@@ -127,6 +139,7 @@ export function ChartAreaInteractive({
             likes: totals.likes,
             comments: totals.comments,
         };
+
         return totalMap[selectedMetric].toLocaleString();
     };
 
@@ -144,23 +157,26 @@ export function ChartAreaInteractive({
             likes: `Total des likes sur les ${days}`,
             comments: `Total des commentaires sur les ${days}`,
         };
+
         return descriptions[selectedMetric];
     };
 
     // Obtenir la couleur de la métrique
-    const getMetricColor = (): string => {
+    const getMetricColor = useCallback((): string => {
         const colors: Record<MetricType, string> = {
             views: 'var(--primary)',
             likes: '#eab308',
             comments: '#3b82f6',
         };
+
         return colors[selectedMetric];
-    };
+    });
 
     // Obtenir l'ID du dégradé
     const getGradientId = (): string => {
         const prefix =
             selectedMetric.charAt(0).toUpperCase() + selectedMetric.slice(1);
+
         return `fill${prefix}`;
     };
 
@@ -172,7 +188,7 @@ export function ChartAreaInteractive({
                 color: getMetricColor(),
             },
         }),
-        [selectedMetric],
+        [getMetricColor, getMetricTitle, selectedMetric],
     );
 
     // Données pour le graphique
@@ -190,15 +206,16 @@ export function ChartAreaInteractive({
                 <CardHeader>
                     <CardTitle>Statistiques</CardTitle>
                     <CardDescription>
-                        Aucune donnée disponible pour le moment.
-                        Commencez à publier des articles pour voir les statistiques.
+                        Aucune donnée disponible pour le moment. Commencez à
+                        publier des articles pour voir les statistiques.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex h-62.5 items-center justify-center">
                     <div className="text-center text-muted-foreground">
                         <p>Aucune statistique disponible</p>
                         <p className="text-sm">
-                            Les données apparaîtront une fois que vous aurez des articles publiés.
+                            Les données apparaîtront une fois que vous aurez des
+                            articles publiés.
                         </p>
                     </div>
                 </CardContent>
@@ -234,8 +251,9 @@ export function ChartAreaInteractive({
                                 type="single"
                                 value={selectedMetric}
                                 onValueChange={(value) => {
-                                    if (value)
+                                    if (value) {
                                         setSelectedMetric(value as MetricType);
+                                    }
                                 }}
                                 variant="outline"
                                 className="my-1 mr-2"
@@ -266,7 +284,9 @@ export function ChartAreaInteractive({
                             type="single"
                             value={timeRange}
                             onValueChange={(value) => {
-                                if (value) setTimeRange(value);
+                                if (value) {
+                                    setTimeRange(value);
+                                }
                             }}
                             variant="outline"
                             className="hidden *:data-[slot=toggle-group-item]:px-4! @[767px]/card:flex"
@@ -286,8 +306,9 @@ export function ChartAreaInteractive({
                         <Select
                             value={selectedMetric}
                             onValueChange={(value) => {
-                                if (value)
+                                if (value) {
                                     setSelectedMetric(value as MetricType);
+                                }
                             }}
                         >
                             <SelectTrigger
@@ -378,6 +399,7 @@ export function ChartAreaInteractive({
                             minTickGap={32}
                             tickFormatter={(value: string) => {
                                 const date = new Date(value);
+
                                 return date.toLocaleDateString('fr-FR', {
                                     month: 'short',
                                     day: 'numeric',
@@ -397,6 +419,7 @@ export function ChartAreaInteractive({
                                                 day: 'numeric',
                                             });
                                         }
+
                                         return label;
                                     }}
                                     indicator="dot"
@@ -407,9 +430,11 @@ export function ChartAreaInteractive({
                                             comments: 'Commentaires',
                                         };
                                         const nameKey = name as string;
+
                                         if (typeof value === 'number') {
                                             return `${value.toLocaleString()} ${labels[nameKey] || ''}`;
                                         }
+
                                         return `${value} ${labels[nameKey] || ''}`;
                                     }}
                                 />

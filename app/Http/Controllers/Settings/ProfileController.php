@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -35,7 +36,7 @@ class ProfileController extends Controller
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
 
-            if (\Illuminate\Support\Facades\Schema::hasColumn($request->user()->getTable(), 'email_verifie')) {
+            if (Schema::hasColumn($request->user()->getTable(), 'email_verifie')) {
                 $request->user()->email_verifie = false;
             }
         }

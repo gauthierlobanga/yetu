@@ -9,7 +9,7 @@ import { RegionSelector } from './RegionSelector';
 export function HeaderActions() {
     const { auth } = usePage().props;
 
-    const isCartPage = route().current('shop.cart.index');
+    const isCartPage = route().current('cart.index');
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Head, Link } from '@inertiajs/react';
-import MainLayout from '@/layouts/main-layout';
-import { Badge } from '@/components/ui/badge';
 import { BookOpenIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import MainLayout from '@/layouts/main-layout';
 
 export default function Privacy() {
     return (

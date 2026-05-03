@@ -1,8 +1,8 @@
 import { router } from '@inertiajs/react';
 import { Globe } from 'lucide-react';
 import { useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { ComboboxPopup } from '@/components/ecommerce/pays/SelectCountry';
+
+import { blogIndex } from '@/actions/App/Http/Controllers/Blog/BlogController';
 import { ComboboxWithGroupsAndSeparator } from '@/components/ecommerce/pays/Timezone';
 import { Button } from '@/components/ui/button';
 import {
@@ -111,12 +111,12 @@ const countries = [
     },
 ];
 
-const currencies: Currency[] = [
+const currencies = [
     { code: 'eur', name: 'Euro' },
     { code: 'usd', name: 'Dollar US' },
 ];
 
-const languages: Language[] = [
+const languages = [
     { code: 'fr', name: 'Français' },
     { code: 'en', name: 'Anglais' },
 ];
@@ -142,16 +142,16 @@ export function RegionSelector() {
             country.label.toLowerCase().includes(countrySearch.toLowerCase()),
     );
 
-    const filteredCurrencies = currencies.filter((currency) =>
+    const filteredCurrencies = currencies.filter((currency: Currency) =>
         currency.name.toLowerCase().includes(currencySearch.toLowerCase()),
     );
 
-    const filteredLanguages = languages.filter((language) =>
+    const filteredLanguages = languages.filter((language: Language) =>
         language.name.toLowerCase().includes(languageSearch.toLowerCase()),
     );
 
     const handleSubmit = () => {
-        router.get(route('blog.index'), {
+        router.get(blogIndex().url, {
             country: selectedCountry?.code,
             currency: selectedCurrency?.code,
             locale: selectedLanguage?.code,
@@ -186,7 +186,7 @@ export function RegionSelector() {
                         <label className="text-sm font-semibold">Pays</label>
                         <Combobox
                             items={filteredCountries}
-                            selectedValue={selectedCountry}
+                            value={selectedCountry}
                             onValueChange={(val) => setSelectedCountry(val)}
                             itemToStringValue={(item) => item?.label || ''}
                             inputValue={countrySearch}
@@ -229,7 +229,7 @@ export function RegionSelector() {
                         <label className="text-sm font-semibold">Devise</label>
                         <Combobox
                             items={filteredCurrencies}
-                            selectedValue={selectedCurrency}
+                            value={selectedCurrency}
                             onValueChange={(val) => setSelectedCurrency(val)}
                             itemToStringValue={(item) => item?.name || ''}
                             inputValue={currencySearch}
@@ -268,7 +268,7 @@ export function RegionSelector() {
                         <label className="text-sm font-semibold">Langue</label>
                         <Combobox
                             items={filteredLanguages}
-                            selectedValue={selectedLanguage}
+                            value={selectedLanguage}
                             onValueChange={(val) => setSelectedLanguage(val)}
                             itemToStringValue={(item) => item?.name || ''}
                             inputValue={languageSearch}

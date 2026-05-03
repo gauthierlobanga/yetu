@@ -1,9 +1,19 @@
 // resources/js/Pages/Shop/Categories/Index.tsx
 import { Head, Link, usePage } from '@inertiajs/react';
-import { motion, useInView } from 'framer-motion';
-import { ArrowRight, Package, Search, Sparkles } from 'lucide-react';
-import { useRef } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { motion, useInView, AnimatePresence } from 'framer-motion';
+import {
+    ArrowRight,
+    Package,
+    Search,
+    Sparkles,
+    ShoppingBag,
+    Grid3X3,
+    Tag,
+} from 'lucide-react';
+import { useRef, useState } from 'react';
 import MainLayout from '@/layouts/main-layout';
+import { home } from '@/routes';
 import type { PageProps, Category } from '@/types/ecommerce/products';
 
 interface Props extends PageProps {
@@ -15,15 +25,34 @@ export default function CategoriesIndex() {
     const { categories } = props;
     const headerRef = useRef(null);
     const isHeaderInView = useInView(headerRef, { once: true });
+    const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
     return (
         <MainLayout>
             <Head title="Toutes les catégories" />
 
-            {/* Hero Section */}
-            <section className="relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-secondary/5 py-16 md:py-24">
-                <div className="absolute top-0 -right-40 h-150 rounded-full bg-primary/5 blur-3xl" />
-                <div className="absolute -bottom-40 -left-40 h-150 rounded-full bg-secondary/5 blur-3xl" />
+            {/* Hero Section améliorée */}
+            <section className="relative overflow-hidden bg-linear-to-br from-primary/5 via-background to-secondary/5 py-14 md:py-18">
+                {/* Cercles décoratifs animés */}
+                <motion.div
+                    className="absolute -top-20 -right-20 h-96 w-96 rounded-full bg-primary/10 blur-3xl"
+                    animate={{ scale: [1, 1.2, 1], rotate: [0, 10, 0] }}
+                    transition={{
+                        duration: 12,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                    }}
+                />
+                <motion.div
+                    className="absolute -bottom-32 -left-32 h-128 w-lg rounded-full bg-secondary/5 blur-3xl"
+                    animate={{ scale: [1, 1.1, 1], rotate: [0, -10, 0] }}
+                    transition={{
+                        duration: 10,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                    }}
+                />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent" />
 
                 <div className="relative mx-auto max-w-7xl px-4 text-center">
                     <motion.div
@@ -32,24 +61,25 @@ export default function CategoriesIndex() {
                         animate={isHeaderInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: 0.6 }}
                     >
-                        <span className="inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-sm">
-                            Explorez par catégorie
+                        <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-sm">
+                            <Grid3X3 className="h-4 w-4" />
+                            {categories.length} catégories disponibles
                         </span>
-                        <h1 className="mt-6 font-heading text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-                            Trouvez exactement{' '}
+                        <h1 className="mt-6 font-heading text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl">
+                            Explorez nos{' '}
                             <span className="bg-linear-to-r from-primary to-secondary bg-clip-text text-transparent">
-                                ce que vous cherchez
+                                univers
                             </span>
                         </h1>
-                        <p className="mx-auto mt-4 max-w-2xl text-muted-foreground md:text-lg">
-                            Parcourez nos collections soigneusement organisées
-                            pour découvrir des produits d'exception.
+                        <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+                            Chaque catégorie a été pensée pour vous offrir une
+                            expérience unique. Laissez-vous guider.
                         </p>
                     </motion.div>
                 </div>
             </section>
 
-            {/* Section : Grille ou état vide */}
+            {/* Grille de catégories */}
             <section className="py-16">
                 <div className="mx-auto max-w-7xl px-4">
                     {categories.length > 0 ? (
@@ -61,50 +91,77 @@ export default function CategoriesIndex() {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true, margin: '-50px' }}
                                     transition={{
-                                        delay: index * 0.03,
-                                        duration: 0.5,
+                                        delay: index * 0.02,
+                                        duration: 0.4,
                                     }}
+                                    onMouseEnter={() =>
+                                        setHoveredCategory(category.slug)
+                                    }
+                                    onMouseLeave={() =>
+                                        setHoveredCategory(null)
+                                    }
                                 >
                                     <Link
                                         href={category.url}
-                                        className="group relative flex h-full flex-col overflow-hidden rounded-3xl bg-card shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+                                        className="group relative flex h-full flex-col overflow-hidden rounded-3xl bg-card shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl"
                                     >
-                                        {/* Image avec zoom */}
+                                        {/* Image avec effet parallaxe */}
                                         <div className="relative aspect-square overflow-hidden">
                                             <img
                                                 src={
                                                     category.image ||
-                                                    '/images/placeholder-category.jpg'
+                                                    '/storage/images/getting-business.jpg'
                                                 }
                                                 alt={category.nom}
-                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                 loading="lazy"
                                             />
-                                            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent" />
-                                        </div>
+                                            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
 
-                                        {/* Contenu */}
-                                        <div className="absolute right-0 bottom-0 left-0 p-5">
-                                            <h3 className="text-lg font-bold text-white drop-shadow-md">
-                                                {category.nom}
-                                            </h3>
-                                            <div className="mt-2 flex items-center gap-1 text-sm text-white/80">
-                                                <Package className="h-3.5 w-3.5" />
-                                                <span>
-                                                    {category.products_count ||
-                                                        0}{' '}
-                                                    produits
-                                                </span>
+                                            {/* Badge nombre de produits */}
+                                            <div className="absolute top-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-gray-900 shadow backdrop-blur-sm">
+                                                {category.products_count ?? 0}
                                             </div>
                                         </div>
 
-                                        {/* Overlay de survol */}
-                                        <div className="absolute inset-0 flex items-center justify-center bg-primary/15 opacity-0 backdrop-blur-sm transition-all duration-200 group-hover:opacity-100">
-                                            <span className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-primary shadow-lg">
-                                                Explorer
-                                                <ArrowRight className="h-4 w-4" />
-                                            </span>
+                                        {/* Contenu textuel */}
+                                        <div className="absolute right-0 bottom-0 left-0 p-4">
+                                            <h3 className="text-lg font-bold text-white drop-shadow-md">
+                                                {category.nom}
+                                            </h3>
+                                            <p className="mt-1 line-clamp-2 text-xs text-white/70">
+                                                {category.description ||
+                                                    'Découvrez notre sélection'}
+                                            </p>
                                         </div>
+
+                                        {/* Overlay de survol amélioré */}
+                                        <motion.div
+                                            className="absolute inset-0 flex items-center justify-center bg-primary/20 opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100"
+                                            initial={false}
+                                            animate={{
+                                                opacity:
+                                                    hoveredCategory ===
+                                                    category.slug
+                                                        ? 1
+                                                        : 0,
+                                            }}
+                                        >
+                                            <motion.span
+                                                initial={{ scale: 0.8 }}
+                                                animate={{
+                                                    scale:
+                                                        hoveredCategory ===
+                                                        category.slug
+                                                            ? 1
+                                                            : 0.8,
+                                                }}
+                                                className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-primary shadow-xl"
+                                            >
+                                                <Tag className="h-4 w-4" />
+                                                Explorer
+                                            </motion.span>
+                                        </motion.div>
                                     </Link>
                                 </motion.div>
                             ))}
@@ -142,7 +199,7 @@ export default function CategoriesIndex() {
 
                             <div className="flex flex-wrap justify-center gap-4">
                                 <Link
-                                    href={route('shop.products.index')}
+                                    href={route('product.index')}
                                     className="group inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30"
                                 >
                                     <Sparkles className="h-4 w-4" />
@@ -150,7 +207,7 @@ export default function CategoriesIndex() {
                                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                 </Link>
                                 <Link
-                                    href="#" //{accueil()} <-- correction ici
+                                    href={home()}
                                     className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-white/50 px-6 py-3 font-medium text-foreground backdrop-blur-sm transition-all hover:bg-white hover:shadow-md dark:bg-black/30 dark:hover:bg-black/50"
                                 >
                                     <Package className="h-4 w-4" />
@@ -159,6 +216,53 @@ export default function CategoriesIndex() {
                             </div>
                         </motion.div>
                     )}
+                </div>
+            </section>
+
+            {/* Section « Pourquoi choisir nos catégories » */}
+            <section className="border-t border-border/50 bg-muted/30 py-16">
+                <div className="mx-auto max-w-7xl px-4 text-center">
+                    <h2 className="text-3xl font-bold tracking-tight">
+                        Une navigation pensée pour vous
+                    </h2>
+                    <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="rounded-full bg-primary/10 p-4 text-primary">
+                                <Grid3X3 className="h-8 w-8" />
+                            </div>
+                            <h3 className="text-lg font-semibold">
+                                Catégories organisées
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                Trouvez facilement ce que vous cherchez grâce à
+                                notre arborescence claire.
+                            </p>
+                        </div>
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="rounded-full bg-primary/10 p-4 text-primary">
+                                <ShoppingBag className="h-8 w-8" />
+                            </div>
+                            <h3 className="text-lg font-semibold">
+                                Produits exclusifs
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                Chaque catégorie propose une sélection unique de
+                                produits artisanaux.
+                            </p>
+                        </div>
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="rounded-full bg-primary/10 p-4 text-primary">
+                                <Sparkles className="h-8 w-8" />
+                            </div>
+                            <h3 className="text-lg font-semibold">
+                                Nouveautés permanentes
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                                De nouvelles catégories et produits ajoutés
+                                régulièrement.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </MainLayout>

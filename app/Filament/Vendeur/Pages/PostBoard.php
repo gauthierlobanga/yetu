@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Vendeur\Vendeur\Pages;
+namespace App\Filament\Vendeur\Pages;
 
 use App\Models\Post;
 use Illuminate\Database\Eloquent\Builder;

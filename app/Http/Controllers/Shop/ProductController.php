@@ -44,7 +44,7 @@ class ProductController extends Controller
                     : back()->with('error', $message);
             }
 
-            $redirectUrl = route('shop.products.index', array_filter([
+            $redirectUrl = route('product.index', array_filter([
                 'search' => $result['query'],
                 'image_search' => 1,
             ]));
@@ -65,7 +65,7 @@ class ProductController extends Controller
         }
     }
 
-    public function index(Request $request)
+    public function productsIndex(Request $request)
     {
         $query = $this->buildProductQuery();
 
@@ -109,7 +109,7 @@ class ProductController extends Controller
             };
         }
 
-        $products = $query->paginate(24)->through(fn ($p) => $this->formatProduct($p));
+        $products = $query->paginate(48)->through(fn ($p) => $this->formatProduct($p));
 
         $categories = ProductCategory::active()->parents()->ordered()->get();
 
@@ -150,7 +150,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function show(Produit $produit)
+    public function productsShow(Produit $produit)
     {
         $produit->load(['media', 'brand', 'categories', 'variantes', 'approvedAvis.client']);
         $produit->incrementerVues();
@@ -163,7 +163,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function quickView(Produit $produit)
+    public function productsQuickView(Produit $produit)
     {
         return response()->json($this->formatProduct($produit, true));
     }
@@ -184,7 +184,7 @@ class ProductController extends Controller
             'note_moyenne' => (float) $product->note_moyenne,
             'nombre_avis' => $product->nombre_avis,
             'badge' => $product->is_new ? 'Nouveauté' : ($product->is_bestseller ? 'Best ' : null),
-            'url' => route('shop.products.show', $product->slug),
+            'url' => route('product.show', $product->slug),
         ];
 
         if ($withDetails) {

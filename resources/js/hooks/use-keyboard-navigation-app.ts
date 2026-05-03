@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 // resources/js/hooks/use-keyboard-navigation-app.ts
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -34,20 +35,29 @@ export function useKeyboardNavigation<T extends NavigableItem = NavigableItem>(
     const totalItems = useMemo(() => items.length, [items.length]);
 
     const moveDown = useCallback(() => {
-        if (totalItems === 0) return;
+        if (totalItems === 0) {
+            return;
+        }
+
         setSelectedIndex((prev) => (prev + 1) % totalItems);
         setSelectionOrigin("keyboard");
     }, [totalItems]);
 
     const moveUp = useCallback(() => {
-        if (totalItems === 0) return;
+        if (totalItems === 0) {
+            return;
+        }
+
         setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems);
         setSelectionOrigin("keyboard");
     }, [totalItems]);
 
     const hoverIndex = useCallback(
         (index: number) => {
-            if (index < 0 || index >= totalItems) return;
+            if (index < 0 || index >= totalItems) {
+                return;
+            }
+
             setSelectedIndex(index);
             setSelectionOrigin("pointer");
         },
@@ -56,7 +66,10 @@ export function useKeyboardNavigation<T extends NavigableItem = NavigableItem>(
 
     const activateSelection = useCallback((): boolean => {
         const item = items[selectedIndex];
-        if (!item) return false;
+
+        if (!item) {
+            return false;
+        }
 
         // 🔥 Extraire l'URL selon la structure de l'item
         let url: string | undefined;
@@ -80,8 +93,10 @@ export function useKeyboardNavigation<T extends NavigableItem = NavigableItem>(
             } else {
                 window.location.assign(url);
             }
+
             return true;
         }
+
         return false;
     }, [selectedIndex, items, openResultsInNewTab]);
 
@@ -89,6 +104,7 @@ export function useKeyboardNavigation<T extends NavigableItem = NavigableItem>(
         if (selectedIndex >= 0 && selectedIndex < items.length) {
             return items[selectedIndex];
         }
+
         return null;
     }, [selectedIndex, items]);
 

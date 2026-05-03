@@ -13,26 +13,6 @@ return new class extends Migration
     {
         $supportsFullText = Schema::getConnection()->getDriverName() !== 'sqlite';
 
-        Schema::table('tenants', function (Blueprint $table) {
-            $table->string('raison_sociale')->nullable()->unique();
-            $table->string('slug')->nullable()->unique();
-            $table->string('siret')->nullable();
-            $table->string('email')->nullable();
-            $table->string('telephone')->nullable();
-            $table->jsonb('configuration')->nullable();
-            $table->enum('statut', ['actif', 'inactif', 'en_attente', 'suspendu'])->default('actif');
-            $table->boolean('is_active')->default(true);
-            $table->timestamp('date_activation')->nullable();
-            $table->timestamp('date_expiration')->nullable();
-        });
-
-        // Schema::create('user_tenant', function (Blueprint $table) {
-        //     $table->foreignUuid('tenant_id')->constrained()->cascadeOnDelete();
-        //     $table->foreignUuid('user_id')->references('id')->on('users')->onDelete('cascade');
-        //     $table->timestamps();
-        //     $table->primary(['tenant_id', 'user_id']);
-        // });
-
         Schema::create('adresses', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('rue');
@@ -211,20 +191,16 @@ return new class extends Migration
             $table->boolean('is_featured')->default(true)->after('statut');
             $table->boolean('is_new')->default(true)->after('is_featured');
             $table->boolean('is_bestseller')->default(true)->after('is_new');
-
             $table->integer('views_count')->default(0)->after('is_bestseller');
             $table->integer('sold_count')->default(0)->after('views_count');
             $table->decimal('average_rating', 10, 2)->default(0)->after('sold_count');
             $table->integer('reviews_count')->default(0)->after('average_rating');
-
             $table->string('seo_title')->after('short_description');
             $table->string('seo_description')->after('seo_title');
             $table->jsonb('seo_keywords')->after('seo_description');
-
-            $table->timestamp('published_at')->after('seo_keywords');
-            $table->timestamp('scheduled_for')->after('published_at');
-
-            $table->timestamp('expires_at')->after('scheduled_for');
+            $table->timestamp('published_at')->nullable()->after('seo_keywords');
+            $table->timestamp('scheduled_for')->nullable()->after('published_at');
+            $table->timestamp('expires_at')->nullable()->after('scheduled_for');
             $table->timestamp('date_publication')->nullable();
             $table->timestamps();
             $table->softDeletes();

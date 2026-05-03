@@ -1,6 +1,6 @@
 // resources/js/components/search-my-input.tsx
 
-import { router } from '@inertiajs/react';
+import axios from 'axios';
 import {
     ArrowDown,
     ArrowUp,
@@ -10,14 +10,13 @@ import {
 } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation-app';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useDebounce } from '@/hooks/use-debounce';
-import axios from 'axios';
+import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation-app';
+import { cn } from '@/lib/utils';
 
 // Types
 export interface SearchResult {
@@ -52,6 +51,7 @@ export interface SearchConfig {
 // Search Button Component
 // ============================================================================
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface SearchButtonProps extends React.ComponentProps<typeof Button> {}
 
 export const SearchButton: React.FC<SearchButtonProps> = ({
@@ -64,9 +64,14 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
     const [isKPressed, setIsKPressed] = useState(false);
 
     useEffect(() => {
-        if (typeof navigator === 'undefined') return;
-        const isMac = /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
-        setModifierLabel(isMac ? '⌘' : 'Ctrl');
+        if (typeof navigator === 'undefined') {
+            return;
+        }
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setModifierLabel(
+            /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl',
+        );
     }, []);
 
     useEffect(() => {
@@ -74,6 +79,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
             if (event.metaKey || event.ctrlKey) {
                 setIsModifierPressed(true);
             }
+
             if (event.key.toLowerCase() === 'k') {
                 setIsKPressed(true);
             }
@@ -83,6 +89,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
             if (!event.metaKey && !event.ctrlKey) {
                 setIsModifierPressed(false);
             }
+
             if (event.key.toLowerCase() === 'k') {
                 setIsKPressed(false);
             }
@@ -176,7 +183,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
         };
     }, [isOpen, onClose]);
 
-    if (!isOpen) return null;
+    if (!isOpen) {
+        return null;
+    }
 
     return createPortal(
         <div
@@ -292,22 +301,27 @@ interface ResultsPanelProps {
 
 const ResultsPanel = memo(function ResultsPanel({
     results,
-    query,
     selectedIndex,
     onResultClick,
     onHoverIndex,
-    openResultsInNewTab = true,
 }: ResultsPanelProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [hoverEnabled, setHoverEnabled] = useState(false);
 
     useEffect(() => {
         const container = containerRef.current;
-        if (!container) return;
+
+        if (!container) {
+            return;
+        }
+
         const selectedEl = container.querySelector(
             '[aria-selected="true"]',
         ) as HTMLElement | null;
-        if (!selectedEl) return;
+
+        if (!selectedEl) {
+            return;
+        }
 
         const padding = 8;
         const cRect = container.getBoundingClientRect();
@@ -322,14 +336,22 @@ const ResultsPanel = memo(function ResultsPanel({
 
     useEffect(() => {
         const container = containerRef.current;
-        if (!container) return;
+
+        if (!container) {
+            return;
+        }
+
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setHoverEnabled(false);
+
         const enable = () => setHoverEnabled(true);
         container.addEventListener('pointermove', enable, { once: true });
+
         return () =>
             container.removeEventListener('pointermove', enable as any);
     }, []);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const renderResult = (result: SearchResult, isSelected: boolean) => {
         const isPost = result._type === 'post';
         const isCategory = result._type === 'category';
@@ -433,6 +455,7 @@ const ResultsPanel = memo(function ResultsPanel({
         >
             {results.map((result, idx) => {
                 const isSelected = selectedIndex === idx;
+
                 return (
                     <div
                         key={`${result._type}-${result.id}`}
@@ -446,7 +469,9 @@ const ResultsPanel = memo(function ResultsPanel({
                         aria-selected={isSelected}
                         onClick={() => onResultClick(result)}
                         onMouseEnter={() => {
-                            if (hoverEnabled) onHoverIndex?.(idx);
+                            if (hoverEnabled) {
+                                onHoverIndex?.(idx);
+                            }
                         }}
                     >
                         {renderResult(result, isSelected)}
@@ -548,6 +573,7 @@ function SearchModal({ onClose, config }: SearchModalProps) {
         const fetchResults = async () => {
             if (!debouncedQuery.trim() || debouncedQuery.trim().length < 2) {
                 setResults([]);
+
                 return;
             }
 
@@ -581,23 +607,25 @@ function SearchModal({ onClose, config }: SearchModalProps) {
         fetchResults();
     }, [debouncedQuery, config.hitsPerPage]);
 
-    const { selectedIndex, moveDown, moveUp, activateSelection, hoverIndex } =
+    const { selectedIndex, moveDown, moveUp, hoverIndex } =
         useKeyboardNavigation<SearchResult>(
             results,
             query,
             config.openResultsInNewTab ?? false,
         );
 
-    const handleResultClick = (result: SearchResult) => {
+    const handleResultClick = useCallback((result: SearchResult) => {
         const url = `/blog/${result.slug}`;
         window.location.href = url;
-    };
+    }, []);
 
     const handleActivateSelection = useCallback(() => {
         if (selectedIndex >= 0 && selectedIndex < results.length) {
             handleResultClick(results[selectedIndex]);
+
             return true;
         }
+
         return false;
     }, [selectedIndex, results, handleResultClick]);
 
@@ -675,6 +703,7 @@ export default function SearchExperience(config: SearchConfig) {
         };
 
         document.addEventListener('keydown', handleKeyDown);
+
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, []);
 

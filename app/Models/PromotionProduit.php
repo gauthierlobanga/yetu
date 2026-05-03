@@ -2,20 +2,17 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PromotionProduit extends Pivot
 {
-    use BelongsToTenant,SoftDeletes;
+    use SoftDeletes;
 
     protected $table = 'promotion_produit';
 
     protected $fillable = [
-        'tenant_id',
         'promotion_id',
         'produit_id',
         'valeur_specifique',

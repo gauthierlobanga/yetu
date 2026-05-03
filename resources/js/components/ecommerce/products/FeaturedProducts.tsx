@@ -97,7 +97,7 @@ export default function FeaturedProducts({
                         </p>
 
                         <Button variant="outline" className="mt-6" asChild>
-                            <Link href={route('shop.products.index')}>
+                            <Link href={route('product.index')}>
                                 Découvrir tous les produits
                             </Link>
                         </Button>

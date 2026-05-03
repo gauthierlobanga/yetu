@@ -1,14 +1,11 @@
+import { Link } from '@inertiajs/react';
+import { Bell, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { CanRole } from '@/core/permissions/Can';
 import SearchInputPage from '@/pages/searchInput';
 import AppearanceToogle from './appearance-toogle';
-import { Bell, ShieldCheck } from 'lucide-react';
-import { Link } from '@inertiajs/react';
-import { dashboard } from '@/routes';
-import { CanRole } from '@/core/permissions/Can';
-import { dashboard as admin } from '@/routes/filament/admin/pages/index';
-import { Badge } from './ui/badge';
 
 export function SiteHeader() {
     return (
@@ -21,7 +18,7 @@ export function SiteHeader() {
                     className="mx-2 data-[orientation=vertical]:h-4"
                 />
                 <Link
-                    href={dashboard()}
+                    href={route('vendor.dashboard')}
                     className="cursor-pointer text-base font-medium"
                 >
                     <h1>Dashboard</h1>
@@ -33,8 +30,12 @@ export function SiteHeader() {
                             <div className="relative flex items-center space-x-1 rounded-lg py-2.5">
                                 <ShieldCheck className="mr-2 h-8 w-8" />
                                 <Link
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="block w-full cursor-pointer text-sm"
-                                    href={admin()}
+                                    href={route(
+                                        'filament.admin.pages.dashboard',
+                                    )}
                                 >
                                     Admin
                                 </Link>

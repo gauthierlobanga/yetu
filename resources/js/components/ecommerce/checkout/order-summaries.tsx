@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
-export default function OrderSummary() {
+export default function OrderSummaryStatic() {
     const orderItems = [
         {
             id: 1,
@@ -117,7 +117,7 @@ export default function OrderSummary() {
                             <div className="space-y-6">
                                 {orderItems.map((item) => (
                                     <div key={item.id} className="flex gap-4">
-                                        <div className="size-16 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
+                                        <div className="size-16 shrink-0 overflow-hidden rounded-lg bg-muted">
                                             <img
                                                 src={item.image}
                                                 alt={item.name}
@@ -147,15 +147,15 @@ export default function OrderSummary() {
                             <div className="space-y-3 text-sm">
                                 <div className="flex justify-between text-muted-foreground">
                                     <span>Sub Total</span>
-                                    <span>${subtotal.toFixed(2)}</span>
+                                    <span>${Number(subtotal).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-muted-foreground">
                                     <span>Shipping</span>
-                                    <span>${shipping.toFixed(2)}</span>
+                                    <span>${Number(shipping).toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-muted-foreground">
                                     <span>Tax</span>
-                                    <span>${tax.toFixed(2)}</span>
+                                    <span>${Number(tax).toFixed(2)}</span>
                                 </div>
                             </div>
 
@@ -164,7 +164,7 @@ export default function OrderSummary() {
                             <div className="flex items-center justify-between">
                                 <span className="font-bold">Order Total</span>
                                 <span className="font-bold">
-                                    ${total.toFixed(2)}
+                                    ${Number(total).toFixed(2)}
                                 </span>
                             </div>
                         </CardContent>

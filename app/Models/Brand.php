@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,8 +18,8 @@ use Spatie\Sitemap\Tags\Url;
 
 class Brand extends Model implements HasMedia, Sitemapable
 {
-    use BelongsToTenant,HasUuids;
     use HasFactory, InteractsWithMedia, SoftDeletes;
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -40,7 +38,6 @@ class Brand extends Model implements HasMedia, Sitemapable
     protected $table = 'brands';
 
     protected $fillable = [
-        'tenant_id',
         'name',
         'slug',
         'description',
@@ -307,7 +304,7 @@ class Brand extends Model implements HasMedia, Sitemapable
      */
     // public function getUrlAttribute(): string
     // {
-    //     return route('shop.brands.show', $this->slug);
+    //     return route('brands.show', $this->slug);
     // }
 
     /**

@@ -1,5 +1,5 @@
 import { useForm, usePage } from '@inertiajs/react';
-import ShopAccountShell from '@/components/shop/ShopAccountShell';
+import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -112,7 +112,7 @@ export default function ShopReturnCreatePage() {
 
                     <Button
                         disabled={form.processing}
-                        onClick={() => form.post(route('shop.returns.store'))}
+                        onClick={() => form.post(route('returns.store'))}
                     >
                         Envoyer la demande
                     </Button>

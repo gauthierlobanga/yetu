@@ -25,6 +25,8 @@ class LigneRetourResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'retour_id';
 
+    protected static bool $isScopedToTenant = false;
+
     protected static ?string $cluster = CommandesCluster::class;
 
     public static function getNavigationBadge(): ?string

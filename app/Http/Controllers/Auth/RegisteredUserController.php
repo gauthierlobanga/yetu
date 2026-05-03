@@ -99,6 +99,6 @@ class RegisteredUserController extends Controller
 
     private function getTenantHomeUrl(Tenant $tenant): string
     {
-        return 'https://'.$tenant->slug.'.'.config('app.domain');
+        return 'http://'.$tenant->slug.'.'.config('app.domain');
     }
 }

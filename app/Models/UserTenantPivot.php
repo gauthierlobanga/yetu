@@ -5,11 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class UserTenantPivot extends Pivot
 {
-    use BelongsToTenant;
     use HasUuids;
 
     public $incrementing = false;

@@ -41,8 +41,17 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            // 'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
-            'url' => rtrim(env('APP_URL', 'https://plateform-ecommerces.test'), '/') . '/storage',
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // Le nouveau disque pour tes Tenants
+        'tenant' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'), // Stancl ajoutera le suffixe ici automatiquement
+            'url' => env('APP_URL').'/tenants', // On va créer cette route à l'étape 3
             'visibility' => 'public',
             'throw' => false,
             'report' => false,

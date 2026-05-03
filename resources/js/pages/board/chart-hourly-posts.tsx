@@ -37,10 +37,7 @@ export function ChartHourlyPosts({ data }: { data: HourlyPost[] }) {
                 <CardDescription>Quand publient vos auteurs ?</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer
-                    config={chartConfig}
-                    className="h-[300px] w-full"
-                >
+                <ChartContainer config={chartConfig} className="h-75 w-full">
                     <BarChart data={formattedData}>
                         <CartesianGrid vertical={false} />
                         <XAxis

@@ -1,11 +1,13 @@
 <?php
 
+use App\Models\Activity;
+
 return [
 
     /*
      * If set to false, no activities will be saved to the database.
      */
-    'enabled' => env('ACTIVITY_LOGGER_ENABLED', true),
+    'enabled' => env('ACTIVITY_LOGGER_ENABLED', false),
 
     /*
      * When the clean-command is executed, all recording activities older than
@@ -35,7 +37,7 @@ return [
      * It should implement the Spatie\Activitylog\Contracts\Activity interface
      * and extend Illuminate\Database\Eloquent\Model.
      */
-    'activity_model' => \Spatie\Activitylog\Models\Activity::class,
+    'activity_model' => Activity::class,
 
     /*
      * This is the name of the table that will be created by the migration and

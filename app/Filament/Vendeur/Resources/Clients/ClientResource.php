@@ -28,6 +28,8 @@ class ClientResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nom';
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return ClientForm::configure($schema);

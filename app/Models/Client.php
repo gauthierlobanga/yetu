@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,8 +16,8 @@ use Illuminate\Support\Facades\Cache;
 
 class Client extends Model
 {
-    use BelongsToTenant, HasUuids;
     use HasFactory, SoftDeletes;
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -38,7 +36,6 @@ class Client extends Model
     protected $table = 'clients';
 
     protected $fillable = [
-        'tenant_id',
         'user_id',
         'type',
         'civilite',
@@ -188,27 +185,6 @@ class Client extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function adresses(): MorphMany
-    {
-        return $this->morphMany(Adresse::class, 'addressable');
-    }
-
-    public function adresseFacturation()
-    {
-        return $this->adresses()
-            ->where('type', 'facturation')
-            ->where('est_defaut', true)
-            ->first();
-    }
-
-    public function adresseLivraison()
-    {
-        return $this->adresses()
-            ->where('type', 'livraison')
-            ->where('est_defaut', true)
-            ->first();
     }
 
     /**

@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use App\Contracts\Addressable;
 use App\Enums\AddressType;
 use Illuminate\Database\Eloquent\Attributes\Table;
@@ -18,10 +16,10 @@ use Spatie\Activitylog\Support\LogOptions;
 #[Table('adresses')]
 class Adresse extends Model
 {
-    use BelongsToTenant,HasUuids;
-
     /** @use HasFactory<AddressFactory> */
     use HasFactory, SoftDeletes;
+
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -38,7 +36,6 @@ class Adresse extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'tenant_id',
         'rue',
         'complement',
         'code_postal',

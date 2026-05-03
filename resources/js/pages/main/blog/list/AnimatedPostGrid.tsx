@@ -1,43 +1,4 @@
 // resources/js/components/blog/AnimatedPostGrid.tsx
-// 'use client';
-
-// import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
-// import type { ProcessedPost } from '@/types/posts/posts';
-
-// interface AnimatedPostGridProps {
-//     posts: ProcessedPost[];
-//     renderItem: (post: ProcessedPost) => React.ReactNode;
-// }
-
-// export function AnimatedPostGrid({ posts, renderItem }: AnimatedPostGridProps) {
-//     return (
-//         <LayoutGroup>
-//             <motion.div
-//                 layout
-//                 className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-//             >
-//                 <AnimatePresence mode="popLayout">
-//                     {posts.map((post) => (
-//                         <motion.div
-//                             key={post.id}
-//                             layout
-//                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
-//                             animate={{ opacity: 1, scale: 1, y: 0 }}
-//                             exit={{ opacity: 0, scale: 0.9, y: -20 }}
-//                             transition={{
-//                                 duration: 0.3,
-//                                 ease: [0.25, 0.1, 0.25, 1],
-//                             }}
-//                         >
-//                             {renderItem(post)}
-//                         </motion.div>
-//                     ))}
-//                 </AnimatePresence>
-//             </motion.div>
-//         </LayoutGroup>
-//     );
-// }
-// resources/js/components/blog/AnimatedPostGrid.tsx
 'use client';
 
 import { motion, AnimatePresence } from 'motion/react';

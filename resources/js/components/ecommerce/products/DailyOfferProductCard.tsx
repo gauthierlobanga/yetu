@@ -11,6 +11,21 @@ interface DailyOfferProductCardProps {
     showDiscountBadge?: boolean;
 }
 
+function getImageUrl(image: string | null | undefined): string {
+    if (!image) {
+        return '/storage/images/getting-business.jpg';
+    } // fallback
+
+    // Si l'image commence déjà par http ou /storage, on la garde telle quelle
+    if (image.startsWith('http') || image.startsWith('/storage')) {
+        return image;
+    }
+
+    // Sinon, on ajoute le préfixe storage
+    return `/storage/${image.replace(/^\//, '')}`;
+}
+
+// Utilisation
 export default function DailyOfferProductCard({
     product,
     showDiscountBadge = false,
@@ -21,7 +36,7 @@ export default function DailyOfferProductCard({
     const soldCount = Number(product.sold_count) || 0;
     const { addToCart } = useCart();
 
-    const imageUrl = product.image_principale || '/images/getting-business.jpg';
+    const imageUrl = getImageUrl(product.image_principale);
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -39,7 +54,7 @@ export default function DailyOfferProductCard({
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         onError={(e) => {
                             (e.target as HTMLImageElement).src =
-                                '/images/getting-business.jpg';
+                                '/storage/images/getting-business.jpg';
                         }}
                     />
                     {showDiscountBadge && product.reduction_pourcentage && (
@@ -68,21 +83,25 @@ export default function DailyOfferProductCard({
 
                     <div className="flex items-baseline gap-1.5">
                         <span className="text-lg font-medium">
-                            €{prixActuel.toFixed(2)}
+                            €{Number(prixActuel).toFixed(2)}
                         </span>
                         {product.est_en_promotion && prixTTC > prixActuel && (
                             <span className="text-xs text-muted-foreground line-through">
-                                €{prixTTC.toFixed(2)}
+                                €{Number(prixTTC).toFixed(2)}
                             </span>
                         )}
                     </div>
 
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                         <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                        <span className="ml-0.5">{noteMoyenne.toFixed(1)}</span>
+                        <span className="ml-0.5">
+                            {Number(noteMoyenne).toFixed(1)}
+                        </span>
                         <span className="mx-1">|</span>
                         <span>
-                            <span className="font-extrabold">{soldCount}</span>{' '}
+                            <span className="font-extrabold">
+                                {Number(soldCount).toFixed(0)}
+                            </span>{' '}
                             vendu(s)
                         </span>
                     </div>

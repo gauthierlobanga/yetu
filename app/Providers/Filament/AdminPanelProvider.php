@@ -2,7 +2,7 @@
 
 namespace App\Providers\Filament;
 
-use Awcodes\QuickCreate\QuickCreatePlugin;
+use App\Http\Middleware\EnsureUserIsSuperAdmin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -36,7 +36,6 @@ class AdminPanelProvider extends PanelProvider
             ->favicon(Storage::url('images/favicon.ico'))
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
-            ->domain(config('app.domain'))
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('16rem')
             ->tenant(null)
@@ -95,10 +94,10 @@ class AdminPanelProvider extends PanelProvider
                         'default' => 1,
                         'sm' => 2,
                     ]),
-                QuickCreatePlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnsureUserIsSuperAdmin::class,
             ])
             ->databaseNotifications()
             ->resourceCreatePageRedirect('index')

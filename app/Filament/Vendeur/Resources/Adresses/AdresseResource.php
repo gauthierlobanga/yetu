@@ -28,7 +28,7 @@ class AdresseResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'code_postal';
 
-    protected static ?string $tenantOwnershipRelationshipName = 'tenant';
+    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {
@@ -64,7 +64,7 @@ class AdresseResource extends Resource
             ]);
     }
 
-    public static function getNavigationBadge(): ?string
+     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
     }

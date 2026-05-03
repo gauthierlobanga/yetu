@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,10 +14,10 @@ use Illuminate\Support\Str;
 
 class Comment extends Model
 {
-    use BelongsToTenant,HasUuids;
-
     /** @use HasFactory<CommentFactory> */
     use HasFactory, SoftDeletes;
+
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -38,7 +36,6 @@ class Comment extends Model
     protected $table = 'comments';
 
     protected $fillable = [
-        'tenant_id',
         'commentable_type',
         'commentable_id',
         'user_id',
@@ -157,7 +154,7 @@ class Comment extends Model
 
         // Convertir les URLs en liens
         $content = preg_replace(
-            '/(https?:\/\/[^\s]+)/',
+            '/(http?:\/\/[^\s]+)/',
             '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">$1</a>',
             $content
         );

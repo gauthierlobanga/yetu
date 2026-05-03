@@ -19,14 +19,7 @@ class LigneCommandesTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.raison_sociale')
-                    ->label('Organisation')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable()
-                    ->badge()
-                    ->color('info')
-                    ->icon('heroicon-o-building-office'),
+
                 // Commande
                 TextColumn::make('commande.numero_commande')
                     ->label('N° Commande')

@@ -14,14 +14,7 @@ class CommentMentionsTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.raison_sociale')
-                    ->label('Organisation')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable()
-                    ->badge()
-                    ->color('info')
-                    ->icon('heroicon-o-building-office'),
+
                 TextColumn::make('comment.content')
                     ->searchable(),
                 TextColumn::make('user.name')

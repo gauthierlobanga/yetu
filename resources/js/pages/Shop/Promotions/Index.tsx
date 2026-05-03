@@ -65,11 +65,12 @@ export default function PromotionsIndexPage() {
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <CalendarRange className="h-4 w-4" />
                                     <span>
-                                        Jusqu’au {promotion.date_fin ?? 'sans limite'}
+                                        Jusqu’au{' '}
+                                        {promotion.date_fin ?? 'sans limite'}
                                     </span>
                                 </div>
                                 <Link
-                                    href={route('shop.products.index')}
+                                    href={route('product.index')}
                                     className="inline-flex text-sm font-medium text-primary hover:underline"
                                 >
                                     Explorer les produits

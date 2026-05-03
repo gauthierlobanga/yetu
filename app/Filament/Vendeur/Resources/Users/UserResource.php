@@ -2,7 +2,6 @@
 
 namespace App\Filament\Vendeur\Resources\Users;
 
-use AlizHarb\ActivityLog\RelationManagers\ActivitiesRelationManager;
 use App\Enums\NavigationGroup;
 use App\Filament\Vendeur\Resources\Users\Pages\CreateUser;
 use App\Filament\Vendeur\Resources\Users\Pages\EditUser;
@@ -29,7 +28,9 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static ?string $tenantOwnershipRelationshipName = 'tenants';
+    // protected static ?string $tenantOwnershipRelationshipName = 'tenants';
+
+    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {
@@ -44,7 +45,6 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ActivitiesRelationManager::class,
         ];
     }
 

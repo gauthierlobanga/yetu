@@ -2,14 +2,13 @@
 
 namespace App\Concerns;
 
+use App\Events\UserLoggedIn;
+use App\Events\UserPreferencesApplied;
 use App\ValueObjects\UserPreferences;
 use Illuminate\Support\Carbon;
 
 trait HasUserPreferences
 {
-    /**
-     * @var UserPreferences|null
-     */
     private ?UserPreferences $preferencesObject = null;
 
     /**
@@ -30,7 +29,7 @@ trait HasUserPreferences
      */
     public function getPreferencesObject(): UserPreferences
     {
-        if (!$this->preferencesObject) {
+        if (! $this->preferencesObject) {
             $this->preferencesObject = UserPreferences::fromArray(
                 json_decode($this->preferences ?? '{}', true)
             );
@@ -49,7 +48,7 @@ trait HasUserPreferences
         ]);
 
         // Dispatch event for analytics
-        event(new \App\Events\UserLoggedIn($this));
+        event(new UserLoggedIn($this));
     }
 
     /**
@@ -66,7 +65,7 @@ trait HasUserPreferences
      */
     public function getLastSeenAttribute(): ?string
     {
-        if (!$this->dernier_connexion) {
+        if (! $this->dernier_connexion) {
             return null;
         }
 
@@ -78,13 +77,14 @@ trait HasUserPreferences
      */
     public function getLastLoginInTimezoneAttribute(): ?string
     {
-        if (!$this->dernier_connexion) {
+        if (! $this->dernier_connexion) {
             return null;
         }
 
         $timezone = $this->getPreferencesObject()->getTimezone();
+
         return $this->dernier_connexion->setTimezone($timezone)->format(
-            $this->getPreferencesObject()->getDateFormat() . ' H:i'
+            $this->getPreferencesObject()->getDateFormat().' H:i'
         );
     }
 
@@ -146,7 +146,7 @@ trait HasUserPreferences
      */
     public function resetPreferences(): self
     {
-        $prefs = new UserPreferences();
+        $prefs = new UserPreferences;
         $this->preferences = json_encode($prefs->toArray());
         $this->save();
 
@@ -206,6 +206,6 @@ trait HasUserPreferences
         date_default_timezone_set($prefs->getTimezone());
 
         // Fire event for other systems
-        event(new \App\Events\UserPreferencesApplied($this));
+        event(new UserPreferencesApplied($this));
     }
 }

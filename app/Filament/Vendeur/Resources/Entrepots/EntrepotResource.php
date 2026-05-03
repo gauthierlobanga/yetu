@@ -27,6 +27,8 @@ class EntrepotResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nom';
 
+    protected static bool $isScopedToTenant = false;
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();

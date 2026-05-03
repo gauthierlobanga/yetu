@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import ShopAccountShell from '@/components/shop/ShopAccountShell';
+import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -45,8 +45,7 @@ export default function ShopReturnsIndexPage() {
                             <CardContent className="flex flex-col gap-4 p-4 md:flex-row md:items-center md:justify-between">
                                 <div className="space-y-1">
                                     <p className="font-medium">
-                                        {returnItem.commande
-                                            ?.numero_commande ??
+                                        {returnItem.commande?.numero_commande ??
                                             'Commande'}
                                     </p>
                                     <p className="text-sm text-muted-foreground">
@@ -60,7 +59,7 @@ export default function ShopReturnsIndexPage() {
                                     </Badge>
                                     <Link
                                         href={route(
-                                            'shop.returns.show',
+                                            'return.show',
                                             returnItem.id,
                                         )}
                                         className="text-sm font-medium text-primary hover:underline"

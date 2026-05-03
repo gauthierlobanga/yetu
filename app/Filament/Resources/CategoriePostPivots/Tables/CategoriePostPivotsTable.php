@@ -15,8 +15,6 @@ class CategoriePostPivotsTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.raison_sociale')
-                    ->searchable(),
                 TextColumn::make('post.title')
                     ->searchable(),
                 IconColumn::make('est_principale')

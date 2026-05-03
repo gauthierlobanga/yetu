@@ -8,9 +8,12 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Permission\PermissionRegistrar;
 use Stancl\JobPipeline\JobPipeline;
 use Stancl\Tenancy\Controllers\TenantAssetsController;
 use Stancl\Tenancy\Events;
+use Stancl\Tenancy\Events\TenancyEnded;
+use Stancl\Tenancy\Events\TenancyInitialized;
 use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
 use Stancl\Tenancy\Middleware;
@@ -30,17 +33,17 @@ class TenancyServiceProvider extends ServiceProvider
             // Tenant events
             Events\CreatingTenant::class => [],
             Events\TenantCreated::class => [
-                JobPipeline::make([
-                    Jobs\CreateDatabase::class,
-                    Jobs\MigrateDatabase::class,
-                    // Jobs\SeedDatabase::class,
+                // JobPipeline::make([
+                //     Jobs\CreateDatabase::class,
+                //     Jobs\MigrateDatabase::class,
+                //     // Jobs\SeedDatabase::class,
 
-                    // Your own jobs to prepare the tenant.
-                    // Provision API keys, create S3 buckets, anything you want!
+                //     // Your own jobs to prepare the tenant.
+                //     // Provision API keys, create S3 buckets, anything you want!
 
-                ])->send(function (Events\TenantCreated $event) {
-                    return $event->tenant;
-                })->shouldBeQueued(false), // `false` by default, but you probably want to make this `true` for production.
+                // ])->send(function (Events\TenantCreated $event) {
+                //     return $event->tenant;
+                // })->shouldBeQueued(false), // `false` by default, but you probably want to make this `true` for production.
             ],
             Events\SavingTenant::class => [],
             Events\TenantSaved::class => [],
@@ -74,17 +77,26 @@ class TenancyServiceProvider extends ServiceProvider
 
             // Tenancy events
             Events\InitializingTenancy::class => [],
-            Events\TenancyInitialized::class => [
+            TenancyInitialized::class => [
                 Listeners\BootstrapTenancy::class,
             ],
 
             Events\EndingTenancy::class => [],
-            Events\TenancyEnded::class => [
+            TenancyEnded::class => [
                 Listeners\RevertToCentralContext::class,
+                function (TenancyEnded $event) {
+                    $permissionRegistrar = app(PermissionRegistrar::class);
+                    $permissionRegistrar->cacheKey = 'spatie.permission.cache';
+                },
             ],
 
             Events\BootstrappingTenancy::class => [],
-            Events\TenancyBootstrapped::class => [],
+            Events\TenancyBootstrapped::class => [
+                function (Events\TenancyBootstrapped $event) {
+                    $permissionRegistrar = app(PermissionRegistrar::class);
+                    $permissionRegistrar->cacheKey = 'spatie.permission.cache.tenant.'.$event->tenancy->tenant->getTenantKey();
+                },
+            ],
             Events\RevertingToCentralContext::class => [],
             Events\RevertedToCentralContext::class => [],
 
@@ -110,7 +122,7 @@ class TenancyServiceProvider extends ServiceProvider
 
         $this->makeTenancyMiddlewareHighestPriority();
 
-        // TenantAssetsController::$tenancyMiddleware = InitializeTenancyByDomainOrSubdomain::class;
+        TenantAssetsController::$tenancyMiddleware = InitializeTenancyByDomain::class;
 
     }
 
@@ -136,6 +148,16 @@ class TenancyServiceProvider extends ServiceProvider
             }
         });
     }
+
+    // protected function mapRoutes()
+    // {
+    //     $this->app->booted(function () {
+    //         if (file_exists(base_path('routes/tenants/routes.php'))) {
+    //             Route::domain('{tenant}.'.config('app.domain'))
+    //                 ->group(base_path('routes/tenants/routes.php'));
+    //         }
+    //     });
+    // }
 
     protected function makeTenancyMiddlewareHighestPriority()
     {

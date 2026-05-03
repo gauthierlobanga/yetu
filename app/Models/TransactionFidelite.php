@@ -4,8 +4,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TransactionFidelite extends Model
 {
-    use BelongsToTenant,HasFactory;
+    use HasFactory;
     use HasUuids;
 
     /**
@@ -33,7 +31,6 @@ class TransactionFidelite extends Model
     protected $table = 'transaction_fidelites';
 
     protected $fillable = [
-        'tenant_id',
         'compte_fidelite_id',
         'type',
         'points',

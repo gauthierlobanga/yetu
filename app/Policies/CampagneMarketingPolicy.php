@@ -8,7 +8,7 @@ use App\Models\Marketing;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
-class MarketingPolicy
+class CampagneMarketingPolicy
 {
     use HandlesAuthorization;
 
@@ -17,7 +17,7 @@ class MarketingPolicy
      */
     public function before(AuthUser $user, string $ability): ?bool
     {
-        if ($user->hasRole('uzana')) {
+        if ($user->hasRole('super_admin')) {
             return true;
         }
 

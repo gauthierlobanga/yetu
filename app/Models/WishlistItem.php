@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WishlistItem extends Model
 {
-    use BelongsToTenant;
     use HasFactory;
     use HasUuids;
 
@@ -34,7 +31,6 @@ class WishlistItem extends Model
     protected $fillable = [
         'wishlist_id',
         'produit_id',
-        'tenant_id',
         'quantite',
         'note',
         'added_at',

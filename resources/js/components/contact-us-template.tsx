@@ -1,8 +1,10 @@
+use Filament\Forms\Components\Textarea;
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Check } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useForm, Controller } from 'react-hook-form';
-import * as z from 'zod';
+import type * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {

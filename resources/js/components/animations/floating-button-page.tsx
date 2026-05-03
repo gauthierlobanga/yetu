@@ -1,10 +1,6 @@
-import {
-    DribbbleIcon,
-    FacebookIcon,
-    LinkedinIcon,
-    PlusIcon,
-} from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 
+import { FaDribbble, FaFacebook, FaLinkedin } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { FloatingButton, FloatingButtonItem } from './floating-button';
@@ -13,17 +9,17 @@ export default function FloatingButtonComposant() {
     const items = [
         {
             id: 'facebook',
-            icon: <FacebookIcon />,
+            icon: <FaFacebook />,
             bgColor: 'bg-[#1877f2]',
         },
         {
             id: 'dribbble',
-            icon: <DribbbleIcon />,
+            icon: <FaDribbble />,
             bgColor: 'bg-[#ea4c89]',
         },
         {
             id: 'linkedin',
-            icon: <LinkedinIcon />,
+            icon: <FaLinkedin />,
             bgColor: 'bg-[#0a66c2]',
         },
     ];

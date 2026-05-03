@@ -31,14 +31,7 @@ class ProduitsTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.raison_sociale')
-                    ->label('Organisation')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable()
-                    ->badge()
-                    ->color('info')
-                    ->icon('heroicon-o-building-office'),
+
                 // Image principale
                 SpatieMediaLibraryImageColumn::make('image_principale')
                     ->label('Image')
@@ -354,7 +347,7 @@ class ProduitsTable
                     Action::make('preview')
                         ->label('Aperçu')
                         ->icon('heroicon-m-eye')
-                        // ->url(fn ($record) => route('shop.products.show', $record->slug))
+                        ->url(fn ($record) => route('product.show', $record->slug))
                         ->openUrlInNewTab()
                         ->color('gray'),
 

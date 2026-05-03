@@ -15,11 +15,18 @@ class CreateTenantsTable extends Migration
     {
         Schema::create('tenants', function (Blueprint $table) {
             $table->string('id')->primary();
-
-            // your custom columns may go here
-
-            $table->timestamps();
+            $table->string('raison_sociale')->nullable()->unique();
+            $table->string('slug')->nullable()->unique();
+            $table->string('email')->nullable();
+            $table->string('telephone')->nullable();
+            $table->enum('statut', ['actif', 'inactif', 'en_attente', 'suspendu'])->default('actif');
+            $table->boolean('is_active')->default(true);
+            $table->jsonb('configuration')->nullable();
             $table->jsonb('data')->nullable();
+            $table->timestamp('date_activation')->nullable();
+            $table->timestamp('date_expiration')->nullable();
+            $table->timestamps();
+
         });
     }
 

@@ -1,5 +1,5 @@
 import { router, useForm, usePage } from '@inertiajs/react';
-import ShopAccountShell from '@/components/shop/ShopAccountShell';
+import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -80,7 +80,7 @@ export default function ShopAddressesPage() {
                                             onClick={() =>
                                                 router.post(
                                                     route(
-                                                        'shop.addresses.default',
+                                                        'addresses.default',
                                                         address.id,
                                                     ),
                                                 )
@@ -94,7 +94,7 @@ export default function ShopAddressesPage() {
                                             onClick={() =>
                                                 router.delete(
                                                     route(
-                                                        'shop.addresses.destroy',
+                                                        'addresses.destroy',
                                                         address.id,
                                                     ),
                                                 )
@@ -188,9 +188,7 @@ export default function ShopAddressesPage() {
                         </div>
                         <Button
                             disabled={form.processing}
-                            onClick={() =>
-                                form.post(route('shop.addresses.store'))
-                            }
+                            onClick={() => form.post(route('addresses.store'))}
                         >
                             Enregistrer l’adresse
                         </Button>

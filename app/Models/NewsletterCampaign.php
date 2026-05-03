@@ -4,8 +4,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,8 +14,8 @@ use Illuminate\Support\Collection;
 
 class NewsletterCampaign extends Model
 {
-    use BelongsToTenant,HasUuids;
     use HasFactory, SoftDeletes;
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -36,7 +34,6 @@ class NewsletterCampaign extends Model
     protected $table = 'newsletter_campaigns';
 
     protected $fillable = [
-        'tenant_id',
         'titre',
         'sujet',
         'contenu_html',

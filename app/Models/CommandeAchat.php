@@ -4,8 +4,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,8 +13,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CommandeAchat extends Model
 {
-    use BelongsToTenant,HasUuids;
     use HasFactory, SoftDeletes;
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -33,7 +31,6 @@ class CommandeAchat extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'tenant_id',
         'fournisseur_id',
         'numero_commande',
         'date_commande',

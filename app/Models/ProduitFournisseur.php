@@ -2,18 +2,13 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class ProduitFournisseur extends Pivot
 {
-    use BelongsToTenant;
-
     protected $table = 'produit_fournisseur';
 
     protected $fillable = [
-        'tenant_id',
         'produit_id',
         'fournisseur_id',
         'prix_achat_ht',

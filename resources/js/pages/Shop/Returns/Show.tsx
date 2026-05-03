@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import ShopAccountShell from '@/components/shop/ShopAccountShell';
+import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -72,9 +72,7 @@ export default function ShopReturnShowPage() {
                                         'Etat non precise'}
                                 </p>
                             </div>
-                            <Badge variant="secondary">
-                                {line.montant} €
-                            </Badge>
+                            <Badge variant="secondary">{line.montant} €</Badge>
                         </div>
                     ))}
 

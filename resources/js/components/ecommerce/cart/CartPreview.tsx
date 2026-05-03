@@ -1,110 +1,10 @@
 // resources/js/components/ecommerce/cart/CartPreview.tsx
-// import { Link } from '@inertiajs/react';
-// import { ArrowRight } from 'lucide-react';
-// import { Button } from '@/components/ui/button';
-// import { Separator } from '@/components/ui/separator';
-// import { useCart } from '@/hooks/ecommerce/use-cart';
-
-// export default function CartPreview() {
-//     const { cart } = useCart();
-
-//     if (!cart || cart.items.length === 0) {
-//         return (
-//             <div className="w-80 p-4 text-center">
-//                 <p className="text-sm text-muted-foreground">
-//                     Votre panier est vide
-//                 </p>
-//                 <Button asChild size="sm" className="mt-3 w-full">
-//                     <Link href={route('shop.products.index')}>
-//                         Découvrir des produits
-//                     </Link>
-//                 </Button>
-//             </div>
-//         );
-//     }
-
-//     // Afficher au maximum 3 articles
-//     const previewItems = cart.items.slice(0, 3);
-//     const remainingCount = cart.items.length - previewItems.length;
-
-//     return (
-//         <div className="w-96 p-4">
-//             <div className="mb-3 flex items-center justify-between">
-//                 <h4 className="font-semibold">Panier ({cart.nb_articles})</h4>
-//                 <Link
-//                     href={route('shop.cart.index')}
-//                     className="text-xs text-primary hover:underline"
-//                 >
-//                     Voir tout
-//                 </Link>
-//             </div>
-
-//             <div className="max-h-80 space-y-3 overflow-y-auto">
-//                 {previewItems.map((item) => (
-//                     <div key={item.id} className="flex gap-3">
-//                         <img
-//                             src={item.produit.image || undefined}
-//                             alt={item.produit.nom}
-//                             className="h-14 w-14 rounded-md border object-cover"
-//                         />
-//                         <div className="flex-1 space-y-0.5">
-//                             <p className="line-clamp-1 text-xs font-medium">
-//                                 {item.produit.nom}
-//                             </p>
-//                             <p className="text-xs text-muted-foreground">
-//                                 {item.variante?.valeur || ''}
-//                             </p>
-//                             <div className="flex items-center justify-between">
-//                                 <span className="text-sm font-semibold">
-//                                     €{Number(item.prix_unitaire).toFixed(2)}
-//                                 </span>
-//                                 <span className="text-xs text-muted-foreground">
-//                                     x{item.quantite}
-//                                 </span>
-//                             </div>
-//                         </div>
-//                     </div>
-//                 ))}
-//             </div>
-
-//             {remainingCount > 0 && (
-//                 <p className="mt-2 text-xs text-muted-foreground">
-//                     + {remainingCount} autre{remainingCount > 1 ? 's' : ''}{' '}
-//                     article{remainingCount > 1 ? 's' : ''}
-//                 </p>
-//             )}
-
-//             <Separator className="my-3" />
-
-//             <div className="space-y-1 text-sm">
-//                 <div className="flex justify-between">
-//                     <span className="text-muted-foreground">Sous-total</span>
-//                     <span className="font-medium">
-//                         €{cart.sous_total.toFixed(2)}
-//                     </span>
-//                 </div>
-//                 {cart.total_remises > 0 && (
-//                     <div className="flex justify-between text-green-600">
-//                         <span>Économies</span>
-//                         <span>-€{cart.total_remises.toFixed(2)}</span>
-//                     </div>
-//                 )}
-//             </div>
-
-//             <Button asChild className="mt-4 w-full" size="sm">
-//                 <Link href={route('shop.cart.index')}>
-//                     Accéder au panier
-//                     <ArrowRight className="ml-2 h-4 w-4" />
-//                 </Link>
-//             </Button>
-//         </div>
-//     );
-// }
 import { Link } from '@inertiajs/react';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/ecommerce/use-cart';
+import { EmptyCartPreview } from './EmptyCartPreview';
 
 export default function CartPreview() {
     const { cart } = useCart();
@@ -112,17 +12,7 @@ export default function CartPreview() {
     if (!cart || cart.items.length === 0) {
         return (
             <div className="w-80 p-6">
-                <div className="flex flex-col items-center justify-center space-y-4 rounded-2xl border border-dashed border-gray-200 bg-gray-50/60 py-10 text-center dark:border-gray-800 dark:bg-gray-900/40">
-                    <div className="text-sm text-muted-foreground">
-                        Votre panier est vide
-                    </div>
-
-                    <Button asChild size="sm" className="rounded-full px-5">
-                        <Link href={route('shop.products.index')}>
-                            Explorer la boutique
-                        </Link>
-                    </Button>
-                </div>
+                <EmptyCartPreview />;
             </div>
         );
     }
@@ -131,7 +21,7 @@ export default function CartPreview() {
     const remainingCount = cart.items.length - previewItems.length;
 
     return (
-        <div className="w-[380px] rounded-3xl border border-gray-200/70 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-gray-800/60 dark:bg-gray-900/80">
+        <div className="w-95 border border-gray-200/70 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-gray-800/60 dark:bg-gray-900/80">
             {/* HEADER */}
             <div className="mb-4 flex items-center justify-between">
                 <div>
@@ -143,13 +33,6 @@ export default function CartPreview() {
                         {cart.nb_articles > 1 ? 's' : ''}
                     </p>
                 </div>
-
-                <Link
-                    href={route('shop.cart.index')}
-                    className="text-xs font-medium text-primary hover:underline"
-                >
-                    Voir tout
-                </Link>
             </div>
 
             {/* ITEMS */}
@@ -160,10 +43,7 @@ export default function CartPreview() {
                         className="group flex gap-3 rounded-xl p-2 transition hover:bg-gray-50 dark:hover:bg-gray-800/50"
                     >
                         <img
-                            src={
-                                item.produit.image ||
-                                '/images/placeholder-product.jpg'
-                            }
+                            src={item.produit.image || undefined}
                             alt={item.produit.nom}
                             className="h-14 w-14 rounded-lg border object-cover"
                         />
@@ -209,14 +89,14 @@ export default function CartPreview() {
                 <div className="flex justify-between">
                     <span className="text-muted-foreground">Sous-total</span>
                     <span className="font-semibold text-gray-900 dark:text-gray-100">
-                        €{cart.sous_total.toFixed(2)}
+                        €{Number(cart.sous_total).toFixed(2)}
                     </span>
                 </div>
 
                 {cart.total_remises > 0 && (
                     <div className="flex justify-between text-emerald-600">
                         <span>Économies</span>
-                        <span>-€{cart.total_remises.toFixed(2)}</span>
+                        <span>-€{Number(cart.total_remises).toFixed(2)}</span>
                     </div>
                 )}
             </div>
@@ -226,7 +106,7 @@ export default function CartPreview() {
                 asChild
                 className="mt-5 h-11 w-full rounded-xl text-sm font-medium"
             >
-                <Link href={route('shop.cart.index')}>
+                <Link href={route('cart.index')}>
                     Voir mon panier
                     <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

@@ -17,6 +17,7 @@ import {
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
 
+import ProductCardCompact from '@/components/ecommerce/products/ProductCardCompact';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -40,7 +41,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { useCart } from '@/hooks/ecommerce/use-cart';
+import { useCartItems } from '@/hooks/ecommerce/use-cart';
 import { SpinnerCard } from '@/pages/Shop/Products/Spinner';
 import type {
     PageProps,
@@ -48,7 +49,6 @@ import type {
     CalculatedTotals,
 } from '@/types/ecommerce/products';
 import { EmptyCart } from './EmptyCart';
-import ProductCardCompact from '@/components/ecommerce/products/ProductCardCompact';
 
 interface PagePropsWithRecommendations extends PageProps {
     recommendedProducts?: Product[];
@@ -63,7 +63,7 @@ export default function CartContent() {
         clearCart,
         applyCoupon,
         removeCoupon,
-    } = useCart();
+    } = useCartItems();
     const { props } = usePage<PagePropsWithRecommendations>();
     const recommendedProducts = props.recommendedProducts ?? [];
 
@@ -85,53 +85,66 @@ export default function CartContent() {
         isAfterMount.current = true;
     }, []);
     // Initialiser la sélection
+    const isInitialized = useRef(false);
+
+    const syncSelection = useCallback(
+        async (itemIds: number[]) => {
+            if (!cart) {
+                return;
+            }
+
+            try {
+                const response = await fetch(route('cart.calculate'), {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN':
+                            document
+                                .querySelector('meta[name="csrf-token"]')
+                                ?.getAttribute('content') ?? '',
+                    },
+                    body: JSON.stringify({ item_ids: itemIds }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    console.error('Erreur API détaillée:', errorData);
+
+                    throw new Error('Erreur API');
+                }
+
+                const data = await response.json();
+
+                if (data.calculatedTotals) {
+                    setCalculatedTotals(data.calculatedTotals);
+                }
+            } catch (error) {
+                console.error(error);
+                // ✅ Ne plus mettre à zéro, on garde l'état précédent
+            }
+        },
+        [cart],
+    );
     useEffect(() => {
         if (!cart) {
             return;
         }
 
-        setSelectedItems(cart.items.map((item) => item.id));
-    }, [cart]);
+        const ids = cart.items.map((item) => item.id);
+        setSelectedItems(ids);
 
-    const syncSelection = useCallback(
-        async (itemIds: number[], options?: { showSpinner?: boolean }) => {
-            if (!cart) {
-                return;
-            }
+        // 🔥 première sync propre
+        syncSelection(ids);
 
-            const shouldShowSpinner = options?.showSpinner ?? true;
-
-            if (shouldShowSpinner) {
-                setIsSyncing(true);
-            }
-
-            try {
-                const response = await fetch(route('shop.cart.calculate'), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: JSON.stringify({ item_ids: itemIds }),
-                });
-                const data = await response.json();
-                setCalculatedTotals(data.calculatedTotals);
-            } catch (error) {
-                console.error('Erreur de calcul', error);
-                toast.error('Impossible de recalculer les totaux');
-            } finally {
-                if (shouldShowSpinner) {
-                    setIsSyncing(false);
-                }
-            }
-        },
-        [cart],
-    );
+        isInitialized.current = true;
+    }, [cart, syncSelection]);
 
     // Synchroniser quand la sélection change (avec debounce)
     useEffect(() => {
-        // Ne rien faire au premier rendu ni si cart n'est pas chargé
-        if (!cart || !isAfterMount.current) {
+        if (!cart || selectedItems.length === 0) {
             return;
         }
 
@@ -140,7 +153,7 @@ export default function CartContent() {
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [selectedItems, cart, syncSelection]);
+    }, [cart, selectedItems, syncSelection]);
 
     if (!cart || cart.items.length === 0) {
         return <EmptyCart />;
@@ -169,8 +182,12 @@ export default function CartContent() {
         }
     };
 
+    if (!calculatedTotals) {
+        return null;
+    }
+
     const totalItems = cart.items.reduce((sum, item) => sum + item.quantite, 0);
-    const totalSavings = calculatedTotals.total_remises;
+    const totalSavings = calculatedTotals?.total_remises ?? 0;
 
     return (
         <div className="flex h-full flex-col">
@@ -247,7 +264,7 @@ export default function CartContent() {
                                             <img
                                                 src={
                                                     item.produit.image ||
-                                                    '/images/placeholder.jpg'
+                                                    undefined
                                                 }
                                                 alt={item.produit.nom}
                                                 className="h-24 w-24 rounded-xl border object-cover transition group-hover:scale-105"
@@ -282,7 +299,7 @@ export default function CartContent() {
 
                                                     <Link
                                                         href={route(
-                                                            'shop.products.show',
+                                                            'product.show',
                                                             item.produit.slug,
                                                         )}
                                                         className="line-clamp-2 text-sm leading-snug font-semibold hover:text-primary"
@@ -443,10 +460,7 @@ export default function CartContent() {
                                 {cart.items.slice(0, 4).map((item, i) => (
                                     <img
                                         key={i}
-                                        src={
-                                            item.produit.image ||
-                                            '/images/placeholder.jpg'
-                                        }
+                                        src={item.produit.image || undefined}
                                         className="h-12 w-12 rounded-lg border-2 border-white object-cover shadow-sm dark:border-gray-900"
                                     />
                                 ))}
@@ -466,7 +480,10 @@ export default function CartContent() {
                                     Sous-total de l'article
                                 </span>
                                 <span className="font-medium">
-                                    {calculatedTotals.sous_total.toFixed(2)} CDF
+                                    {Number(
+                                        calculatedTotals.sous_total,
+                                    ).toFixed(2)}{' '}
+                                    CDF
                                 </span>
                             </div>
 
@@ -475,9 +492,9 @@ export default function CartContent() {
                                     Frais d'expédition
                                 </span>
                                 <span className="font-medium">
-                                    {calculatedTotals.total_livraison.toFixed(
-                                        2,
-                                    )}{' '}
+                                    {Number(
+                                        calculatedTotals.total_livraison,
+                                    ).toFixed(2)}{' '}
                                     CDF
                                 </span>
                             </div>
@@ -487,9 +504,9 @@ export default function CartContent() {
                                     <span>Réduction sur les frais</span>
                                     <span>
                                         -
-                                        {calculatedTotals.total_remises.toFixed(
-                                            2,
-                                        )}{' '}
+                                        {Number(
+                                            calculatedTotals.total_remises,
+                                        ).toFixed(2)}{' '}
                                         CDF
                                     </span>
                                 </div>
@@ -500,7 +517,9 @@ export default function CartContent() {
                             <div className="flex justify-between text-lg font-bold">
                                 <span>Sous-total</span>
                                 <span>
-                                    {calculatedTotals.total_general.toFixed(2)}{' '}
+                                    {Number(
+                                        calculatedTotals.total_general,
+                                    ).toFixed(2)}{' '}
                                     CDF
                                 </span>
                             </div>
@@ -557,7 +576,7 @@ export default function CartContent() {
                             className="h-10 w-full cursor-pointer rounded-full bg-primary/95 text-base font-semibold hover:bg-primary"
                         >
                             <Link
-                                href={route('shop.checkout.index')}
+                                href={route('checkout.index')}
                                 className="flex items-center justify-center gap-2"
                             >
                                 {isSyncing ? (
@@ -647,7 +666,7 @@ export default function CartContent() {
                         <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-secondary/5 blur-[80px]" />
                     </div>
 
-                    {/* En-tête premium */}
+                    {/* En-tête */}
                     <div className="mb-8 flex items-end justify-between">
                         <div className="space-y-1">
                             <span className="text-xs font-semibold tracking-wider text-primary uppercase">
@@ -661,7 +680,7 @@ export default function CartContent() {
                             </p>
                         </div>
                         <Link
-                            href={route('shop.products.index')}
+                            href={route('product.index')}
                             className="group flex items-center gap-1 text-sm font-medium text-primary transition-all hover:gap-2 hover:text-primary/80"
                         >
                             Voir toutes les suggestions
@@ -669,49 +688,32 @@ export default function CartContent() {
                         </Link>
                     </div>
 
-                    {/* Carrousel avec navigation améliorée */}
-                    <div className="group/carousel relative">
-                        <Carousel
-                            opts={{
-                                align: 'start',
-                                loop: true,
-                                dragFree: true,
-                                containScroll: 'trimSnaps',
-                            }}
-                            className="w-full"
-                        >
-                            <CarouselContent className="-ml-3 md:-ml-4">
-                                {recommendedProducts.map((product) => (
-                                    <CarouselItem
-                                        key={product.id}
-                                        className="pl-3 sm:basis-1/2 md:basis-1/3 md:pl-4 lg:basis-1/4 xl:basis-1/5"
-                                    >
-                                        <ProductCardCompact product={product} />
-                                    </CarouselItem>
-                                ))}
-                            </CarouselContent>
-
-                            {/* Flèches de navigation glassmorphism */}
-                            <CarouselPrevious className="absolute top-1/2 -left-4 z-10 h-14 w-14 -translate-y-1/2 rounded-xs border-0 bg-background/70 opacity-0 shadow-xl backdrop-blur-md transition-all duration-300 group-hover/carousel:opacity-100 hover:bg-background/90 hover:shadow-2xl md:-left-6" />
-                            <CarouselNext className="absolute top-1/2 -right-4 z-10 h-14 w-14 -translate-y-1/2 rounded-xs border-0 bg-background/70 opacity-0 shadow-xl backdrop-blur-md transition-all duration-300 group-hover/carousel:opacity-100 hover:bg-background/90 hover:shadow-2xl md:-right-6" />
-                        </Carousel>
-
-                        {/* Indicateur de défilement (optionnel) */}
-                        <div className="mt-4 flex justify-center">
-                            <div className="flex gap-1.5">
-                                {Array.from({
-                                    length: Math.ceil(
-                                        recommendedProducts.length / 5,
-                                    ),
-                                }).map((_, i) => (
-                                    <div
-                                        key={i}
-                                        className="h-1.5 w-6 rounded-full bg-muted transition-all"
-                                    />
-                                ))}
-                            </div>
-                        </div>
+                    {/* Grille de produits (4 colonnes) */}
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
+                        {recommendedProducts.slice(0, 8).map((product) => (
+                            <motion.div
+                                key={product.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <ProductCardCompact product={product} />
+                            </motion.div>
+                        ))}
                     </div>
+
+                    {/* Bouton "Voir plus" si plus de 8 produits */}
+                    {recommendedProducts.length > 8 && (
+                        <div className="mt-6 text-center">
+                            <Button variant="outline" asChild>
+                                <Link href={route('product.index')}>
+                                    Voir plus de recommandations
+                                    <ChevronRight className="ml-2 h-4 w-4" />
+                                </Link>
+                            </Button>
+                        </div>
+                    )}
 
                     {/* Bannière promotionnelle (optionnelle) */}
                     <div className="mt-10 overflow-hidden rounded-2xl bg-linear-to-r from-primary/10 via-secondary/5 to-primary/10 p-5">
@@ -726,7 +728,7 @@ export default function CartContent() {
                                 </p>
                             </div>
                             <Button variant="link" size="sm" asChild>
-                                <Link href={route('shop.promotions.index')}>
+                                <Link href={route('promotions.index')}>
                                     En savoir plus
                                 </Link>
                             </Button>

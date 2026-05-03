@@ -139,9 +139,9 @@ export default function ContactPage({
         message: '',
     });
 
-    const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    function handleSubmit(event: FormEvent<HTMLFormElement>): void {
         event.preventDefault();
-        post(route('contact.store'), {
+        post(route('page.contact.store'), {
             preserveScroll: true,
             showProgress: false,
             onSuccess: () => {
@@ -152,7 +152,7 @@ export default function ContactPage({
                 toast.error('Veuillez corriger les erreurs du formulaire.');
             },
         });
-    };
+    }
 
     const SelectedCategoryIcon = categoryDetails[data.categorie]?.icon || Globe;
 

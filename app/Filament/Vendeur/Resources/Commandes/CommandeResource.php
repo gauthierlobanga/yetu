@@ -33,6 +33,8 @@ class CommandeResource extends Resource
 
     protected static ?string $cluster = CommandesCluster::class;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return CommandeForm::configure($schema);
@@ -68,7 +70,7 @@ class CommandeResource extends Resource
             ]);
     }
 
-    public static function getNavigationBadge(): ?string
+     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
     }

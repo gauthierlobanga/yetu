@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Lock, ShieldCheck } from 'lucide-react';
-import ShopAccountShell from '@/components/shop/ShopAccountShell';
+import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -50,7 +50,7 @@ export default function PaymentPayPage() {
                     <div className="flex flex-wrap gap-3">
                         <Button asChild>
                             <Link
-                                href={route('shop.payment.callback', {
+                                href={route('payment.callback', {
                                     commande_id: commande.id,
                                 })}
                             >
@@ -58,9 +58,7 @@ export default function PaymentPayPage() {
                             </Link>
                         </Button>
                         <Button variant="outline" asChild>
-                            <Link href={route('shop.checkout.cancel')}>
-                                Annuler
-                            </Link>
+                            <Link href={route('checkout.cancel')}>Annuler</Link>
                         </Button>
                     </div>
                 </CardContent>

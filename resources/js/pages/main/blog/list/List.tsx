@@ -1,3 +1,4 @@
+/* eslint-disable import/order */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Head, Link, router } from '@inertiajs/react';
@@ -57,16 +58,16 @@ import { Separator } from '@/components/ui/separator';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import MainLayout from '@/layouts/main-layout';
-import { show } from '@/routes/blog';
 import type { BreadcrumbItem } from '@/types';
 import type { Category } from '@/types/posts/category';
 import type { Post, PostsResponse } from '@/types/posts/posts';
 import { AnimatedPostGrid } from './AnimatedPostGrid';
+import blog from '../../../../routes/blog';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Blog',
-        href: route('blog.index'),
+        href: blog.index().url,
     },
 ];
 
@@ -313,7 +314,7 @@ export default function List({
 
             previousFiltersRef.current = filterKey;
 
-            router.get(route('blog.index'), params as any, {
+            router.get(blog.index().url, params as any, {
                 async: true,
                 preserveState: true,
                 preserveScroll: true,
@@ -494,7 +495,7 @@ export default function List({
     }, []);
 
     const PostCard = ({ post }: { post: ProcessedPost }) => (
-        <Link href={show(post.slug)} className="group block h-full">
+        <Link href={blog.show(post.slug)} className="group block h-full">
             <Card className="h-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
                 {/* Image */}
                 <div className="relative overflow-hidden">

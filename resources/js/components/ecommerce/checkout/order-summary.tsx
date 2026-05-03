@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface OrderSummaryProps {
-    subtotal: string;
+    subtotal: number;
     discount: string;
     delivery: string;
     total: string;
@@ -26,7 +26,9 @@ const OrderSummary = ({
                     <div className="space-y-3 border-t border-border pt-4 text-sm">
                         <div className="flex items-center justify-between">
                             <span className="">Subtotal</span>
-                            <span className="font-medium">{subtotal}</span>
+                            <span className="font-medium">
+                                {Number(subtotal).toFixed(2)}
+                            </span>
                         </div>
                         <div className="flex items-center justify-between">
                             <span className="">Discount</span>

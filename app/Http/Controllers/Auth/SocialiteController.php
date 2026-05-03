@@ -9,12 +9,12 @@ use Laravel\Socialite\Facades\Socialite;
 
 class SocialiteController extends Controller
 {
-    public function redirect($provider)
+    public function socialiteShopRedirect($provider)
     {
         return Socialite::driver($provider)->redirect();
     }
 
-    public function callback($provider)
+    public function socialiteShopCallback($provider)
     {
         try {
             $socialUser = Socialite::driver($provider)->user();
@@ -47,6 +47,6 @@ class SocialiteController extends Controller
 
         Auth::login($user);
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('dashboard.index', absolute: false));
     }
 }

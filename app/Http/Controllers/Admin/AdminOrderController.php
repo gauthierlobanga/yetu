@@ -12,7 +12,7 @@ class AdminOrderController extends Controller
     /**
      * Génère une facture PDF pour une commande.
      */
-    public function invoice(Commande $commande): Response
+    public function adminOrdersInvoice(Commande $commande): Response
     {
         // Charger les relations nécessaires
         $commande->load([
@@ -27,11 +27,11 @@ class AdminOrderController extends Controller
             'commande' => $commande,
             'company' => [
                 'name' => config('app.name'),
-                'address' => config('shop.company_address', 'Votre adresse'),
-                'email' => config('shop.company_email', 'contact@example.com'),
-                'phone' => config('shop.company_phone', '+33 1 23 45 67 89'),
-                'siret' => config('shop.company_siret', '123 456 789 00012'),
-                'tva' => config('shop.company_tva', 'FR12345678900'),
+                'address' => config('company_address', 'Votre adresse'),
+                'email' => config('company_email', 'contact@example.com'),
+                'phone' => config('company_phone', '+33 1 23 45 67 89'),
+                'siret' => config('company_siret', '123 456 789 00012'),
+                'tva' => config('company_tva', 'FR12345678900'),
             ],
         ]);
 

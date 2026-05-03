@@ -42,8 +42,10 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, toUrl } from '@/lib/utils';
 import SearchInput from '@/pages/searchInput';
-import { dashboard } from '@/routes';
-import { index } from '@/routes/blog';
+import { home } from '@/routes';
+import blog from '@/routes/blog';
+import page from '@/routes/page';
+import product from '@/routes/product';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -53,34 +55,34 @@ type Props = {
 const mainNavItems: NavItem[] = [
     {
         title: 'Accueil',
-        href: route('nmarket.accueil'),
+        href: home(),
     },
     {
         title: 'Produits',
-        href: route('contact.index'),
+        href: product.index().url,
     },
     {
         title: 'Services',
-        href: route('contact.index'),
+        href: '',
     },
     {
         title: 'Blog',
-        href: index(),
+        href: blog.index().url,
     },
     {
         title: 'About',
-        href: route('nmarket.about'),
+        href: page.about().url,
     },
     {
         title: 'Contact',
-        href: route('contact.index'),
+        href: page.contact().url,
     },
 ];
 
 const rightNavItems: NavItem[] = [
     {
         title: 'Aide',
-        href: route('nmarket.help'),
+        href: page.help().url,
         icon: Folder,
     },
 ];
@@ -105,7 +107,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
         const url = String(user.avatar_url);
 
-        return url.startsWith('https') || url.startsWith('/') ? url : undefined;
+        return url.startsWith('http') || url.startsWith('/') ? url : undefined;
     })();
 
     // Sécuriser le nom
@@ -180,7 +182,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
                     {/* Logo de l'application */}
                     <Link
-                        href="#" //{accueil()}
+                        href={home()}
                         prefetch
                         className="flex items-center space-x-2"
                     >

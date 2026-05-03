@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Commande;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
@@ -22,17 +21,16 @@ class CheckoutController extends Controller
     /**
      * Affiche la page de checkout avec le récapitulatif du panier.
      */
-    public function index(Request $request)
+    public function checkoutIndex(Request $request)
     {
         $cart = $this->cartController->getCart($request);
 
         if ($cart->est_vide) {
-            return redirect()->route('shop.cart.index')
-                ->with('error', 'Votre panier est vide.');
+            return redirect()->route('cart.index')->with('error', 'Votre panier est vide.');
         }
 
-        $client = FacadesAuth::user()->client ?? null;
-        $addresses = $client ? $client->adresses()->get() : collect();
+        // Récupérer les adresses de l'utilisateur connecté
+        $addresses = Auth::user()?->adresses()->get() ?? collect();
 
         return Inertia::render('Shop/Checkout/Index', [
             'cart' => $this->cartController->formatCart($cart),
@@ -43,7 +41,7 @@ class CheckoutController extends Controller
     /**
      * Traite la commande : vérifie le stock, convertit le panier en commande et décrémente les stocks.
      */
-    public function process(Request $request)
+    public function checkoutProcess(Request $request)
     {
         $validated = $request->validate([
             'adresse_facturation_id' => 'required|exists:adresses,id',
@@ -85,7 +83,7 @@ class CheckoutController extends Controller
                 }
             }
 
-            return redirect()->route('shop.payment.pay', $commande);
+            return redirect()->route('payment.pay', $commande);
         } catch (\Exception $e) {
             Log::error('Erreur lors de la création de la commande : '.$e->getMessage());
 
@@ -98,7 +96,7 @@ class CheckoutController extends Controller
     /**
      * Page de succès après paiement.
      */
-    public function success(Commande $commande)
+    public function checkoutSuccess(Commande $commande)
     {
         // Vérifier que l'utilisateur est bien le propriétaire de la commande
         if ($commande->client_id !== optional(Auth::user()->client)->id) {
@@ -113,9 +111,9 @@ class CheckoutController extends Controller
     /**
      * Page d'annulation du paiement.
      */
-    public function cancel()
+    public function checkoutCancel()
     {
-        return redirect()->route('shop.cart.index')
+        return redirect()->route('cart.index')
             ->with('info', 'Le paiement a été annulé. Vous pouvez réessayer quand vous le souhaitez.');
     }
 }

@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Head, Link } from '@inertiajs/react';
-import MainLayout from '@/layouts/main-layout';
-import type { BreadcrumbItem } from '@/types';
 import { BookOpenIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import MainLayout from '@/layouts/main-layout';
 
 export default function Terms() {
     return (

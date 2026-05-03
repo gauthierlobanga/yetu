@@ -33,7 +33,7 @@ class ListUsers extends ListRecords
                 ->iconPosition(IconPosition::Before),
             // Tous les Users
             'Actif' => Tab::make('Actif')
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_active', true))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('is_active', true))
                 ->excludeQueryWhenResolvingRecord()
                 ->badge(User::query()->where('is_active', true)->count())
                 ->deferBadge()
@@ -47,7 +47,7 @@ class ListUsers extends ListRecords
                 ->badgeColor('danger')
                 ->icon('heroicon-m-user-group')
                 ->iconPosition(IconPosition::Before)
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('is_active', false))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('is_active', false))
                 ->excludeQueryWhenResolvingRecord(),
 
             // Séparateur visuel (optionnel)
@@ -61,7 +61,7 @@ class ListUsers extends ListRecords
                 ->deferBadge()
                 ->icon('heroicon-m-calendar')
                 ->iconPosition(IconPosition::Before)
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]))
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]))
                 ->excludeQueryWhenResolvingRecord(),
 
             // Users du mois dernier
@@ -71,7 +71,7 @@ class ListUsers extends ListRecords
                 ->deferBadge()
                 ->icon('heroicon-m-calendar-days')
                 ->iconPosition(IconPosition::Before)
-                ->modifyQueryUsing(fn(Builder $query) => $query->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()]))
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()]))
                 ->excludeQueryWhenResolvingRecord(),
 
             // Users des 30 derniers jours
@@ -81,12 +81,12 @@ class ListUsers extends ListRecords
                 ->deferBadge()
                 ->icon('heroicon-m-calendar')
                 ->iconPosition(IconPosition::Before)
-                ->modifyQueryUsing(fn(Builder $query) => $query->where('created_at', '>=', now()->subDays(30)))
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('created_at', '>=', now()->subDays(30)))
                 ->excludeQueryWhenResolvingRecord(),
         ];
     }
 
-    public function getDefaultActiveTab(): string | int | null
+    public function getDefaultActiveTab(): string|int|null
     {
         return 'Actif';
     }

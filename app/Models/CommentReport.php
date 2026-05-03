@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CommentReport extends Model
 {
-    use BelongsToTenant,HasFactory;
+    use HasFactory;
     use HasUuids;
 
     /**
@@ -31,7 +29,6 @@ class CommentReport extends Model
     protected $table = 'comment_reports';
 
     protected $fillable = [
-        'tenant_id',
         'comment_id',
         'user_id',
         'reason',

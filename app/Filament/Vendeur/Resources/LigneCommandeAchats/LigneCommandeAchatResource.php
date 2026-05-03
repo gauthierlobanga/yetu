@@ -29,6 +29,8 @@ class LigneCommandeAchatResource extends Resource
 
     protected static ?string $navigationLabel = 'Ligne Achats';
 
+    protected static bool $isScopedToTenant = false;
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();

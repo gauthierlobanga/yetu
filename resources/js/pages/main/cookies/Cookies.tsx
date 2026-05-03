@@ -1,11 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
 import MainLayout from '@/layouts/main-layout';
+import blog from '@/routes/blog';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Posts',
-        href: route('post.list'),
+        title: 'Blog',
+        href: blog.index().url,
     },
 ];
 

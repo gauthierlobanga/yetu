@@ -26,7 +26,7 @@ class AvisClientResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Shop;
 
-    protected static ?string $tenantOwnershipRelationshipName = 'tenant';
+    protected static bool $isScopedToTenant = false;
 
     protected static ?int $navigationSort = 9;
 
@@ -66,7 +66,7 @@ class AvisClientResource extends Resource
             ]);
     }
 
-    public static function getNavigationBadge(): ?string
+     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
     }

@@ -31,9 +31,9 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
-import { list } from '@/routes/post';
+import dashboard from '@/routes/dashboard';
 import { edit } from '@/routes/profile';
+import vendor from '@/routes/vendor';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
 import { NavFooter } from './nav-footer';
@@ -41,13 +41,13 @@ import { NavFooter } from './nav-footer';
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
-        href: dashboard(),
+        href: dashboard.index().url,
         icon: LayoutGrid,
     },
     {
-        title: 'Posts',
-        href: list(),
-        icon: IconListDetails,
+        title: 'Information boutique ',
+        href: vendor.dashboard().url,
+        icon: LayoutGrid,
     },
 ];
 
@@ -56,11 +56,6 @@ const footerNavItems: NavItem[] = [
         title: 'Settings',
         href: edit(),
         icon: IconSettings,
-    },
-    {
-        title: 'Get Help',
-        href: '#',
-        icon: IconHelp,
     },
 ];
 
@@ -74,7 +69,7 @@ export function AppSidebar() {
                             asChild
                             className="data-[slot=sidebar-menu-button]:p-1.5!"
                         >
-                            <Link href={dashboard()} prefetch>
+                            <Link href={dashboard.index()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

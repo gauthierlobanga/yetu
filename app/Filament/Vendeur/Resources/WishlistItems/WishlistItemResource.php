@@ -27,6 +27,8 @@ class WishlistItemResource extends Resource
 
     protected static ?string $cluster = WishlistsCluster::class;
 
+    protected static bool $isScopedToTenant = false;
+
     public static function form(Schema $schema): Schema
     {
         return WishlistItemForm::configure($schema);

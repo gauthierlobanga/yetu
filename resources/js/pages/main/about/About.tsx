@@ -61,7 +61,7 @@ export default function About() {
 
     return (
         <MainLayout>
-            <Head title="À propos de Nmarket" />
+            <Head title="À propos de shop" />
 
             {/* HERO SECTION – IMMERSIVE */}
             <section className="relative overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-28">
@@ -92,7 +92,7 @@ export default function About() {
                         </h1>
 
                         <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-                            Nmarket est né d'une vision simple : créer une
+                            shop est né d'une vision simple : créer une
                             plateforme où qualité, confiance et innovation se
                             rencontrent pour offrir une expérience d'achat
                             exceptionnelle.
@@ -104,7 +104,7 @@ export default function About() {
                                 className="gap-2 shadow-lg"
                                 asChild
                             >
-                                <Link href={route('shop.products.index')}>
+                                <Link href={route('product.index')}>
                                     Découvrir nos produits
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
@@ -349,7 +349,7 @@ export default function About() {
                                 avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
                             },
                             {
-                                text: 'Qualité des produits exceptionnelle. Nmarket est devenu mon site de référence.',
+                                text: 'Qualité des produits exceptionnelle. shop est devenu mon site de référence.',
                                 author: 'Marie D.',
                                 role: 'Designer',
                                 avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
@@ -407,7 +407,7 @@ export default function About() {
                             Questions fréquentes
                         </h2>
                         <p className="mt-4 text-muted-foreground">
-                            Tout ce que vous devez savoir sur Nmarket
+                            Tout ce que vous devez savoir sur shop
                         </p>
                     </motion.div>
 
@@ -454,7 +454,7 @@ export default function About() {
                         viewport={{ once: true }}
                     >
                         <h2 className="font-heading text-3xl font-bold md:text-4xl">
-                            Prêt à rejoindre l'aventure Nmarket ?
+                            Prêt à rejoindre l'aventure shop ?
                         </h2>
                         <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
                             Découvrez dès maintenant notre sélection de produits
@@ -466,13 +466,13 @@ export default function About() {
                                 className="gap-2 shadow-lg"
                                 asChild
                             >
-                                <Link href={route('shop.products.index')}>
+                                <Link href={route('product.index')}>
                                     Explorer la boutique
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
                             </Button>
                             <Button size="lg" variant="outline" asChild>
-                                <Link href={route('contact.index')}>
+                                <Link href={route('page.contact')}>
                                     Nous contacter
                                 </Link>
                             </Button>

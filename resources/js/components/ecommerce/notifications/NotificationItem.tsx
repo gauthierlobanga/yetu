@@ -1,11 +1,11 @@
 // resources/js/components/ecommerce/notifications/NotificationItem.tsx
 
 import { Link } from '@inertiajs/react';
-import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Package, CreditCard, Bell, MessageCircle, Star } from 'lucide-react';
-import { Notification } from '@/types/ecommerce/notifications/notification';
+import { cn } from '@/lib/utils';
+import type { Notification } from '@/types/ecommerce/notifications/notification';
 
 interface NotificationItemProps {
     notification: Notification;

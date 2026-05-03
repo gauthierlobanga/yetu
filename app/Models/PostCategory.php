@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +14,7 @@ use Illuminate\Support\Str;
 #[Table('posts_categories')]
 class PostCategory extends Model
 {
-    use BelongsToTenant, SoftDeletes;
+    use SoftDeletes;
 
     protected $table = 'posts_categories';
 
@@ -37,7 +35,6 @@ class PostCategory extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'tenant_id',
         'parent_id',
         'nom',
         'slug',
@@ -91,7 +88,12 @@ class PostCategory extends Model
     // Accessors
     public function getUrlAttribute(): string
     {
-        return route('category.show', $this->slug);
+        return route('blog.category', $this->slug);
+    }
+
+    public function getUrlCategoryAttribute(): string
+    {
+        return route('blog.category', $this->slug);
     }
 
     public function getFullPathAttribute(): string

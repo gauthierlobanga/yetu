@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,8 +12,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class AvisClient extends Model implements HasMedia
 {
-    use BelongsToTenant,SoftDeletes;
     use HasUuids, InteractsWithMedia;
+    use SoftDeletes;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -34,7 +32,6 @@ class AvisClient extends Model implements HasMedia
     protected $table = 'avis_clients';
 
     protected $fillable = [
-        'tenant_id',
         'client_id',
         'produit_id',
         'note',

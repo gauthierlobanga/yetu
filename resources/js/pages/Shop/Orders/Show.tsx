@@ -1,5 +1,5 @@
 import { Link, router, usePage } from '@inertiajs/react';
-import ShopAccountShell from '@/components/shop/ShopAccountShell';
+import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -131,21 +131,17 @@ export default function ShopOrderShowPage() {
                         </CardHeader>
                         <CardContent className="space-y-4 text-sm">
                             <div>
-                                <p className="mb-1 font-medium">
-                                    Facturation
-                                </p>
+                                <p className="mb-1 font-medium">Facturation</p>
                                 <p className="text-muted-foreground">
                                     {order.adresse_facturation
-                                        ?.adresse_complete ??
-                                        'Non renseignee'}
+                                        ?.adresse_complete ?? 'Non renseignee'}
                                 </p>
                             </div>
                             <div>
                                 <p className="mb-1 font-medium">Livraison</p>
                                 <p className="text-muted-foreground">
                                     {order.adresse_livraison
-                                        ?.adresse_complete ??
-                                        'Non renseignee'}
+                                        ?.adresse_complete ?? 'Non renseignee'}
                                 </p>
                             </div>
                         </CardContent>
@@ -155,24 +151,18 @@ export default function ShopOrderShowPage() {
                         <Button
                             variant="outline"
                             onClick={() =>
-                                router.post(
-                                    route('shop.orders.cancel', order.id),
-                                )
+                                router.post(route('orders.cancel', order.id))
                             }
                         >
                             Annuler la commande
                         </Button>
                         <Button variant="outline" asChild>
-                            <Link
-                                href={route('shop.orders.invoice', order.id)}
-                            >
+                            <Link href={route('orders.invoice', order.id)}>
                                 Demander la facture
                             </Link>
                         </Button>
                         <Button asChild>
-                            <Link
-                                href={route('shop.returns.create', order.id)}
-                            >
+                            <Link href={route('return.create', order.id)}>
                                 Demander un retour
                             </Link>
                         </Button>

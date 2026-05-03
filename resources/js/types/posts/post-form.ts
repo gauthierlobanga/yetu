@@ -1,6 +1,5 @@
 // resources/js/types/posts/post-form.ts
 
-import type { Post } from './posts';
 import type { Category } from './category';
 
 export interface PostFormData {
@@ -39,27 +38,6 @@ export interface PostFormData {
     // Pour les mises à jour
     _method?: 'put' | 'post';
 }
-
-// export interface PostFormProps {
-//     post?: Post;
-//     categories: Array<{
-//         id: number;
-//         nom: string;
-//         slug: string;
-//         parent_id?: number | null;
-//         color?: string | null;
-//     }>;
-//     tags?: Array<{
-//         id: number;
-//         name: string;
-//         slug: string;
-//         count?: number;
-//     }>;
-//     statuses: Record<string, string>;
-//     onSubmit?: (data: PostFormData) => void;
-//     onCancel?: () => void;
-//     isSubmitting?: boolean;
-// }
 
 export interface MediaUploadResponse {
     id: number;

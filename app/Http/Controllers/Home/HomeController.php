@@ -10,12 +10,15 @@ use App\Models\Promotion;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class HomeController extends Controller
 {
-    public function index(Request $request)
+    public function homeIndex(Request $request)
     {
+        $productsCount = Produit::published()->count();
+        $recentProducts = Produit::published()->latest()->take(4)->get();
 
         $hasProductCategories = Schema::hasTable('produit_categories');
         $canLoadProductCategories = $hasProductCategories && Schema::hasTable('produit_categorie_pivot');
@@ -167,6 +170,8 @@ class HomeController extends Controller
             'bestSellers' => $bestSellers,
             'dealOfTheDay' => $dealOfTheDay,
             'brands' => $brands,
+            'productsCount' => $productsCount,
+            'recentProducts' => $recentProducts,
         ]);
     }
 
@@ -189,7 +194,7 @@ class HomeController extends Controller
             'nombre_avis' => (int) $product->nombre_avis,
             'badge' => $product->is_new ? 'Nouveauté' : ($product->is_bestseller ? 'Best Seller' : null),
             'brand' => $product->brand ? ['nom' => $product->brand->nom, 'slug' => $product->brand->slug] : null,
-            'url' => route('shop.products.show', $product->slug),
+            'url' => route('product.show', $product->slug),
             'sold_count' => (int) $product->sold_count,
         ];
 
@@ -267,21 +272,21 @@ class HomeController extends Controller
             'description' => $category->short_description,
             'image' => $category->image_url,
             'icon' => $category->icon_url,
-            'url' => route('shop.categories.show', $category->slug),
+            'url' => route('product.category.show', $category->slug),
             'children' => $category->children->map(fn ($child) => $this->formatCategory($child)),
         ];
     }
 
     private function formatBrand(Brand $brand): array
     {
-        $logo = $brand->getFirstMediaUrl('logo') ?: asset('images/');
+        $logo = $brand->getFirstMediaUrl('logo') ?: Storage::url('images/');
 
         return [
             'id' => $brand->id,
             'nom' => $brand->nom,
             'slug' => $brand->slug,
             'logo' => $logo,
-            'url' => route('shop.brands.show', $brand->slug),
+            'url' => route('brands.show', $brand->slug),
         ];
     }
 }

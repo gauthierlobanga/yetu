@@ -25,6 +25,8 @@ class LivraisonPanierResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'panier_id';
 
+    protected static bool $isScopedToTenant = false;
+
     protected static ?string $cluster = CommandesCluster::class;
 
     public static function form(Schema $schema): Schema

@@ -27,7 +27,9 @@ class VendeurResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static ?string $tenantOwnershipRelationshipName = 'users';
+    // protected static ?string $tenantOwnershipRelationshipName = 'users';
+
+    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

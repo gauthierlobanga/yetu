@@ -1,8 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 // resources/js/hooks/ecommerce/use-notifications.ts
-
-import { Notification } from '@/types/ecommerce/notifications/notification';
 import { usePage, router } from '@inertiajs/react';
 import { useMemo } from 'react';
+import type { Notification } from '@/types/ecommerce/notifications/notification';
 
 interface UseNotificationsReturn {
     notifications: Notification[];

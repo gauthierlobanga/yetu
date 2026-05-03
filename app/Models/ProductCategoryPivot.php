@@ -4,15 +4,12 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class ProductCategoryPivot extends Pivot
 {
-    use BelongsToTenant;
     use HasUuids;
 
     protected $table = 'produit_categorie_pivot';
@@ -22,7 +19,6 @@ class ProductCategoryPivot extends Pivot
     public $incrementing = false;
 
     protected $fillable = [
-        'tenant _id',
         'produit_id',
         'category_id',
         'is_primary',

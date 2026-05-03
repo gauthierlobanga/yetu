@@ -21,13 +21,11 @@ class CountryForm
 
                     TextInput::make('iso2')
                         ->required()
-                        ->maxLength(2)
-                        ->uppercase(),
+                        ->maxLength(2),
 
                     TextInput::make('iso3')
                         ->required()
-                        ->maxLength(3)
-                        ->uppercase(),
+                        ->maxLength(3),
 
                     TextInput::make('phone_code')
                         ->tel()

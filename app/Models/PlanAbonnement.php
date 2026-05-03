@@ -4,8 +4,6 @@
 
 namespace App\Models;
 
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PlanAbonnement extends Model
 {
-    use BelongsToTenant, HasUuids,SoftDeletes;
+    use HasUuids,SoftDeletes;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -33,7 +31,6 @@ class PlanAbonnement extends Model
     protected $table = 'plan_abonnements';
 
     protected $fillable = [
-        'tenant_id',
         'nom',
         'description',
         'prix_ht',

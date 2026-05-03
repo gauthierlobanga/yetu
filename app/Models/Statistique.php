@@ -1,10 +1,6 @@
 <?php
 
-// app/Models/Statistique.php
-
 namespace App\Models;
-
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Statistique extends Model
 {
-    use BelongsToTenant, HasUuids, SoftDeletes;
+    use HasUuids, SoftDeletes;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -32,7 +28,6 @@ class Statistique extends Model
     protected $table = 'statistiques';
 
     protected $fillable = [
-        'tenant_id',
         'type',
         'donnees',
         'date_reference',
@@ -120,7 +115,6 @@ class Statistique extends Model
     {
         return static::updateOrCreate(
             [
-                'tenant_id' => self::tenant()->id,
                 'type' => $type,
                 'date_reference' => $dateReference ?? now()->toDateString(),
             ],

@@ -67,15 +67,19 @@ class VendeursTable
                     ->counts('documentsLegaux')
                     ->alignCenter(),
 
-                TextColumn::make('produits_count')
-                    ->label('Produits')
-                    ->counts('produits')
-                    ->alignCenter(),
+                // TextColumn::make('produits_count')
+                //     ->label('Produits')
+                //     // ->counts('produits')
+                //     ->getStateUsing(fn (Tenant $record) => $record->produits()->count())
+                //     ->sortable()
+                //     ->alignCenter(),
 
-                TextColumn::make('commandes_count')
-                    ->label('Commandes')
-                    ->counts('commandes')
-                    ->alignCenter(),
+                // TextColumn::make('commandes_count')
+                //     ->label('Commandes')
+                //     // ->counts('commandes')
+                //     ->getStateUsing(fn (Tenant $record) => $record->commandes()->count())
+                //     ->sortable()
+                //     ->alignCenter(),
 
                 TextColumn::make('pourcentage_verification')
                     ->label('Vérification')

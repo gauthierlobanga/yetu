@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Vendeur\Vendeur\Pages\Tenancy;
+namespace App\Filament\Vendeur\Pages\Tenancy;
 
 use App\Models\Tenant;
 use Filament\Forms\Components\DateTimePicker;

@@ -1,4 +1,5 @@
 <?php
+
 // app/Models/FactureAbonnement.php
 
 namespace App\Models;
@@ -11,14 +12,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class FactureAbonnement extends Model
 {
     use HasUuids, SoftDeletes;
+
     /**
      * Indique que les clés primaires sont de type string (UUID)
+     *
      * @var string
      */
     protected $keyType = 'string';
 
     /**
      * Indique que les clés primaires ne sont pas auto-incrémentées
+     *
      * @var bool
      */
     public $incrementing = false;
@@ -31,7 +35,7 @@ class FactureAbonnement extends Model
         'montant',
         'date_echeance',
         'date_paiement',
-        'statut'
+        'statut',
     ];
 
     protected function casts(): array
@@ -47,8 +51,11 @@ class FactureAbonnement extends Model
 
     // Constantes
     const STATUT_EN_ATTENTE = 'en_attente';
+
     const STATUT_PAYEE = 'payee';
+
     const STATUT_ECHUE = 'echue';
+
     const STATUT_ANNULEE = 'annulee';
 
     public static function getStatuts(): array
@@ -93,7 +100,7 @@ class FactureAbonnement extends Model
 
     public function getMontantFormatteAttribute(): string
     {
-        return number_format($this->montant, 2) . '€';
+        return number_format($this->montant, 2).'€';
     }
 
     // Méthodes utilitaires
@@ -106,7 +113,7 @@ class FactureAbonnement extends Model
         // Créer un paiement associé
         Paiement::create([
             'commande_id' => null,
-            'reference' => $reference ?? 'FACT-' . $this->reference,
+            'reference' => $reference ?? 'FACT-'.$this->reference,
             'mode' => Paiement::MODE_VIREMENT,
             'montant' => $this->montant,
             'statut' => Paiement::STATUT_VALIDE,

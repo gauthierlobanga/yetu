@@ -136,7 +136,7 @@ export default function ProductsIndex() {
         try {
             // Envoyer l'image au serveur via Inertia (en utilisant router.post avec FormData)
             // Note : Inertia ne supporte pas nativement FormData, on utilise fetch puis redirection manuelle
-            const response = await fetch(route('shop.search.by-image'), {
+            const response = await fetch(route('products.search.by-image'), {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -182,7 +182,7 @@ export default function ProductsIndex() {
             }
         });
 
-        router.get('/shop/products', query, {
+        router.get('/product', query, {
             preserveState: true,
             preserveScroll: true,
             only: ['products'],
@@ -196,7 +196,7 @@ export default function ProductsIndex() {
         setPriceRange([serverPriceRange.min, serverPriceRange.max]);
 
         router.get(
-            '/shop/products',
+            '/product',
             {},
             {
                 preserveState: true,
@@ -426,7 +426,9 @@ export default function ProductsIndex() {
                         <span className="text-muted-foreground">
                             Resultats pour
                         </span>
-                        <span className="font-medium">{searchContext.query}</span>
+                        <span className="font-medium">
+                            {searchContext.query}
+                        </span>
                     </motion.div>
                 )}
 
@@ -681,7 +683,7 @@ export default function ProductsIndex() {
                                     <Button variant="outline" size="lg" asChild>
                                         <Link
                                             href={route(
-                                                'shop.categories.index',
+                                                'product.category.index',
                                             )}
                                         >
                                             Parcourir les catégories
@@ -699,7 +701,7 @@ export default function ProductsIndex() {
                                 >
                                     Besoin d'aide ?{' '}
                                     <Link
-                                        href={route('contact.index')}
+                                        href={route('page.contact')}
                                         className="font-medium text-primary hover:underline"
                                     >
                                         Contactez notre support

@@ -19,14 +19,14 @@ class CategoryResource extends JsonResource
             'updated_at' => $this->updated_at?->toISOString(),
 
             // Relations
-            'parent' => $this->whenLoaded('parent', fn() => [
+            'parent' => $this->whenLoaded('parent', fn () => [
                 'id' => $this->parent->id,
                 'nom' => $this->parent->nom,
                 'slug' => $this->parent->slug,
                 'color' => $this->parent->color,
             ]),
 
-            'enfants' => $this->whenLoaded('enfants', fn() => [
+            'enfants' => $this->whenLoaded('enfants', fn () => [
                 'id' => $this->enfants->id,
                 'nom' => $this->enfants->nom,
                 'slug' => $this->enfants->slug,

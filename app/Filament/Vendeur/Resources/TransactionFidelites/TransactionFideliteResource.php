@@ -28,7 +28,7 @@ class TransactionFideliteResource extends Resource
 
     protected static ?int $navigationSort = 10;
 
-    // protected static ?string $cluster = PromotionsCluster::class;
+    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

@@ -57,7 +57,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { home } from '@/routes';
 
 export default function AuthCardLayout({
     children,
@@ -69,11 +68,11 @@ export default function AuthCardLayout({
     description?: string;
 }>) {
     return (
-        <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/5 p-6 md:p-10">
+        <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-linear-to-br from-primary/5 via-background to-primary/5 p-6 md:p-10">
             {/* Cercles décoratifs animés en arrière-plan */}
             <div className="absolute -top-32 -left-32 h-96 w-96 animate-pulse rounded-full bg-primary/10 blur-3xl" />
             <div className="absolute -right-32 -bottom-32 h-96 w-96 animate-pulse rounded-full bg-primary/10 blur-3xl" />
-            <div className="absolute top-1/2 left-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
+            <div className="absolute top-1/2 left-1/2 h-150 w-150 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -87,7 +86,7 @@ export default function AuthCardLayout({
                     className="flex justify-center"
                 >
                     <Link
-                        href={home()}
+                        href={route('home')}
                         className="flex items-center gap-2 self-center font-medium"
                     >
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20 transition-shadow hover:shadow-primary/30">

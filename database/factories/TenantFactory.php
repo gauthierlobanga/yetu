@@ -22,6 +22,7 @@ class TenantFactory extends Factory
         $raison_sociale = fake()->company();
 
         return [
+            'id' => $raison_sociale,
             'raison_sociale' => $raison_sociale,
             'slug' => Str::slug($raison_sociale),
             'statut' => Tenant::STATUT_ACTIF,

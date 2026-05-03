@@ -58,11 +58,11 @@ class BrandForm
 
                                         Grid::make(2)
                                             ->schema([
-                                                // TextInput::make('website')
-                                                //     ->label('Site web')
-                                                //     ->url()
-                                                //     ->prefix('https://')
-                                                //     ->placeholder('exemple.com'),
+                                                TextInput::make('website')
+                                                    ->label('Site web')
+                                                    ->url()
+                                                    ->prefix('http://')
+                                                    ->placeholder('exemple.com'),
                                                 TextInput::make('email')
                                                     ->label('Email')
                                                     ->email()

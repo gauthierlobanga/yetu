@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import ShopAccountShell from '@/components/shop/ShopAccountShell';
+import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Badge } from '@/components/ui/badge';
 import {
     Card,
@@ -88,7 +88,7 @@ export default function ShopOrdersIndexPage() {
                                         <TableCell className="text-right">
                                             <Link
                                                 href={route(
-                                                    'shop.orders.show',
+                                                    'orders.show',
                                                     order.id,
                                                 )}
                                                 className="text-sm font-medium text-primary hover:underline"

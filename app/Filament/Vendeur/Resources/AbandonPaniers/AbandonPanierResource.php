@@ -25,7 +25,7 @@ class AbandonPanierResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'raison';
 
-    protected static ?string $tenantOwnershipRelationshipName = 'tenant';
+    protected static bool $isScopedToTenant = false;
 
     protected static ?string $cluster = PaniersCluster::class;
 
@@ -65,7 +65,7 @@ class AbandonPanierResource extends Resource
             ]);
     }
 
-    public static function getNavigationBadge(): ?string
+     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
     }

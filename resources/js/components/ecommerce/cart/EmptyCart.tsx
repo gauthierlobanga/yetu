@@ -78,7 +78,7 @@ export function EmptyCart() {
                     size="lg"
                     className="group gap-2 rounded-full px-8 shadow-lg hover:shadow-xl"
                 >
-                    <Link href={route('shop.products.index')}>
+                    <Link href={route('product.index')}>
                         Explorer la boutique
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
@@ -93,7 +93,7 @@ export function EmptyCart() {
                 className="mt-12 grid max-w-lg grid-cols-3 gap-3 text-sm"
             >
                 <Link
-                    href={route('shop.products.index', { sort: 'bestseller' })}
+                    href={route('product.index', { sort: 'bestseller' })}
                     className="rounded-lg border border-border/50 bg-card/50 p-3 backdrop-blur-sm transition hover:bg-card"
                 >
                     <span className="font-medium">🔥 Meilleures ventes</span>
@@ -102,7 +102,7 @@ export function EmptyCart() {
                     </p>
                 </Link>
                 <Link
-                    href={route('shop.promotions.index')}
+                    href={route('promotions.index')}
                     className="rounded-lg border border-border/50 bg-card/50 p-3 backdrop-blur-sm transition hover:bg-card"
                 >
                     <span className="font-medium">🏷️ Promotions</span>
@@ -111,7 +111,7 @@ export function EmptyCart() {
                     </p>
                 </Link>
                 <Link
-                    href={route('shop.categories.index')}
+                    href={route('product.category.index')}
                     className="rounded-lg border border-border/50 bg-card/50 p-3 backdrop-blur-sm transition hover:bg-card"
                 >
                     <span className="font-medium">📦 Catégories</span>

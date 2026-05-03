@@ -14,14 +14,7 @@ class UserTenantPivotsTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.raison_sociale')
-                    ->label('Organisation')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable()
-                    ->badge()
-                    ->color('info')
-                    ->icon('heroicon-o-building-office'),
+
                 TextColumn::make('user.name')
                     ->searchable(),
                 TextColumn::make('created_at')

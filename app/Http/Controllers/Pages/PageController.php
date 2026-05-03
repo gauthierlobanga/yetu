@@ -12,17 +12,17 @@ use Inertia\Inertia;
 
 class PageController extends Controller
 {
-    public function contact()
+    public function pageContact()
     {
         return Inertia::render('main/contact/Contact');
     }
 
-    public function help()
+    public function pageHelp()
     {
         return Inertia::render('main/help/Help');
     }
 
-    public function about()
+    public function pageAbout()
     {
         $platformStats = Cache::remember('home_platform_stats', 3600, function () {
             return [
@@ -41,32 +41,32 @@ class PageController extends Controller
         ]);
     }
 
-    public function terms()
+    public function pageTerms()
     {
         return Inertia::render('main/terms/Terms');
     }
 
-    public function privacy()
+    public function pagePrivacy()
     {
         return Inertia::render('main/privacy/Privacy');
     }
 
-    public function cookies()
+    public function pageCookies()
     {
         return Inertia::render('main/cookies/Cookies');
     }
 
-    public function support()
+    public function pageSupport()
     {
         return Inertia::render('main/support/Support');
     }
 
-    public function faq()
+    public function pageFaq()
     {
         return Inertia::render('main/faq/Faq');
     }
 
-    public function testimonials()
+    public function pageTestimonials()
     {
         return Inertia::render('main/testimonials/Testimonials');
     }

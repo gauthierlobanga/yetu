@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Models\Permission as SpatiePermission;
+use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class Permission extends SpatiePermission
 {
+    use BelongsToTenant;
     use HasFactory;
     use HasUuids;
 
