@@ -299,7 +299,7 @@ export default function CartContent() {
 
                                                     <Link
                                                         href={route(
-                                                            'product.show',
+                                                            'tenant.tenant.product.show',
                                                             item.produit.slug,
                                                         )}
                                                         className="line-clamp-2 text-sm leading-snug font-semibold hover:text-primary"
@@ -576,7 +576,7 @@ export default function CartContent() {
                             className="h-10 w-full cursor-pointer rounded-full bg-primary/95 text-base font-semibold hover:bg-primary"
                         >
                             <Link
-                                href={route('checkout.index')}
+                                href={route('tenant.checkout.index')}
                                 className="flex items-center justify-center gap-2"
                             >
                                 {isSyncing ? (
@@ -680,7 +680,7 @@ export default function CartContent() {
                             </p>
                         </div>
                         <Link
-                            href={route('product.index')}
+                            href={route('tenant.product.index')}
                             className="group flex items-center gap-1 text-sm font-medium text-primary transition-all hover:gap-2 hover:text-primary/80"
                         >
                             Voir toutes les suggestions
@@ -707,7 +707,7 @@ export default function CartContent() {
                     {recommendedProducts.length > 8 && (
                         <div className="mt-6 text-center">
                             <Button variant="outline" asChild>
-                                <Link href={route('product.index')}>
+                                <Link href={route('tenant.product.index')}>
                                     Voir plus de recommandations
                                     <ChevronRight className="ml-2 h-4 w-4" />
                                 </Link>
@@ -728,7 +728,7 @@ export default function CartContent() {
                                 </p>
                             </div>
                             <Button variant="link" size="sm" asChild>
-                                <Link href={route('promotions.index')}>
+                                <Link href={route('tenant.promotions.index')}>
                                     En savoir plus
                                 </Link>
                             </Button>

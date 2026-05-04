@@ -305,7 +305,7 @@ class ProductCategory extends Model implements HasMedia, Sitemapable
 
     public function getUrlAttribute(): string
     {
-        return route('product.category.show', $this->slug);
+        return route('tenant.product.category.show', $this->slug);
     }
 
     public function getFullPathAttribute(): string

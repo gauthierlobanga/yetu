@@ -10,6 +10,7 @@ use App\Services\VendorRegistrationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class PaymentController extends Controller
@@ -94,6 +95,12 @@ class PaymentController extends Controller
                 // Approuver le vendeur et créer le tenant
                 $tenant = $this->vendorService->approve($vendorRequest);
 
+                if ($logoPath = session('temp_logo_path')) {
+                    $tenant->addMedia(storage_path('app/'.$logoPath))
+                        ->toMediaCollection('tenant_avatar');
+                    Storage::delete($logoPath);
+                    session()->forget('temp_logo_path');
+                }
                 // Nettoyer la session
                 session()->forget('vendor_request_id');
 
@@ -103,6 +110,7 @@ class PaymentController extends Controller
                         'raison_sociale' => $tenant->raison_sociale,
                         'slug' => $tenant->slug,
                         'url' => $tenant->url,
+                        'logo_url' => $tenant->getFirstMediaUrl('tenant_avatar', 'tenant_thumb'),
                         'admin_url' => $this->vendorService->getVendeurUrl($tenant),
                     ],
                 ]);

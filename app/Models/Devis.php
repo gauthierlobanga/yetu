@@ -155,7 +155,7 @@ class Devis extends Model
 
     // public function getUrlPdfAttribute(): string
     // {
-    //     return route('devis.pdf', $this->reference);
+    //     return route('tenant.devis.pdf', $this->reference);
     // }
 
     // Scopes

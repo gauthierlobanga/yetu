@@ -23,7 +23,6 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                             >
                                 {cat.nom}
                             </Link>
-                            {/* Sous-catégories pourraient être chargées ici */}
                         </div>
                     ))}
                 </div>

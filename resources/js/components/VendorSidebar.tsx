@@ -30,10 +30,7 @@ export function VendorSidebar({ mainNavItems, footerNavItems }: Props) {
     return (
         <Sidebar>
             <SidebarHeader>
-                <Link
-                    href={tenant.route('home')}
-                    className="flex items-center gap-2"
-                >
+                <Link href={route('home')} className="flex items-center gap-2">
                     <AppLogoIcon className="h-8 w-8" />
                     <span className="text-xl font-bold">Espace Vendeur</span>
                 </Link>

@@ -171,7 +171,7 @@ class PlanForm
                     ->schema([
                         KeyValue::make('features')
                             ->label('Fonctionnalités incluses')
-                            ->addButtonLabel('Ajouter une fonctionnalité')
+                            ->addActionLabel('Ajouter une fonctionnalité')
                             ->keyLabel('Icône (emoji)')
                             ->valueLabel('Description')
                             ->keyPlaceholder('🚀')
@@ -181,7 +181,7 @@ class PlanForm
 
                         KeyValue::make('limits')
                             ->label('Limites')
-                            ->addButtonLabel('Ajouter une limite')
+                            ->addActionLabel('Ajouter une limite')
                             ->keyLabel('Nom (ex: nb_produits)')
                             ->valueLabel('Valeur')
                             ->keyPlaceholder('nb_produits')
@@ -223,7 +223,7 @@ class PlanForm
                     ->schema([
                         KeyValue::make('metadata')
                             ->label('Métadonnées additionnelles')
-                            ->addButtonLabel('Ajouter une méta')
+                            ->addActionLabel('Ajouter une méta')
                             ->keyLabel('Clé')
                             ->valueLabel('Valeur')
                             ->keyPlaceholder('couleur_theme')

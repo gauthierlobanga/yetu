@@ -1,12 +1,11 @@
 <?php
 
-// app/Http/Requests/VendorRegistrationRequest.php
-
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Propaganistas\LaravelPhone\Rules\Phone;
 
 class VendorRegistrationRequest extends FormRequest
 {
@@ -36,7 +35,10 @@ class VendorRegistrationRequest extends FormRequest
 
             // Contact
             'contact_email' => ['required', 'email', 'max:255'],
-            'contact_phone' => ['nullable', 'string', 'max:20'],
+            'contact_phone' => ['nullable', 'string', (new Phone('AUTO'))->type('mobile')],
+            'phone_code' => ['nullable', 'string', 'max:10'],
+            // Validation du téléphone AVEC le code pays
+            'phone_full' => ['nullable', new Phone($this->currency)->type('mobile')],
 
             // Localisation & préférences
             'currency' => ['nullable', 'string', 'max:3'],
@@ -52,7 +54,7 @@ class VendorRegistrationRequest extends FormRequest
             'youtube_url' => ['nullable', 'url', 'max:255'],
             'tiktok_url' => ['nullable', 'url', 'max:255'],
 
-            // ✅ Documents légaux (ajout)
+            // Documents légaux
             'documents' => ['nullable', 'array'],
             'documents.*.type_document_id' => [
                 'required', 'uuid', 'exists:type_documents_legaux,id',
@@ -82,13 +84,19 @@ class VendorRegistrationRequest extends FormRequest
             'documents.*.type_document_id.exists' => "Le type de document sélectionné n'existe pas.",
             'documents.*.date_expiration.after' => "La date d'expiration doit être postérieure à la date de délivrance.",
             'documents.*.date_delivrance.before_or_equal' => 'La date de délivrance ne peut pas être dans le futur.',
+            'phone_full.phone' => 'Le numéro de téléphone n\'est pas valide pour le pays sélectionné.',
         ];
     }
 
     protected function prepareForValidation(): void
     {
+        // Construire le numéro complet avec le code pays
+        $phoneCode = $this->phone_code ?? '+243';
+        $phoneNumber = $this->contact_phone;
+
         $this->merge([
             'shop_slug' => strtolower($this->shop_slug),
+            'phone_full' => $phoneNumber ? $phoneCode.$phoneNumber : null,
         ]);
     }
 }

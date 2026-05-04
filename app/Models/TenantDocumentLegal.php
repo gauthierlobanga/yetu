@@ -27,7 +27,7 @@ class TenantDocumentLegal extends Model
         'est_verifie',
         'verifie_le',
         'verifie_par',
-        'vendor_request_id',  // ✅ déjà présent
+        'vendor_request_id',
     ];
 
     protected $casts = [

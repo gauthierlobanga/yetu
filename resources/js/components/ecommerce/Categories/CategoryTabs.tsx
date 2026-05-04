@@ -155,7 +155,9 @@ export default function CategoryTabs({
                                             <Link
                                                 href={
                                                     activeCategory?.url ||
-                                                    route('product.index')
+                                                    route(
+                                                        'tenant.product.index',
+                                                    )
                                                 }
                                             >
                                                 Voir toute la collection
@@ -201,7 +203,7 @@ export default function CategoryTabs({
                                     className="mt-6"
                                     asChild
                                 >
-                                    <Link href={route('product.index')}>
+                                    <Link href={route('tenant.product.index')}>
                                         Voir tous les produits
                                     </Link>
                                 </Button>

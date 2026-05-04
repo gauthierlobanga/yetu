@@ -302,10 +302,10 @@ class Brand extends Model implements HasMedia, Sitemapable
     /**
      * Accesseur pour l'URL de la marque
      */
-    // public function getUrlAttribute(): string
-    // {
-    //     return route('brands.show', $this->slug);
-    // }
+    public function getUrlAttribute(): string
+    {
+        return route('tenant.brands.show', $this->slug);
+    }
 
     /**
      * Accesseur pour le nombre de produits

@@ -8,28 +8,44 @@ import type { Product } from '@/types/ecommerce/products';
 
 interface ProductCardCompactProps {
     product: Product;
+    showDiscountBadge?: boolean;
+}
+
+/** Retourne une URL d’image valide ou un placeholder */
+function getImageUrl(image: string | null | undefined): string {
+    if (!image) {
+        return '/images/getting-business.jpg';
+    }
+
+    if (image.startsWith('http') || image.startsWith('/storage')) {
+        return image;
+    }
+
+    return `/storage/${image.replace(/^\//, '')}`;
+}
+
+/** Formate un montant en CDF */
+function formatPrice(amount: number): string {
+    return new Intl.NumberFormat('fr-CD', {
+        style: 'currency',
+        currency: 'CDF',
+        minimumFractionDigits: 0,
+    }).format(amount);
 }
 
 export default function ProductCardCompact({
     product,
+    showDiscountBadge = false,
 }: ProductCardCompactProps) {
     const noteMoyenne = Number(product.note_moyenne) || 0;
     const soldCount = Number(product.sold_count) || 0;
     const { addToCart } = useCart();
 
-    const formatSoldCount = (count: number) => {
-        if (count >= 1000) {
-            return `${Math.floor(count / 1000)}k+`;
-        }
-
-        return `${count}`;
-    };
-
     const renderStars = () => (
-        <div className="flex items-center">
+        <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span className="ml-0.5 text-xs">
-                {Number(noteMoyenne).toFixed(1)}
+            <span className="font-medium text-foreground">
+                {noteMoyenne.toFixed(1)}
             </span>
         </div>
     );
@@ -42,10 +58,10 @@ export default function ProductCardCompact({
 
     return (
         <Link href={product.url} className="group block">
-            <div className="relative overflow-hidden rounded-md bg-muted">
+            <div className="relative overflow-hidden rounded-lg bg-muted">
                 <div className="aspect-square w-full">
                     <img
-                        src={product.image_principale || undefined}
+                        src={getImageUrl(product.image_principale)}
                         alt={product.nom}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         loading="lazy"
@@ -53,52 +69,55 @@ export default function ProductCardCompact({
                 </div>
 
                 {/* Badges */}
-                <div className="absolute top-1 left-1 flex flex-col gap-0.5">
-                    {product.est_en_promotion && (
-                        <Badge className="bg-red-500 px-1.5 py-0 text-xs text-white">
+                <div className="absolute top-1.5 left-1.5 flex flex-col gap-1">
+                    {showDiscountBadge && product.est_en_promotion && (
+                        <Badge className="bg-red-500 px-1.5 py-0 text-[10px] text-white">
                             -{product.reduction_pourcentage}%
                         </Badge>
                     )}
                     {product.badge && (
-                        <Badge className="bg-primary/90 px-1.5 py-0 text-xs text-primary-foreground">
+                        <Badge className="bg-emerald-600 px-1.5 py-0 text-[10px] text-white">
                             {product.badge}
                         </Badge>
                     )}
                 </div>
 
                 {/* Bouton panier au survol */}
-                <div className="absolute inset-x-0 bottom-0 w-1/4 p-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                <div className="absolute inset-x-0 bottom-0 p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                     <Button
                         onClick={handleAddToCart}
                         size="sm"
-                        className="mx-auto h-8 cursor-pointer gap-1 rounded-none bg-black/80 p-4 text-xs text-white backdrop-blur-sm hover:bg-black"
+                        className="w-full gap-1.5 border-0 bg-white/90 text-xs text-foreground backdrop-blur-sm hover:bg-white dark:bg-gray-900/90 dark:hover:bg-gray-900"
                     >
-                        <ShoppingCart className="h-5 w-5" />
+                        <ShoppingCart className="h-3.5 w-3.5" />
                         Ajouter
                     </Button>
                 </div>
             </div>
 
             <div className="mt-1.5 space-y-0.5">
-                <h3 className="line-clamp-2 text-xs leading-tight font-medium">
+                <h3 className="line-clamp-2 text-xs leading-tight font-medium text-foreground">
                     {product.nom}
                 </h3>
 
-                <div className="flex items-center gap-1 text-muted-foreground">
+                <div className="flex items-center gap-1">
                     {renderStars()}
-                    <span className="text-xs">•</span>
-                    <span className="text-xs">
-                        {formatSoldCount(soldCount)} vendus
+                    <span className="text-[10px] text-muted-foreground">•</span>
+                    <span className="text-[10px] text-muted-foreground">
+                        {soldCount >= 1000
+                            ? `${Math.floor(soldCount / 1000)}k+`
+                            : soldCount}{' '}
+                        vendu{soldCount > 1 ? 's' : ''}
                     </span>
                 </div>
 
                 <div className="flex items-baseline gap-1.5">
-                    <span className="text-sm font-bold">
-                        €{Number(product.prix_actuel).toFixed(2)}
+                    <span className="text-sm font-bold text-foreground">
+                        {formatPrice(product.prix_actuel ?? product.prix_ttc)}
                     </span>
                     {product.est_en_promotion && (
                         <span className="text-xs text-muted-foreground line-through">
-                            €{Number(product.prix_ttc).toFixed(2)}
+                            {formatPrice(product.prix_ttc)}
                         </span>
                     )}
                 </div>

@@ -26,6 +26,7 @@ import {
     OtherIcon,
     SunglassesIcon,
 } from './icon';
+import tenant from '@/routes/tenant';
 
 type ListItemType = {
     title: string;
@@ -93,7 +94,10 @@ export default function NavigationMenuS() {
             <header>
                 <div className="flex grid-cols-3 items-center justify-between p-4">
                     {/* left content and log */}
-                    <Link href="/" className="flex items-center gap-2">
+                    <Link
+                        href={tenant.dashboard.index()}
+                        className="flex items-center gap-2"
+                    >
                         <AppLogo />
                     </Link>
 

@@ -57,7 +57,7 @@ class VendorRequestsTable
                     ->weight('bold')
                     ->icon('heroicon-o-building-storefront')
                     ->iconColor('primary')
-                    ->description(fn ($record) => $record->shop_slug.'.uzana.test'),
+                    ->description(fn ($record) => $record->shop_slug.'.'.config('app.domain')),
 
                 TextColumn::make('status')
                     ->label('Statut')

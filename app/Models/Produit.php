@@ -464,7 +464,7 @@ class Produit extends Model implements HasMedia, Sitemapable
 
     public function getUrlAttribute(): string
     {
-        return route('product.show', $this->slug);
+        return route('tenant.tenant.product.show', $this->slug);
     }
 
     public function getSeoTitleAttribute(): string

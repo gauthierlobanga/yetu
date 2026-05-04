@@ -2,9 +2,15 @@
 // resources/js/components/home/daily-offers.tsx
 
 import { Link } from '@inertiajs/react';
-import { ArrowRight, Package, Sparkles } from 'lucide-react';
+import {
+    ArrowRight,
+    Package,
+    Sparkles,
+    ChevronLeft,
+    ChevronRight,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Navigation } from 'swiper/modules';
+import { Navigation, Autoplay, EffectFade } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import DailyOfferProductCard from '@/components/ecommerce/products/DailyOfferProductCard';
 import { Button } from '@/components/ui/button';
@@ -13,6 +19,9 @@ import type { Product } from '@/types/ecommerce/products';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
+import 'swiper/css/effect-fade';
+// eslint-disable-next-line import/order
+import { motion } from 'framer-motion';
 
 interface DailyOffersProps {
     bestSellers: Product[];
@@ -23,11 +32,11 @@ export default function DailyOffers({
     bestSellers,
     dealOfTheDay,
 }: DailyOffersProps) {
-    const [slidesPerView, setSlidesPerView] = useState(1);
+    // Détection responsive pour le nombre de slides
+    const [slidesPerView, setSlidesPerView] = useState(3);
 
-    // ✅ Détection responsive robuste
     useEffect(() => {
-        const updateSlides = () => {
+        const handleResize = () => {
             if (window.innerWidth >= 1024) {
                 setSlidesPerView(3);
             } else if (window.innerWidth >= 768) {
@@ -36,26 +45,36 @@ export default function DailyOffers({
                 setSlidesPerView(1);
             }
         };
+        handleResize();
+        window.addEventListener('resize', handleResize);
 
-        updateSlides();
-        window.addEventListener('resize', updateSlides);
-
-        return () => window.removeEventListener('resize', updateSlides);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // ✅ Loop intelligent (clé de la solution)
     const shouldLoop = (items: Product[]) => items.length > slidesPerView;
 
     return (
-        <section className="bg-muted/30 py-10 lg:py-14">
-            <div className="mx-auto max-w-7xl px-4">
-                <h2 className="mb-5 text-center font-heading text-3xl font-bold">
-                    Offres du jour
-                </h2>
+        <section className="relative overflow-hidden py-14">
+            {/* Dégradé d'arrière‑plan */}
+            <div className="absolute inset-0 bg-linear-to-b from-emerald-50/40 via-white to-emerald-50/20 dark:from-emerald-950/20 dark:via-gray-950 dark:to-emerald-950/10" />
 
-                <div className="grid gap-5 lg:grid-cols-2">
-                    {/* ================= BEST SELLERS ================= */}
-                    <Card className="overflow-hidden">
+            <div className="relative mx-auto max-w-7xl px-4">
+                <div className="mb-10 text-center">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        <Sparkles className="h-4 w-4" />
+                        Offres du jour
+                    </span>
+                    <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground">
+                        Nos meilleures offres
+                    </h2>
+                    <p className="mt-2 text-muted-foreground">
+                        Sélectionnées pour vous
+                    </p>
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                    {/* Best Sellers */}
+                    <Card className="overflow-hidden border-0 bg-card/70 backdrop-blur-sm">
                         <CardContent className="p-4">
                             <Header
                                 title="Meilleures ventes"
@@ -75,22 +94,21 @@ export default function DailyOffers({
                                     icon={Package}
                                     title="Aucune meilleure vente"
                                     description="Les produits populaires apparaîtront ici."
-                                    link={route('product.index')}
+                                    link={route('tenant.product.index')}
                                     linkText="Voir tous les produits"
                                 />
                             )}
                         </CardContent>
                     </Card>
 
-                    {/* ================= DEAL OF THE DAY ================= */}
-                    <Card className="overflow-hidden bg-linear-to-br from-red-50/50 to-orange-50/50 dark:from-red-950/10 dark:to-orange-950/10">
+                    {/* Deal of the Day */}
+                    <Card className="overflow-hidden border-0 bg-linear-to-br from-rose-50/70 to-amber-50/70 backdrop-blur-sm dark:from-rose-950/20 dark:to-amber-950/20">
                         <CardContent className="p-4">
                             <div className="mb-3 flex items-center justify-between">
                                 <Header
                                     title="Deal du Jour"
-                                    subtitle="Offres exceptionnelles"
+                                    subtitle="Offres exceptionnelles, quantités limitées"
                                 />
-
                                 {dealOfTheDay.length > 0 && (
                                     <Button
                                         variant="link"
@@ -98,8 +116,13 @@ export default function DailyOffers({
                                         className="p-0"
                                         asChild
                                     >
-                                        <Link href={route('promotions.index')}>
-                                            Voir plus
+                                        <Link
+                                            href={route(
+                                                'tenant.promotions.index',
+                                            )}
+                                            className="text-emerald-600 dark:text-emerald-400"
+                                        >
+                                            Voir plus{' '}
                                             <ArrowRight className="ml-1 h-3 w-3" />
                                         </Link>
                                     </Button>
@@ -119,8 +142,8 @@ export default function DailyOffers({
                                 <EmptyState
                                     icon={Sparkles}
                                     title="Pas de deal en cours"
-                                    description="Les offres apparaîtront ici."
-                                    link={route('promotions.index')}
+                                    description="Les offres exceptionnelles seront disponibles ici."
+                                    link={route('tenant.promotions.index')}
                                     linkText="Voir les promotions"
                                 />
                             )}
@@ -132,10 +155,9 @@ export default function DailyOffers({
     );
 }
 
-//////////////////////////////////////////////////////////////////
-// COMPONENT CAROUSEL RÉUTILISABLE (clé pro)
-//////////////////////////////////////////////////////////////////
-
+// ----------------------------------------------------------------------
+// Carousel amélioré
+// ----------------------------------------------------------------------
 function Carousel({
     items,
     slidesPerView,
@@ -154,12 +176,22 @@ function Carousel({
     const loop = shouldLoop(items);
 
     return (
-        <div className="group relative">
+        <div className="group/carousel relative">
             <Swiper
-                modules={[Navigation]}
-                spaceBetween={12}
+                modules={[Navigation, Autoplay]}
+                spaceBetween={16}
                 slidesPerView={1}
                 loop={loop}
+                speed={600}
+                autoplay={
+                    items.length > 2
+                        ? {
+                              delay: 4000,
+                              disableOnInteraction: false,
+                              pauseOnMouseEnter: true,
+                          }
+                        : false
+                }
                 navigation={{
                     prevEl: `.${prevClass}`,
                     nextEl: `.${nextClass}`,
@@ -168,64 +200,71 @@ function Carousel({
                     768: { slidesPerView: 2 },
                     1024: { slidesPerView: 3 },
                 }}
-                className="w-full"
+                className="w-full pb-2!"
             >
                 {items.map((product) => (
                     <SwiperSlide key={product.id}>
-                        <DailyOfferProductCard
-                            product={product}
-                            showDiscountBadge={showDiscount}
-                        />
+                        <motion.div
+                            whileHover={{ y: -2, scale: 1.01 }}
+                            transition={{ duration: 0.2 }}
+                            className="h-full"
+                        >
+                            <DailyOfferProductCard
+                                product={product}
+                                showDiscountBadge={showDiscount}
+                            />
+                        </motion.div>
                     </SwiperSlide>
                 ))}
             </Swiper>
 
-            {/* Navigation */}
-            <NavButton className={prevClass} left />
-            <NavButton className={nextClass} />
+            {/* Boutons de navigation professionnels */}
+            <NavButton className={prevClass} direction="prev" />
+            <NavButton className={nextClass} direction="next" />
         </div>
     );
 }
 
-//////////////////////////////////////////////////////////////////
-//  NAV BUTTON
-//////////////////////////////////////////////////////////////////
-
+// ----------------------------------------------------------------------
+// Bouton de navigation amélioré
+// ----------------------------------------------------------------------
 function NavButton({
     className,
-    left = false,
+    direction,
 }: {
     className: string;
-    left?: boolean;
+    direction: 'prev' | 'next';
 }) {
+    const Icon = direction === 'prev' ? ChevronLeft : ChevronRight;
+    const position = direction === 'prev' ? 'left-1' : 'right-1';
+
     return (
         <button
-            className={`absolute top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/80 p-2 opacity-0 shadow-lg backdrop-blur transition-all group-hover:opacity-100 ${
-                left ? 'left-2' : 'right-2'
-            }`}
+            className={`${className} absolute top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/90 text-foreground opacity-0 shadow-sm backdrop-blur-sm transition-all duration-300 group-hover/carousel:opacity-100 hover:bg-card hover:shadow-md ${position}`}
+            aria-label={direction === 'prev' ? 'Précédent' : 'Suivant'}
         >
-            <ArrowRight className={`h-5 w-5 ${left ? 'rotate-180' : ''}`} />
+            <Icon className="h-5 w-5 transition-transform group-hover/carousel:scale-110" />
         </button>
     );
 }
 
-//////////////////////////////////////////////////////////////////
-//  HEADER
-//////////////////////////////////////////////////////////////////
-
+// ----------------------------------------------------------------------
+// En-tête
+// ----------------------------------------------------------------------
 function Header({ title, subtitle }: { title: string; subtitle: string }) {
     return (
-        <div className="mb-5 text-center">
-            <h3 className="font-heading text-xl font-semibold">{title}</h3>
+        <div className="mb-4">
+            <h3 className="font-heading text-lg font-semibold text-foreground">
+                {title}
+            </h3>
             <p className="text-xs text-muted-foreground">{subtitle}</p>
         </div>
     );
 }
 
-//////////////////////////////////////////////////////////////////
-//  EMPTY STATE
-//////////////////////////////////////////////////////////////////
-
+// ----------------------------------------------------------------------
+// État vide
+// ----------------------------------------------------------------------
 function EmptyState({
     icon: Icon,
     title,
@@ -240,13 +279,13 @@ function EmptyState({
     linkText: string;
 }) {
     return (
-        <div className="flex min-h-40 flex-col items-center justify-center gap-4 text-center">
-            <Icon className="h-8 w-8 text-muted-foreground" />
+        <div className="flex min-h-45 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-muted/30 px-4 py-8 text-center">
+            <Icon className="h-10 w-10 text-muted-foreground" />
             <div>
-                <h4 className="font-medium">{title}</h4>
+                <h4 className="font-medium text-foreground">{title}</h4>
                 <p className="text-sm text-muted-foreground">{description}</p>
             </div>
-            <Button variant="outline" asChild>
+            <Button variant="outline" size="sm" asChild>
                 <Link href={link}>{linkText}</Link>
             </Button>
         </div>

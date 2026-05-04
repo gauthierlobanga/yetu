@@ -104,7 +104,7 @@ export default function About() {
                                 className="gap-2 shadow-lg"
                                 asChild
                             >
-                                <Link href={route('product.index')}>
+                                <Link href={route('tenant.product.index')}>
                                     Découvrir nos produits
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
@@ -466,13 +466,13 @@ export default function About() {
                                 className="gap-2 shadow-lg"
                                 asChild
                             >
-                                <Link href={route('product.index')}>
+                                <Link href={route('tenant.product.index')}>
                                     Explorer la boutique
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
                             </Button>
                             <Button size="lg" variant="outline" asChild>
-                                <Link href={route('page.contact')}>
+                                <Link href={route('tenant.page.contact')}>
                                     Nous contacter
                                 </Link>
                             </Button>

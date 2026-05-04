@@ -47,6 +47,6 @@ class SocialiteController extends Controller
 
         Auth::login($user);
 
-        return redirect()->intended(route('dashboard.index', absolute: false));
+        return redirect()->intended(route('tenant.dashboard.index', absolute: false));
     }
 }

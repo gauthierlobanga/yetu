@@ -245,11 +245,6 @@ class Client extends Model
             ->withTimestamps();
     }
 
-    // public function compteFidelite(): HasOne
-    // {
-    //     return $this->hasOne(CompteFidelite::class);
-    // }
-
     /**
      * Le front client manipule un compte fidélité principal par client.
      *
@@ -517,21 +512,6 @@ class Client extends Model
             $this->niveau_fidelite = self::NIVEAU_BRONZE;
         }
     }
-
-    // public function getPromotionsUtilisables()
-    // {
-    //     return $this->promotions()
-    //         ->where(function ($q) {
-    //             $q->whereNull('utilisation_max')
-    //                 ->orWhereRaw('promotion_client.utilisations < promotions.utilisation_max');
-    //         })
-    //         ->where('date_debut', '<=', now())
-    //         ->where(function ($q) {
-    //             $q->whereNull('date_fin')
-    //                 ->orWhere('date_fin', '>=', now());
-    //         })
-    //         ->get();
-    // }
 
     /**
      * Obtenir les promotions utilisables par le client

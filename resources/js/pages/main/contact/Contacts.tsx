@@ -141,7 +141,7 @@ export default function ContactPage({
 
     function handleSubmit(event: FormEvent<HTMLFormElement>): void {
         event.preventDefault();
-        post(route('page.contact.store'), {
+        post(route('tenant.page.contact.store'), {
             preserveScroll: true,
             showProgress: false,
             onSuccess: () => {

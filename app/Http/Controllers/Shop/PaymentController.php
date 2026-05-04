@@ -29,9 +29,9 @@ class PaymentController extends Controller
         if ($commande) {
             $commande->marquerPayee();
 
-            return redirect()->route('checkout.success', $commande);
+            return redirect()->route('tenant.checkout.success', $commande);
         }
 
-        return redirect()->route('cart.index')->with('error', 'Paiement échoué');
+        return redirect()->route('tenant.cart.index')->with('error', 'Paiement échoué');
     }
 }

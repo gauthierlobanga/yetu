@@ -1,5 +1,4 @@
 // resources/js/Pages/Vendor/Plans.tsx
-import { CheckIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 import { SparklesIcon as SparklesSolid } from '@heroicons/react/24/solid';
 import { Head, Link, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,10 +13,22 @@ import {
     Store,
     RefreshCw,
     Headphones,
+    ShieldCheckIcon,
+    Sparkles,
+    // Icônes pour les fonctionnalités
+    Package,
+    ShoppingCart,
+    BarChart3,
+    Globe,
+    CreditCard,
+    Users,
+    FileText,
+    Wrench,
+    Check,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
-type Plan = {
+interface Plan {
     id: number | string;
     name: string;
     description: string;
@@ -33,14 +44,14 @@ type Plan = {
     badge?: string;
     badge_color?: string;
     button_text?: string;
-};
+}
 
-type VendorPlansProps = {
+interface Props {
     plans: Plan[];
     canBecomeVendor: boolean;
-};
+}
 
-const planIcons: Record<string, React.ElementType> = {
+const planIcons: Record<string, React.ComponentType<{ className?: string }>> = {
     Gratuit: Zap,
     Starter: Rocket,
     Pro: Crown,
@@ -48,10 +59,38 @@ const planIcons: Record<string, React.ElementType> = {
     Enterprise: BadgeCheck,
 };
 
-export default function VendorPlans({
-    plans,
-    canBecomeVendor,
-}: VendorPlansProps) {
+// Mapping mots‑clés → icône Lucide pour les fonctionnalités
+const featureIconMap: Record<
+    string,
+    React.ComponentType<{ className?: string }>
+> = {
+    produit: Package,
+    commande: ShoppingCart,
+    statistique: BarChart3,
+    domaine: Globe,
+    paiement: CreditCard,
+    compte: Users,
+    rapport: FileText,
+    support: Headphones,
+    personnalis: Wrench, // "personnalisé"
+    illimité: Sparkles,
+};
+
+function getFeatureIcon(
+    text: string,
+): React.ComponentType<{ className?: string }> {
+    const lower = text.toLowerCase();
+
+    for (const [key, Icon] of Object.entries(featureIconMap)) {
+        if (lower.includes(key)) {
+            return Icon;
+        }
+    }
+
+    return Check; // icône par défaut
+}
+
+export default function VendorPlans({ plans, canBecomeVendor }: Props) {
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>(
         'monthly',
@@ -61,32 +100,36 @@ export default function VendorPlans({
         if (billingCycle === 'annual') {
             return plans.map((plan) => ({
                 ...plan,
-                price: plan.price * 10,
-                interval: 'year',
+                price: Math.round(plan.price * 10 * 100) / 100,
+                interval: 'year' as const,
             }));
         }
 
-        return plans;
+        return plans.map((p) => ({ ...p, interval: p.interval as string }));
     }, [plans, billingCycle]);
 
     if (!canBecomeVendor) {
         return (
-            <div className="mx-auto max-w-lg py-20 text-center">
-                <SparklesSolid className="mx-auto h-12 w-12 text-amber-500" />
-                <h1 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
-                    Demande en cours
-                </h1>
-                <p className="mt-4 text-gray-500 dark:text-gray-400">
-                    Une demande de création de boutique est déjà en cours de
-                    traitement. Vous recevrez une notification dès qu'elle sera
-                    validée.
-                </p>
-                <Link
-                    href="/dashboard"
-                    className="mt-8 inline-flex items-center gap-2 rounded-xl bg-amber-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-amber-700"
-                >
-                    Retour au tableau de bord
-                </Link>
+            <div className="flex min-h-[60vh] items-center justify-center px-4">
+                <div className="max-w-md text-center">
+                    <div className="mb-6 inline-flex rounded-2xl bg-emerald-100 p-4 dark:bg-emerald-900/30">
+                        <SparklesSolid className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                        Demande en cours
+                    </h1>
+                    <p className="mt-3 text-gray-500 dark:text-gray-400">
+                        Une demande de création de boutique est déjà en cours de
+                        traitement. Vous recevrez une notification dès qu'elle
+                        sera validée.
+                    </p>
+                    <Link
+                        href="/dashboard"
+                        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                    >
+                        Retour au tableau de bord
+                    </Link>
+                </div>
             </div>
         );
     }
@@ -100,6 +143,18 @@ export default function VendorPlans({
         }
     };
 
+    const formatPrice = (price: number, currency: string = 'CDF') => {
+        if (price === 0) {
+            return 'Gratuit';
+        }
+
+        return new Intl.NumberFormat('fr-CD', {
+            style: 'currency',
+            currency,
+            minimumFractionDigits: 0,
+        }).format(price);
+    };
+
     return (
         <>
             <Head title="Choisir un plan – Devenir vendeur" />
@@ -108,13 +163,13 @@ export default function VendorPlans({
                 <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
                     {/* En-tête */}
                     <div className="mb-16 text-center">
-                        <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
                             <TrendingUp className="h-4 w-4" />
                             Plus de 500 boutiques créées ce mois-ci
                         </span>
-                        <h1 className="mt-6 text-4xl font-extrabold text-gray-900 sm:text-5xl lg:text-6xl dark:text-white">
+                        <h1 className="mt-6 text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-5xl dark:text-white">
                             Lancez votre{' '}
-                            <span className="bg-linear-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent dark:from-amber-400 dark:to-amber-600">
+                            <span className="bg-linear-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-600">
                                 boutique
                             </span>{' '}
                             en ligne
@@ -154,13 +209,11 @@ export default function VendorPlans({
                         </div>
                     </div>
 
-                    {/* Grille des plans */}
-                    <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">
+                    {/* Grille des plans (4 colonnes sur écrans larges) */}
+                    <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {displayedPlans.map((plan) => {
                             const isSelected = selectedPlan?.id === plan.id;
-                            const PlanIcon = planIcons[plan.name] || Store;
-                            const isPopular =
-                                plan.is_featured || plan.is_recommended;
+                            const IconComponent = planIcons[plan.name] || Store;
 
                             return (
                                 <motion.div
@@ -173,16 +226,17 @@ export default function VendorPlans({
                                         ease: 'easeOut',
                                     }}
                                     onClick={() => setSelectedPlan(plan)}
-                                    className={`relative flex cursor-pointer flex-col rounded-2xl border-2 p-6 transition-all duration-200 hover:shadow-lg ${
+                                    className={`relative flex cursor-pointer flex-col rounded-2xl border-2 p-5 transition-all duration-200 hover:shadow-lg ${
                                         isSelected
-                                            ? 'border-amber-500 bg-amber-50/50 shadow-lg dark:border-amber-400 dark:bg-amber-900/20'
-                                            : isPopular
-                                              ? 'border-amber-200 bg-white dark:border-amber-600 dark:bg-gray-800'
+                                            ? 'border-emerald-500 bg-emerald-50/50 shadow-lg dark:border-emerald-400 dark:bg-emerald-900/20'
+                                            : plan.is_featured ||
+                                                plan.is_recommended
+                                              ? 'border-emerald-200 bg-white dark:border-emerald-600 dark:bg-gray-800'
                                               : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
                                     }`}
                                 >
                                     {plan.badge && (
-                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-4 py-1 text-sm font-semibold text-white shadow">
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white shadow">
                                             {plan.badge}
                                         </div>
                                     )}
@@ -190,36 +244,28 @@ export default function VendorPlans({
                                         className={`mb-4 ${plan.badge ? 'mt-2' : ''}`}
                                     >
                                         <div className="mb-2 inline-flex rounded-lg bg-gray-100 p-2 dark:bg-gray-700">
-                                            <PlanIcon className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                                            <IconComponent className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                                         </div>
-                                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                                             {plan.name}
                                         </h2>
                                         {plan.highlight && (
-                                            <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">
+                                            <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
                                                 {plan.highlight}
                                             </p>
                                         )}
-                                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                        <p className="mt-2 line-clamp-3 text-xs text-gray-500 dark:text-gray-400">
                                             {plan.description}
                                         </p>
                                     </div>
 
-                                    <div className="mb-6">
+                                    <div className="mb-5">
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-4xl font-extrabold text-gray-900 dark:text-white">
-                                                {plan.price === 0
-                                                    ? 'Gratuit'
-                                                    : new Intl.NumberFormat(
-                                                          'fr-CD',
-                                                          {
-                                                              style: 'currency',
-                                                              currency:
-                                                                  plan.currency ||
-                                                                  'CDF',
-                                                              minimumFractionDigits: 0,
-                                                          },
-                                                      ).format(plan.price)}
+                                            <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                                                {formatPrice(
+                                                    plan.price,
+                                                    plan.currency,
+                                                )}
                                             </span>
                                             {plan.price > 0 && (
                                                 <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -231,34 +277,39 @@ export default function VendorPlans({
                                             )}
                                         </div>
                                         {plan.trial_days > 0 && (
-                                            <p className="mt-1 text-sm font-medium text-green-600 dark:text-green-400">
+                                            <p className="mt-1 text-xs font-medium text-green-600 dark:text-green-400">
                                                 {plan.trial_days} jours d'essai
                                                 gratuit
                                             </p>
                                         )}
                                     </div>
 
-                                    <hr className="mb-6 border-gray-200 dark:border-gray-700" />
+                                    <hr className="mb-5 border-gray-200 dark:border-gray-700" />
 
-                                    <ul className="mb-8 flex-1 space-y-3">
-                                        {plan.features?.map((feature, i) => (
-                                            <li
-                                                key={i}
-                                                className="flex items-start gap-2"
-                                            >
-                                                <CheckIcon className="mt-0.5 h-5 w-5 shrink-0 text-green-500" />
-                                                <span className="text-sm text-gray-600 dark:text-gray-300">
-                                                    {feature}
-                                                </span>
-                                            </li>
-                                        ))}
+                                    <ul className="mb-6 flex-1 space-y-2.5">
+                                        {plan.features?.map((feature, i) => {
+                                            const FeatureIcon =
+                                                getFeatureIcon(feature);
+
+                                            return (
+                                                <li
+                                                    key={i}
+                                                    className="flex items-start gap-2"
+                                                >
+                                                    <FeatureIcon className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+                                                    <span className="text-xs text-gray-600 dark:text-gray-300">
+                                                        {feature}
+                                                    </span>
+                                                </li>
+                                            );
+                                        })}
                                     </ul>
 
                                     <button
-                                        className={`w-full rounded-xl py-3 text-sm font-semibold transition ${
+                                        className={`w-full rounded-xl py-2.5 text-sm font-semibold transition ${
                                             isSelected
-                                                ? 'bg-amber-500 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-amber-100 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+                                                ? 'bg-emerald-500 text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-emerald-100 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
                                         }`}
                                     >
                                         {isSelected
@@ -282,7 +333,7 @@ export default function VendorPlans({
                             >
                                 <button
                                     onClick={handleContinue}
-                                    className="inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-amber-600 to-amber-700 px-10 py-4 text-lg font-bold text-white shadow-xl transition hover:from-amber-700 hover:to-amber-800"
+                                    className="inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-emerald-600 to-emerald-700 px-10 py-4 text-lg font-bold text-white shadow-xl transition hover:from-emerald-700 hover:to-emerald-800"
                                 >
                                     Continuer avec {selectedPlan.name}
                                     <ArrowRight className="h-5 w-5" />
@@ -304,12 +355,12 @@ export default function VendorPlans({
                             },
                             { icon: Headphones, text: 'Support 24/7' },
                             { icon: TrendingUp, text: 'Statistiques avancées' },
-                        ].map(({ icon: Icon, text }, i) => (
+                        ].map(({ icon: Icon, text }) => (
                             <div
-                                key={i}
+                                key={text}
                                 className="flex flex-col items-center gap-2 rounded-2xl bg-gray-50 p-6 dark:bg-gray-800"
                             >
-                                <Icon className="h-8 w-8 text-amber-500" />
+                                <Icon className="h-8 w-8 text-emerald-500" />
                                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                     {text}
                                 </span>

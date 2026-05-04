@@ -4,6 +4,7 @@ import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import tenant from '@/routes/tenant';
 
 interface OrderItem {
     id: string;
@@ -77,7 +78,7 @@ export default function ShopDashboardPage() {
                             </p>
                         </div>
                         <Button variant="outline" asChild>
-                            <Link href={route('orders.index')}>
+                            <Link href={tenant.orders.index().url}>
                                 Tout voir
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
@@ -88,7 +89,7 @@ export default function ShopDashboardPage() {
                             recentOrders.map((order) => (
                                 <Link
                                     key={order.id}
-                                    href={route('orders.show', order.id)}
+                                    href={tenant.orders.show(order.id).url}
                                     className="flex items-center justify-between rounded-2xl border px-4 py-3 transition hover:bg-muted/40"
                                 >
                                     <div className="space-y-1">
@@ -124,21 +125,21 @@ export default function ShopDashboardPage() {
                         </CardHeader>
                         <CardContent className="grid gap-3">
                             <Link
-                                href={route('wishlist.index')}
+                                href={tenant.wishlist.index().url}
                                 className="flex items-center gap-3 rounded-2xl border px-4 py-3 hover:bg-muted/40"
                             >
                                 <Heart className="h-4 w-4 text-primary" />
                                 <span>Revoir mes favoris</span>
                             </Link>
                             <Link
-                                href={route('loyalty.index')}
+                                href={tenant.loyalty.index().url}
                                 className="flex items-center gap-3 rounded-2xl border px-4 py-3 hover:bg-muted/40"
                             >
                                 <Sparkles className="h-4 w-4 text-primary" />
                                 <span>Utiliser mes points fidelite</span>
                             </Link>
                             <Link
-                                href={route('orders.index')}
+                                href={tenant.orders.index().url}
                                 className="flex items-center gap-3 rounded-2xl border px-4 py-3 hover:bg-muted/40"
                             >
                                 <ShoppingBag className="h-4 w-4 text-primary" />

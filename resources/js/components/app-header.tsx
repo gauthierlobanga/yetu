@@ -43,9 +43,8 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn, toUrl } from '@/lib/utils';
 import SearchInput from '@/pages/searchInput';
 import { home } from '@/routes';
-import blog from '@/routes/blog';
-import page from '@/routes/page';
-import product from '@/routes/product';
+import tenant from '@/routes/tenant';
+import page from '@/routes/tenant/page';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -55,34 +54,34 @@ type Props = {
 const mainNavItems: NavItem[] = [
     {
         title: 'Accueil',
-        href: home(),
+        href: tenant.home(),
     },
     {
         title: 'Produits',
-        href: product.index().url,
+        href: tenant.product.index().url,
     },
-    {
-        title: 'Services',
-        href: '',
-    },
+    // {
+    //     title: 'Services',
+    //     href: tenant.service.index().url,
+    // },
     {
         title: 'Blog',
-        href: blog.index().url,
+        href: tenant.blog.index().url,
     },
     {
         title: 'About',
-        href: page.about().url,
+        href: tenant.page.about().url,
     },
     {
         title: 'Contact',
-        href: page.contact().url,
+        href: tenant.page.contact().url,
     },
 ];
 
 const rightNavItems: NavItem[] = [
     {
         title: 'Aide',
-        href: page.help().url,
+        href: tenant.page.help().url,
         icon: Folder,
     },
 ];

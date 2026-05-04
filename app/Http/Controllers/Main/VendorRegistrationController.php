@@ -10,8 +10,11 @@ use App\Models\TypeDocumentLegal;
 use App\Services\VendorRegistrationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Nnjeim\World\Models\Country;
 use Nnjeim\World\Models\Currency;
 use Nnjeim\World\Models\Language;
 
@@ -71,36 +74,65 @@ class VendorRegistrationController extends Controller
 
         $plan = Plan::findOrFail($planId);
 
-        // Récupérer les devises depuis nnjeim/world
+        // Devises depuis nnjeim/world
         $currencies = Currency::select('code', 'symbol', 'name')
             ->orderBy('code')
             ->get()
+            ->unique('code')
+            ->values()
             ->map(fn ($c) => [
                 'code' => $c->code,
                 'symbol' => $c->symbol,
                 'name' => $c->name,
             ]);
 
-        // Récupérer les langues depuis nnjeim/world
+        // Langues depuis nnjeim/world
         $languages = Language::select('code', 'name')
             ->orderBy('name')
             ->get()
+            ->unique('code')
+            ->values()
             ->map(fn ($l) => [
                 'code' => $l->code,
                 'name' => $l->name,
-                'flag' => $this->getFlagEmoji($l->code),
             ]);
 
-        // Récupérer les types de documents légaux
-        $documentTypes = TypeDocumentLegal::orderBy('ordre', 'asc')
+        // Pays pour les codes téléphoniques (nnjeim/world)
+        $countries = Country::select('id', 'iso2', 'name', 'phone_code')
+            ->whereNotNull('phone_code')
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($c) => [
+                'iso2' => strtolower($c->iso2),
+                'name' => $c->name,
+                'phone_code' => '+'.$c->phone_code,
+            ]);
+
+        $requiredDocuments = TypeDocumentLegal::obligatoires()
+            ->orderBy('ordre', 'asc')
             ->get()
             ->map(fn ($doc) => [
                 'id' => $doc->id,
                 'code' => $doc->code,
                 'nom' => $doc->nom,
                 'description' => $doc->description,
-                'est_obligatoire' => $doc->est_obligatoire,
-            ]);
+                'est_obligatoire' => true,
+                'forme_juridique' => $doc->forme_juridique, // ← déjà présent en base
+            ])
+            ->values(); // on obtient une simple collection, pas un Record
+
+        $optionalDocuments = TypeDocumentLegal::optionnels()
+            ->orderBy('ordre', 'asc')
+            ->get()
+            ->map(fn ($doc) => [
+                'id' => $doc->id,
+                'code' => $doc->code,
+                'nom' => $doc->nom,
+                'description' => $doc->description,
+                'est_obligatoire' => false,
+                'forme_juridique' => $doc->forme_juridique,
+            ])
+            ->values();
 
         return Inertia::render('Vendor/Configure', [
             'plan' => [
@@ -111,7 +143,9 @@ class VendorRegistrationController extends Controller
             ],
             'currencies' => $currencies,
             'languages' => $languages,
-            'documentTypes' => $documentTypes,
+            'countries' => $countries,
+            'requiredDocuments' => $requiredDocuments,
+            'optionalDocuments' => $optionalDocuments,
         ]);
     }
 
@@ -192,6 +226,33 @@ class VendorRegistrationController extends Controller
     /**
      * Étape 3 : Soumettre la demande.
      */
+    // public function vendeurStore(VendorRegistrationRequest $request)
+    // {
+    //     $user = Auth::user();
+    //     $plan = Plan::findOrFail($request->plan_id);
+
+    //     if (! $this->vendorService->canBecomeVendor($user)) {
+    //         return back()->with('error', 'Vous avez déjà une demande en cours.');
+    //     }
+
+    //     if (! $this->vendorService->isShopSlugAvailable($request->shop_slug)) {
+    //         return back()->withErrors(['shop_slug' => 'Ce sous-domaine est déjà utilisé.']);
+    //     }
+
+    //     $vendorRequest = $this->vendorService->initiateRegistration($user, $request->validated());
+    //     session()->forget('selected_plan_id');
+
+    //     if ($plan->price > 0) {
+    //         session(['vendor_request_id' => $vendorRequest->id]);
+
+    //         return redirect()->route('vendor.payment');
+    //     }
+
+    //     $tenant = $this->vendorService->approve($vendorRequest);
+
+    //     // Au lieu de renvoyer directement la vue, on redirige vers la route de succès
+    //     return redirect()->route('vendor.success', ['tenant' => $tenant->slug]);
+    // }
     public function vendeurStore(VendorRegistrationRequest $request)
     {
         $user = Auth::user();
@@ -208,15 +269,38 @@ class VendorRegistrationController extends Controller
         $vendorRequest = $this->vendorService->initiateRegistration($user, $request->validated());
         session()->forget('selected_plan_id');
 
+        // Sauvegarder temporairement le logo s'il existe
+        if ($request->hasFile('logo')) {
+            session(['temp_logo_path' => $request->file('logo')->store('temp')]);
+        }
+
+        // Paiement
         if ($plan->price > 0) {
             session(['vendor_request_id' => $vendorRequest->id]);
 
             return redirect()->route('vendor.payment');
         }
 
+        // Approbation immédiate (plan gratuit)
         $tenant = $this->vendorService->approve($vendorRequest);
 
-        // Au lieu de renvoyer directement la vue, on redirige vers la route de succès
+        // Attacher le logo au tenant
+        if ($logoPath = session('temp_logo_path')) {
+            try {
+                $tenant->addMedia(storage_path('app/'.$logoPath))
+                    ->usingFileName('logo-'.$tenant->id.'.png')
+                    ->toMediaCollection('tenant_avatar');
+                // Supprimer le fichier temporaire
+                Storage::delete($logoPath);
+                session()->forget('temp_logo_path');
+            } catch (\Exception $e) {
+                Log::error('Erreur sauvegarde logo', [
+                    'error' => $e->getMessage(),
+                    'tenant_id' => $tenant->id,
+                ]);
+            }
+        }
+
         return redirect()->route('vendor.success', ['tenant' => $tenant->slug]);
     }
 

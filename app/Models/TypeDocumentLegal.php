@@ -18,6 +18,7 @@ class TypeDocumentLegal extends Model
         'description',
         'autorite_emettrice',
         'est_obligatoire',
+        'forme_juridique',
         'ordre',
     ];
 
@@ -41,6 +42,33 @@ class TypeDocumentLegal extends Model
                 'verifie_par',
             ])
             ->withTimestamps();
+    }
+
+    /**
+     * Retourne le libellé lisible d'une forme juridique.
+     */
+    public static function getFormeJuridiqueLabel(?string $value): string
+    {
+        return match ($value) {
+            'societe_commerciale' => 'Société commerciale',
+            'petit_commercant' => 'Petit commerçant',
+            'organisation_sans_but_lucratif' => 'Organisation sans but lucratif',
+            'toutes' => 'Toutes formes',
+            default => $value ?? '—',
+        };
+    }
+
+    /**
+     * Retourne les options pour un SelectFilter Filament.
+     */
+    public static function getFormeJuridiqueOptions(): array
+    {
+        return [
+            'societe_commerciale' => 'Société commerciale',
+            'petit_commercant' => 'Petit commerçant',
+            'organisation_sans_but_lucratif' => 'Organisation sans but lucratif',
+            'toutes' => 'Toutes formes',
+        ];
     }
 
     public function scopeObligatoires($query)

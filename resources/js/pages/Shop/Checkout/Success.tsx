@@ -3,6 +3,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import MainLayout from '@/layouts/main-layout';
+import tenant from '@/routes/tenant';
 
 interface Props extends Record<string, unknown> {
     commande: {
@@ -36,12 +37,14 @@ export default function CheckoutSuccessPage() {
                         </div>
                         <div className="flex flex-wrap justify-center gap-3">
                             <Button asChild>
-                                <Link href={route('orders.show', commande.id)}>
+                                <Link
+                                    href={tenant.orders.show(commande.id).url}
+                                >
                                     Voir ma commande
                                 </Link>
                             </Button>
                             <Button variant="outline" asChild>
-                                <Link href={route('product.index')}>
+                                <Link href={tenant.product.index().url}>
                                     Continuer mes achats
                                 </Link>
                             </Button>

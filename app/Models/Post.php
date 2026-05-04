@@ -448,12 +448,12 @@ class Post extends Model implements HasMedia
 
     public function getUrlAttribute(): string
     {
-        return route('posts.show', $this->slug);
+        return route('tenant.blog.show', $this->slug);
     }
 
     public function getUrlBlogAttribute(): string
     {
-        return route('blog.show', $this->slug);
+        return route('tenant.blog.show', $this->slug);
     }
 
     public function getStatusLabelAttribute(): string

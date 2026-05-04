@@ -78,7 +78,7 @@ export function EmptyCartPreview() {
                     size="lg"
                     className="group gap-2 rounded-full px-8 shadow-lg hover:shadow-xl"
                 >
-                    <Link href={route('product.index')}>
+                    <Link href={route('tenant.product.index')}>
                         Explorer la boutique
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>

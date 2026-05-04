@@ -44,7 +44,7 @@ class ContactController extends Controller
             ]),
         ]);
 
-        return to_route('page.contact')->with('success', 'Votre message a bien ete envoye. Notre equipe vous recontactera tres vite.');
+        return to_route('tenant.page.contact')->with('success', 'Votre message a bien ete envoye. Notre equipe vous recontactera tres vite.');
     }
 
     private function getPageProps(): array

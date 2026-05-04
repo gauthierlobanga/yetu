@@ -1,3 +1,4 @@
+// resources/js/layouts/ShopAccountShell.tsx
 import { Head, Link } from '@inertiajs/react';
 import {
     Award,
@@ -62,7 +63,7 @@ const sections: Array<{
     },
     {
         key: 'loyalty',
-        label: 'Fidelite',
+        label: 'Fidélité',
         href: route('loyalty.index'),
         icon: Award,
     },
@@ -93,11 +94,17 @@ export default function ShopAccountShell({
             <Head title={headTitle} />
 
             <div className="mx-auto max-w-7xl px-4 py-8">
-                <div className="mb-6 rounded-3xl border bg-linear-to-br from-primary/8 via-background to-secondary/8 p-6">
+                {/* En‑tête épuré */}
+                <div className="mb-6 rounded-xl border bg-card p-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                         <div className="space-y-2">
-                            <Badge variant="secondary">Espace client</Badge>
-                            <h1 className="font-heading text-3xl font-semibold">
+                            <Badge
+                                variant="secondary"
+                                className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
+                            >
+                                Espace client
+                            </Badge>
+                            <h1 className="text-3xl font-bold tracking-tight text-foreground">
                                 {title}
                             </h1>
                             <p className="max-w-2xl text-sm text-muted-foreground">
@@ -110,13 +117,13 @@ export default function ShopAccountShell({
                                 {stats.map((stat) => (
                                     <Card
                                         key={stat.label}
-                                        className="min-w-36 border-0 bg-background/90 py-0 shadow-sm"
+                                        className="min-w-36 border bg-card"
                                     >
                                         <CardContent className="space-y-1 p-4">
                                             <p className="text-xs tracking-wide text-muted-foreground uppercase">
                                                 {stat.label}
                                             </p>
-                                            <p className="text-xl font-semibold">
+                                            <p className="text-xl font-semibold text-foreground">
                                                 {stat.value}
                                             </p>
                                             {stat.helper && (
@@ -133,22 +140,26 @@ export default function ShopAccountShell({
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
-                    <Card className="h-fit py-0">
+                    {/* Navigation latérale */}
+                    <Card className="h-fit border">
                         <CardHeader className="pb-2">
-                            <CardTitle>Navigation</CardTitle>
+                            <CardTitle className="text-sm font-semibold text-foreground">
+                                Navigation
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-2">
+                        <CardContent className="space-y-1">
                             {sections.map((section) => {
                                 const Icon = section.icon;
+                                const isActive = active === section.key;
 
                                 return (
                                     <Link
                                         key={section.key}
                                         href={section.href}
-                                        className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition ${
-                                            active === section.key
-                                                ? 'bg-primary text-primary-foreground'
-                                                : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground'
+                                        className={`flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                                            isActive
+                                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                         }`}
                                     >
                                         <Icon className="h-4 w-4" />
@@ -159,6 +170,7 @@ export default function ShopAccountShell({
                         </CardContent>
                     </Card>
 
+                    {/* Contenu principal */}
                     <div className="space-y-6">{children}</div>
                 </div>
             </div>

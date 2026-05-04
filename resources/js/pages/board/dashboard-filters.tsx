@@ -1,9 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/components/dashboard-filters.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
-import { Calendar, Filter, X, ChevronDown, RefreshCw } from 'lucide-react';
 import {
     format,
     subDays,
@@ -14,9 +13,18 @@ import {
     endOfYear,
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Calendar, Filter, X, ChevronDown, RefreshCw } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
 import {
     Select,
     SelectContent,
@@ -24,15 +32,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import tenant from '@/routes/tenant';
 
 interface DashboardFiltersProps {
     currentFilters?: {
@@ -64,6 +66,7 @@ const periodOptions = [
 
 const yearOptions = Array.from({ length: 5 }, (_, i) => {
     const year = new Date().getFullYear() - i;
+
     return { value: year.toString(), label: year.toString() };
 });
 
@@ -144,7 +147,7 @@ export function DashboardFilters({
             params.status = selectedStatus;
         }
 
-        router.get('/dashboard', params, {
+        router.get(tenant.dashboard.index().url, params, {
             preserveState: true,
             preserveScroll: true,
             only: [
@@ -176,7 +179,7 @@ export function DashboardFilters({
         setSelectedStatus('all');
 
         router.get(
-            '/dashboard',
+            tenant.dashboard.index().url,
             {},
             {
                 preserveState: true,
@@ -187,10 +190,23 @@ export function DashboardFilters({
 
     const getActiveFiltersCount = () => {
         let count = 0;
-        if (period !== 'last30days') count++;
-        if (selectedStatus !== 'all') count++;
-        if (selectedYear !== new Date().getFullYear().toString()) count++;
-        if (selectedMonth !== '') count++;
+
+        if (period !== 'last30days') {
+            count++;
+        }
+
+        if (selectedStatus !== 'all') {
+            count++;
+        }
+
+        if (selectedYear !== new Date().getFullYear().toString()) {
+            count++;
+        }
+
+        if (selectedMonth !== '') {
+            count++;
+        }
+
         return count;
     };
 

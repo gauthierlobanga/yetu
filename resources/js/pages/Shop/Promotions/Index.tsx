@@ -70,7 +70,7 @@ export default function PromotionsIndexPage() {
                                     </span>
                                 </div>
                                 <Link
-                                    href={route('product.index')}
+                                    href={route('tenant.product.index')}
                                     className="inline-flex text-sm font-medium text-primary hover:underline"
                                 >
                                     Explorer les produits

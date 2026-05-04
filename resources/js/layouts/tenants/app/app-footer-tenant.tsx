@@ -54,7 +54,7 @@ const footerSections = [
     {
         title: 'Explorer',
         links: [
-            { name: 'Produits', href: route('tenant.products.index') },
+            { name: 'Produits', href: route('tenant.product.index') },
             {
                 name: 'Promotions',
                 href: route('tenant.promotions.index'),
@@ -62,12 +62,12 @@ const footerSections = [
             },
             {
                 name: 'Nouveautés',
-                href: route('tenant.products.index', { sort: 'newest' }),
+                href: route('tenant.product.index', { sort: 'newest' }),
                 badge: '✨',
             },
             {
                 name: 'Meilleures ventes',
-                href: route('tenant.products.index', { sort: 'bestseller' }),
+                href: route('tenant.product.index', { sort: 'bestseller' }),
             },
         ],
     },
@@ -75,9 +75,9 @@ const footerSections = [
         title: 'Entreprise',
         links: [
             { name: 'À propos', href: route('tenant.pages.about') },
-            { name: 'Blog', href: '' },
-            { name: 'Carrières', href: '#' },
-            { name: 'Devenir vendeur', href: '#' },
+            { name: 'Blog', href: route('tenant.blog.index') },
+            { name: 'Carrières', href: route('tenant.home') },
+            { name: 'Devenir vendeur', href: route('vendor.register') },
         ],
     },
     {

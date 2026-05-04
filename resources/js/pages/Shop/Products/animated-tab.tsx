@@ -115,7 +115,9 @@ export default function ProductShowTab({
                                             <Link
                                                 href={
                                                     activeCategory?.url ||
-                                                    route('product.index')
+                                                    route(
+                                                        'tenant.product.index',
+                                                    )
                                                 }
                                             >
                                                 Voir toute la collection
@@ -234,7 +236,7 @@ export default function ProductShowTab({
                                         >
                                             <Link
                                                 href={route(
-                                                    'product.category.index',
+                                                    'tenant.product.category.index',
                                                 )}
                                             >
                                                 Parcourir les catégories
@@ -252,7 +254,7 @@ export default function ProductShowTab({
                                     >
                                         Besoin d'aide ?{' '}
                                         <Link
-                                            href={route('page.contact')}
+                                            href={route('tenant.page.contact')}
                                             className="font-medium text-primary hover:underline"
                                         >
                                             Contactez notre support

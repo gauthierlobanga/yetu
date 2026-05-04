@@ -106,7 +106,7 @@ export default function CartPreview() {
                 asChild
                 className="mt-5 h-11 w-full rounded-xl text-sm font-medium"
             >
-                <Link href={route('cart.index')}>
+                <Link href={route('tenant.cart.index')}>
                     Voir mon panier
                     <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

@@ -69,43 +69,6 @@ class Inventaire extends Model
     /**
      * Méthodes métier
      */
-
-    // public function terminer(array $resultats): void
-    // {
-    //     $this->statut = self::STATUT_TERMINE;
-    //     $this->date_fin = now();
-    //     $this->resultats = $resultats;
-    //     $this->save();
-    // }
-
-    // public function valider(): void
-    // {
-    //     if ($this->statut !== self::STATUT_TERMINE) {
-    //         throw new \Exception("L'inventaire doit être terminé avant d'être validé.");
-    //     }
-
-    //     $this->statut = self::STATUT_VALIDE;
-    //     $this->save();
-
-    //     // Créer les mouvements de stock pour les écarts
-    //     foreach ($this->resultats['produits'] ?? [] as $produitData) {
-    //         $ecart = ($produitData['quantite_reelle'] ?? 0) - ($produitData['quantite_theorique'] ?? 0);
-
-    //         if ($ecart != 0) {
-    //             MouvementStock::create([
-    //                 'produit_id' => $produitData['produit_id'],
-    //                 'entrepot_id' => $this->entrepot_id,
-    //                 'inventaire_id' => $this->id,
-    //                 'type' => MouvementStock::TYPE_AJUSTEMENT,
-    //                 'quantite' => $ecart,
-    //                 'reference' => "INV-{$this->reference}",
-    //                 'notes' => 'Ajustement inventaire',
-    //                 'date_mouvement' => now(),
-    //             ]);
-    //         }
-    //     }
-    // }
-
     // Accessors
     public function getLibelleStatutAttribute(): string
     {

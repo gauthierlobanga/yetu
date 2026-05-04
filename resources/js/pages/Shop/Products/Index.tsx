@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { Head, usePage, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -42,6 +41,7 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import MainLayout from '@/layouts/main-layout';
+import tenant from '@/routes/tenant';
 import type { PageProps, Product, Category } from '@/types/ecommerce/products';
 
 interface LocalFilters {
@@ -103,6 +103,7 @@ export default function ProductsIndex() {
     );
     const [searchInput, setSearchInput] = useState(initialFilters.search || '');
     const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     useEffect(() => {
         setLocalFilters(initialFilters);
         setSearchInput(initialFilters.search || '');
@@ -112,7 +113,6 @@ export default function ProductsIndex() {
         ]);
     }, [initialFilters, serverPriceRange]);
 
-    // Dans le composant ProductsIndex :
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isSearchingByImage, setIsSearchingByImage] = useState(false);
 
@@ -134,8 +134,6 @@ export default function ProductsIndex() {
         formData.append('image', file);
 
         try {
-            // Envoyer l'image au serveur via Inertia (en utilisant router.post avec FormData)
-            // Note : Inertia ne supporte pas nativement FormData, on utilise fetch puis redirection manuelle
             const response = await fetch(route('products.search.by-image'), {
                 method: 'POST',
                 body: formData,
@@ -165,12 +163,12 @@ export default function ProductsIndex() {
         } finally {
             setIsSearchingByImage(false);
 
-            // Réinitialiser l'input
             if (fileInputRef.current) {
                 fileInputRef.current.value = '';
             }
         }
     };
+
     const applyFilters = (newFilters: Partial<LocalFilters>) => {
         const updated = { ...localFilters, ...newFilters };
         setLocalFilters(updated);
@@ -182,7 +180,7 @@ export default function ProductsIndex() {
             }
         });
 
-        router.get('/product', query, {
+        router.get(tenant.product.index().url, query, {
             preserveState: true,
             preserveScroll: true,
             only: ['products'],
@@ -196,7 +194,7 @@ export default function ProductsIndex() {
         setPriceRange([serverPriceRange.min, serverPriceRange.max]);
 
         router.get(
-            '/product',
+            tenant.product.index().url,
             {},
             {
                 preserveState: true,
@@ -247,18 +245,15 @@ export default function ProductsIndex() {
             <Head title="Tous les produits" />
 
             <div className="mx-auto max-w-7xl px-4 py-8">
-                {/* En-tête avec titre et recherche */}
-
-                {/* En-tête premium avec titre et recherche avancée */}
+                {/* En-tête premium */}
                 <div className="mb-8 space-y-4">
-                    {/* Ligne principale : Titre et recherche */}
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <motion.div
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.3 }}
                         >
-                            <h1 className="font-heading text-2xl font-bold md:text-3xl">
+                            <h1 className="font-heading text-2xl font-bold text-foreground md:text-3xl">
                                 Tous les produits
                                 <motion.span
                                     key={totalProducts}
@@ -272,7 +267,7 @@ export default function ProductsIndex() {
                             </h1>
                         </motion.div>
 
-                        {/* Zone de recherche enrichie */}
+                        {/* Zone de recherche */}
                         <motion.div
                             initial={{ opacity: 0, x: 10 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -302,7 +297,6 @@ export default function ProductsIndex() {
                                     </button>
                                 )}
                                 <div className="absolute top-1/2 right-1 flex -translate-y-1/2 items-center gap-1">
-                                    {/* Recherche par image (placeholder) */}
                                     <input
                                         type="file"
                                         ref={fileInputRef}
@@ -310,7 +304,6 @@ export default function ProductsIndex() {
                                         accept="image/*"
                                         className="hidden"
                                     />
-
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -328,7 +321,7 @@ export default function ProductsIndex() {
                                 </div>
                             </div>
 
-                            {/* Suggestions de recherche populaires (affichage conditionnel) */}
+                            {/* Suggestions */}
                             {searchInput && (
                                 <motion.div
                                     initial={{ opacity: 0, y: -5 }}
@@ -426,7 +419,7 @@ export default function ProductsIndex() {
                         <span className="text-muted-foreground">
                             Resultats pour
                         </span>
-                        <span className="font-medium">
+                        <span className="font-medium text-foreground">
                             {searchContext.query}
                         </span>
                     </motion.div>
@@ -451,12 +444,11 @@ export default function ProductsIndex() {
                         </div>
                     </div>
 
-                    {/* Zone principale */}
+                    {/* Zone produits */}
                     <div className="lg:col-span-3">
                         {/* Barre d'outils */}
                         <div className="mb-4 flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                                {/* Filtres mobile */}
                                 <Sheet
                                     open={mobileFiltersOpen}
                                     onOpenChange={setMobileFiltersOpen}
@@ -480,7 +472,6 @@ export default function ProductsIndex() {
                                         </Button>
                                     </SheetTrigger>
                                     <SheetContent
-                                        aria-describedby={undefined}
                                         side="left"
                                         className="w-80 sm:w-96"
                                     >
@@ -512,13 +503,12 @@ export default function ProductsIndex() {
                                     </SheetContent>
                                 </Sheet>
 
-                                {/* Densité d'affichage */}
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className="hidden cursor-pointer rounded-none shadow-none md:flex"
+                                            className="hidden cursor-pointer md:flex"
                                         >
                                             {viewDensity === 'comfortable' ? (
                                                 <LayoutGrid className="h-5 w-5" />
@@ -527,12 +517,8 @@ export default function ProductsIndex() {
                                             )}
                                         </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                        align="start"
-                                        className="cursor-pointer rounded-none shadow-none"
-                                    >
+                                    <DropdownMenuContent align="start">
                                         <DropdownMenuItem
-                                            className="cursor-pointer"
                                             onClick={() =>
                                                 setViewDensity('comfortable')
                                             }
@@ -541,7 +527,6 @@ export default function ProductsIndex() {
                                             Confortable
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
-                                            className="cursor-pointer"
                                             onClick={() =>
                                                 setViewDensity('compact')
                                             }
@@ -553,7 +538,6 @@ export default function ProductsIndex() {
                                 </DropdownMenu>
                             </div>
 
-                            {/* Tri */}
                             <Select
                                 value={localFilters.sort || 'newest'}
                                 onValueChange={(value) =>
@@ -582,14 +566,12 @@ export default function ProductsIndex() {
 
                         {/* État vide */}
                         {products.data.length === 0 ? (
-                            // Composant à ajouter dans ProductsIndex.tsx
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.4, ease: 'easeOut' }}
                                 className="flex flex-col items-center justify-center py-16 text-center"
                             >
-                                {/* Illustration premium */}
                                 <div className="relative mb-8">
                                     <motion.div
                                         initial={{ scale: 0.9, opacity: 0 }}
@@ -600,6 +582,7 @@ export default function ProductsIndex() {
                                         }}
                                         className="text-muted-foreground/60"
                                     >
+                                        {/* icône SVG conservée */}
                                         <svg
                                             width="160"
                                             height="160"
@@ -643,12 +626,11 @@ export default function ProductsIndex() {
                                     </motion.div>
                                 </div>
 
-                                {/* Message principal */}
                                 <motion.h3
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.2 }}
-                                    className="mb-2 font-heading text-2xl font-semibold"
+                                    className="mb-2 font-heading text-2xl font-semibold text-foreground"
                                 >
                                     Aucun produit trouvé
                                 </motion.h3>
@@ -665,7 +647,6 @@ export default function ProductsIndex() {
                                     catégories.
                                 </motion.p>
 
-                                {/* Actions */}
                                 <motion.div
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -683,7 +664,7 @@ export default function ProductsIndex() {
                                     <Button variant="outline" size="lg" asChild>
                                         <Link
                                             href={route(
-                                                'product.category.index',
+                                                'tenant.product.category.index',
                                             )}
                                         >
                                             Parcourir les catégories
@@ -692,7 +673,6 @@ export default function ProductsIndex() {
                                     </Button>
                                 </motion.div>
 
-                                {/* Suggestion de contact (optionnel) */}
                                 <motion.p
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
@@ -701,7 +681,7 @@ export default function ProductsIndex() {
                                 >
                                     Besoin d'aide ?{' '}
                                     <Link
-                                        href={route('page.contact')}
+                                        href={route('tenant.page.contact')}
                                         className="font-medium text-primary hover:underline"
                                     >
                                         Contactez notre support

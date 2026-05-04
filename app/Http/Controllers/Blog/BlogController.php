@@ -24,7 +24,7 @@ class BlogController extends Controller
                 ->find($request->integer('category_id'));
 
             if ($legacyCategory) {
-                return redirect()->route('blog.index', [
+                return redirect()->route('tenant.blog.index', [
                     'tag' => $legacyCategory->slug,
                     ...$request->except('category_id'),
                 ]);
@@ -129,7 +129,7 @@ class BlogController extends Controller
 
     public function blogByCategory(PostCategory $category)
     {
-        return route('blog.index', ['tag' => $category->slug]);
+        return route('tenant.blog.index', ['tag' => $category->slug]);
     }
 
     public function blogComment() {}

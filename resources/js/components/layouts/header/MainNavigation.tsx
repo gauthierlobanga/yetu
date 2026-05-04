@@ -1,11 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// resources/js/components/MainNavigation.tsx
 import { Link } from '@inertiajs/react';
+import React from 'react';
 import {
     NavigationMenu,
     NavigationMenuItem,
+    NavigationMenuLink,
     NavigationMenuList,
+    NavigationMenuTrigger,
+    NavigationMenuContent,
     navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
-import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
 import type { NavItem } from '@/types';
 
@@ -13,40 +18,42 @@ interface MainNavigationProps {
     items: NavItem[];
 }
 
-const activeItemStyles = 'bg-accent text-accent-foreground';
-
 export function MainNavigation({ items }: MainNavigationProps) {
-    const { whenCurrentUrl } = useCurrentUrl();
-
-    // Filtrer les doublons potentiels basés sur href
-    const uniqueItems = items.filter(
-        (item, index, self) =>
-            index === self.findIndex((t) => t.href === item.href),
-    );
-
     return (
-        <NavigationMenu className="flex h-full items-stretch">
-            <NavigationMenuList className="flex h-full items-stretch space-x-1">
-                {uniqueItems.map((item, index) => (
-                    <NavigationMenuItem
-                        key={`nav-${item.href}-${index}`}
-                        className="relative flex h-full items-center"
-                    >
-                        <Link
-                            href={item.href}
-                            className={cn(
-                                navigationMenuTriggerStyle(),
-                                whenCurrentUrl(item.href, activeItemStyles),
-                                'h-9 cursor-pointer px-3 text-sm font-medium transition-colors hover:text-primary',
-                            )}
-                        >
-                            {item.icon && (
-                                <item.icon className="mr-2 h-4 w-4" />
-                            )}
-                            {item.title}
-                        </Link>
-                    </NavigationMenuItem>
-                ))}
+        <NavigationMenu className="hidden lg:flex">
+            <NavigationMenuList className="gap-1">
+                {items.map((item, index) => {
+                    // Si l'item a un contenu (méga‑menu), on utilise NavigationMenuTrigger + NavigationMenuContent
+                    if (item.content) {
+                        return (
+                            <NavigationMenuItem key={`nav-${index}`}>
+                                <NavigationMenuTrigger className="h-10 px-3 text-sm font-medium">
+                                    {item.title}
+                                </NavigationMenuTrigger>
+                                <NavigationMenuContent className="absolute top-full left-0 w-screen border-b bg-white shadow-lg dark:bg-gray-900">
+                                    <div className="mx-auto max-w-7xl px-4 py-8">
+                                        {item.content}
+                                    </div>
+                                </NavigationMenuContent>
+                            </NavigationMenuItem>
+                        );
+                    }
+
+                    // Sinon, un simple lien
+                    return (
+                        <NavigationMenuItem key={`nav-${index}`}>
+                            <Link
+                                href={item.href}
+                                className={cn(
+                                    navigationMenuTriggerStyle(),
+                                    'h-10 px-3 text-sm font-medium',
+                                )}
+                            >
+                                {item.title}
+                            </Link>
+                        </NavigationMenuItem>
+                    );
+                })}
             </NavigationMenuList>
         </NavigationMenu>
     );

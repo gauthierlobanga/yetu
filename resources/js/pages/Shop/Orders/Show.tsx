@@ -3,6 +3,7 @@ import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import tenant from '@/routes/tenant';
 
 interface OrderLine {
     id: string;
@@ -151,18 +152,18 @@ export default function ShopOrderShowPage() {
                         <Button
                             variant="outline"
                             onClick={() =>
-                                router.post(route('orders.cancel', order.id))
+                                router.post(tenant.orders.cancel(order.id).url)
                             }
                         >
                             Annuler la commande
                         </Button>
                         <Button variant="outline" asChild>
-                            <Link href={route('orders.invoice', order.id)}>
+                            <Link href={tenant.orders.invoice(order.id).url}>
                                 Demander la facture
                             </Link>
                         </Button>
                         <Button asChild>
-                            <Link href={route('return.create', order.id)}>
+                            <Link href={tenant.return.create(order.id).url}>
                                 Demander un retour
                             </Link>
                         </Button>

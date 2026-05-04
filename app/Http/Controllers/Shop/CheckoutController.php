@@ -26,7 +26,7 @@ class CheckoutController extends Controller
         $cart = $this->cartController->getCart($request);
 
         if ($cart->est_vide) {
-            return redirect()->route('cart.index')->with('error', 'Votre panier est vide.');
+            return redirect()->route('tenant.cart.index')->with('error', 'Votre panier est vide.');
         }
 
         // Récupérer les adresses de l'utilisateur connecté
@@ -83,7 +83,7 @@ class CheckoutController extends Controller
                 }
             }
 
-            return redirect()->route('payment.pay', $commande);
+            return redirect()->route('tenant.payment.pay', $commande);
         } catch (\Exception $e) {
             Log::error('Erreur lors de la création de la commande : '.$e->getMessage());
 
@@ -113,7 +113,7 @@ class CheckoutController extends Controller
      */
     public function checkoutCancel()
     {
-        return redirect()->route('cart.index')
+        return redirect()->route('tenant.cart.index')
             ->with('info', 'Le paiement a été annulé. Vous pouvez réessayer quand vous le souhaitez.');
     }
 }

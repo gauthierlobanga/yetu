@@ -88,12 +88,12 @@ class PostCategory extends Model
     // Accessors
     public function getUrlAttribute(): string
     {
-        return route('blog.category', $this->slug);
+        return route('tenant.blog.category', $this->slug);
     }
 
     public function getUrlCategoryAttribute(): string
     {
-        return route('blog.category', $this->slug);
+        return route('tenant.blog.category', $this->slug);
     }
 
     public function getFullPathAttribute(): string

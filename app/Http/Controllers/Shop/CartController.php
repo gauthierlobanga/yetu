@@ -42,7 +42,7 @@ class CartController extends Controller
             return response()->json(['success' => true, 'cart' => $this->formatCart($cart)]);
         }
 
-        return redirect()->route('cart.index')->with('success', 'Produit ajouté au panier');
+        return redirect()->route('tenant.cart.index')->with('success', 'Produit ajouté au panier');
     }
 
     public function cartUpdate(Request $request, ItemPanier $item)

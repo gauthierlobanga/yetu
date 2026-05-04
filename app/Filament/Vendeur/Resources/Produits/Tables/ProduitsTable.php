@@ -348,7 +348,7 @@ class ProduitsTable
                     Action::make('preview')
                         ->label('Aperçu')
                         ->icon('heroicon-m-eye')
-                        ->url(fn ($record) => route('product.show', $record->slug))
+                        ->url(fn ($record) => route('tenant.product.show', $record->slug))
                         ->openUrlInNewTab()
                         ->color('gray'),
 

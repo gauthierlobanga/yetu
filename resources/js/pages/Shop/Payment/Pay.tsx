@@ -3,6 +3,7 @@ import { Lock, ShieldCheck } from 'lucide-react';
 import ShopAccountShell from '@/components/ecommerce/ShopAccountShell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import tenant from '@/routes/tenant';
 
 interface Props extends Record<string, unknown> {
     commande: {
@@ -50,7 +51,7 @@ export default function PaymentPayPage() {
                     <div className="flex flex-wrap gap-3">
                         <Button asChild>
                             <Link
-                                href={route('payment.callback', {
+                                href={route('tenant.payment.callback', {
                                     commande_id: commande.id,
                                 })}
                             >
@@ -58,7 +59,9 @@ export default function PaymentPayPage() {
                             </Link>
                         </Button>
                         <Button variant="outline" asChild>
-                            <Link href={route('checkout.cancel')}>Annuler</Link>
+                            <Link href={tenant.checkout.cancel().url}>
+                                Annuler
+                            </Link>
                         </Button>
                     </div>
                 </CardContent>

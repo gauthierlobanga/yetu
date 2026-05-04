@@ -61,7 +61,7 @@ class ReturnController extends Controller
             ]);
         }
 
-        return redirect()->route('return.show', $retour)->with('success', 'Demande de retour enregistrée');
+        return redirect()->route('tenant.return.show', $retour)->with('success', 'Demande de retour enregistrée');
     }
 
     public function returnsShow(Retour $retour)

@@ -13,9 +13,6 @@ class CategoryController extends Controller
         $categories = ProductCategory::active()->ordered()->with('media')->get()
             ->map(fn ($c) => $this->formatCategory($c));
 
-        // $categories = ProductCategory::active()->parents()->ordered()->with('media')->get()
-        //     ->map(fn ($c) => $this->formatCategory($c));
-
         return Inertia::render('Shop/Categories/Index', ['categories' => $categories]);
     }
 
@@ -47,7 +44,7 @@ class CategoryController extends Controller
             'icon' => $category->icon,
             'banner' => $category->banner,
             'image_thumb' => $category->image_thumb,
-            'url' => route('product.category.show', $category->slug),
+            'url' => route('tenant.product.category.show', $category->slug),
             'products_count' => $category->products_count,
         ];
     }

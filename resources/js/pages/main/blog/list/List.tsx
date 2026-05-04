@@ -62,12 +62,12 @@ import type { BreadcrumbItem } from '@/types';
 import type { Category } from '@/types/posts/category';
 import type { Post, PostsResponse } from '@/types/posts/posts';
 import { AnimatedPostGrid } from './AnimatedPostGrid';
-import blog from '../../../../routes/blog';
+import tenant from '@/routes/tenant';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Blog',
-        href: blog.index().url,
+        href: tenant.blog.index().url,
     },
 ];
 
@@ -314,7 +314,7 @@ export default function List({
 
             previousFiltersRef.current = filterKey;
 
-            router.get(blog.index().url, params as any, {
+            router.get(tenant.blog.index().url, params as any, {
                 async: true,
                 preserveState: true,
                 preserveScroll: true,
@@ -495,7 +495,10 @@ export default function List({
     }, []);
 
     const PostCard = ({ post }: { post: ProcessedPost }) => (
-        <Link href={blog.show(post.slug)} className="group block h-full">
+        <Link
+            href={tenant.blog.show(post.slug).url}
+            className="group block h-full"
+        >
             <Card className="h-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
                 {/* Image */}
                 <div className="relative overflow-hidden">

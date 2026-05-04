@@ -194,7 +194,7 @@ class HomeController extends Controller
             'nombre_avis' => (int) $product->nombre_avis,
             'badge' => $product->is_new ? 'Nouveauté' : ($product->is_bestseller ? 'Best Seller' : null),
             'brand' => $product->brand ? ['nom' => $product->brand->nom, 'slug' => $product->brand->slug] : null,
-            'url' => route('product.show', $product->slug),
+            'url' => route('tenant.tenant.product.show', $product->slug),
             'sold_count' => (int) $product->sold_count,
         ];
 
@@ -272,7 +272,7 @@ class HomeController extends Controller
             'description' => $category->short_description,
             'image' => $category->image_url,
             'icon' => $category->icon_url,
-            'url' => route('product.category.show', $category->slug),
+            'url' => route('tenant.product.category.show', $category->slug),
             'children' => $category->children->map(fn ($child) => $this->formatCategory($child)),
         ];
     }
@@ -286,7 +286,7 @@ class HomeController extends Controller
             'nom' => $brand->nom,
             'slug' => $brand->slug,
             'logo' => $logo,
-            'url' => route('brands.show', $brand->slug),
+            'url' => route('tenant.brands.show', $brand->slug),
         ];
     }
 }

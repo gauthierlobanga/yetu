@@ -44,7 +44,7 @@ class ProductController extends Controller
                     : back()->with('error', $message);
             }
 
-            $redirectUrl = route('product.index', array_filter([
+            $redirectUrl = route('tenant.product.index', array_filter([
                 'search' => $result['query'],
                 'image_search' => 1,
             ]));
@@ -184,7 +184,7 @@ class ProductController extends Controller
             'note_moyenne' => (float) $product->note_moyenne,
             'nombre_avis' => $product->nombre_avis,
             'badge' => $product->is_new ? 'Nouveauté' : ($product->is_bestseller ? 'Best ' : null),
-            'url' => route('product.show', $product->slug),
+            'url' => route('tenant.tenant.product.show', $product->slug),
         ];
 
         if ($withDetails) {

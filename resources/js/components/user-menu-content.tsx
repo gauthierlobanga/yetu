@@ -28,8 +28,8 @@ import { Can, CanRole } from '@/core/permissions/Can';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 // import { logout } from '@/routes';
 import { useTenantRoute } from '@/lib/utils/routes'; // ou le chemin réel
-import { logout } from '@/routes';
-import { edit } from '@/routes/profile';
+import { logout } from '@/routes/tenant';
+import { edit } from '@/routes/tenant/profile';
 import type { User } from '@/types';
 type Props = {
     user: User;
@@ -86,7 +86,6 @@ const MenuItemComponent = ({
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
     const id = useId();
-    const tenantRoute = useTenantRoute(); // ← appelé une fois, ici
 
     const handleLogout = () => {
         cleanup();
@@ -100,7 +99,7 @@ export function UserMenuContent({ user }: Props) {
                 key: 'dashboard',
                 icon: LayoutDashboard,
                 label: 'Mon compte',
-                href: route('dashboard.index'),
+                href: route('tenant.dashboard.index'),
             },
             {
                 key: 'dashboard-vendor',
@@ -112,13 +111,13 @@ export function UserMenuContent({ user }: Props) {
                 key: 'orders',
                 icon: ShoppingBag,
                 label: 'Mes commandes',
-                href: route('orders.index'),
+                href: route('tenant.orders.index'),
             },
             {
                 key: 'wishlist',
                 icon: Heart,
                 label: 'Liste de souhaits',
-                href: route('wishlist.index'),
+                href: route('tenant.wishlist.index'),
             },
         ] as MenuItem[],
 
@@ -133,7 +132,7 @@ export function UserMenuContent({ user }: Props) {
                 key: 'help',
                 icon: HelpCircle,
                 label: "Centre d'aide",
-                href: route('page.help'),
+                href: route('tenant.page.help'),
             },
         ] as MenuItem[],
 
@@ -223,7 +222,7 @@ export function UserMenuContent({ user }: Props) {
                 className="cursor-pointer text-destructive focus:text-destructive"
             >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Déconnexion</span>
+                <span>Se déconnecter</span>
             </DropdownMenuItem>
         </>
     );
