@@ -136,7 +136,7 @@ export default function CartContent() {
         const ids = cart.items.map((item) => item.id);
         setSelectedItems(ids);
 
-        // 🔥 première sync propre
+        // première sync propre
         syncSelection(ids);
 
         isInitialized.current = true;

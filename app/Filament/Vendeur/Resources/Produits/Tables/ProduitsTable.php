@@ -199,7 +199,9 @@ class ProduitsTable
                     ->numeric()
                     ->sortable()
                     ->alignCenter()
-                    ->formatStateUsing(fn ($state) => $state > 0 ? Heroicon::OutlinedStar.' '.number_format($state, 1) : '-')
+    //                 ->formatStateUsing(fn ($state) => $state > 0
+    // ? \heroicon('heroicon-o-star', 'h-4 w-4 inline-block text-warning-400')->toHtml() . ' ' . number_format($state, 1)
+    // : '-')
                     ->color('warning'),
 
                 // Dimensions

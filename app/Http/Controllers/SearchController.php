@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\PostCategory;
+use App\Models\Produit;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -121,5 +122,34 @@ class SearchController extends Controller
         }
 
         return $results;
+    }
+
+    /**
+     * Suggestions de produits pour la recherche instantanée.
+     */
+    public function suggestions(Request $request)
+    {
+        $query = $request->input('q', '');
+        if (strlen($query) < 2) {
+            return response()->json(['suggestions' => []]);
+        }
+
+        $produits = Produit::where('statut', Produit::STATUS_PUBLISHED)
+            ->where(function ($q) use ($query) {
+                $q->where('nom', 'like', "%{$query}%")
+                    ->orWhere('description_longue', 'like', "%{$query}%")
+                    ->orWhere('short_description', 'like', "%{$query}%");
+            })
+            ->limit(5)
+            ->get()
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'nom' => $p->nom,
+                'slug' => $p->slug,
+                'prix' => $p->prix_actuel,          // accesseur
+                'image' => $p->getImageUrl('thumb') ?? '/storage/images/Vue-Storefront.png',
+            ]);
+
+        return response()->json(['suggestions' => $produits]);
     }
 }

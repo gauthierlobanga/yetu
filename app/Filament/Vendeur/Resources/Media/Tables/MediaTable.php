@@ -32,14 +32,8 @@ class MediaTable
                     ->imageWidth(80)
                     ->getStateUsing(function ($record) {
                         if (str_starts_with($record->mime_type, 'image/')) {
-                            // Utiliser l'URL complète avec le slug du tenant
-                            if (function_exists('tenancy') && tenancy()->initialized) {
-                                $tenant = tenancy()->tenant;
-                                $path = 'tenants/'.$tenant->id.'/'.$record->getPathRelativeToRoot();
-
-                                return '/storage/tenant-'.$tenant->slug.'/'.$path;
-                            }
-
+                            // Les médias sont stockés sur le disque public central
+                            // Utiliser l'URL standard
                             return $record->getUrl();
                         }
 

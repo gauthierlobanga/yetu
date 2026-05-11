@@ -30,6 +30,8 @@ use App\Http\Controllers\Shop\ReturnController;
 use App\Http\Controllers\Shop\ReviewController;
 use App\Http\Controllers\Shop\WishlistController;
 use App\Http\Controllers\Vendor\VendorDashboardController;
+use App\Http\Controllers\vendor\VendorSettingsController;
+use App\Http\Controllers\Vendor\VendorStatisticsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
@@ -123,8 +125,19 @@ Route::middleware([
             ->middleware('throttle:6,1')
             ->name('user-password.update');
 
-        Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
+        Route::inertia('settings/appearance', 'settings/appearance')
+            ->name('appearance.edit');
+
+        Route::get('/parametres', [VendorSettingsController::class, 'edit'])
+            ->name('vendor.settings');
+
+        Route::put('/parametres', [VendorSettingsController::class, 'update'])
+            ->name('vendor.settings.update');
+
+        Route::get('/statistiques', [VendorStatisticsController::class, 'index'])
+            ->name('vendor.statistics');
     });
+
     /*
     |--------------------------------------------------------------------------
     | ROUTES PUBLICS TENANT
@@ -224,6 +237,7 @@ Route::middleware([
             Route::get('/quick-view/{produit:slug}', [ProductController::class, 'productsQuickView'])->name('product.quick-view');
             Route::get('/{produit:slug}', [ProductController::class, 'productsShow'])->name('product.show');
             Route::post('/search/by-image', [ProductController::class, 'searchByImage'])->name('product.search.by-image');
+            Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
             Route::get('/{produit:slug}/reviews', [ReviewController::class, 'productsReviewsIndex'])->name('product.reviews.index');
         });
 

@@ -40,10 +40,10 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { useSearchSuggestions } from '@/hooks/ecommerce/use-search-suggestions';
 import MainLayout from '@/layouts/main-layout';
 import tenant from '@/routes/tenant';
 import type { PageProps, Product, Category } from '@/types/ecommerce/products';
-
 interface LocalFilters {
     category?: string;
     brand?: string;
@@ -134,18 +134,21 @@ export default function ProductsIndex() {
         formData.append('image', file);
 
         try {
-            const response = await fetch(route('products.search.by-image'), {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': (
-                        document.querySelector(
-                            'meta[name="csrf-token"]',
-                        ) as HTMLMetaElement
-                    )?.content,
+            const response = await fetch(
+                route('tenant.products.search.by-image'),
+                {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': (
+                            document.querySelector(
+                                'meta[name="csrf-token"]',
+                            ) as HTMLMetaElement
+                        )?.content,
+                    },
                 },
-            });
+            );
 
             if (response.redirected) {
                 window.location.href = response.url;
@@ -239,6 +242,8 @@ export default function ProductsIndex() {
         .map(([key, value]) => ({ key, value: value as string }));
 
     const totalProducts = products.total ?? products.data.length;
+    const { suggestions, loading: suggestionsLoading } =
+        useSearchSuggestions(searchInput);
 
     return (
         <MainLayout>
@@ -324,34 +329,136 @@ export default function ProductsIndex() {
                             {/* Suggestions */}
                             {searchInput && (
                                 <motion.div
-                                    initial={{ opacity: 0, y: -5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -5 }}
-                                    className="absolute top-full right-0 left-0 z-20 mt-1 rounded-lg border bg-card p-2 shadow-lg"
+                                    initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                                    transition={{
+                                        duration: 0.2,
+                                        ease: 'easeOut',
+                                    }}
+                                    className="absolute top-full right-0 left-0 z-20 mt-2 overflow-hidden rounded-2xl border border-emerald-200/60 bg-gradient-to-b from-white to-emerald-50/30 shadow-xl shadow-emerald-500/10 backdrop-blur-xl dark:border-emerald-800/60 dark:from-slate-900 dark:to-emerald-950/30 dark:shadow-emerald-900/20"
                                 >
-                                    <p className="px-2 py-1 text-xs font-medium text-muted-foreground">
-                                        Suggestions populaires
-                                    </p>
-                                    <div className="space-y-1">
-                                        {[
-                                            'Smartphone',
-                                            'Ordinateur portable',
-                                            'Écouteurs sans fil',
-                                        ].map((suggestion) => (
-                                            <button
-                                                key={suggestion}
-                                                onClick={() => {
-                                                    setSearchInput(suggestion);
-                                                    applyFilters({
-                                                        search: suggestion,
-                                                    });
-                                                }}
-                                                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted"
-                                            >
-                                                <Search className="h-3.5 w-3.5 text-muted-foreground" />
-                                                {suggestion}
-                                            </button>
-                                        ))}
+                                    {/* En-tête */}
+                                    <div className="flex items-center justify-between border-b border-emerald-100/60 px-4 py-3 dark:border-emerald-800/30">
+                                        <p className="text-xs font-semibold tracking-wider text-emerald-700 uppercase dark:text-emerald-300">
+                                            Suggestions
+                                        </p>
+                                        <span className="text-xs text-emerald-500/70 dark:text-emerald-400/60">
+                                            {suggestionsLoading
+                                                ? '...'
+                                                : `${suggestions.length} produit${suggestions.length > 1 ? 's' : ''}`}
+                                        </span>
+                                    </div>
+
+                                    <div className="p-2">
+                                        {suggestionsLoading && (
+                                            <div className="flex items-center gap-3 px-2 py-4 text-sm text-muted-foreground">
+                                                <Loader2 className="h-5 w-5 animate-spin text-emerald-500" />
+                                                <span>Recherche en cours…</span>
+                                            </div>
+                                        )}
+
+                                        {!suggestionsLoading &&
+                                            suggestions.length === 0 &&
+                                            searchInput.length >= 2 && (
+                                                <div className="flex flex-col items-center gap-2 py-6 text-center">
+                                                    <Search className="h-8 w-8 text-emerald-300/50 dark:text-emerald-700/50" />
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Aucun résultat pour «{' '}
+                                                        <span className="font-medium text-foreground">
+                                                            {searchInput}
+                                                        </span>{' '}
+                                                        »
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                        {!suggestionsLoading &&
+                                            suggestions.length > 0 && (
+                                                <ul className="space-y-0.5">
+                                                    {suggestions.map(
+                                                        (product) => (
+                                                            <li
+                                                                key={product.id}
+                                                            >
+                                                                <button
+                                                                    onClick={() => {
+                                                                        window.location.href =
+                                                                            route(
+                                                                                'tenant.product.show',
+                                                                                product.slug,
+                                                                            );
+                                                                    }}
+                                                                    className="group flex w-full items-center gap-3 rounded-xl p-2 text-left transition-all duration-200 hover:bg-emerald-50/80 hover:shadow-sm dark:hover:bg-emerald-900/20"
+                                                                >
+                                                                    {/* Image du produit */}
+                                                                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-emerald-200/40 bg-muted dark:border-emerald-800/40">
+                                                                        {product.image ? (
+                                                                            <img
+                                                                                src={
+                                                                                    product.image
+                                                                                }
+                                                                                alt={
+                                                                                    product.nom
+                                                                                }
+                                                                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                                                            />
+                                                                        ) : (
+                                                                            <div className="flex h-full w-full items-center justify-center">
+                                                                                <Search className="h-5 w-5 text-emerald-400/50" />
+                                                                            </div>
+                                                                        )}
+                                                                        {/* Effet de bordure émeraude au survol */}
+                                                                        <div className="absolute inset-0 rounded-lg border-2 border-transparent transition-colors duration-200 group-hover:border-emerald-400/30 dark:group-hover:border-emerald-600/40" />
+                                                                    </div>
+
+                                                                    {/* Informations produit */}
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <p className="truncate text-sm font-semibold text-foreground transition-colors group-hover:text-emerald-700 dark:group-hover:text-emerald-300">
+                                                                            {
+                                                                                product.nom
+                                                                            }
+                                                                        </p>
+                                                                        <p className="mt-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                                                                            {new Intl.NumberFormat(
+                                                                                'fr-CD',
+                                                                                {
+                                                                                    style: 'currency',
+                                                                                    currency:
+                                                                                        'CDF',
+                                                                                },
+                                                                            ).format(
+                                                                                product.prix,
+                                                                            )}
+                                                                        </p>
+                                                                    </div>
+
+                                                                    {/* Flèche d'accès */}
+                                                                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-all group-hover:translate-x-0.5 group-hover:text-emerald-500" />
+                                                                </button>
+                                                            </li>
+                                                        ),
+                                                    )}
+                                                </ul>
+                                            )}
+
+                                        {/* Bouton "Voir tous les résultats" */}
+                                        {searchInput.length >= 2 && (
+                                            <div className="mt-2 border-t border-emerald-100/60 pt-2 dark:border-emerald-800/30">
+                                                <button
+                                                    onClick={() =>
+                                                        applyFilters({
+                                                            search: searchInput,
+                                                        })
+                                                    }
+                                                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-50/50 py-2.5 text-sm font-medium text-emerald-700 transition-all hover:bg-emerald-100/80 hover:shadow-sm dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/40"
+                                                >
+                                                    <Search className="h-4 w-4" />
+                                                    Afficher tous les résultats
+                                                    pour « {searchInput} »
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </motion.div>
                             )}

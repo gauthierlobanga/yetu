@@ -155,18 +155,20 @@ export default function ProductShow() {
     const renderStars = (rating: number, size: 'sm' | 'md' = 'md') => {
         const starSize = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4';
 
-        return Array.from({ length: 5 }).map((_, i) => (
-            <Star
-                key={i}
-                className={`${starSize} ${
-                    i < Math.floor(rating)
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : i < rating
-                          ? 'fill-yellow-400/50 text-yellow-400'
-                          : 'fill-muted-foreground/20 text-muted-foreground/20'
-                }`}
-            />
-        ));
+        return Array.from({ length: 5 }).map((_, i) => {
+            return (
+                <Star
+                    key={i}
+                    className={`${starSize} ${
+                        i < Math.floor(rating)
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : i < rating
+                              ? 'fill-yellow-400/50 text-yellow-400'
+                              : 'fill-muted-foreground/20 text-muted-foreground/20'
+                    }`}
+                />
+            );
+        });
     };
 
     const handleAddToCart = () => {

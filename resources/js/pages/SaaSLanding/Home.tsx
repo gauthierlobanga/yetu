@@ -659,7 +659,7 @@ function FadeInSection({
 export default function SaaSLanding({ plans, stats, testimonials }: Props) {
     return (
         <MainLayout>
-            <Head title="Yedu: Créez votre boutique en ligne" />
+            <Head title="Yetu: Créez votre boutique en ligne" />
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-linear-to-br from-primary/30 via-background to-primary/20 text-foreground">
                 <div className="absolute inset-0 bg-[radial-linear(ellipse_at_top_right,var(--color-primary)/.15,transparent_50%)]" />
@@ -1046,10 +1046,8 @@ export default function SaaSLanding({ plans, stats, testimonials }: Props) {
             {/* ========== CTA FINAL ========== */}
             <CtaFinalSection />
 
-            {/* ========== CTA FINAL ========== */}
+            {/* ========== CTA INTEGRATION PRODUIT ========== */}
             <IntegrationProduct />
-
-            {/* ========== CTA ========== */}
         </MainLayout>
     );
 }

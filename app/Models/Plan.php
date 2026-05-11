@@ -16,6 +16,11 @@ class Plan extends Model
 
     public $incrementing = false;
 
+    public function getConnectionName()
+    {
+        return config('tenancy.database.central_connection', 'central');
+    }
+
     protected $fillable = [
         'name',
         'slug',

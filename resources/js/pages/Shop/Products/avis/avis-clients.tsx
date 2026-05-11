@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
+import getToastStyle from '@/lib/toast-style';
 import { ReviewCard } from './review-card';
 
 interface Review {
@@ -68,6 +69,7 @@ export function ReviewsSection({ productId, avis, ratingStats }: Props) {
                         description: 'Votre avis a été publié avec succès.',
                         icon: <Star className="h-5 w-5 text-amber-400" />,
                         duration: 3000,
+                        style: getToastStyle('success'),
                     });
                     router.get(
                         window.location.href,
@@ -84,6 +86,7 @@ export function ReviewsSection({ productId, avis, ratingStats }: Props) {
                     setSubmitting(false);
                     toast.error('Erreur', {
                         description: "Impossible de publier l'avis.",
+                        style: getToastStyle('error'),
                     });
                 },
             },
@@ -179,7 +182,7 @@ export function ReviewsSection({ productId, avis, ratingStats }: Props) {
             {/* Colonne droite : résumé + formulaire */}
             <div className="space-y-6" ref={formRef}>
                 {/* Carte Note globale */}
-                <div className="rounded-2xl border border-border bg-gradient-to-br from-card to-card/50 p-6 shadow-sm backdrop-blur-sm">
+                <div className="rounded-2xl border border-border bg-linear-to-br from-card to-card/50 p-6 shadow-sm backdrop-blur-sm">
                     <div className="mb-4 flex items-center gap-2">
                         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
                             <Star className="h-4 w-4" fill="currentColor" />
@@ -192,7 +195,7 @@ export function ReviewsSection({ productId, avis, ratingStats }: Props) {
                     <div className="mb-4 flex items-end justify-between">
                         <div className="flex items-baseline gap-1">
                             <span className="text-6xl font-extrabold tracking-tight text-foreground">
-                                {stats.average.toFixed(1)}
+                                {Number(stats.average).toFixed(1)}
                             </span>
                             <span className="text-base text-muted-foreground">
                                 /5
@@ -240,7 +243,7 @@ export function ReviewsSection({ productId, avis, ratingStats }: Props) {
                                         className="h-2.5 flex-1 bg-muted"
                                     />
                                     <span className="w-10 text-right text-xs text-muted-foreground">
-                                        {percentage.toFixed(0)}%
+                                        {Number(percentage).toFixed(0)}%
                                     </span>
                                 </div>
                             );
@@ -249,7 +252,7 @@ export function ReviewsSection({ productId, avis, ratingStats }: Props) {
                 </div>
 
                 {/* Formulaire */}
-                <div className="rounded-2xl border border-border bg-gradient-to-br from-card to-card/50 p-6 shadow-sm backdrop-blur-sm">
+                <div className="rounded-2xl border border-border bg-linear-to-br from-card to-card/50 p-6 shadow-sm backdrop-blur-sm">
                     <div className="mb-5 flex items-center gap-2">
                         <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
                             <MessageCircle className="h-4 w-4" />

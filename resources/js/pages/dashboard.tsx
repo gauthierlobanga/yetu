@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/pages/dashboard.tsx
 import { AppSidebar } from '@/components/app-sidebar';
+import { ChartBarMixed } from '@/components/board/BarChartMixed';
+import { ChartCategoryPerformance } from '@/components/board/chart-category-performance';
+import { ChartHourlyPosts } from '@/components/board/chart-hourly-posts';
+import { ChartMonthlyPosts } from '@/components/board/chart-monthly-posts';
+import { ChartScheduledPosts } from '@/components/board/chart-scheduled-posts';
+import { ChartTopAuthors } from '@/components/board/chart-top-authors';
+import { ChartTopTags } from '@/components/board/chart-top-tags';
+import { ChartWeeklyActivity } from '@/components/board/chart-weekly-activity';
+import { ChartBarLabel } from '@/components/board/ChartBarLabelPost';
+import { DashboardFilters } from '@/components/board/dashboard-filters';
+import { ChartPieInteractive } from '@/components/board/PieChartInteractivePost';
 import { ChartAreaInteractive } from '@/components/chart-area-interactive';
 import { DataTable } from '@/components/data-table-post';
 import { SectionCards } from '@/components/section-cards-post';
 import { SiteHeader } from '@/components/site-header';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { ChartBarMixed } from './board/BarChartMixed';
-import { ChartCategoryPerformance } from './board/chart-category-performance';
-import { ChartHourlyPosts } from './board/chart-hourly-posts';
-import { ChartMonthlyPosts } from './board/chart-monthly-posts';
-import { ChartScheduledPosts } from './board/chart-scheduled-posts';
-import { ChartTopAuthors } from './board/chart-top-authors';
-import { ChartTopTags } from './board/chart-top-tags';
-import { ChartWeeklyActivity } from './board/chart-weekly-activity';
-import { ChartBarLabel } from './board/ChartBarLabelPost';
-import { DashboardFilters } from './board/dashboard-filters';
-import { ChartPieInteractive } from './board/PieChartInteractivePost';
 
 interface DashboardProps {
     posts: {
