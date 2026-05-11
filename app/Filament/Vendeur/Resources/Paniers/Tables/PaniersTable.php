@@ -147,7 +147,7 @@ class PaniersTable
                 Action::make('view_items')
                     ->label('Voir articles')
                     ->icon('heroicon-m-eye')
-                    ->url(fn ($record) => route('filament.admin.paniers.resources.paniers.index', [
+                    ->url(fn ($record) => route('filament.vendeur.paniers.resources.paniers.index', [
                         'tableFilters[panier_id][value]' => $record->id,
                     ]))
                     ->color('info'),

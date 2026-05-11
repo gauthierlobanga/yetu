@@ -3,7 +3,6 @@
 namespace App\Filament\Vendeur\Resources\Permissions;
 
 use App\Enums\NavigationGroup;
-use App\Filament\Concerns\ExclureFromResources;
 use App\Filament\Vendeur\Resources\Permissions\Pages\CreatePermission;
 use App\Filament\Vendeur\Resources\Permissions\Pages\EditPermission;
 use App\Filament\Vendeur\Resources\Permissions\Pages\ListPermissions;
@@ -19,8 +18,6 @@ use UnitEnum;
 
 class PermissionResource extends Resource
 {
-    use ExclureFromResources;
-
     protected static ?string $model = Permission::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
@@ -29,9 +26,7 @@ class PermissionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static bool $isScopedToTenant = false;
-
-        public static function getNavigationBadge(): ?string
+    public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
     }

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Jobs\CreatedTenantUser;
+use App\Jobs\GenerateTenantPermissions;
+use App\Jobs\SeederTenantData;
+use App\Jobs\SeedTenantDatabase;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
@@ -33,17 +37,22 @@ class TenancyServiceProvider extends ServiceProvider
             // Tenant events
             Events\CreatingTenant::class => [],
             Events\TenantCreated::class => [
-                // JobPipeline::make([
-                //     Jobs\CreateDatabase::class,
-                //     Jobs\MigrateDatabase::class,
-                //     // Jobs\SeedDatabase::class,
+                JobPipeline::make([
+                    Jobs\CreateDatabase::class,
+                    Jobs\MigrateDatabase::class,
+                    SeedTenantDatabase::class,
+                    GenerateTenantPermissions::class,
+                    CreatedTenantUser::class,
+                    SeederTenantData::class,
 
-                //     // Your own jobs to prepare the tenant.
-                //     // Provision API keys, create S3 buckets, anything you want!
+                    // Jobs\SeedDatabase::class,
 
-                // ])->send(function (Events\TenantCreated $event) {
-                //     return $event->tenant;
-                // })->shouldBeQueued(false), // `false` by default, but you probably want to make this `true` for production.
+                    // Your own jobs to prepare the tenant.
+                    // Provision API keys, create S3 buckets, anything you want!
+
+                ])->send(function (Events\TenantCreated $event) {
+                    return $event->tenant;
+                })->shouldBeQueued(false), // `false` by default, but you probably want to make this `true` for production.
             ],
             Events\SavingTenant::class => [],
             Events\TenantSaved::class => [],
@@ -82,12 +91,14 @@ class TenancyServiceProvider extends ServiceProvider
             ],
 
             Events\EndingTenancy::class => [],
+
             TenancyEnded::class => [
                 Listeners\RevertToCentralContext::class,
                 function (TenancyEnded $event) {
                     $permissionRegistrar = app(PermissionRegistrar::class);
                     $permissionRegistrar->cacheKey = 'spatie.permission.cache';
                 },
+
             ],
 
             Events\BootstrappingTenancy::class => [],
@@ -97,6 +108,7 @@ class TenancyServiceProvider extends ServiceProvider
                     $permissionRegistrar->cacheKey = 'spatie.permission.cache.tenant.'.$event->tenancy->tenant->getTenantKey();
                 },
             ],
+
             Events\RevertingToCentralContext::class => [],
             Events\RevertedToCentralContext::class => [],
 
@@ -110,15 +122,10 @@ class TenancyServiceProvider extends ServiceProvider
         ];
     }
 
-    public function register()
-    {
-        //
-    }
-
     public function boot()
     {
         $this->bootEvents();
-        $this->mapRoutes();
+        // $this->mapRoutes();
 
         $this->makeTenancyMiddlewareHighestPriority();
 
@@ -148,16 +155,6 @@ class TenancyServiceProvider extends ServiceProvider
             }
         });
     }
-
-    // protected function mapRoutes()
-    // {
-    //     $this->app->booted(function () {
-    //         if (file_exists(base_path('routes/tenants/routes.php'))) {
-    //             Route::domain('{tenant}.'.config('app.domain'))
-    //                 ->group(base_path('routes/tenants/routes.php'));
-    //         }
-    //     });
-    // }
 
     protected function makeTenancyMiddlewareHighestPriority()
     {

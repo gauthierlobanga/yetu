@@ -21,6 +21,7 @@ class VendorRequest extends Model
     protected $fillable = [
         'user_id',
         'plan_id',
+        'tenant_id',
         'shop_name',
         'shop_slug',
         'shop_description',
@@ -61,6 +62,11 @@ class VendorRequest extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 
     // App\Models\VendorRequest

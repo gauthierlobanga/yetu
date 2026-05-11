@@ -37,14 +37,27 @@ trait ProfileValidationRules
      */
     protected function emailRules(int|string|null $userId = null): array
     {
+        // Déterminer la connexion à utiliser pour la validation
+        $connection = null;
+        if (function_exists('tenancy') && tenancy()->initialized) {
+            $connection = 'tenant';
+        }
+
+        $uniqueRule = $userId === null
+            ? Rule::unique(User::class)
+            : Rule::unique(User::class)->ignore($userId);
+
+        // Si une connexion spécifique est définie, l'utiliser pour la validation
+        if ($connection) {
+            $uniqueRule->connection($connection);
+        }
+
         return [
             'required',
             'string',
             'email',
             'max:255',
-            $userId === null
-                ? Rule::unique(User::class)
-                : Rule::unique(User::class)->ignore($userId),
+            $uniqueRule,
         ];
     }
 }

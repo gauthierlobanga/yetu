@@ -3,7 +3,7 @@
 namespace App\Filament\Vendeur\Resources\Contacts\Pages;
 
 use App\Filament\Vendeur\Resources\Contacts\ContactResource;
-use App\Filament\Vendeur\Widgets\ContactStatsWidget;
+use App\Filament\Widgets\ContactStatsWidget;
 use App\Models\Contact;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;

@@ -129,23 +129,23 @@ class ProduitsTable
                         'publie' => 'success',
                         'brouillon' => 'warning',
                         'archive' => 'gray',
-                        // 'out_of_stock' => 'danger',
-                        // 'discontinued' => 'warning',
+                        'out_of_stock' => 'danger',
+                        'discontinued' => 'warning',
                         default => 'gray',
                     })
                     ->icon(fn (string $state): string => match ($state) {
                         'publie' => 'heroicon-m-check-circle',
                         'brouillon' => 'heroicon-m-clock',
                         'archive' => 'heroicon-m-clock',
-                        // 'out_of_stock' => 'heroicon-m-circle',
-                        // 'discontinued' => 'heroicon-m-x-circle',
+                        'out_of_stock' => 'heroicon-m-circle',
+                        'discontinued' => 'heroicon-m-x-circle',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'publie' => 'Publié',
                         'brouillon' => 'Brouillon',
                         'archive' => 'Archivé',
-                        // 'out_of_stock' => 'Rupture',
-                        // 'discontinued' => 'Abandonné',
+                        'out_of_stock' => 'Rupture',
+                        'discontinued' => 'Abandonné',
                         default => $state,
                     })
                     ->sortable(),

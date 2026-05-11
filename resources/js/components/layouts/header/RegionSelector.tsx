@@ -1,9 +1,7 @@
-import { router } from '@inertiajs/react';
+import { usePage, router } from '@inertiajs/react';
 import { Globe } from 'lucide-react';
-import { useState } from 'react';
-
-import { blogIndex } from '@/actions/App/Http/Controllers/Blog/BlogController';
-import { ComboboxWithGroupsAndSeparator } from '@/components/ecommerce/pays/Timezone';
+import { useState, useEffect, useMemo } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
     Combobox,
@@ -29,149 +27,151 @@ import {
     SheetFooter,
 } from '@/components/ui/sheet';
 
-type Country = (typeof countries)[number];
-type Currency = (typeof currencies)[number];
-type Language = (typeof languages)[number];
+interface Country {
+    code: string;
+    name: string;
+    continent?: string;
+    currency?: string;
+    phone_code?: string;
+}
 
-const countries = [
-    { code: '', value: '', continent: '', label: 'Select country' },
-    {
-        code: 'ar',
-        value: 'argentina',
-        label: 'Argentina',
-        continent: 'South America',
-    },
-    {
-        code: 'au',
-        value: 'australia',
-        label: 'Australia',
-        continent: 'Oceania',
-    },
-    {
-        code: 'br',
-        value: 'brazil',
-        label: 'Brazil',
-        continent: 'South America',
-    },
-    {
-        code: 'ca',
-        value: 'canada',
-        label: 'Canada',
-        continent: 'North America',
-    },
-    { code: 'cn', value: 'china', label: 'China', continent: 'Asia' },
-    {
-        code: 'co',
-        value: 'colombia',
-        label: 'Colombia',
-        continent: 'South America',
-    },
-    { code: 'eg', value: 'egypt', label: 'Egypt', continent: 'Africa' },
-    { code: 'fr', value: 'france', label: 'France', continent: 'Europe' },
-    { code: 'de', value: 'germany', label: 'Germany', continent: 'Europe' },
-    { code: 'it', value: 'italy', label: 'Italy', continent: 'Europe' },
-    { code: 'jp', value: 'japan', label: 'Japan', continent: 'Asia' },
-    { code: 'ke', value: 'kenya', label: 'Kenya', continent: 'Africa' },
-    {
-        code: 'mx',
-        value: 'mexico',
-        label: 'Mexico',
-        continent: 'North America',
-    },
-    {
-        code: 'nz',
-        value: 'new-zealand',
-        label: 'New Zealand',
-        continent: 'Oceania',
-    },
-    { code: 'ng', value: 'nigeria', label: 'Nigeria', continent: 'Africa' },
-    {
-        code: 'za',
-        value: 'south-africa',
-        label: 'South Africa',
-        continent: 'Africa',
-    },
-    {
-        code: 'kr',
-        value: 'south-korea',
-        label: 'South Korea',
-        continent: 'Asia',
-    },
-    {
-        code: 'gb',
-        value: 'united-kingdom',
-        label: 'United Kingdom',
-        continent: 'Europe',
-    },
-    {
-        code: 'us',
-        value: 'united-states',
-        label: 'United States',
-        continent: 'North America',
-    },
-];
+interface Currency {
+    code: string;
+    name: string;
+    symbol?: string;
+}
 
-const currencies = [
-    { code: 'eur', name: 'Euro' },
-    { code: 'usd', name: 'Dollar US' },
-];
-
-const languages = [
-    { code: 'fr', name: 'Français' },
-    { code: 'en', name: 'Anglais' },
-];
+interface Language {
+    code: string;
+    name: string;
+}
 
 export function RegionSelector() {
+    const { props } = usePage();
+    const {
+        countries = [],
+        currencies = [],
+        languages = [],
+        currentCountry,
+        currentCurrency,
+        currentLanguage,
+    } = props as any;
+
+    // Initialiser les valeurs à partir des props backend ou détection automatique
     const [selectedCountry, setSelectedCountry] = useState<Country | null>(
-        countries.find((c) => c.code === 'fr') || null,
+        () =>
+            currentCountry
+                ? { code: currentCountry, name: currentCountry }
+                : null,
     );
     const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(
-        currencies[0],
+        () =>
+            currentCurrency
+                ? { code: currentCurrency, name: currentCurrency }
+                : null,
     );
     const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(
-        languages[0],
+        () =>
+            currentLanguage
+                ? { code: currentLanguage, name: currentLanguage }
+                : null,
     );
 
     const [countrySearch, setCountrySearch] = useState('');
     const [currencySearch, setCurrencySearch] = useState('');
     const [languageSearch, setLanguageSearch] = useState('');
 
-    const filteredCountries = countries.filter(
-        (country) =>
-            country.code !== '' &&
-            country.label.toLowerCase().includes(countrySearch.toLowerCase()),
-    );
+    // Filtrer les listes
+    const filteredCountries = useMemo(() => {
+        if (!Array.isArray(countries)) {
+            return [];
+        }
 
-    const filteredCurrencies = currencies.filter((currency: Currency) =>
-        currency.name.toLowerCase().includes(currencySearch.toLowerCase()),
-    );
+        return countries.filter((country: Country) =>
+            country.name.toLowerCase().includes(countrySearch.toLowerCase()),
+        );
+    }, [countries, countrySearch]);
 
-    const filteredLanguages = languages.filter((language: Language) =>
-        language.name.toLowerCase().includes(languageSearch.toLowerCase()),
-    );
+    const filteredCurrencies = useMemo(() => {
+        if (!Array.isArray(currencies)) {
+            return [];
+        }
+
+        return currencies.filter((currency: Currency) =>
+            currency.name.toLowerCase().includes(currencySearch.toLowerCase()),
+        );
+    }, [currencies, currencySearch]);
+
+    const filteredLanguages = useMemo(() => {
+        if (!Array.isArray(languages)) {
+            return [];
+        }
+
+        return languages.filter((language: Language) =>
+            language.name.toLowerCase().includes(languageSearch.toLowerCase()),
+        );
+    }, [languages, languageSearch]);
+
+    // Mettre à jour les sélections initiales si les props changent
+    useEffect(() => {
+        if (currentCountry && !selectedCountry) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setSelectedCountry({ code: currentCountry, name: currentCountry });
+        }
+
+        if (currentCurrency && !selectedCurrency) {
+            setSelectedCurrency({
+                code: currentCurrency,
+                name: currentCurrency,
+            });
+        }
+
+        if (currentLanguage && !selectedLanguage) {
+            setSelectedLanguage({
+                code: currentLanguage,
+                name: currentLanguage,
+            });
+        }
+    }, [
+        currentCountry,
+        currentCurrency,
+        currentLanguage,
+        selectedCountry,
+        selectedCurrency,
+        selectedLanguage,
+    ]);
 
     const handleSubmit = () => {
-        router.get(blogIndex().url, {
-            country: selectedCountry?.code,
-            currency: selectedCurrency?.code,
-            locale: selectedLanguage?.code,
-        });
-        router.post(route('preferences.update'), {
-            country: selectedCountry?.code,
-            currency: selectedCurrency?.code,
-            locale: selectedLanguage?.code,
-        });
+        router.post(
+            route('preferences.update'),
+            {
+                country: selectedCountry?.code,
+                currency: selectedCurrency?.code,
+                locale: selectedLanguage?.code,
+            },
+            {
+                onSuccess: () => {
+                    toast.success('Préférences mises à jour.');
+                },
+                onError: (errors) => {
+                    toast.error('Erreur lors de la mise à jour.');
+                    console.error(errors);
+                },
+            },
+        );
     };
+
+    const itemToStringValue = (item: any) => item?.name || '';
 
     return (
         <Sheet>
             <SheetTrigger asChild>
-                <Button variant="ghost" size="icon-lg">
-                    <Globe className="h-8 w-8 cursor-pointer" />
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                    <Globe className="h-4 w-4" />
                 </Button>
             </SheetTrigger>
 
-            <SheetContent className="w-120 sm:w-112.5">
+            <SheetContent className="w-full sm:max-w-md">
                 <SheetHeader>
                     <SheetTitle>Préférences régionales</SheetTitle>
                     <SheetDescription>
@@ -180,28 +180,30 @@ export function RegionSelector() {
                     </SheetDescription>
                 </SheetHeader>
 
-                <div className="grid gap-6 px-6 py-6">
-                    {/* SECTION PAYS */}
+                <div className="grid gap-6 p-6">
+                    {/* Pays */}
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold">Pays</label>
+                        <label className="text-sm font-semibold text-foreground">
+                            Pays
+                        </label>
                         <Combobox
                             items={filteredCountries}
                             value={selectedCountry}
                             onValueChange={(val) => setSelectedCountry(val)}
-                            itemToStringValue={(item) => item?.label || ''}
+                            itemToStringValue={itemToStringValue}
                             inputValue={countrySearch}
                             onInputValueChange={setCountrySearch}
                         >
                             <ComboboxInput
-                                className="py-4"
                                 placeholder="Rechercher un pays..."
+                                className="h-10"
                             />
                             <ComboboxContent>
                                 <ComboboxEmpty>
                                     Aucun pays trouvé.
                                 </ComboboxEmpty>
                                 <ComboboxList>
-                                    {(country) => (
+                                    {(country: Country) => (
                                         <ComboboxItem
                                             key={country.code}
                                             value={country}
@@ -209,11 +211,14 @@ export function RegionSelector() {
                                             <Item size="xs" className="p-0">
                                                 <ItemContent>
                                                     <ItemTitle>
-                                                        {country.label}
+                                                        {country.name}
                                                     </ItemTitle>
                                                     <ItemDescription>
-                                                        {country.continent} (
-                                                        {country.code})
+                                                        {country.continent ||
+                                                            ''}{' '}
+                                                        (
+                                                        {country.code?.toUpperCase()}
+                                                        )
                                                     </ItemDescription>
                                                 </ItemContent>
                                             </Item>
@@ -224,24 +229,29 @@ export function RegionSelector() {
                         </Combobox>
                     </div>
 
-                    {/* SECTION DEVISE - CORRIGÉE */}
+                    {/* Devise */}
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold">Devise</label>
+                        <label className="text-sm font-semibold text-foreground">
+                            Devise
+                        </label>
                         <Combobox
                             items={filteredCurrencies}
                             value={selectedCurrency}
                             onValueChange={(val) => setSelectedCurrency(val)}
-                            itemToStringValue={(item) => item?.name || ''}
+                            itemToStringValue={itemToStringValue}
                             inputValue={currencySearch}
                             onInputValueChange={setCurrencySearch}
                         >
-                            <ComboboxInput placeholder="Choisir une devise..." />
+                            <ComboboxInput
+                                placeholder="Choisir une devise..."
+                                className="h-10"
+                            />
                             <ComboboxContent>
                                 <ComboboxEmpty>
                                     Aucune devise trouvée.
                                 </ComboboxEmpty>
                                 <ComboboxList>
-                                    {(currency) => (
+                                    {(currency: Currency) => (
                                         <ComboboxItem
                                             key={currency.code}
                                             value={currency}
@@ -252,7 +262,10 @@ export function RegionSelector() {
                                                         {currency.name}
                                                     </ItemTitle>
                                                     <ItemDescription>
-                                                        {currency.code.toUpperCase()}
+                                                        {currency.code?.toUpperCase()}{' '}
+                                                        {currency.symbol
+                                                            ? `(${currency.symbol})`
+                                                            : ''}
                                                     </ItemDescription>
                                                 </ItemContent>
                                             </Item>
@@ -263,24 +276,29 @@ export function RegionSelector() {
                         </Combobox>
                     </div>
 
-                    {/* SECTION LANGUE - CORRIGÉE */}
+                    {/* Langue */}
                     <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold">Langue</label>
+                        <label className="text-sm font-semibold text-foreground">
+                            Langue
+                        </label>
                         <Combobox
                             items={filteredLanguages}
                             value={selectedLanguage}
                             onValueChange={(val) => setSelectedLanguage(val)}
-                            itemToStringValue={(item) => item?.name || ''}
+                            itemToStringValue={itemToStringValue}
                             inputValue={languageSearch}
                             onInputValueChange={setLanguageSearch}
                         >
-                            <ComboboxInput placeholder="Choisir une langue..." />
+                            <ComboboxInput
+                                placeholder="Choisir une langue..."
+                                className="h-10"
+                            />
                             <ComboboxContent>
                                 <ComboboxEmpty>
                                     Aucune langue trouvée.
                                 </ComboboxEmpty>
                                 <ComboboxList>
-                                    {(lang) => (
+                                    {(lang: Language) => (
                                         <ComboboxItem
                                             key={lang.code}
                                             value={lang}
@@ -291,7 +309,7 @@ export function RegionSelector() {
                                                         {lang.name}
                                                     </ItemTitle>
                                                     <ItemDescription>
-                                                        {lang.code.toUpperCase()}
+                                                        {lang.code?.toUpperCase()}
                                                     </ItemDescription>
                                                 </ItemContent>
                                             </Item>
@@ -301,12 +319,9 @@ export function RegionSelector() {
                             </ComboboxContent>
                         </Combobox>
                     </div>
-
-                    {/* SECTION TIMEZONE */}
-                    <ComboboxWithGroupsAndSeparator />
                 </div>
 
-                <SheetFooter className="mt-4">
+                <SheetFooter className="px-6 pb-6">
                     <Button className="w-full" onClick={handleSubmit}>
                         Enregistrer les modifications
                     </Button>

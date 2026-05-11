@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureUserIsVendeur
@@ -14,13 +15,41 @@ class EnsureUserIsVendeur
         $user = Auth::user();
 
         if (! $user) {
-            return redirect()->route('login');
+            Log::warning('Tentative d\'accès au panel Vendeur par un utilisateur non authentifié.', [
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl(),
+            ]);
+
+            return redirect()->route('tenant.login');
         }
 
-        if (! $user->is_active) {
-            abort(403, 'Compte désactivé.');
+        if (
+            ! $user->hasRole(['super_admin', 'Manager', 'owner', 'manager'])
+            && ! $this->canAccessCurrentTenant($user)
+        ) {
+            Log::info('Accès refusé au panel admin.', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'roles' => $user->getRoleNames(),
+                'ip' => $request->ip(),
+            ]);
+
+            return redirect()->intended('/');
         }
 
         return $next($request);
+    }
+
+    private function canAccessCurrentTenant($user): bool
+    {
+        if (! function_exists('tenant') || ! tenant()) {
+            return false;
+        }
+
+        try {
+            return $user->canAccessTenant(tenant());
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }

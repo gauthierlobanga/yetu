@@ -16,6 +16,14 @@ return new class extends Migration
             $table->foreignUuid('parrain_id')->nullable()->constrained('clients')->nullOnDelete();
         });
 
+        Schema::table('posts_categories', function (Blueprint $table) {
+            $table->foreignUuid('parent_id')->nullable()->constrained('posts_categories')->cascadeOnDelete();
+        });
+
+        Schema::table('comments', function (Blueprint $table) {
+            $table->foreignUuid('parent_id')->nullable()->constrained('comments')->cascadeOnDelete();
+        });
+
     }
 
     /**

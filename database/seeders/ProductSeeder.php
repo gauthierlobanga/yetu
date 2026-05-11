@@ -469,20 +469,31 @@ class ProductSeeder extends Seeder
         $data['average_rating'] = 0;
         $data['reviews_count'] = 0;
 
-        // Créer le produit
-        $produit = Produit::create($data);
+        // Créer le produit avec vérification de duplication sur le slug
+        $produit = Produit::firstOrCreate(
+            ['slug' => $data['slug']],
+            $data
+        );
 
         // Attacher les catégories avec DB::table
         if (! empty($categories)) {
             foreach ($categories as $index => $categorieId) {
                 // Vérifier que la catégorie existe avant d'insérer
                 if (ProductCategory::where('id', $categorieId)->exists()) {
-                    DB::table('produit_categorie_pivot')->insert([
-                        'produit_id' => $produit->id,
-                        'category_id' => $categorieId,
-                        'is_primary' => ($index === 0),
-                        'order' => $index,
-                    ]);
+                    // Vérifier si la relation existe déjà
+                    $existing = DB::table('produit_categorie_pivot')
+                        ->where('produit_id', $produit->id)
+                        ->where('category_id', $categorieId)
+                        ->first();
+
+                    if (! $existing) {
+                        DB::table('produit_categorie_pivot')->insert([
+                            'produit_id' => $produit->id,
+                            'category_id' => $categorieId,
+                            'is_primary' => ($index === 0),
+                            'order' => $index,
+                        ]);
+                    }
                 }
             }
         }
@@ -495,7 +506,11 @@ class ProductSeeder extends Seeder
         // Créer les variantes
         if (! empty($variantes) && method_exists($produit, 'variantes')) {
             foreach ($variantes as $varianteData) {
-                $produit->variantes()->create($varianteData);
+                // Utiliser firstOrCreate pour éviter les duplications sur sku_variante
+                $produit->variantes()->firstOrCreate(
+                    ['sku_variante' => $varianteData['sku_variante']],
+                    $varianteData
+                );
             }
         }
 

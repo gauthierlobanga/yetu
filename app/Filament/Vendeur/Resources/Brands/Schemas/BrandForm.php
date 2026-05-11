@@ -60,38 +60,7 @@ class BrandForm
 
                                         Grid::make(2)
                                             ->schema([
-                                                Select::make('tenant_id')
-                                                    ->label('Organisation')
-                                                    ->relationship('tenant', 'raison_sociale')
-                                                    ->preload()
-                                                    ->searchable()
-                                                    ->options(function () {
-                                                        $user = Auth::user();
 
-                                                        // Si l'utilisateur est Super Admin, il voit toutes les Vendeurs
-                                                        if ($user->hasRole(['super_admin'])) {
-                                                            return Tenant::pluck('raison_sociale', 'id');
-                                                        }
-
-                                                        // Sinon, il voit seulement ses Vendeurs
-                                                        return $user->tenants()->pluck('raison_sociale', 'tenants.id');
-                                                    })
-                                                    ->default(function () {
-                                                        $user = Auth::user();
-
-                                                        // Si on est dans un contexte tenant, pré-remplir avec la Vendeur actuelle
-                                                        if (Filament::hasTenancy() && Filament::getTenant()) {
-                                                            return Filament::getTenant()->id;
-                                                        }
-
-                                                        // Si l'utilisateur n'a qu'une seule Vendeur, la sélectionner par défaut
-                                                        if ($user->tenants()->count() === 1) {
-                                                            return $user->tenants()->first()->id;
-                                                        }
-
-                                                        return null;
-                                                    })
-                                                    ->required(),
                                                 TextInput::make('email')
                                                     ->label('Email')
                                                     ->email()
@@ -176,6 +145,8 @@ class BrandForm
                                                     ->image()
                                                     ->imageEditor()
                                                     ->circleCropper()
+                                                    ->disk('tenant')
+                                                    ->directory('brands/logo')
                                                     ->maxSize(2048)
                                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                                                     ->helperText('Format recommandé: PNG ou SVG avec fond transparent, 200x200px'),
@@ -188,6 +159,8 @@ class BrandForm
                                                     ->collection('cover')
                                                     ->image()
                                                     ->imageEditor()
+                                                    ->disk('tenant')
+                                                    ->directory('brands/cover')
                                                     ->maxSize(5120)
                                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                                     ->helperText('Format recommandé: 1920x400px'),
@@ -202,6 +175,8 @@ class BrandForm
                                             ->multiple()
                                             ->image()
                                             ->imageEditor()
+                                            ->disk('tenant')
+                                            ->directory('brands/gallery')
                                             ->maxFiles(10)
                                             ->maxSize(5120)
                                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])

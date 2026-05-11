@@ -176,7 +176,7 @@ class ProductCategoriesTable
                     Action::make('view_products')
                         ->label('Voir produits')
                         ->icon('heroicon-m-shopping-bag')
-                        ->url(fn ($record) => route('filament.admin.products.resources.produits.index', [
+                        ->url(fn ($record) => route('filament.vendeur.products.resources.produits.index', [
                             'tableFilters[categories][values][]' => $record->id,
                         ]))
                         ->color('info'),
@@ -184,7 +184,7 @@ class ProductCategoriesTable
                     Action::make('view_children')
                         ->label('Voir sous-catégories')
                         ->icon('heroicon-m-folder')
-                        ->url(fn ($record) => route('filament.admin.products.resources.product-categories.index', [
+                        ->url(fn ($record) => route('filament.vendeur.products.resources.product-categories.index', [
                             'tableFilters[parent_id][value]' => $record->id,
                         ]))
                         ->color('gray')

@@ -49,13 +49,16 @@ export default function Home() {
                 bestSellers={bestSellers}
                 dealOfTheDay={dealOfTheDay}
             />
+
             <CategoryTabs
                 categories={categories}
                 productsByCategory={productsByCategory}
             />
+
             {trendingProducts.length > 0 && (
                 <TrendingProducts products={trendingProducts} />
             )}
+
             <FeaturedProducts
                 products={productsToShow}
                 loadMore={loadMore}

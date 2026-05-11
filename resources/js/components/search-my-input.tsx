@@ -59,7 +59,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
     children,
     ...buttonProps
 }) => {
-    const [modifierLabel, setModifierLabel] = useState('⌘');
+    const [modifierLabel, setModifierLabel] = useState('');
     const [isModifierPressed, setIsModifierPressed] = useState(false);
     const [isKPressed, setIsKPressed] = useState(false);
 
@@ -70,7 +70,8 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
 
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setModifierLabel(
-            /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl',
+            /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '' : '',
+            // /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl',
         );
     }, []);
 
@@ -112,7 +113,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
     }, []);
 
     const baseClassName = cn(
-        'h-auto cursor-pointer justify-between py-3 transition-all duration-200 hover:shadow-md md:min-w-[200px]',
+        'h-auto cursor-pointer justify-between py-3 transition-all duration-200 md:min-w-[200px]',
         className,
     );
 
@@ -126,16 +127,13 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
         >
             <span className="flex items-center gap-2 text-muted-foreground opacity-80">
                 <SearchIcon size={20} />
-                <span className="hidden sm:inline">
-                    {children || 'Rechercher'}
-                </span>
+                <span className="hidden sm:inline">{children}</span>
             </span>
             <div className="hidden gap-0.5 md:flex">
                 <kbd
                     className={cn(
                         'grid h-5 min-w-5 place-items-center rounded bg-muted text-xs text-muted-foreground transition-all duration-200',
-                        isModifierPressed &&
-                            'inset-shadow-sm inset-shadow-foreground/30',
+                        isModifierPressed && 'inset-shadow-foreground/30',
                     )}
                 >
                     {modifierLabel}
@@ -144,7 +142,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
                     className={cn(
                         'grid h-5 min-w-5 place-items-center rounded bg-muted text-xs text-muted-foreground transition-all duration-200',
                         isKPressed &&
-                            'inset-shadow-sm inset-shadow-foreground/30',
+                            'inset-shadow-md inset-shadow-foreground/50',
                     )}
                 >
                     K

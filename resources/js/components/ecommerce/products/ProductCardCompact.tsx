@@ -14,7 +14,7 @@ interface ProductCardCompactProps {
 /** Retourne une URL d’image valide ou un placeholder */
 function getImageUrl(image: string | null | undefined): string {
     if (!image) {
-        return '/images/getting-business.jpg';
+        return '/storage/images/getting-business.jpg';
     }
 
     if (image.startsWith('http') || image.startsWith('/storage')) {

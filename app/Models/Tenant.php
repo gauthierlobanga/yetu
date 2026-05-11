@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+// use App\Observers\TenantObserver;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasCurrentTenantLabel;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -18,6 +22,7 @@ use Stancl\Tenancy\Database\Concerns\HasDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDomains;
 use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
 
+// #[ObservedBy(TenantObserver::class)]
 class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, HasMedia, HasName, TenantWithDatabase
 {
     use HasDatabase, HasDomains;
@@ -43,10 +48,12 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
 
     protected $fillable = [
         'id',
+        'user_id',
         'raison_sociale',
         'slug',
         'siret',
         'email',
+        'password',
         'telephone',
         'is_active',
         'type_entite',
@@ -60,6 +67,16 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         'description',
     ];
 
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     public static function getCustomColumns(): array
     {
         return [
@@ -69,6 +86,7 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
             'domain',
             'siret',
             'email',
+            'password',
             'telephone',
             'is_active',
             'type_entite',
@@ -157,7 +175,15 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         ];
     }
 
-    // Relation avec les documents légaux
+    public function setPasswordAttribute(?string $value): void
+    {
+        if (! empty($value)) {
+            $this->attributes['password'] = Hash::needsRehash($value)
+                ? Hash::make($value)
+                : $value;
+        }
+    }
+
     public function documentsLegaux()
     {
         return $this->belongsToMany(
@@ -291,11 +317,17 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
             ->nonQueued();
     }
 
-    // /** @return HasMany<Role, self> */
-    // public function roles(): HasMany
-    // {
-    //     return $this->hasMany(Role::class);
-    // }
+    public function isAccessible(): bool
+    {
+        return $this->vendorRequest()
+            ->where('status', VendorRequest::STATUS_APPROVED)
+            ->exists() && $this->estActif();
+    }
+
+    public function vendorRequest(): HasOne
+    {
+        return $this->hasOne(VendorRequest::class, 'tenant_id');
+    }
 
     public function getFilamentAvatarUrl(): ?string
     {
@@ -316,7 +348,6 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
             ?? "Vendeur #{$this->getKey()}";
     }
 
-    // App\Models\Tenant.php
     public function getProduitsCountAttribute(): int
     {
         return once(function () {
@@ -389,12 +420,6 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
     public function mouvementStocks(): HasMany
     {
         return $this->hasMany(MouvementStock::class);
-    }
-
-    /** @return HasMany<PlanAbonnement, self> */
-    public function planAbonnements(): HasMany
-    {
-        return $this->hasMany(PlanAbonnement::class);
     }
 
     public function clients(): HasMany
@@ -487,11 +512,6 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         return $this->hasMany(ProgrammeFidelite::class);
     }
 
-    public function plansAbonnement(): HasMany
-    {
-        return $this->hasMany(PlanAbonnement::class);
-    }
-
     public function auditLogs(): HasMany
     {
         return $this->hasMany(AuditLog::class);
@@ -525,8 +545,8 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
     // URLs
     public function getUrlAttribute(): string
     {
-        if ($this->domain) {
-            return 'http://'.$this->domain;
+        if ($domain = $this->domains()->value('domain')) {
+            return 'http://'.$domain;
         }
 
         return 'http://'.$this->slug.'.'.config('app.domain');
@@ -585,5 +605,41 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
                 $tenant->slug = Str::slug($tenant->raison_sociale);
             }
         });
+    }
+
+    /**
+     * Vérifie si la période d'essai du plan est expirée.
+     */
+    public function isTrialExpired(): bool
+    {
+        // Si le plan n'existe pas ou n'a pas de période d'essai, on considère que l'essai n'est pas expiré
+        if (! $this->plan || empty($this->plan->trial_days)) {
+            return false;
+        }
+
+        // La date de début de l'essai est la date d'activation ou à défaut la date de création du tenant
+        $start = $this->date_activation ?? $this->created_at;
+
+        // Si la date d'expiration est explicitement définie, on l'utilise
+        if ($this->date_expiration) {
+            return $this->date_expiration->isPast();
+        }
+
+        // Sinon on calcule à partir de la date de début + durée de l'essai
+        return $start->addDays($this->plan->trial_days)->isPast();
+    }
+
+    /**
+     * Récupère la date de fin d'essai (ou null si pas d'essai).
+     */
+    public function getTrialEndsAtAttribute(): ?Carbon
+    {
+        if (! $this->plan || empty($this->plan->trial_days)) {
+            return null;
+        }
+
+        $start = $this->date_activation ?? $this->created_at;
+
+        return \Illuminate\Support\Carbon::parse($start)->addDays($this->plan->trial_days);
     }
 }

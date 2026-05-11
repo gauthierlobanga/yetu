@@ -26,10 +26,8 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { Can, CanRole } from '@/core/permissions/Can';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
-// import { logout } from '@/routes';
-import { useTenantRoute } from '@/lib/utils/routes'; // ou le chemin réel
-import { logout } from '@/routes/tenant';
-import { edit } from '@/routes/tenant/profile';
+import { logout } from '@/routes';
+import { edit } from '@/routes/profile';
 import type { User } from '@/types';
 type Props = {
     user: User;
@@ -99,7 +97,7 @@ export function UserMenuContent({ user }: Props) {
                 key: 'dashboard',
                 icon: LayoutDashboard,
                 label: 'Mon compte',
-                href: route('tenant.dashboard.index'),
+                href: route('dashboard'),
             },
             {
                 key: 'dashboard-vendor',

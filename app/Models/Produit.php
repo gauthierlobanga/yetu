@@ -677,16 +677,16 @@ class Produit extends Model implements HasMedia, Sitemapable
         return $variations;
     }
 
-    public function clearCache(): void
-    {
-        Cache::forget("product_{$this->id}_image_thumb");
-        Cache::forget("product_{$this->id}_image_card");
-        Cache::forget("product_{$this->id}_image_small");
-        Cache::forget("product_{$this->id}_image_medium");
-        Cache::forget("product_{$this->id}_image_large");
-        Cache::forget("product_{$this->id}_image_zoom");
-        Cache::forget("product_{$this->id}_all_images");
-    }
+    // public function clearCache(): void
+    // {
+    //     Cache::forget("product_{$this->id}_image_thumb");
+    //     Cache::forget("product_{$this->id}_image_card");
+    //     Cache::forget("product_{$this->id}_image_small");
+    //     Cache::forget("product_{$this->id}_image_medium");
+    //     Cache::forget("product_{$this->id}_image_large");
+    //     Cache::forget("product_{$this->id}_image_zoom");
+    //     Cache::forget("product_{$this->id}_all_images");
+    // }
 
     public function toSitemapTag(): Url|string|array
     {
@@ -730,8 +730,8 @@ class Produit extends Model implements HasMedia, Sitemapable
         //     $produit->clearCache();
         // });
 
-        static::deleted(function ($produit) {
-            $produit->clearCache();
-        });
+        // static::deleted(function ($produit) {
+        //     $produit->clearCache();
+        // });
     }
 }

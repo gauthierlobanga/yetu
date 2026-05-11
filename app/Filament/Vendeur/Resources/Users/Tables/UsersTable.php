@@ -20,6 +20,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use STS\FilamentImpersonate\Actions\Impersonate;
 
 class UsersTable
@@ -33,6 +34,7 @@ class UsersTable
                     ->collection('avatar')
                     ->conversion('thumbnail')
                     ->visibility('public')
+                    ->disk('tenant')
                     ->circular()
                     ->imageSize(50)
                     ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name='.urlencode($record->name).'&color=7F9CF5&background=EBF4FF&size=128&bold=true'),
@@ -48,14 +50,13 @@ class UsersTable
                     ->label('Rôles')
                     ->badge()
                     ->separator(',')
-                    ->color(fn ($state): string => match (true) {
-                        str_contains($state, 'super_admin') => 'success',
-                        str_contains($state, 'manager') => 'info',
-                        str_contains($state, 'editor') => 'warning',
-                        str_contains($state, 'vendeur') => 'warning',
+                    ->color(fn (string $state): string => match ($state) {
+                        'super_admin' => 'danger',
+                        'admin' => 'warning',
+                        'editor' => 'info',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn ($state) => str_replace('_', ' ', ucfirst($state)))
+                    ->formatStateUsing(fn ($state) => ucfirst($state))
                     ->searchable(),
 
                 IconColumn::make('is_active')
@@ -149,8 +150,9 @@ class UsersTable
                     ->requiresConfirmation()
                     ->modalHeading('Connexion impersonnelle')
                     ->modalDescription('Vous allez vous connecter en tant que cet utilisateur. Vous pourrez revenir à votre compte en cliquant sur "Arrêter l\'impersonation".')
-                    ->guard('web') // Garde par défaut, à adapter si besoin
-                    ->redirectTo(route('dashboard.index')), // Où rediriger après impersonation
+                    ->guard('web')
+                    ->redirectTo('/dashboard'), // Garde par défaut, à adapter si besoin
+                // ->redirectTo(redirect(uri('/dashboard'))), // Où rediriger après impersonation
 
                 ActionGroup::make([
                     ViewAction::make()
@@ -168,7 +170,7 @@ class UsersTable
                         ->requiresConfirmation()
                         ->modalHeading('Activer l\'utilisateur')
                         ->modalDescription('Êtes-vous sûr de vouloir activer cet utilisateur ?')
-                        ->visible(fn (User $record): bool => ! $record->is_active)
+                        ->hidden(fn (User $record): bool => $record->is_active && $record->hasRole('super_admin'))
                         ->action(fn (User $record) => $record->update(['is_active' => true])),
 
                     Action::make('deactivate')
@@ -178,7 +180,7 @@ class UsersTable
                         ->requiresConfirmation()
                         ->modalHeading('Désactiver l\'utilisateur')
                         ->modalDescription('Êtes-vous sûr de vouloir désactiver cet utilisateur ?')
-                        ->visible(fn (User $record): bool => $record->is_active)
+                        ->hidden(fn (User $record): bool => $record->id === Auth::id() && $record->hasRole('super_admin'))
                         ->action(fn (User $record) => $record->update(['is_active' => false])),
 
                 ])
@@ -217,16 +219,9 @@ class UsersTable
             ])
             ->emptyStateHeading('Aucun utilisateur')
             ->emptyStateDescription('Commencez par créer un utilisateur en cliquant sur le bouton ci-dessous.')
-            ->emptyStateIcon('heroicon-o-user-group')
-            ->deferLoading()
+            ->emptyStateIcon('heroicon-o-users')
             ->defaultSort('created_at', 'desc')
-            ->persistFiltersInSession()
-            ->striped();
-        // ->emptyStateHeading('Aucun utilisateur')
-        // ->emptyStateDescription('Commencez par créer un utilisateur en cliquant sur le bouton ci-dessous.')
-        // ->emptyStateIcon('heroicon-o-users')
-        // ->defaultSort('created_at', 'desc')
-        // ->striped()
-        // ->paginated([10, 25, 50, 100]);
+            ->striped()
+            ->paginated([10, 25, 50, 100]);
     }
 }

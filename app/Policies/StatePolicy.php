@@ -4,25 +4,13 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Models\State;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
-use Nnjeim\World\Models\State;
 
 class StatePolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
 
     public function viewAny(AuthUser $authUser): bool
     {
@@ -47,6 +35,11 @@ class StatePolicy
     public function delete(AuthUser $authUser, State $state): bool
     {
         return $authUser->can('Delete State');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny State');
     }
 
     public function restore(AuthUser $authUser, State $state): bool

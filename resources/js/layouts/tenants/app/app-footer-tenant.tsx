@@ -17,7 +17,6 @@ import {
     FaTwitter,
     FaYoutube,
 } from 'react-icons/fa';
-import { homeIndex } from '@/actions/App/Http/Controllers/Home/HomeController';
 import AppLogo from '@/components/app-logo';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -58,12 +57,12 @@ const footerSections = [
             {
                 name: 'Promotions',
                 href: route('tenant.promotions.index'),
-                badge: '🔥',
+                badge: '',
             },
             {
                 name: 'Nouveautés',
                 href: route('tenant.product.index', { sort: 'newest' }),
-                badge: '✨',
+                badge: '',
             },
             {
                 name: 'Meilleures ventes',
@@ -129,7 +128,7 @@ export default function TenantFooterSection() {
             <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-linear-to-b from-primary/5 to-transparent blur-3xl" />
 
             {/* Garanties */}
-            <motion.div
+            {/* <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate={isInView ? 'visible' : 'hidden'}
@@ -166,7 +165,7 @@ export default function TenantFooterSection() {
                         </motion.div>
                     ))}
                 </div>
-            </motion.div>
+            </motion.div> */}
 
             <Separator className="opacity-20" />
 

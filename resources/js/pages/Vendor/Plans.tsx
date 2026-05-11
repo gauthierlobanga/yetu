@@ -15,7 +15,6 @@ import {
     Headphones,
     ShieldCheckIcon,
     Sparkles,
-    // Icônes pour les fonctionnalités
     Package,
     ShoppingCart,
     BarChart3,
@@ -27,6 +26,7 @@ import {
     Check,
 } from 'lucide-react';
 import { useState, useMemo } from 'react';
+import { dashboard } from '@/routes';
 
 interface Plan {
     id: number | string;
@@ -59,7 +59,6 @@ const planIcons: Record<string, React.ComponentType<{ className?: string }>> = {
     Enterprise: BadgeCheck,
 };
 
-// Mapping mots‑clés → icône Lucide pour les fonctionnalités
 const featureIconMap: Record<
     string,
     React.ComponentType<{ className?: string }>
@@ -72,7 +71,7 @@ const featureIconMap: Record<
     compte: Users,
     rapport: FileText,
     support: Headphones,
-    personnalis: Wrench, // "personnalisé"
+    personnalis: Wrench,
     illimité: Sparkles,
 };
 
@@ -87,7 +86,7 @@ function getFeatureIcon(
         }
     }
 
-    return Check; // icône par défaut
+    return Check;
 }
 
 export default function VendorPlans({ plans, canBecomeVendor }: Props) {
@@ -112,20 +111,20 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center px-4">
                 <div className="max-w-md text-center">
-                    <div className="mb-6 inline-flex rounded-2xl bg-emerald-100 p-4 dark:bg-emerald-900/30">
-                        <SparklesSolid className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+                    <div className="mb-6 inline-flex rounded-2xl bg-primary/10 p-4">
+                        <SparklesSolid className="h-10 w-10 text-primary" />
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    <h1 className="text-2xl font-bold text-foreground">
                         Demande en cours
                     </h1>
-                    <p className="mt-3 text-gray-500 dark:text-gray-400">
+                    <p className="mt-3 text-muted-foreground">
                         Une demande de création de boutique est déjà en cours de
                         traitement. Vous recevrez une notification dès qu'elle
                         sera validée.
                     </p>
                     <Link
-                        href="/dashboard"
-                        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                        href={dashboard()}
+                        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
                     >
                         Retour au tableau de bord
                     </Link>
@@ -159,22 +158,29 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
         <>
             <Head title="Choisir un plan – Devenir vendeur" />
 
-            <div className="bg-white dark:bg-gray-950">
+            {/* Fond premium avec dégradé et formes décoratives */}
+            <div className="relative min-h-screen overflow-hidden bg-linear-to-b from-background via-background to-primary/5 dark:from-background dark:to-primary/10">
+                {/* Formes d'arrière-plan floues */}
+                <div className="pointer-events-none absolute inset-0 -z-10">
+                    <div className="absolute -top-32 left-1/4 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+                    <div className="absolute right-1/4 -bottom-20 h-96 w-96 rounded-full bg-primary/5 blur-3xl" />
+                </div>
+
                 <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
                     {/* En-tête */}
                     <div className="mb-16 text-center">
-                        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
                             <TrendingUp className="h-4 w-4" />
                             Plus de 500 boutiques créées ce mois-ci
                         </span>
-                        <h1 className="mt-6 text-4xl font-semibold text-gray-900 sm:text-5xl lg:text-5xl dark:text-white">
+                        <h1 className="mt-6 text-4xl font-semibold text-foreground sm:text-5xl lg:text-5xl">
                             Lancez votre{' '}
-                            <span className="bg-linear-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-600">
+                            <span className="bg-linear-to-r from-primary to-emerald-400 bg-clip-text text-transparent dark:from-primary dark:to-emerald-300">
                                 boutique
                             </span>{' '}
                             en ligne
                         </h1>
-                        <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-500 dark:text-gray-400">
+                        <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
                             Choisissez le plan qui correspond à vos ambitions.
                             Passez à un plan supérieur à tout moment.
                         </p>
@@ -182,13 +188,13 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
 
                     {/* Toggle mensuel / annuel */}
                     <div className="mb-12 flex justify-center">
-                        <div className="inline-flex items-center rounded-full bg-gray-100 p-1 dark:bg-gray-800">
+                        <div className="inline-flex items-center rounded-full bg-muted p-1">
                             <button
                                 onClick={() => setBillingCycle('monthly')}
                                 className={`rounded-full px-6 py-2 text-sm font-medium transition ${
                                     billingCycle === 'monthly'
-                                        ? 'bg-white text-gray-900 shadow dark:bg-gray-700 dark:text-white'
-                                        : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                        ? 'bg-background text-foreground shadow dark:bg-card'
+                                        : 'text-muted-foreground hover:text-foreground'
                                 }`}
                             >
                                 Mensuel
@@ -197,19 +203,19 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
                                 onClick={() => setBillingCycle('annual')}
                                 className={`rounded-full px-6 py-2 text-sm font-medium transition ${
                                     billingCycle === 'annual'
-                                        ? 'bg-white text-gray-900 shadow dark:bg-gray-700 dark:text-white'
-                                        : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                        ? 'bg-background text-foreground shadow dark:bg-card'
+                                        : 'text-muted-foreground hover:text-foreground'
                                 }`}
                             >
                                 Annuel
-                                <span className="ml-2 rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900 dark:text-green-400">
+                                <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
                                     -2 mois
                                 </span>
                             </button>
                         </div>
                     </div>
 
-                    {/* Grille des plans (4 colonnes sur écrans larges) */}
+                    {/* Grille des plans */}
                     <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                         {displayedPlans.map((plan) => {
                             const isSelected = selectedPlan?.id === plan.id;
@@ -228,47 +234,47 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
                                     onClick={() => setSelectedPlan(plan)}
                                     className={`relative flex cursor-pointer flex-col rounded-2xl border-2 p-5 transition-all duration-200 hover:shadow-lg ${
                                         isSelected
-                                            ? 'border-emerald-500 bg-emerald-50/50 shadow-lg dark:border-emerald-400 dark:bg-emerald-900/20'
+                                            ? 'border-primary bg-primary/10 shadow-lg dark:bg-primary/20'
                                             : plan.is_featured ||
                                                 plan.is_recommended
-                                              ? 'border-emerald-200 bg-white dark:border-emerald-600 dark:bg-gray-800'
-                                              : 'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
+                                              ? 'border-primary/30 bg-card'
+                                              : 'border-border bg-card'
                                     }`}
                                 >
                                     {plan.badge && (
-                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white shadow">
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow">
                                             {plan.badge}
                                         </div>
                                     )}
                                     <div
                                         className={`mb-4 ${plan.badge ? 'mt-2' : ''}`}
                                     >
-                                        <div className="mb-2 inline-flex rounded-lg bg-gray-100 p-2 dark:bg-gray-700">
-                                            <IconComponent className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                                        <div className="mb-2 inline-flex rounded-lg bg-muted p-2">
+                                            <IconComponent className="h-6 w-6 text-primary" />
                                         </div>
-                                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+                                        <h2 className="text-lg font-bold text-foreground">
                                             {plan.name}
                                         </h2>
                                         {plan.highlight && (
-                                            <p className="mt-1 text-xs text-emerald-600 dark:text-emerald-400">
+                                            <p className="mt-1 text-xs text-primary">
                                                 {plan.highlight}
                                             </p>
                                         )}
-                                        <p className="mt-2 line-clamp-3 text-xs text-gray-500 dark:text-gray-400">
+                                        <p className="mt-2 line-clamp-3 text-xs text-muted-foreground">
                                             {plan.description}
                                         </p>
                                     </div>
 
                                     <div className="mb-5">
                                         <div className="flex items-baseline gap-1">
-                                            <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
+                                            <span className="text-3xl font-extrabold text-foreground">
                                                 {formatPrice(
                                                     plan.price,
                                                     plan.currency,
                                                 )}
                                             </span>
                                             {plan.price > 0 && (
-                                                <span className="text-sm text-gray-500 dark:text-gray-400">
+                                                <span className="text-sm text-muted-foreground">
                                                     /
                                                     {plan.interval === 'year'
                                                         ? 'an'
@@ -277,14 +283,14 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
                                             )}
                                         </div>
                                         {plan.trial_days > 0 && (
-                                            <p className="mt-1 text-xs font-medium text-green-600 dark:text-green-400">
+                                            <p className="mt-1 text-xs font-medium text-primary">
                                                 {plan.trial_days} jours d'essai
                                                 gratuit
                                             </p>
                                         )}
                                     </div>
 
-                                    <hr className="mb-5 border-gray-200 dark:border-gray-700" />
+                                    <hr className="mb-5 border-border" />
 
                                     <ul className="mb-6 flex-1 space-y-2.5">
                                         {plan.features?.map((feature, i) => {
@@ -296,8 +302,8 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
                                                     key={i}
                                                     className="flex items-start gap-2"
                                                 >
-                                                    <FeatureIcon className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
-                                                    <span className="text-xs text-gray-600 dark:text-gray-300">
+                                                    <FeatureIcon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                                                    <span className="text-xs text-muted-foreground">
                                                         {feature}
                                                     </span>
                                                 </li>
@@ -308,8 +314,8 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
                                     <button
                                         className={`w-full rounded-xl py-2.5 text-sm font-semibold transition ${
                                             isSelected
-                                                ? 'bg-emerald-500 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-emerald-100 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+                                                ? 'bg-primary text-primary-foreground'
+                                                : 'bg-muted text-foreground hover:bg-primary/20 dark:hover:bg-primary/10'
                                         }`}
                                     >
                                         {isSelected
@@ -333,7 +339,7 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
                             >
                                 <button
                                     onClick={handleContinue}
-                                    className="inline-flex items-center gap-2 rounded-2xl bg-linear-to-r from-emerald-600 to-emerald-700 px-10 py-4 text-lg font-bold text-white shadow-xl transition hover:from-emerald-700 hover:to-emerald-800"
+                                    className="inline-flex items-center gap-2 rounded-full bg-linear-to-r from-primary to-primary/80 px-8 py-4 text-lg font-semibold text-primary-foreground shadow-xl transition hover:from-primary/90 hover:to-primary/70"
                                 >
                                     Continuer avec {selectedPlan.name}
                                     <ArrowRight className="h-5 w-5" />
@@ -358,10 +364,10 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
                         ].map(({ icon: Icon, text }) => (
                             <div
                                 key={text}
-                                className="flex flex-col items-center gap-2 rounded-2xl bg-gray-50 p-6 dark:bg-gray-800"
+                                className="flex flex-col items-center gap-2 rounded-2xl bg-muted p-6"
                             >
-                                <Icon className="h-8 w-8 text-emerald-500" />
-                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <Icon className="h-8 w-8 text-primary" />
+                                <span className="text-sm font-medium text-foreground">
                                     {text}
                                 </span>
                             </div>
@@ -369,7 +375,7 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
                     </div>
 
                     {/* Footer */}
-                    <p className="mt-12 text-center text-sm text-gray-400 dark:text-gray-500">
+                    <p className="mt-12 text-center text-sm text-muted-foreground">
                         Tous les plans incluent un sous‑domaine gratuit, la
                         gestion des commandes et le support technique.
                         <br />

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\EnsureCentralDomain;
 use App\Http\Middleware\EnsureUserIsSuperAdmin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -38,10 +39,9 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('16rem')
-            ->tenant(null)
             ->colors([
                 'danger' => Color::Rose,
-                'gray' => Color::Gray,
+                'gray' => Color::Slate,
                 'info' => Color::Blue,
                 'primary' => Color::Emerald,
                 'success' => Color::Emerald,
@@ -69,15 +69,19 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            ->middleware([
+                'universal',
+                EnsureCentralDomain::class,
+            ])
             ->plugins([
                 FilamentShieldPlugin::make()
-                    ->navigationLabel('Bouclier')                  // string|Closure|null
-                    ->navigationIcon(Heroicon::OutlinedShieldCheck)         // string|Closure|null
-                    ->activeNavigationIcon(Heroicon::ShieldCheck)   // string|Closure|null
-                    ->navigationSort(10)                        // int|Closure|null
-                    ->navigationBadge()                      // string|Closure|null
-                    ->globallySearchable(true)                  // bool|Closure
-                    ->globalSearchResultsLimit(50)              // int|Closure
+                    ->navigationLabel('Bouclier')
+                    ->navigationIcon(Heroicon::OutlinedShieldCheck)
+                    ->activeNavigationIcon(Heroicon::ShieldCheck)
+                    ->navigationSort(10)
+                    ->navigationBadge()
+                    ->globallySearchable(true)
+                    ->globalSearchResultsLimit(50)
                     ->navigationBadgeColor('success')
                     ->gridColumns([
                         'default' => 1,
@@ -99,6 +103,7 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
                 EnsureUserIsSuperAdmin::class,
             ])
+            // ->strictAuthorization()
             ->databaseNotifications()
             ->resourceCreatePageRedirect('index')
             ->resourceEditPageRedirect('index');

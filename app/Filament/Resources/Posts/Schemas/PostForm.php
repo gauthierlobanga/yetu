@@ -17,7 +17,6 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
-use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
@@ -25,7 +24,6 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -171,20 +169,20 @@ class PostForm
                                             ->hint('Haute résolution recommandée (min. 1600x900)'),
 
                                         // GRILLE DES CONVERSIONS PRÉVISUALISÉES
-                                        Section::make('Prévisualisations')
-                                            ->collapsible()
-                                            ->collapsed()
-                                            ->schema([
-                                                Grid::make(3)
-                                                    ->schema([
-                                                        self::createConversionPreview('thumb', 'Miniature', '150x150'),
-                                                        self::createConversionPreview('card', 'Card', '400x300'),
-                                                        self::createConversionPreview('small', 'Petit', '600x400'),
-                                                        self::createConversionPreview('medium', 'Moyen', '1200x800'),
-                                                        self::createConversionPreview('large', 'Grand', '1920x1080'),
-                                                    ]),
-                                            ])
-                                            ->visible(fn (Get $get) => ! empty($get('featured'))),
+                                        // Section::make('Prévisualisations')
+                                        //     ->collapsible()
+                                        //     ->collapsed()
+                                        //     ->schema([
+                                        //         Grid::make(3)
+                                        //             ->schema([
+                                        //                 self::createConversionPreview('thumb', 'Miniature', '150x150'),
+                                        //                 self::createConversionPreview('card', 'Card', '400x300'),
+                                        //                 self::createConversionPreview('small', 'Petit', '600x400'),
+                                        //                 self::createConversionPreview('medium', 'Moyen', '1200x800'),
+                                        //                 self::createConversionPreview('large', 'Grand', '1920x1080'),
+                                        //             ]),
+                                        //     ])
+                                        //     ->visible(fn (Get $get) => ! empty($get('featured'))),
 
                                         // GALERIE D'IMAGES
                                         SpatieMediaLibraryFileUpload::make('gallery')
@@ -395,28 +393,28 @@ class PostForm
                             ]),
 
                         // AJOUT : Section d'aide sur les images
-                        Section::make('📸 Bonnes pratiques images')
-                            ->icon('heroicon-m-information-circle')
-                            ->collapsed()
-                            ->schema([
-                                View::make('filament.components.image-tips')
-                                    ->visible(fn () => true),
-                            ]),
+                        // Section::make('📸 Bonnes pratiques images')
+                        //     ->icon('heroicon-m-information-circle')
+                        //     ->collapsed()
+                        //     ->schema([
+                        //         View::make('filament.components.image-tips')
+                        //             ->visible(fn () => true),
+                        //     ]),
                     ]),
             ]);
     }
 
     /**
      * Crée un composant de prévisualisation de conversion
-     */
-    private static function createConversionPreview(string $conversion, string $label, string $size): Component
-    {
-        return View::make('filament.components.conversion-preview')
-            ->viewData([
-                'conversion' => $conversion,
-                'label' => $label,
-                'size' => $size,
-            ])
-            ->visible(fn (Get $get) => ! empty($get('featured')));
-    }
+    //  */
+    // private static function createConversionPreview(string $conversion, string $label, string $size): Component
+    // {
+    //     return View::make('filament.components.conversion-preview')
+    //         ->viewData([
+    //             'conversion' => $conversion,
+    //             'label' => $label,
+    //             'size' => $size,
+    //         ])
+    //         ->visible(fn (Get $get) => ! empty($get('featured')));
+    // }
 }

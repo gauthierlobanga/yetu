@@ -18,7 +18,6 @@ class LivraisonPaniersTable
     {
         return $table
             ->columns([
-
                 TextColumn::make('panier.client.nom')
                     ->label('Client')
                     ->searchable()

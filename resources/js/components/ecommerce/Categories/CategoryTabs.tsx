@@ -73,7 +73,7 @@ export default function CategoryTabs({
     }
 
     return (
-        <section className="py-12 lg:py-16">
+        <section className="bg-linear-to-b from-emerald-50/40 via-white to-emerald-50/20 py-12 lg:py-16 dark:from-emerald-950/20 dark:via-gray-950 dark:to-emerald-950/10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-8 text-center">
                     <h2 className="font-heading text-2xl font-bold md:text-3xl">
@@ -87,7 +87,7 @@ export default function CategoryTabs({
                 {/* Onglets modernes */}
                 <div className="relative mb-10">
                     <div className="no-scrollbar flex w-full justify-center overflow-x-auto">
-                        <div className="flex gap-2 rounded-full border bg-white/60 p-1 backdrop-blur dark:bg-white/5">
+                        <div className="flex gap-2 rounded-full border-b bg-white/60 p-1 backdrop-blur dark:bg-white/5">
                             {filteredCategories.map((category) => {
                                 const isActive = activeTab === category.slug;
 
@@ -102,7 +102,7 @@ export default function CategoryTabs({
                                         {isActive && (
                                             <motion.div
                                                 layoutId="activeTab"
-                                                className="absolute inset-0 rounded-xs bg-linear-to-r from-orange-500 to-red-500 shadow-md"
+                                                className="absolute inset-0 rounded-full bg-linear-to-r from-emerald-700 to-emerald-500"
                                                 transition={{
                                                     type: 'spring',
                                                     stiffness: 300,
@@ -138,7 +138,7 @@ export default function CategoryTabs({
                     >
                         {activeProducts.length > 0 ? (
                             <>
-                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4">
+                                <div className="grid grid-cols-2 gap-2 bg-linear-to-b from-emerald-50/40 via-white to-emerald-50/20 sm:grid-cols-3 sm:gap-3 md:grid-cols-5 dark:from-emerald-950/20 dark:via-gray-950 dark:to-emerald-950/10">
                                     {activeProducts
                                         .slice(0, 12) // max 12 produits = 3 lignes de 4
                                         .map((product) => (

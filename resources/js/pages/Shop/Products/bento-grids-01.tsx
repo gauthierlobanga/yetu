@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { motion, useInView } from 'framer-motion';
 import {
     Zap,

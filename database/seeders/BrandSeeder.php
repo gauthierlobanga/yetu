@@ -426,7 +426,11 @@ class BrandSeeder extends Seeder
             $brandData['social_links'] = json_encode($brandData['social_links']);
             $brandData['metadata'] = json_encode($brandData['metadata']);
 
-            Brand::create($brandData);
+            // Utiliser firstOrCreate pour éviter les duplications
+            Brand::firstOrCreate(
+                ['slug' => $brandData['slug']],
+                $brandData
+            );
         }
     }
 }

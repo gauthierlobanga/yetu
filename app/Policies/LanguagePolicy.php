@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Models\Language;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
-use Nnjeim\World\Models\Language;
 
 class LanguagePolicy
 {
@@ -47,6 +47,11 @@ class LanguagePolicy
     public function delete(AuthUser $authUser, Language $language): bool
     {
         return $authUser->can('Delete Language');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny Language');
     }
 
     public function restore(AuthUser $authUser, Language $language): bool

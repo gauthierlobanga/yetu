@@ -4,25 +4,13 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Models\Timezone;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
-use Nnjeim\World\Models\Timezone;
 
 class TimezonePolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
 
     public function viewAny(AuthUser $authUser): bool
     {
@@ -47,6 +35,11 @@ class TimezonePolicy
     public function delete(AuthUser $authUser, Timezone $timezone): bool
     {
         return $authUser->can('Delete Timezone');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny Timezone');
     }
 
     public function restore(AuthUser $authUser, Timezone $timezone): bool

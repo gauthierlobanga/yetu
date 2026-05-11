@@ -46,37 +46,37 @@ const sections: Array<{
     {
         key: 'dashboard',
         label: 'Vue d’ensemble',
-        href: route('dashboard.index'),
+        href: route('dashboard'),
         icon: LayoutDashboard,
     },
     {
         key: 'orders',
         label: 'Mes commandes',
-        href: route('orders.index'),
+        href: route('tenant.orders.index'),
         icon: ShoppingBag,
     },
     {
         key: 'wishlist',
         label: 'Wishlist',
-        href: route('wishlist.index'),
+        href: route('tenant.wishlist.index'),
         icon: Heart,
     },
     {
         key: 'loyalty',
         label: 'Fidélité',
-        href: route('loyalty.index'),
+        href: route('tenant.loyalty.index'),
         icon: Award,
     },
     {
         key: 'addresses',
         label: 'Adresses',
-        href: route('addresses.addresses.index'),
+        href: route('tenant.addresses.index'),
         icon: MapPinned,
     },
     {
         key: 'returns',
         label: 'Retours',
-        href: route('return.index'),
+        href: route('tenant.return.index'),
         icon: RotateCcw,
     },
 ];

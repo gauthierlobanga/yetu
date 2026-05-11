@@ -164,7 +164,7 @@ return new class extends Migration
 
         Schema::create('produits', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('devise_id')->references('id')->on('devises')->onDelete('restrict');
+            $table->foreignUuid('devise_id')->nullable()->constrained('devises')->nullOnDelete();
             $table->foreignUuid('brand_id')->constrained('brands')->cascadeOnDelete();
             $table->string('reference')->nullable();
             $table->string('nom');
@@ -191,19 +191,15 @@ return new class extends Migration
             $table->boolean('is_featured')->default(true)->after('statut');
             $table->boolean('is_new')->default(true)->after('is_featured');
             $table->boolean('is_bestseller')->default(true)->after('is_new');
-
             $table->integer('views_count')->default(0)->after('is_bestseller');
             $table->integer('sold_count')->default(0)->after('views_count');
             $table->decimal('average_rating', 10, 2)->default(0)->after('sold_count');
             $table->integer('reviews_count')->default(0)->after('average_rating');
-
             $table->string('seo_title')->after('short_description');
             $table->string('seo_description')->after('seo_title');
             $table->jsonb('seo_keywords')->after('seo_description');
-
-            $table->timestamp('published_at')->after('seo_keywords');
+            $table->timestamp('published_at')->nullable()->after('seo_keywords');
             $table->timestamp('scheduled_for')->nullable()->after('published_at');
-
             $table->timestamp('expires_at')->nullable()->after('scheduled_for');
             $table->timestamp('date_publication')->nullable();
             $table->timestamps();
@@ -806,6 +802,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('user_tenant');
         Schema::dropIfExists('adresses');
         Schema::dropIfExists('clients');
         Schema::dropIfExists('produit_categories');

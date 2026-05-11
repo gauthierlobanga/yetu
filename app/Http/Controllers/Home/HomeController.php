@@ -98,7 +98,7 @@ class HomeController extends Controller
             $promoProducts = Produit::published()
                 ->inStock()
                 ->bestseller()
-                ->take(3)
+                ->take(10)
                 ->get()
                 ->map(fn ($product) => $this->formatProduct($product));
 
@@ -194,7 +194,7 @@ class HomeController extends Controller
             'nombre_avis' => (int) $product->nombre_avis,
             'badge' => $product->is_new ? 'Nouveauté' : ($product->is_bestseller ? 'Best Seller' : null),
             'brand' => $product->brand ? ['nom' => $product->brand->nom, 'slug' => $product->brand->slug] : null,
-            'url' => route('tenant.tenant.product.show', $product->slug),
+            'url' => route('tenant.product.show', $product->slug),
             'sold_count' => (int) $product->sold_count,
         ];
 

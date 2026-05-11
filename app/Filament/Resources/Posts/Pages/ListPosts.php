@@ -40,12 +40,12 @@ class ListPosts extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', Post::STATUS_PUBLISHED)),
 
             // Posts en brouillon
-            // 'draft' => Tab::make('Brouillons')
-            //     ->badge(Post::where('status', Post::STATUS_DRAFT)->count())
-            //     ->badgeColor('gray')
-            //     ->icon('heroicon-m-pencil')
-            //     ->iconPosition(IconPosition::Before)
-            //     ->modifyQueryUsing(fn(Builder $query) => $query->where('status', Post::STATUS_DRAFT)),
+            'draft' => Tab::make('Brouillons')
+                ->badge(Post::where('status', Post::STATUS_DRAFT)->count())
+                ->badgeColor('gray')
+                ->icon('heroicon-m-pencil')
+                ->iconPosition(IconPosition::Before)
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', Post::STATUS_DRAFT)),
 
             // Posts programmés
             'scheduled' => Tab::make('Programmés')
@@ -64,12 +64,12 @@ class ListPosts extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', Post::STATUS_EXPIRED)),
 
             // Posts archivés
-            // 'archived' => Tab::make('Archivés')
-            //     ->badge(Post::where('status', Post::STATUS_ARCHIVED)->count())
-            //     ->badgeColor('gray')
-            //     ->icon('heroicon-m-archive-box')
-            //     ->iconPosition(IconPosition::Before)
-            //     ->modifyQueryUsing(fn(Builder $query) => $query->where('status', Post::STATUS_ARCHIVED)),
+            'archived' => Tab::make('Archivés')
+                ->badge(Post::where('status', Post::STATUS_ARCHIVED)->count())
+                ->badgeColor('gray')
+                ->icon('heroicon-m-archive-box')
+                ->iconPosition(IconPosition::Before)
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', Post::STATUS_ARCHIVED)),
 
             // Séparateur visuel (optionnel)
             'separator' => Tab::make('')

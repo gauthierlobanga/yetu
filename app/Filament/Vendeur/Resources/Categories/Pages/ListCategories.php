@@ -3,7 +3,7 @@
 namespace App\Filament\Vendeur\Resources\Categories\Pages;
 
 use App\Filament\Vendeur\Resources\Categories\CategoryResource;
-use App\Models\Category;
+use App\Models\PostCategory;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -26,14 +26,14 @@ class ListCategories extends ListRecords
         return [
             // Tous les Categorys
             'all' => Tab::make('Tous')
-                ->badge(Category::count())
+                ->badge(PostCategory::count())
                 ->badgeColor('gray')
                 ->icon('heroicon-m-document-text')
                 ->iconPosition(IconPosition::Before),
 
             // Categorys Active
             'published' => Tab::make('Active')
-                ->badge(Category::where('est_active', true)->count())
+                ->badge(PostCategory::where('est_active', true)->count())
                 ->badgeColor('success')
                 ->icon('heroicon-m-check-circle')
                 ->iconPosition(IconPosition::Before)
@@ -44,7 +44,7 @@ class ListCategories extends ListRecords
 
             // Categorys de cette semaine
             'this_week' => Tab::make('Cette semaine')
-                ->badge(Category::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count())
+                ->badge(PostCategory::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count())
                 ->badgeColor('info')
                 ->icon('heroicon-m-calendar')
                 ->iconPosition(IconPosition::Before)
@@ -52,7 +52,7 @@ class ListCategories extends ListRecords
 
             // Categorys du mois dernier
             'last_month' => Tab::make('Mois dernier')
-                ->badge(Category::whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])->count())
+                ->badge(PostCategory::whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])->count())
                 ->badgeColor('info')
                 ->icon('heroicon-m-calendar-days')
                 ->iconPosition(IconPosition::Before)
@@ -60,7 +60,7 @@ class ListCategories extends ListRecords
 
             // Categorys des 30 derniers jours
             'last_30_days' => Tab::make('30 derniers jours')
-                ->badge(Category::where('created_at', '>=', now()->subDays(30))->count())
+                ->badge(PostCategory::where('created_at', '>=', now()->subDays(30))->count())
                 ->badgeColor('info')
                 ->icon('heroicon-m-calendar')
                 ->iconPosition(IconPosition::Before)

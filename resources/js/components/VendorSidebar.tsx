@@ -13,7 +13,6 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import AppLogoIcon from './app-logo-icon';
-import tenant from '@/routes/tenant';
 
 interface NavItem {
     title: string;

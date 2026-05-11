@@ -428,7 +428,7 @@ class PostSeeder extends Seeder
             if (in_array($slug, $this->usedSlugs)) {
                 $slug .= '-'.$faker->randomNumber(3);
             }
-        } while (in_array($slug, $this->usedSlugs));
+        } while (in_array($slug, $this->usedSlugs) || DB::table('posts')->where('slug', $slug)->exists());
         $this->usedSlugs[] = $slug;
 
         $postId = DB::table('posts')->insertGetId([

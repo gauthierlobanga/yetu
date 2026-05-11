@@ -1,60 +1,198 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// resources/js/components/MainNavigation.tsx
+// import { Link } from '@inertiajs/react';
+// import { AnimatePresence, motion } from 'framer-motion'; // Changement ici: framer-motion est plus standard
+// import { ChevronDown } from 'lucide-react';
+// import { useEffect, useRef, useState } from 'react';
+// import type { NavItem } from '@/types';
+
+// type Props = {
+//     items: NavItem[];
+// };
+
+// export function MainNavigation({ items }: Props) {
+//     const [openIndex, setOpenIndex] = useState<number | null>(null);
+//     const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+//     const clearTimer = () => {
+//         if (closeTimeout.current) {
+//             clearTimeout(closeTimeout.current);
+//             closeTimeout.current = null;
+//         }
+//     };
+
+//     const handleMouseEnter = (index: number) => {
+//         clearTimer();
+//         setOpenIndex(index);
+//     };
+
+//     const handleMouseLeave = () => {
+//         closeTimeout.current = setTimeout(() => {
+//             setOpenIndex(null);
+//         }, 150); // Délai léger pour la fluidité
+//     };
+
+//     useEffect(() => {
+//         return () => clearTimer();
+//     }, []);
+
+//     return (
+//         <nav className="flex h-full items-center gap-8">
+//             {items.map((item, index) => (
+//                 <div
+//                     key={index}
+//                     className="relative flex h-full items-center"
+//                     onMouseEnter={() => item.content && handleMouseEnter(index)}
+//                     onMouseLeave={() => item.content && handleMouseLeave()}
+//                 >
+//                     {item.content ? (
+//                         <>
+//                             <button
+//                                 className={`inline-flex items-center gap-1 text-sm font-medium transition-colors focus:outline-none ${
+//                                     openIndex === index
+//                                         ? 'text-foreground'
+//                                         : 'text-muted-foreground'
+//                                 }`}
+//                             >
+//                                 {item.title}
+//                                 <ChevronDown
+//                                     className={`h-4 w-4 transition-transform duration-200 ${
+//                                         openIndex === index ? 'rotate-180' : ''
+//                                     }`}
+//                                 />
+//                             </button>
+
+//                             <AnimatePresence>
+//                                 {openIndex === index && (
+//                                     <>
+//                                         {/* PONT INVISIBLE : Empêche le tremblement entre le lien et le menu */}
+//                                         <div className="absolute top-full h-5 w-full" />
+
+//                                         <motion.div
+//                                             initial={{ opacity: 0, y: 10 }}
+//                                             animate={{ opacity: 1, y: 0 }}
+//                                             exit={{ opacity: 0, y: 10 }}
+//                                             transition={{
+//                                                 duration: 0.2,
+//                                                 ease: 'easeOut',
+//                                             }}
+//                                             className="fixed top-16 left-0 w-full border-b border-border/40 bg-background/95 shadow-xl backdrop-blur-md"
+//                                             onMouseEnter={clearTimer}
+//                                         >
+//                                             <div className="mx-auto max-w-7xl">
+//                                                 {item.content}
+//                                             </div>
+//                                         </motion.div>
+//                                     </>
+//                                 )}
+//                             </AnimatePresence>
+//                         </>
+//                     ) : (
+//                         <Link
+//                             href={item.href || '#'}
+//                             className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+//                         >
+//                             {item.title}
+//                         </Link>
+//                     )}
+//                 </div>
+//             ))}
+//         </nav>
+//     );
+// }
 import { Link } from '@inertiajs/react';
-import React from 'react';
-import {
-    NavigationMenu,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-    NavigationMenuTrigger,
-    NavigationMenuContent,
-    navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
-import { cn } from '@/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import type { NavItem } from '@/types';
 
-interface MainNavigationProps {
+type Props = {
     items: NavItem[];
-}
+};
 
-export function MainNavigation({ items }: MainNavigationProps) {
+export function MainNavigation({ items }: Props) {
+    const [openIndex, setOpenIndex] = useState<number | null>(null);
+    const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const clearTimer = () => {
+        if (closeTimeout.current) {
+            clearTimeout(closeTimeout.current);
+            closeTimeout.current = null;
+        }
+    };
+
+    const handleMouseEnter = (index: number) => {
+        clearTimer();
+        setOpenIndex(index);
+    };
+
+    const handleMouseLeave = () => {
+        closeTimeout.current = setTimeout(() => {
+            setOpenIndex(null);
+        }, 200);
+    };
+
+    useEffect(() => {
+        return () => clearTimer();
+    }, []);
+
     return (
-        <NavigationMenu className="hidden lg:flex">
-            <NavigationMenuList className="gap-1">
-                {items.map((item, index) => {
-                    // Si l'item a un contenu (méga‑menu), on utilise NavigationMenuTrigger + NavigationMenuContent
-                    if (item.content) {
-                        return (
-                            <NavigationMenuItem key={`nav-${index}`}>
-                                <NavigationMenuTrigger className="h-10 px-3 text-sm font-medium">
-                                    {item.title}
-                                </NavigationMenuTrigger>
-                                <NavigationMenuContent className="absolute top-full left-0 w-screen border-b bg-white shadow-lg dark:bg-gray-900">
-                                    <div className="mx-auto max-w-7xl px-4 py-8">
-                                        {item.content}
-                                    </div>
-                                </NavigationMenuContent>
-                            </NavigationMenuItem>
-                        );
-                    }
-
-                    // Sinon, un simple lien
-                    return (
-                        <NavigationMenuItem key={`nav-${index}`}>
-                            <Link
-                                href={item.href}
-                                className={cn(
-                                    navigationMenuTriggerStyle(),
-                                    'h-10 px-3 text-sm font-medium',
-                                )}
+        <nav className="flex h-full items-center gap-10">
+            {items.map((item, index) => (
+                <div
+                    key={index}
+                    className="relative flex h-full items-center"
+                    onMouseEnter={() => item.content && handleMouseEnter(index)}
+                    onMouseLeave={() => item.content && handleMouseLeave()}
+                >
+                    {item.content ? (
+                        <>
+                            <button
+                                className={`inline-flex items-center gap-1.5 text-[1.0rem] font-medium transition-colors duration-200 focus:outline-none ${
+                                    openIndex === index
+                                        ? 'text-foreground'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                }`}
                             >
                                 {item.title}
-                            </Link>
-                        </NavigationMenuItem>
-                    );
-                })}
-            </NavigationMenuList>
-        </NavigationMenu>
+                                <ChevronDown
+                                    className={`h-4 w-4 transition-transform duration-200 ${
+                                        openIndex === index ? 'rotate-180' : ''
+                                    }`}
+                                />
+                            </button>
+
+                            <AnimatePresence>
+                                {openIndex === index && (
+                                    <>
+                                        <div className="absolute top-full h-5 w-full" />
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            transition={{
+                                                duration: 0.2,
+                                                ease: 'easeOut',
+                                            }}
+                                            className="fixed top-16 left-0 w-full border-b border-border/40 bg-background shadow-xs backdrop-blur-md"
+                                            onMouseEnter={clearTimer}
+                                        >
+                                            <div className="mx-auto max-w-7xl">
+                                                {item.content}
+                                            </div>
+                                        </motion.div>
+                                    </>
+                                )}
+                            </AnimatePresence>
+                        </>
+                    ) : (
+                        <Link
+                            href={item.href || '#'}
+                            className="text-[1.0rem] font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground"
+                        >
+                            {item.title}
+                        </Link>
+                    )}
+                </div>
+            ))}
+        </nav>
     );
 }

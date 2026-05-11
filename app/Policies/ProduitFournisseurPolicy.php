@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\ProduitFournisseur;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class ProduitFournisseurPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny ProduitFournisseur');
@@ -47,6 +35,11 @@ class ProduitFournisseurPolicy
     public function delete(AuthUser $authUser, ProduitFournisseur $produitFournisseur): bool
     {
         return $authUser->can('Delete ProduitFournisseur');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny ProduitFournisseur');
     }
 
     public function restore(AuthUser $authUser, ProduitFournisseur $produitFournisseur): bool
@@ -78,4 +71,5 @@ class ProduitFournisseurPolicy
     {
         return $authUser->can('Reorder ProduitFournisseur');
     }
+
 }

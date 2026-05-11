@@ -29,10 +29,9 @@ use App\Http\Controllers\Shop\PromotionController;
 use App\Http\Controllers\Shop\ReturnController;
 use App\Http\Controllers\Shop\ReviewController;
 use App\Http\Controllers\Shop\WishlistController;
+use App\Http\Controllers\Vendor\VendorDashboardController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
-use Laravel\Fortify\Http\Controllers\NewPasswordController;
-use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -54,53 +53,77 @@ Route::middleware([
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
 
-    // Mais plus proprement, pour le tenant on veut login/logout sans register :
-    Route::name('tenant.')->group(function () {
-        Route::get('/login', [AuthenticatedSessionController::class, 'create'])
-            ->middleware('guest:web')
-            ->name('login');
-        Route::post('/login', [AuthenticatedSessionController::class, 'store'])
-            ->middleware('guest:web')
-            ->name('login.store');
-        Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-            ->middleware('auth:web')
-            ->name('logout');
+    /*
+      |--------------------------------------------------------------------------
+      | ROUTES PUBLICS TENANT
+      |--------------------------------------------------------------------------
+      */
+    Route::get('/', [HomeController::class, 'homeIndex'])->name('tenant.home');
 
-        // Mot de passe oublié (optionnel)
-        Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
-            ->middleware('guest:web')
-            ->name('password.request');
-        Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
-            ->middleware('guest:web')
-            ->name('password.email');
-        Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
-            ->middleware('guest:web')
-            ->name('password.reset');
-        Route::post('/reset-password', [NewPasswordController::class, 'store'])
-            ->middleware('guest:web')
-            ->name('password.update');
+    /*
+      |--------------------------------------------------------------------------
+      | ROUTES AUTHENTIFICATION TENANT (acheteurs)
+      |--------------------------------------------------------------------------
+      */
+    Route::middleware('guest')->name('tenant.')->group(function () {
+        Route::get('/login', function () {
+            return inertia('auth/login', [
+                'canResetPassword' => true,
+                'canRegister' => true,
+            ]);
+        })->name('login');
+
+        Route::get('/register', function () {
+            return inertia('auth/register');
+        })->name('register');
+
+        Route::get('/forgot-password', function () {
+            return inertia('auth/forgot-password');
+        })->name('password.request');
+
+        Route::get('/reset-password/{token}', function (Request $request, $token) {
+            return inertia('auth/reset-password', [
+                'email' => $request->email,
+                'token' => $token,
+            ]);
+        })->name('password.reset');
     });
 
-    Route::name('tenant.')->group(function () {
-        Route::middleware(['auth'])->group(function () {
-            Route::redirect('settings', '/settings/profile');
+    /*
+      |--------------------------------------------------------------------------
+      | ROUTES PUBLICS TENANT
+      |--------------------------------------------------------------------------
+      */
+    Route::middleware(['auth'])->group(function () {
 
-            Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-            Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::prefix('admin')->group(function () {
+            Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('dashboard');
         });
 
-        Route::middleware(['auth', 'verified'])->group(function () {
-            Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])
+            ->name('vendor.dashboard');
 
-            Route::get('settings/security', [SecurityController::class, 'edit'])->name('security.edit');
+        Route::redirect('settings', '/settings/profile');
 
-            Route::put('settings/password', [SecurityController::class, 'update'])
-                ->middleware('throttle:6,1')
-                ->name('user-password.update');
+        Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+    });
 
-            Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
-        });
+    /*
+    |--------------------------------------------------------------------------
+    | ROUTES PUBLICS TENANT
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+        Route::get('settings/security', [SecurityController::class, 'edit'])->name('security.edit');
+
+        Route::put('settings/password', [SecurityController::class, 'update'])
+            ->middleware('throttle:6,1')
+            ->name('user-password.update');
+
+        Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
     });
     /*
     |--------------------------------------------------------------------------
@@ -108,8 +131,6 @@ Route::middleware([
     |--------------------------------------------------------------------------
     */
     Route::name('tenant.')->group(function () {
-
-        Route::get('/', [HomeController::class, 'homeIndex'])->name('home');
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/countries', [LocationController::class, 'countries'])->name('addresses.countries');
@@ -121,10 +142,8 @@ Route::middleware([
         | ROUTES PAGES STATIQUES (aide, conditions, politique de confidentialité, etc.)
         |--------------------------------------------------------------------------
         */
-        Route::prefix('search')->name('search.')->group(function () {
-            Route::get('/api/search', [SearchController::class, 'shopSearch'])->name('search');
-            Route::get('/search', [SearchController::class, 'shopApi'])->name('api');
-        });
+        Route::get('/api/search', [SearchController::class, 'shopSearch'])->name('search');
+        Route::get('/search', [SearchController::class, 'shopApi'])->name('api');
 
         Route::prefix('page')->group(function () {
             Route::get('/contact', [ContactController::class, 'contactIndex'])->name('page.contact');
@@ -158,9 +177,7 @@ Route::middleware([
         |--------------------------------------------------------------------------
         */
         Route::middleware(['auth', 'verified'])->group(function () {
-
             Route::prefix('dashboard')->group(function () {
-                Route::get('/', [DashboardController::class, 'adminDashboardIndex'])->name('dashboard.index');
                 Route::post('/posts/reorder', [DashboardController::class, 'postsReorder'])->name('posts.reorder');
             });
         });
@@ -205,7 +222,7 @@ Route::middleware([
         Route::prefix('product')->group(function () {
             Route::get('/', [ProductController::class, 'productsIndex'])->name('product.index');
             Route::get('/quick-view/{produit:slug}', [ProductController::class, 'productsQuickView'])->name('product.quick-view');
-            Route::get('/{produit:slug}', [ProductController::class, 'productsShow'])->name('tenant.product.show');
+            Route::get('/{produit:slug}', [ProductController::class, 'productsShow'])->name('product.show');
             Route::post('/search/by-image', [ProductController::class, 'searchByImage'])->name('product.search.by-image');
             Route::get('/{produit:slug}/reviews', [ReviewController::class, 'productsReviewsIndex'])->name('product.reviews.index');
         });
@@ -302,5 +319,9 @@ Route::middleware([
             });
         });
     });
+
+    Route::get('/subscription/required', function () {
+        return inertia('Subscription/Required');
+    })->name('tenant.subscription.required');
 
 });

@@ -198,7 +198,7 @@ class PostsTable
                         ->label('Aperçu')
                         ->iconSize(IconSize::Medium)
                         ->icon('heroicon-m-eye')
-                        ->url(fn ($record) => route('blog.show', $record->slug))
+                        ->url(fn ($record) => route('tenant.blog.show', $record->slug))
                         ->openUrlInNewTab(),
                 ])
                     ->badge()

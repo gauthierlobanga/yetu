@@ -16,7 +16,7 @@ interface ProductCardProps {
 /** Retourne une URL d’image valide ou un placeholder */
 function getImageUrl(image: string | null | undefined): string {
     if (!image) {
-        return '/images/placeholder-product.svg';
+        return '/storage/images/Vue-Storefront.png';
     }
 
     if (image.startsWith('http') || image.startsWith('/storage')) {

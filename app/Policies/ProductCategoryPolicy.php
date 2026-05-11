@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\ProductCategory;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class ProductCategoryPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny ProductCategory');
@@ -47,6 +35,11 @@ class ProductCategoryPolicy
     public function delete(AuthUser $authUser, ProductCategory $productCategory): bool
     {
         return $authUser->can('Delete ProductCategory');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny ProductCategory');
     }
 
     public function restore(AuthUser $authUser, ProductCategory $productCategory): bool
@@ -78,4 +71,5 @@ class ProductCategoryPolicy
     {
         return $authUser->can('Reorder ProductCategory');
     }
+
 }

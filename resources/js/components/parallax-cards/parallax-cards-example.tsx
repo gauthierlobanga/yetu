@@ -2,6 +2,7 @@
 
 import { ReactLenis } from 'lenis/react';
 import type { LenisRef } from 'lenis/react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ChevronDownIcon, ChevronRightIcon } from 'lucide-react';
 import { useScroll, cancelFrame, frame } from 'motion/react';
 import { useEffect, useRef } from 'react';
@@ -50,7 +51,7 @@ const cardItems = [
 
 export type CardItemType = (typeof cardItems)[number];
 
-export default function Page() {
+export default function ParallaxCardPage() {
     const lenisRef = useRef<LenisRef>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -110,7 +111,7 @@ export default function Page() {
             <ReactLenis root options={{ autoRaf: false }} ref={lenisRef} />
             <div ref={containerRef}>
                 <div className="flex h-100 items-center justify-center gap-2 text-xl">
-                    Scroll <ChevronDownIcon />
+                    {/* Scroll <ChevronDownIcon /> */}
                 </div>
                 <div className="mx-auto max-w-2xl pt-14">
                     {cardItems.map((cardItem, i) => (

@@ -151,7 +151,7 @@ export default function FiltersPanel({
     const hasActiveFilters = activeFilters.length > 0;
 
     return (
-        <div className="space-y-5 rounded-xl border bg-card p-5">
+        <div className="space-y-5 border-r-2 border-r-gray-50 bg-card p-5">
             {/* En‑tête */}
             <div className="flex items-center justify-between border-b pb-3">
                 <div className="flex items-center gap-2">
@@ -165,7 +165,7 @@ export default function FiltersPanel({
                         variant="ghost"
                         size="sm"
                         onClick={clearAllFilters}
-                        className="h-8 gap-1 text-xs text-muted-foreground hover:text-foreground"
+                        className="h-8 cursor-pointer gap-1 text-sm text-muted-foreground hover:text-foreground"
                     >
                         <RotateCcw className="h-3.5 w-3.5" />
                         Réinitialiser
@@ -196,7 +196,7 @@ export default function FiltersPanel({
                                 </span>
                                 <button
                                     onClick={() => removeFilter(filter.key)}
-                                    className="ml-1 rounded-full p-0.5 transition-colors hover:bg-muted-foreground/20"
+                                    className="ml-1 cursor-pointer rounded-full p-0.5 transition-colors hover:bg-muted-foreground/20"
                                     aria-label={`Supprimer le filtre ${filter.label}`}
                                 >
                                     <X className="h-3 w-3" />
@@ -378,7 +378,7 @@ export default function FiltersPanel({
                     </div>
                     <Button
                         size="sm"
-                        className="w-full"
+                        className="w-full cursor-pointer rounded-2xl py-4.5"
                         onClick={applyPriceFilter}
                         disabled={
                             priceRange[0] === minPossiblePrice &&

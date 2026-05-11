@@ -122,11 +122,15 @@ class Post extends Model implements HasMedia
 
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(PostCategory::class, 'posts_categories_pivot')
-            ->using(PostCategoryPivot::class)
-            ->withPivot('id', 'is_primary', 'est_principale', 'order')
+        return $this->belongsToMany(
+            PostCategory::class,          // Modèle lié
+            'posts_categories_pivot',     // Table pivot
+            'post_id',                    // Clé étrangère de CE modèle (Post)
+            'category_id'                 // Clé étrangère du modèle PostCategory
+        )
+            ->withPivot('id', 'is_primary', 'est_principale', 'ordre')
             ->withTimestamps()
-            ->orderByPivot('order');
+            ->orderByPivot('ordre');
     }
 
     public function categoriePrincipale()

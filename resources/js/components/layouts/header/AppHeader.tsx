@@ -1,11 +1,13 @@
-// resources/js/components/AppHeader.tsx
 import { Link, usePage } from '@inertiajs/react';
-import { ArrowRight, Menu } from 'lucide-react';
+import { ArrowRight, List, Menu } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
+import { ProductCategoryMenuContent } from '@/components/navigation/categorie-produits-explorer/ProductsMenuContent';
+import { CentreAcheteurs } from '@/components/navigation/CentreAcheteurs';
 import { ChooseYetuContent } from '@/components/navigation/ChooseYetuContent';
 import { ProductsMenuContent } from '@/components/navigation/ProductsMenuContent';
+import { Support } from '@/components/navigation/Support';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -15,11 +17,13 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { useTenant } from '@/hooks/useTenant';
+// import { login } from '@/routes/tenant';
+import { login } from '@/routes/tenant';
 import type { BreadcrumbItem, NavItem } from '@/types';
+import { HeaderActions } from './HeaderActions'; // import du nouveau composant d'actions
 import { MainNavigation } from './MainNavigation';
 import { MobileNavigation } from './MobileNavigation';
 import { UserNavigation } from './UserNavigation';
-import tenant from '@/routes/tenant';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
@@ -39,19 +43,31 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
     // Liens pour les boutiques (tenants)
     const tenantNavItems: NavItem[] = [
-        { title: 'Produits', href: route('tenant.product.index') },
-        { title: 'Catégories', href: route('tenant.product.category.index') },
-        { title: 'Promotions', href: route('tenant.promotions.index') },
-        { title: 'Contact', href: route('tenant.page.contact') },
+        {
+            title: 'Explorer les catégories',
+            content: <ProductCategoryMenuContent />,
+            icon: List,
+            href: '',
+        },
+        {
+            title: "Centre d'acheteurs",
+            content: <CentreAcheteurs />,
+            href: '',
+        },
+        {
+            title: 'Support',
+            content: <Support />,
+            href: '',
+        },
     ];
 
     const mainNavItems = isTenant ? tenantNavItems : centralNavItems;
 
     return (
         <>
-            <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-white/95 backdrop-blur supports-backdrop-filter:bg-white/60 dark:bg-gray-900/95">
-                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
-                    {/* Mobile Menu */}
+            <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-md supports-backdrop-filter:bg-background/60">
+                <div className="mx-auto flex h-16 min-w-xl items-center justify-between px-10 lg:px-12">
+                    {/* Mobile menu */}
                     <div className="mr-2 lg:hidden">
                         <Sheet>
                             <SheetTrigger asChild>
@@ -76,39 +92,36 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                         </Sheet>
                     </div>
 
-                    {/* Logo */}
-                    <Link
-                        href={isTenant ? route('tenant.home') : route('home')}
-                        className="flex shrink-0 items-center"
-                    >
-                        <AppLogo />
-                    </Link>
-
-                    {/* Desktop Navigation (centrée) */}
-                    <div className="hidden flex-1 justify-center lg:flex">
-                        <MainNavigation items={mainNavItems} />
+                    {/* Logo + Navigation */}
+                    <div className="flex items-center gap-8">
+                        <Link
+                            href={
+                                isTenant ? route('tenant.home') : route('home')
+                            }
+                            className="flex shrink-0 items-center"
+                        >
+                            <AppLogo />
+                        </Link>
+                        <div className="hidden h-full lg:flex">
+                            <MainNavigation items={mainNavItems} />
+                        </div>
                     </div>
 
-                    {/* Right Section */}
+                    {/* Actions à droite */}
                     <div className="flex items-center gap-3">
-                        {!isTenant && (
+                        {!isTenant ? (
                             <>
-                                {/* Bouton connexion pour vendeur */}
                                 <Button
                                     variant="ghost"
-                                    size="lg"
+                                    size="sm"
                                     asChild
-                                    className="text-md font-medium"
+                                    className="text-[1.0rem] font-medium text-muted-foreground hover:text-foreground"
                                 >
-                                    <Link href={tenant.login()}>
-                                        {' '}
-                                        {/* <-- modification */}
-                                        Se connecter
-                                    </Link>
+                                    <Link href={login()}>Se connecter</Link>
                                 </Button>
                                 <Button
                                     size="lg"
-                                    className="group relative overflow-hidden rounded-full bg-primary px-4 py-5 text-base font-semibold text-primary-foreground transition hover:shadow-xs"
+                                    className="group py-4.7 relative overflow-hidden rounded-full bg-primary px-4 text-base font-semibold text-primary-foreground transition hover:shadow-xs"
                                     asChild
                                 >
                                     <Link href={route('vendor.register')}>
@@ -121,10 +134,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     </Link>
                                 </Button>
                             </>
-                        )}
-                        {isTenant && (
+                        ) : (
                             <>
-                                {/* Afficher connexion ou profil selon l'état */}
+                                <HeaderActions />
                                 {auth.user ? (
                                     <UserNavigation user={auth.user} />
                                 ) : (
@@ -132,11 +144,9 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         variant="ghost"
                                         size="sm"
                                         asChild
-                                        className="text-sm font-medium"
+                                        className="text-[1.0rem] font-medium"
                                     >
-                                        <Link href={route('tenant.login')}>
-                                            Se connecter
-                                        </Link>
+                                        <Link href={login()}>Se connecter</Link>
                                     </Button>
                                 )}
                             </>

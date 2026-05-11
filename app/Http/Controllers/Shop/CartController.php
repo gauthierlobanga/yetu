@@ -134,7 +134,6 @@ class CartController extends Controller
                 ]);
             }
             $cart = Panier::firstOrCreate(
-                // ['user_id' => $user->id],
                 ['client_id' => $client->id, 'statut' => Panier::STATUT_ACTIF],
                 ['date_creation' => now(), 'expires_at' => now()->addDays(7)]
             );
@@ -189,7 +188,6 @@ class CartController extends Controller
                 $client = FacadesAuth::user()->client()->create();
             }
             $cart = Panier::firstOrCreate(
-                // ['user_id' => $client->id],
                 ['client_id' => $client->id, 'statut' => Panier::STATUT_ACTIF],
                 ['date_creation' => now(), 'expires_at' => now()->addDays(7)]
             );
@@ -208,13 +206,13 @@ class CartController extends Controller
     {
         $request->validate([
             'item_ids' => 'sometimes|array',
-            'item_ids.*' => 'string', // ← Changement ici
+            'item_ids.*' => 'string',
         ]);
 
         $cart = $this->getOrCreateCart($request);
         $selectedIds = $request->input('item_ids', []);
 
-        // 🔥 sécurisation anti-422
+        // sécurisation anti-422
         $validIds = $cart->items()
             ->whereIn('id', $selectedIds)
             ->pluck('id')

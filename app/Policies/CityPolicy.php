@@ -49,6 +49,11 @@ class CityPolicy
         return $authUser->can('Delete City');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny City');
+    }
+
     public function restore(AuthUser $authUser, City $city): bool
     {
         return $authUser->can('Restore City');

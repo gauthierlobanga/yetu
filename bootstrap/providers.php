@@ -9,9 +9,9 @@ use App\Providers\TenancyServiceProvider;
 
 return [
     AppServiceProvider::class,
-    TenancyServiceProvider::class,
+    CommentServiceProvider::class,
     AdminPanelProvider::class,
     VendeurPanelProvider::class,
     FortifyServiceProvider::class,
-    CommentServiceProvider::class,
+    TenancyServiceProvider::class,
 ];

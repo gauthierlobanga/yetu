@@ -1,5 +1,4 @@
 import { Link, usePage } from '@inertiajs/react';
-import { homeIndex } from '@/actions/App/Http/Controllers/Home/HomeController';
 import AppLogoIcon from '@/components/app-logo-icon';
 import type { AuthLayoutProps } from '@/types';
 

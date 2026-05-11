@@ -27,7 +27,13 @@ import {
     useRef,
     useState,
 } from 'react';
+import CobeModern from '@/components/eldoraui/cobe-globe';
+import CobePremiumGSAP from '@/components/eldoraui/cobe-globe';
+import { IntegrationProduct } from '@/components/eldoraui/IntegrationProduit';
+import { Integrations } from '@/components/eldoraui/integrations';
+import { PhotonBeam } from '@/components/eldoraui/photon-beam';
 import AnimatedCtaButton from '@/components/hero/AnimatedCtaButton';
+import ParallaxCardPage from '@/components/parallax-cards/parallax-cards-example';
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/layouts/main-layout';
 
@@ -431,7 +437,7 @@ export function CreerRapidementSection() {
     return (
         <section
             ref={sectionRef}
-            className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-primary/5 py-24"
+            className="relative overflow-hidden bg-linear-to-b from-primary/10 via-background to-primary/5 py-24"
         >
             {/* Décors d'arrière-plan */}
             <div className="pointer-events-none absolute inset-0 -z-10">
@@ -454,7 +460,7 @@ export function CreerRapidementSection() {
                             ref={(el) => {
                                 stepsRef.current[idx] = el;
                             }}
-                            className="group relative rounded-2xl border border-border bg-card/50 p-8 shadow-sm backdrop-blur-lg transition-all duration-300 hover:shadow-xl"
+                            className="group relative rounded-2xl border border-border bg-card/50 p-8 backdrop-blur-lg transition-all duration-300"
                         >
                             <span className="text-5xl font-extrabold tracking-tight text-primary drop-shadow-sm">
                                 {item.step}
@@ -462,8 +468,7 @@ export function CreerRapidementSection() {
                             <h3 className="mt-4 text-xl font-semibold text-foreground">
                                 {item.title}
                             </h3>
-                            {/* Lueur subtile au survol */}
-                            <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/0 to-primary/0 opacity-0 transition-opacity duration-500 group-hover:opacity-10" />
+                            <div className="pointer-events-none absolute inset-0 rounded-xl bg-linear-to-br from-primary/0 to-primary/0 opacity-0 transition-opacity duration-500 group-hover:opacity-10" />
                         </div>
                     ))}
                 </div>
@@ -587,7 +592,7 @@ export function CtaFinalSection() {
                     {/* Titre - police identique au Hero (sans-serif, semibold, tracking tight) */}
                     <h2
                         ref={titleRef}
-                        className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
+                        className="text-3xl font-medium tracking-tight text-foreground sm:text-4xl lg:text-5xl"
                     >
                         Prêt à vous lancer ?
                     </h2>
@@ -605,7 +610,7 @@ export function CtaFinalSection() {
                         <Button
                             size="lg"
                             asChild
-                            className="group relative overflow-hidden rounded-full bg-emerald-600 px-10 py-6 text-lg font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:bg-emerald-700 hover:shadow-emerald-500/30 dark:bg-emerald-700 dark:hover:bg-emerald-600"
+                            className="group relative overflow-hidden rounded-full bg-emerald-600 px-10 py-6 text-lg font-semibold text-white shadow shadow-emerald-500/20 transition-all hover:bg-emerald-700 hover:shadow-emerald-500/30 dark:bg-emerald-700 dark:hover:bg-emerald-600"
                         >
                             <Link href={route('vendor.register')}>
                                 <span className="relative z-10 inline-flex items-center">
@@ -613,7 +618,7 @@ export function CtaFinalSection() {
                                     <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                                 </span>
                                 {/* Brillance au survol */}
-                                <span className="absolute inset-0 -z-0 rounded-full bg-linear-to-r from-transparent via-emerald-300/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:via-emerald-400/20" />
+                                <span className="absolute inset-0 z-0 rounded-full bg-linear-to-r from-transparent via-emerald-300/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:via-emerald-400/20" />
                             </Link>
                         </Button>
                     </div>
@@ -651,7 +656,7 @@ function FadeInSection({
     );
 }
 
-export default function SaaSLanding(_props: Props) {
+export default function SaaSLanding({ plans, stats, testimonials }: Props) {
     return (
         <MainLayout>
             <Head title="Yedu: Créez votre boutique en ligne" />
@@ -702,7 +707,7 @@ export default function SaaSLanding(_props: Props) {
                 <div className="mx-auto max-w-7xl px-6">
                     <FadeInSection className="grid items-center gap-12 lg:grid-cols-2">
                         <div>
-                            <h2 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
+                            <h2 className="font-serif text-5xl font-semibold tracking-tight text-foreground sm:text-5xl">
                                 Vendez partout où vos clients
                                 <br />
                                 font leurs achats.
@@ -1036,14 +1041,15 @@ export default function SaaSLanding(_props: Props) {
             </section>
 
             {/* ========== CRÉEZ RAPIDEMENT ========== */}
-            <section className="bg-linear-to-b from-muted to-background py-20">
-                <CreerRapidementSection />
-            </section>
+            <CreerRapidementSection />
 
             {/* ========== CTA FINAL ========== */}
-            <section className="bg-primary py-16 text-center text-primary-foreground">
-                <CtaFinalSection />
-            </section>
+            <CtaFinalSection />
+
+            {/* ========== CTA FINAL ========== */}
+            <IntegrationProduct />
+
+            {/* ========== CTA ========== */}
         </MainLayout>
     );
 }

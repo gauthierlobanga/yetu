@@ -4,13 +4,12 @@ namespace App\Filament\Vendeur\Resources\Promotions\Schemas;
 
 use App\Models\ProductCategory;
 use App\Models\Produit;
-use App\Models\Tenant;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+// use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -19,7 +18,6 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class PromotionForm
@@ -40,38 +38,7 @@ class PromotionForm
                                         Section::make('Informations générales')
                                             ->icon('heroicon-o-ticket')
                                             ->schema([
-                                                Select::make('tenant_id')
-                                                    ->label('Organisation')
-                                                    ->relationship('tenant', 'raison_sociale')
-                                                    ->preload()
-                                                    ->searchable()
-                                                    ->options(function () {
-                                                        $user = Auth::user();
 
-                                                        // Si l'utilisateur est Super Admin, il voit toutes les Vendeurs
-                                                        if ($user->hasRole(['super_admin'])) {
-                                                            return Tenant::pluck('raison_sociale', 'id');
-                                                        }
-
-                                                        // Sinon, il voit seulement ses Vendeurs
-                                                        return $user->tenants()->pluck('raison_sociale', 'tenants.id');
-                                                    })
-                                                    ->default(function () {
-                                                        $user = Auth::user();
-
-                                                        // Si on est dans un contexte tenant, pré-remplir avec la Vendeur actuelle
-                                                        if (Filament::hasTenancy() && Filament::getTenant()) {
-                                                            return Filament::getTenant()->id;
-                                                        }
-
-                                                        // Si l'utilisateur n'a qu'une seule Vendeur, la sélectionner par défaut
-                                                        if ($user->tenants()->count() === 1) {
-                                                            return $user->tenants()->first()->id;
-                                                        }
-
-                                                        return null;
-                                                    })
-                                                    ->required(),
                                                 TextInput::make('nom')
                                                     ->label('Nom de la promotion')
                                                     ->required()
@@ -80,15 +47,15 @@ class PromotionForm
                                                     ->label('Description')
                                                     ->rows(3)
                                                     ->maxLength(500),
-                                                SpatieMediaLibraryFileUpload::make('banner')
-                                                    ->label('Bannière promotionnelle')
-                                                    ->image()
-                                                    ->collection('banner')
-                                                    ->disk('public')
-                                                    ->directory('promotions')
-                                                    ->visibility('public')
-                                                    ->imageEditor()
-                                                    ->helperText('Image affichée dans la section promotion (format paysage recommandé)'),
+                                                // SpatieMediaLibraryFileUpload::make('banner')
+                                                //     ->label('Bannière promotionnelle')
+                                                //     ->image()
+                                                //     ->collection('banner')
+                                                //     ->disk('public')
+                                                //     ->directory('promotions')
+                                                //     ->visibility('public')
+                                                //     ->imageEditor()
+                                                //     ->helperText('Image affichée dans la section promotion (format paysage recommandé)'),
                                                 Toggle::make('est_active')
                                                     ->label('Promotion active')
                                                     ->inline(false)

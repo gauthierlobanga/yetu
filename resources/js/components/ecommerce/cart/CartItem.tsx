@@ -71,7 +71,7 @@ export function CartItem({ item, compact = false, onUpdate }: CartItemProps) {
 
         try {
             await router.patch(
-                route('cart.update', { id: item.id }),
+                route('tenant.cart.update', { id: item.id }),
                 { quantity: newQuantity },
                 {
                     preserveState: true,
@@ -98,7 +98,7 @@ export function CartItem({ item, compact = false, onUpdate }: CartItemProps) {
         setIsRemoving(true);
 
         try {
-            await router.delete(route('cart.remove', { id: item.id }), {
+            await router.delete(route('tenant.cart.remove', { id: item.id }), {
                 preserveState: true,
                 preserveScroll: true,
                 onSuccess: () => {
@@ -155,7 +155,7 @@ export function CartItem({ item, compact = false, onUpdate }: CartItemProps) {
                 {/* Détails */}
                 <div className="min-w-0 flex-1">
                     <Link
-                        href={route('tenant.tenant.product.show', {
+                        href={route('tenant.product.show', {
                             slug: item.slug || item.product_id,
                         })}
                         className="line-clamp-1 text-sm font-medium hover:underline"
@@ -249,7 +249,7 @@ export function CartItem({ item, compact = false, onUpdate }: CartItemProps) {
                 <div className="flex justify-between">
                     <div className="flex-1">
                         <Link
-                            href={route('tenant.tenant.product.show', {
+                            href={route('tenant.product.show', {
                                 slug: item.slug || item.product_id,
                             })}
                             className="text-base font-medium hover:underline"
@@ -429,7 +429,7 @@ export function CartItem({ item, compact = false, onUpdate }: CartItemProps) {
                                     className="h-8 w-8"
                                     onClick={() => {
                                         router.post(
-                                            route('wishlist.toggle', {
+                                            route('tenant.wishlist.toggle', {
                                                 product: item.product_id,
                                             }),
                                             {},

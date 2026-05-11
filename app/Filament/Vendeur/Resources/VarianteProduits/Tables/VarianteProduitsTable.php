@@ -171,7 +171,7 @@ class VarianteProduitsTable
                 Action::make('view_product')
                     ->label('Voir le produit')
                     ->icon(Heroicon::OutlinedEye)
-                    ->url(fn ($record) => route('filament.admin.products.resources.produits.edit', $record->produit_id))
+                    ->url(fn ($record) => route('filament.vendeur.products.resources.produits.edit', $record->produit_id))
                     ->color('gray')
                     ->button(),
 

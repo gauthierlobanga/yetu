@@ -164,7 +164,7 @@ class BrandsTable
                 Action::make('view_products')
                     ->label('Voir produits')
                     ->icon('heroicon-m-shopping-bag')
-                    ->url(fn ($record) => route('filament.admin.products.resources.produits.index', [
+                    ->url(fn ($record) => route('filament.vendeur.products.resources.produits.index', [
                         'tableFilters[brand_id][values][]' => $record->id,
                     ]))
                     ->button()

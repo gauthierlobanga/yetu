@@ -101,6 +101,8 @@ class RelancePaniersTable
                         'push' => 'Notification push',
                         'notification' => 'Notification',
                     ])
+                    ->preload()
+                    ->searchable()
                     ->multiple(),
 
                 SelectFilter::make('statut')
@@ -112,12 +114,18 @@ class RelancePaniersTable
                         'converti' => 'Converti',
                         'echec' => 'Échec',
                     ])
+                    ->preload()
+                    ->searchable()
                     ->multiple(),
 
                 TernaryFilter::make('a_conduit_achat')
+                    ->preload()
+                    ->searchable()
                     ->label('A conduit à un achat'),
 
-                TrashedFilter::make(),
+                TrashedFilter::make()
+                    ->preload()
+                    ->searchable(),
             ])
             ->recordActions([
                 Action::make('marquer_ouvert')

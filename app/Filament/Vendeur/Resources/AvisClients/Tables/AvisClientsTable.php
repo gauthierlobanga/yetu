@@ -120,7 +120,7 @@ class AvisClientsTable
                 TrashedFilter::make(),
             ])
             ->filtersFormColumns(2)
-            ->recordActions([ // Changé de recordActions() à actions() dans Filament v3
+            ->recordActions([
                 EditAction::make()
                     ->icon('heroicon-o-pencil'),
 
@@ -140,7 +140,7 @@ class AvisClientsTable
                     ->visible(fn ($record) => $record->approuve)
                     ->requiresConfirmation(),
             ])
-            ->toolbarActions([ // Changé de toolbarActions() à bulkActions()
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label('Supprimer la sélection'),

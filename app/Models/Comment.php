@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasComments;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,10 +15,10 @@ use Illuminate\Support\Str;
 
 class Comment extends Model
 {
+    use HasComments, HasUuids;
+
     /** @use HasFactory<CommentFactory> */
     use HasFactory, SoftDeletes;
-
-    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)

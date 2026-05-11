@@ -35,6 +35,15 @@ class VendorRequestForm
                             ])
                             ->native(false),
 
+                        Select::make('tenant_id')
+                            ->label('Organisation')
+                            ->relationship('tenant', 'raison_sociale')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->native(false)
+                            ->helperText('L\'organisation'),
+
                         Select::make('plan_id')
                             ->label('Plan')
                             ->relationship('plan', 'name')

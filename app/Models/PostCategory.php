@@ -75,7 +75,12 @@ class PostCategory extends Model
 
     public function posts(): BelongsToMany
     {
-        return $this->belongsToMany(Post::class, 'posts_categories_pivot')
+        return $this->belongsToMany(
+            Post::class,                  // Modèle lié
+            'posts_categories_pivot',     // Table pivot
+            'category_id',                // Clé étrangère de CE modèle (PostCategory)
+            'post_id'                     // Clé étrangère du modèle Post
+        )
             ->withPivot('is_primary', 'order')
             ->withTimestamps();
     }

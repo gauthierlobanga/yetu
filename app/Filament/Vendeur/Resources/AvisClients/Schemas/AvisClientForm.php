@@ -2,10 +2,7 @@
 
 namespace App\Filament\Vendeur\Resources\AvisClients\Schemas;
 
-use App\Models\Tenant;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -13,7 +10,6 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Auth;
 
 class AvisClientForm
 {
@@ -25,38 +21,6 @@ class AvisClientForm
                     ->description('Détails de l\'avis client')
                     ->icon('heroicon-o-star')
                     ->schema([
-                        Select::make('tenant_id')
-                            ->label('Organisation')
-                            ->relationship('tenant', 'raison_sociale')
-                            ->preload()
-                            ->searchable()
-                            ->options(function () {
-                                $user = Auth::user();
-
-                                // Si l'utilisateur est Super Admin, il voit toutes les Vendeurs
-                                if ($user->hasRole(['super_admin'])) {
-                                    return Tenant::pluck('raison_sociale', 'id');
-                                }
-
-                                // Sinon, il voit seulement ses Vendeurs
-                                return $user->tenants()->pluck('raison_sociale', 'tenants.id');
-                            })
-                            ->default(function () {
-                                $user = Auth::user();
-
-                                // Si on est dans un contexte tenant, pré-remplir avec la Vendeur actuelle
-                                if (Filament::hasTenancy() && Filament::getTenant()) {
-                                    return Filament::getTenant()->id;
-                                }
-
-                                // Si l'utilisateur n'a qu'une seule Vendeur, la sélectionner par défaut
-                                if ($user->tenants()->count() === 1) {
-                                    return $user->tenants()->first()->id;
-                                }
-
-                                return null;
-                            })
-                            ->required(),
                         Select::make('client_id')
                             ->relationship(
                                 name: 'client',
@@ -132,11 +96,12 @@ class AvisClientForm
                             ->displayFormat('d/m/Y H:i')
                             ->weekStartsOnMonday(),
 
-                        Placeholder::make('info_publication')
-                            ->content(fn (Get $get) => $get('approuve')
+                        TextInput::make('info_publication')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->formatStateUsing(fn (Get $get) => $get('approuve')
                                     ? '✅ Cet avis sera visible publiquement'
-                                    : '⏸️ Cet avis est en attente de validation'
-                            )
+                                    : '⏸️ Cet avis est en attente de validation')
                             ->hidden(fn (Get $get) => ! $get('date_avis')),
                     ])->columns(2),
             ]);

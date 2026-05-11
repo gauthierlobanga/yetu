@@ -12,8 +12,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-
-// use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Hash;
 
 class UserForm
 {
@@ -66,25 +65,17 @@ class UserForm
                         Section::make('Avatar')
                             ->icon('heroicon-o-photo')
                             ->components([
-
                                 SpatieMediaLibraryFileUpload::make('avatar')
-                                    ->collection('avatar')
-                                    ->image()
+                                    ->label('Photo de profil')
                                     ->avatar()
+                                    ->image()
+                                    ->imageEditor()
                                     ->circleCropper()
-                                    ->disk(tenancy()->initialized ? 'tenant' : 'public') // 🔥 clé
-                                    ->directory(fn () => tenancy()->initialized
-                                        ? tenant('id')
-                                        : 'central'
-                                    )
-                                    ->visibility('public')
-                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                                    ->reorderable()
-                                    ->downloadable()
-                                    ->previewable()
+                                    ->collection('avatar')
+                                    ->disk('public')
                                     ->maxSize(2048)
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                     ->columnSpanFull(),
-
                             ]),
                     ]),
 
@@ -94,42 +85,27 @@ class UserForm
                         Section::make('Authentification')
                             ->icon('heroicon-o-lock-closed')
                             ->components([
-
+                                // Dans la section Authentification
                                 TextInput::make('password')
                                     ->label('Mot de passe')
                                     ->password()
                                     ->revealable()
                                     ->minLength(8)
-                                    ->confirmed()
+                                    ->same('passwordConfirmation')
                                     ->dehydrated(fn ($state) => filled($state))
-                                    ->helperText('Minimum 8 caractères')
-                                    ->required(fn (string $context): bool => $context === 'create'),
+                                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                                    ->required(fn (string $operation): bool => $operation === 'create')
+                                    ->placeholder('••••••••')
+                                    ->helperText(fn (string $operation) => $operation === 'edit' ? 'Laissez vide pour conserver le mot de passe actuel.' : null)
+                                    ->live(onBlur: true),
 
-                                TextInput::make('password_confirmation')
-                                    ->label('Confirmation du mot de passe')
+                                TextInput::make('passwordConfirmation')
+                                    ->label('Confirmer le mot de passe')
                                     ->password()
                                     ->revealable()
-                                    ->same('password')
                                     ->dehydrated(false)
-                                    ->required(fn (string $context): bool => $context === 'create'),
-
-                                // TextInput::make('password')
-                                //     ->label('Mot de passe')
-                                //     ->password()
-                                //     ->revealable()
-                                //     ->minLength(8)
-                                //     ->same('passwordConfirmation')
-                                //     ->dehydrated(fn($state) => filled($state))
-                                //     ->dehydrateStateUsing(fn($state) => Hash::make($state))
-                                //     ->required(fn(string $operation): bool => $operation === 'create')
-                                //     ->placeholder('••••••••'),
-
-                                // TextInput::make('passwordConfirmation')
-                                //     ->label('Confirmer le mot de passe')
-                                //     ->password()
-                                //     ->revealable()
-                                //     ->dehydrated(false)
-                                //     ->required(fn(string $operation): bool => $operation === 'create'),
+                                    ->required(fn (string $operation): bool => $operation === 'create')
+                                    ->visible(fn (callable $get) => filled($get('password'))),
                             ]),
 
                         Section::make('Statut du compte')

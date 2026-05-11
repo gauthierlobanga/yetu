@@ -3,15 +3,19 @@
 declare(strict_types=1);
 
 use App\Models\Tenant;
+use App\Tenancy\Bootstrappers\CustomFilesystemTenancyBootstrapper;
 use Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper;
 use Stancl\Tenancy\Bootstrappers\DatabaseTenancyBootstrapper;
-use Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper;
 use Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper;
-use Stancl\Tenancy\Database\Models\Domain;
-use Stancl\Tenancy\Features\ViteBundler;
+use Stancl\Tenancy\Bootstrappers\RedisTenancyBootstrapper;
 // use Stancl\Tenancy\TenantDatabaseManagers\PostgreSQLDatabaseManager;
+use Stancl\Tenancy\Database\Models\Domain;
+use Stancl\Tenancy\Features\CrossDomainRedirect;
+use Stancl\Tenancy\Features\TenantConfig;
+use Stancl\Tenancy\Features\UniversalRoutes;
+use Stancl\Tenancy\Features\ViteBundler;
 use Stancl\Tenancy\TenantDatabaseManagers\MySQLDatabaseManager;
-use Stancl\Tenancy\TenantDatabaseManagers\PostgreSQLDatabaseManager;
+// use Stancl\Tenancy\TenantDatabaseManagers\PostgreSQLDatabaseManager;
 use Stancl\Tenancy\TenantDatabaseManagers\PostgreSQLSchemaManager;
 use Stancl\Tenancy\TenantDatabaseManagers\SQLiteDatabaseManager;
 use Stancl\Tenancy\UUIDGenerator;
@@ -40,9 +44,9 @@ return [
     'bootstrappers' => [
         DatabaseTenancyBootstrapper::class,
         CacheTenancyBootstrapper::class,
-        FilesystemTenancyBootstrapper::class,
+        CustomFilesystemTenancyBootstrapper::class,
         QueueTenancyBootstrapper::class,
-        // Stancl\Tenancy\Bootstrappers\RedisTenancyBootstrapper::class, // Note: phpredis is needed
+        RedisTenancyBootstrapper::class, // Note: phpredis is needed
     ],
 
     /**
@@ -71,19 +75,19 @@ return [
             'sqlite' => SQLiteDatabaseManager::class,
             'mysql' => MySQLDatabaseManager::class,
             'mariadb' => MySQLDatabaseManager::class,
-            // 'pgsql' => PostgreSQLDatabaseManager::class,
+            'pgsql' => PostgreSQLSchemaManager::class,
 
-            /**
-             * Use this database manager for MySQL to have a DB user created for each tenant database.
-             * You can customize the grants given to these users by changing the $grants property.
-             */
+        /**
+         * Use this database manager for MySQL to have a DB user created for each tenant database.
+         * You can customize the grants given to these users by changing the $grants property.
+         */
             // 'mysql' => Stancl\Tenancy\TenantDatabaseManagers\PermissionControlledMySQLDatabaseManager::class,
 
-            /**
-             * Disable the pgsql manager above, and enable the one below if you
-             * want to separate tenant DBs by schemas rather than databases.
-             */
-            'pgsql' => PostgreSQLSchemaManager::class, // Separate by schema instead of database
+        /**
+         * Disable the pgsql manager above, and enable the one below if you
+         * want to separate tenant DBs by schemas rather than databases.
+         */
+            // 'pgsql' => PostgreSQLSchemaManager::class, // Separate by schema instead of database
         ],
     ],
 
@@ -114,6 +118,7 @@ return [
         'disks' => [
             'local',
             'public',
+            'tenant',
             // 's3',
         ],
 
@@ -126,6 +131,17 @@ return [
             // Disks whose roots should be overridden after storage_path() is suffixed.
             'local' => '%storage_path%/app/',
             'public' => '%storage_path%/app/public/',
+            'tenant' => '%storage_path%/app/public/',
+        ],
+
+        /**
+         * Disks whose URLs should be overridden.
+         */
+        'url_override' => [
+            'public' => '/storage',
+            'tenant' => function (Tenant $tenant) {
+                return '/storage/tenant-'.$tenant->slug;
+            },
         ],
 
         /**
@@ -146,7 +162,7 @@ return [
          * disable asset() helper tenancy and explicitly use tenant_asset() calls in places
          * where you want to use tenant-specific assets (product images, avatars, etc).
          */
-        'asset_helper_tenancy' => true,
+        'asset_helper_tenancy' => false,
     ],
 
     /**
@@ -176,9 +192,9 @@ return [
     'features' => [
         // Stancl\Tenancy\Features\UserImpersonation::class,
         // Stancl\Tenancy\Features\TelescopeTags::class,
-        // Stancl\Tenancy\Features\UniversalRoutes::class,
-        // Stancl\Tenancy\Features\TenantConfig::class, // https://tenancyforlaravel.com/docs/v3/features/tenant-config
-        // Stancl\Tenancy\Features\CrossDomainRedirect::class, // https://tenancyforlaravel.com/docs/v3/features/cross-domain-redirect
+        UniversalRoutes::class,
+        TenantConfig::class, // https://tenancyforlaravel.com/docs/v3/features/tenant-config
+        CrossDomainRedirect::class, // https://tenancyforlaravel.com/docs/v3/features/cross-domain-redirect
         ViteBundler::class,
     ],
 

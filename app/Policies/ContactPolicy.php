@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Contact;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class ContactPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny Contact');
@@ -47,6 +35,11 @@ class ContactPolicy
     public function delete(AuthUser $authUser, Contact $contact): bool
     {
         return $authUser->can('Delete Contact');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny Contact');
     }
 
     public function restore(AuthUser $authUser, Contact $contact): bool
@@ -78,4 +71,5 @@ class ContactPolicy
     {
         return $authUser->can('Reorder Contact');
     }
+
 }

@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Marketing;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class MarketingPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny Marketing');
@@ -47,6 +35,11 @@ class MarketingPolicy
     public function delete(AuthUser $authUser, Marketing $marketing): bool
     {
         return $authUser->can('Delete Marketing');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny Marketing');
     }
 
     public function restore(AuthUser $authUser, Marketing $marketing): bool
@@ -78,4 +71,5 @@ class MarketingPolicy
     {
         return $authUser->can('Reorder Marketing');
     }
+
 }

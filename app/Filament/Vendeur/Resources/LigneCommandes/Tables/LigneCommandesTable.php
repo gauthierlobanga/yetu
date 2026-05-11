@@ -149,13 +149,13 @@ class LigneCommandesTable
                 Action::make('view_product')
                     ->label('Voir produit')
                     ->icon('heroicon-m-eye')
-                    ->url(fn ($record) => route('filament.admin.products.resources.produits.index', $record->produit_id))
+                    ->url(fn ($record) => route('filament.vendeur.products.resources.produits.index', $record->produit_id))
                     ->color('gray'),
 
                 Action::make('view_commande')
                     ->label('Voir commande')
                     ->icon('heroicon-m-shopping-cart')
-                    ->url(fn ($record) => route('filament.admin.commandes.resources.commandes.index', $record->commande_id))
+                    ->url(fn ($record) => route('filament.vendeur.commandes.resources.commandes.index', $record->commande_id))
                     ->color('info'),
 
                 EditAction::make()

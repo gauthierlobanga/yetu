@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Vendeurs;
 
 use App\Enums\NavigationGroup;
+use App\Filament\Concerns\ExclureFromResources;
 use App\Filament\Resources\Vendeurs\Pages\CreateVendeur;
 use App\Filament\Resources\Vendeurs\Pages\EditVendeur;
 use App\Filament\Resources\Vendeurs\Pages\ListVendeurs;
@@ -14,10 +15,14 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
 class VendeurResource extends Resource
 {
+    use ExclureFromResources;
+
     protected static ?string $model = Tenant::class;
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Organisation;
@@ -62,5 +67,13 @@ class VendeurResource extends Resource
     public static function getNavigationBadgeColor(): ?string
     {
         return static::getModel()::count() > 10 ? 'success' : 'danger';
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }

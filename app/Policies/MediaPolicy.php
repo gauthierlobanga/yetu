@@ -49,6 +49,11 @@ class MediaPolicy
         return $authUser->can('Delete Media');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny Media');
+    }
+
     public function restore(AuthUser $authUser, Media $media): bool
     {
         return $authUser->can('Restore Media');

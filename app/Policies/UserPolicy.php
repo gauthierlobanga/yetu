@@ -9,41 +9,34 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
+    public function viewAny(AuthUser $authUser): bool
     {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
+        return $authUser->can('ViewAny User');
     }
-
-    // public function viewAny(AuthUser $authUser): bool
-    // {
-    //     return $authUser->can('ViewAny User');
-    // }
 
     public function view(AuthUser $authUser): bool
     {
         return $authUser->can('View User');
     }
 
-    // public function create(AuthUser $authUser): bool
-    // {
-    //     return $authUser->can('Create User');
-    // }
+    public function create(AuthUser $authUser): bool
+    {
+        return $authUser->can('Create User');
+    }
 
-    // public function update(AuthUser $authUser): bool
-    // {
-    //     return $authUser->can('Update User');
-    // }
+    public function update(AuthUser $authUser): bool
+    {
+        return $authUser->can('Update User');
+    }
 
     public function delete(AuthUser $authUser): bool
     {
         return $authUser->can('Delete User');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny User');
     }
 
     public function restore(AuthUser $authUser): bool

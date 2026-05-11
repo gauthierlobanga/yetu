@@ -7,10 +7,9 @@ export default function SearchInputPage() {
     return (
         <div className="relative my-4 flex items-center justify-center">
             <SearchInput
-                placeholder="Rechercher des articles, catégories..."
+                placeholder="Rechercher des produits, catégories..."
                 hitsPerPage={8}
                 openResultsInNewTab={false}
-                buttonText="Rechercher"
                 onResultClick={(result) => {
                     console.log('Résultat sélectionné:', result);
                 }}

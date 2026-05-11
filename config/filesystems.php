@@ -47,12 +47,16 @@ return [
             'report' => false,
         ],
 
-        // Le nouveau disque pour tes Tenants
         'tenant' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'), // Stancl ajoutera le suffixe ici automatiquement
-            'url' => env('APP_URL').'/tenants', // On va créer cette route à l'étape 3
+            'root' => storage_path('app'),
+            'url' => '/storage',
             'visibility' => 'public',
+        ],
+
+        'livewire-tmp' => [
+            'driver' => 'local',
+            'root' => storage_path('app/livewire-tmp'),
             'throw' => false,
             'report' => false,
         ],

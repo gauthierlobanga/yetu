@@ -22,7 +22,7 @@ return new class extends Migration
             $table->enum('status', ['en_attente', 'lu', 'repondu', 'archive', 'spam'])->default('en_attente'); //
             $table->enum('priorite', ['basse', 'moyenne', 'haute', 'urgente'])->default('moyenne'); //
             $table->enum('categorie', ['general', 'commercial', 'technique', 'support', 'reclamation'])->default('general'); //
-            $table->ipAddress()->nullable();
+            $table->string('ip_address')->nullable();
             $table->string('user_agent')->nullable();
             $table->text('reponse')->nullable();
             $table->foreignUuid('repondu_par')->nullable()->constrained('users')->nullOnDelete();

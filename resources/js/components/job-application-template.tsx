@@ -1,10 +1,15 @@
 'use client';
-import * as z from 'zod';
-import { formSchema } from '@/lib/form-schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm, Controller } from 'react-hook-form';
-import { motion } from 'motion/react';
 import { Check } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useForm, Controller } from 'react-hook-form';
+import type {
+    ControllerFieldState,
+    ControllerRenderProps,
+} from 'react-hook-form';
+import type * as z from 'zod';
+import { FileUpload } from '@/components/file-upload';
+import { Button } from '@/components/ui/button';
 import {
     Field,
     FieldGroup,
@@ -14,7 +19,6 @@ import {
     FieldError,
     FieldSeparator,
 } from '@/components/ui/field';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 // import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
@@ -25,11 +29,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type {
-    ControllerFieldState,
-    ControllerRenderProps,
-} from 'react-hook-form';
-import { FileUpload } from '@/components/file-upload';
+import { formSchema } from '@/lib/form-schema';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 
 type Schema = z.infer<typeof formSchema>;
@@ -85,6 +85,7 @@ export function JobApplicationForm() {
             </div>
         );
     }
+
     return (
         <form
             onSubmit={handleSubmit}
@@ -258,6 +259,7 @@ export function JobApplicationForm() {
                             { label: 'UI/UX Designer', value: 'designer' },
                             { label: 'Product Manager', value: 'pm' },
                         ];
+
                         return (
                             <Field
                                 data-invalid={fieldState.invalid}
@@ -307,6 +309,7 @@ export function JobApplicationForm() {
                             { label: '6-10 years', value: '6-10' },
                             { label: '10+ years', value: '10+' },
                         ];
+
                         return (
                             <Field
                                 data-invalid={fieldState.invalid}
@@ -354,6 +357,7 @@ export function JobApplicationForm() {
                                 value: 'next-3-months',
                             },
                         ];
+
                         return (
                             <Field
                                 data-invalid={fieldState.invalid}

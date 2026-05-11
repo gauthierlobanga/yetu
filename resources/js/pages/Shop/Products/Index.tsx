@@ -282,7 +282,7 @@ export default function ProductsIndex() {
                                     onChange={(e) =>
                                         handleSearchChange(e.target.value)
                                     }
-                                    className="h-11 pr-24 pl-9 text-sm shadow-sm transition-all focus:shadow-md"
+                                    className="h-11 rounded-full pr-24 pl-9 text-sm transition-all"
                                 />
                                 {searchInput && (
                                     <button
@@ -315,7 +315,7 @@ export default function ProductsIndex() {
                                         {isSearchingByImage ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
                                         ) : (
-                                            <Camera className="h-4 w-4" />
+                                            <Camera className="h-20 w-20" />
                                         )}
                                     </Button>
                                 </div>

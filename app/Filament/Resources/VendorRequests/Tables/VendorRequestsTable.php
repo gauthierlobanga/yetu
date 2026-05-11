@@ -30,6 +30,16 @@ class VendorRequestsTable
     {
         return $table
             ->columns([
+                TextColumn::make('tenant.raison_sociale')
+                    ->label('Organisation')
+                    ->searchable()
+                    ->sortable()
+                    ->icon('heroicon-o-user')
+                    ->iconColor('gray')
+                    // ->description(fn ($record) => $record->user?->email)
+                    // ->tooltip(fn ($record) => 'ID utilisateur : '.$record->user_id)
+                    ->weight('medium'),
+
                 TextColumn::make('user.name')
                     ->label('Demandeur')
                     ->searchable()
@@ -148,7 +158,7 @@ class VendorRequestsTable
                             ->when($data['created_until'], fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
                     Action::make('approve')
                         ->label('Approuver')
@@ -170,7 +180,7 @@ class VendorRequestsTable
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
                         ->visible(fn ($record) => $record->status === VendorRequest::STATUS_PENDING)
-                        ->form([
+                        ->schema([
                             Textarea::make('reason')
                                 ->label('Motif du rejet')
                                 ->required()
@@ -200,7 +210,7 @@ class VendorRequestsTable
                     ->tooltip('Actions')
                     ->icon('heroicon-o-ellipsis-horizontal'),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),

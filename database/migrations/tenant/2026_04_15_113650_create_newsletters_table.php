@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamp('confirmed_at')->nullable();
             $table->boolean('is_active')->default(false);
             $table->enum('source', ['formulaire', 'checkout', 'compte', 'import'])->default('formulaire'); //
-            $table->ipAddress()->nullable();
+            $table->string('ip_address')->nullable();
             $table->string('user_agent')->nullable();
             $table->jsonb('metadata')->nullable();
             $table->timestamps();

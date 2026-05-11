@@ -3,8 +3,8 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\CreateNewUser;
+use App\Actions\Fortify\CustomLoginResponse;
 use App\Actions\Fortify\ResetUserPassword;
-use App\Fortify\Responses\CustomLoginResponse;
 use App\Http\Responses\Auth\EmailVerificationNotificationSentResponse;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -28,6 +28,8 @@ class FortifyServiceProvider extends ServiceProvider
             EmailVerificationNotificationSentResponseContract::class,
             EmailVerificationNotificationSentResponse::class,
         );
+
+        $this->app->singleton(LoginResponse::class, CustomLoginResponse::class);
     }
 
     /**
@@ -38,24 +40,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
-        // Fortify::ignoreRoutes();
 
-        // Lier la réponse de connexion personnalisée
-        $this->app->singleton(LoginResponse::class, function () {
-            return new CustomLoginResponse;
-        });
-
-        // Autres vues Fortify
-        Fortify::loginView(function () {
-            $request = request();
-            $isTenant = ! in_array($request->getHost(), config('tenancy.central_domains'));
-
-            return Inertia::render('Auth/Login', [
-                'isTenant' => $isTenant,
-                'loginRoute' => $isTenant ? route('tenant.login') : route('central.login'),
-                'registerRoute' => $isTenant ? null : route('register'),
-            ]);
-        });
     }
 
     /**

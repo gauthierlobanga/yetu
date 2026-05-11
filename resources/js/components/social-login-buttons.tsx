@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 export function SocialLoginButtons() {
     const getSocialUrl = (provider: string): string | null => {
         try {
-            return route('socialite.redirect', provider);
+            return route('tenant.socialite.redirect', provider);
         } catch {
             return null;
         }
@@ -19,7 +19,7 @@ export function SocialLoginButtons() {
                 asChild
             >
                 <a href={getSocialUrl('google') || '#'}>
-                    <FcGoogle className="h-5 w-5 transition-transform group-hover:scale-110" />
+                    <FcGoogle className="h-8 w-8 transition-transform group-hover:scale-110" />
                     Continue with Google
                 </a>
             </Button>
@@ -30,7 +30,7 @@ export function SocialLoginButtons() {
                 asChild
             >
                 <a href={getSocialUrl('facebook') || '#'}>
-                    <FaFacebook className="h-5 w-5 text-[#1877F2] transition-transform group-hover:scale-110" />
+                    <FaFacebook className="h-8 w-8 text-[#1877F2] transition-transform group-hover:scale-110" />
                     Continue with Facebook
                 </a>
             </Button>
@@ -41,7 +41,7 @@ export function SocialLoginButtons() {
                 asChild
             >
                 <a href={getSocialUrl('github') || '#'}>
-                    <FaGithub className="h-5 w-5 transition-transform group-hover:scale-110" />
+                    <FaGithub className="h-8 w-8 transition-transform group-hover:scale-110" />
                     Continue with GitHub
                 </a>
             </Button>

@@ -108,7 +108,7 @@ class WishlistItemsTable
                 Action::make('view_product')
                     ->label('Voir produit')
                     ->icon('heroicon-m-eye')
-                    ->url(fn ($record) => route('filament.admin.resources.produits.edit', $record->produit_id))
+                    ->url(fn ($record) => route('filament.vendeur.products.resources.produits.edit', $record->produit_id))
                     ->color('gray'),
 
                 Action::make('add_to_cart')

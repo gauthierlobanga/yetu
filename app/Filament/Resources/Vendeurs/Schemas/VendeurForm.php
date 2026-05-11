@@ -55,6 +55,12 @@ class VendeurForm
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
 
+                        TextInput::make('password')
+                            ->password()
+                            ->revealable()
+                            ->minLength(8)
+                            ->dehydrated(fn ($state) => filled($state)) // ne pas écraser avec une chaîne vide
+                            ->required(fn (string $operation): bool => $operation === 'create'),
                     ])
                     ->columns(2),
                 Section::make('Informations générales')
@@ -65,9 +71,9 @@ class VendeurForm
                             ->maxLength(255),
 
                         TextInput::make('domain')
-                            ->url()
-                            ->label('Domaine personnalisé')
-                            ->prefix('https://')
+                            // ->url()
+                            ->label('Domain')
+                            ->prefix('http://')
                             ->prefixIcon(Heroicon::OutlinedGlobeAlt)
                             ->prefixIconColor('success')
                             ->suffix('.com')
@@ -77,22 +83,56 @@ class VendeurForm
                     ->columns(1),
 
                 Section::make('Statut & Activation')
+                    ->icon('heroicon-o-cog-8-tooth')
+                    ->description('Gérez le cycle de vie du compte vendeur.')
                     ->schema([
                         Select::make('statut')
                             ->options(Tenant::getStatuts())
                             ->preload()
                             ->searchable()
                             ->default('en_attente')
-                            ->required(),
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                // Synchroniser l'état actif/inactif avec le statut
+                                if ($state === 'actif') {
+                                    $set('is_active', true);
+                                    // Définir automatiquement la date d'activation si elle n'existe pas encore
+                                    if (! $get('date_activation')) {
+                                        $set('date_activation', now()->format('Y-m-d H:i:s'));
+                                    }
+                                } elseif (in_array($state, ['inactif', 'suspendu'])) {
+                                    $set('is_active', false);
+                                } else {
+                                    // en_attente : laisser l'utilisateur choisir
+                                }
+                            })
+                            ->helperText('Définit le statut opérationnel de la boutique.'),
 
                         Toggle::make('is_active')
                             ->label('Compte actif')
-                            ->default(false),
+                            ->default(false)
+                            ->live()
+                            ->onIcon('heroicon-o-check-circle')
+                            ->offIcon('heroicon-o-x-circle')
+                            ->onColor('success')
+                            ->offColor('danger')
+                            ->helperText('Active ou désactive immédiatement l’accès à la boutique.'),
 
                         DateTimePicker::make('date_activation')
-                            ->label('Date d\'activation'),
+                            ->label('Date d’activation')
+                            ->native(false)
+                            ->displayFormat('d/m/Y H:i')
+                            ->visible(fn (callable $get) => $get('statut') === 'actif')
+                            ->helperText('Date à laquelle la boutique a été activée (remplie automatiquement si laissée vide).'),
+
                         DateTimePicker::make('date_expiration')
-                            ->label('Date d\'expiration'),
+                            ->label('Date d’expiration')
+                            ->native(false)
+                            ->displayFormat('d/m/Y H:i')
+                            ->afterOrEqual('date_activation')
+                            ->visible(fn (callable $get) => in_array($get('statut'), ['actif', 'suspendu']))
+                            ->helperText('Optionnel. La boutique sera automatiquement suspendue après cette date.'),
                     ])
                     ->columns(2),
 

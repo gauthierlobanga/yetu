@@ -94,7 +94,7 @@ export default function CartContent() {
             }
 
             try {
-                const response = await fetch(route('cart.calculate'), {
+                const response = await fetch(route('tenant.cart.calculate'), {
                     method: 'POST',
                     credentials: 'same-origin',
                     headers: {
@@ -299,7 +299,7 @@ export default function CartContent() {
 
                                                     <Link
                                                         href={route(
-                                                            'tenant.tenant.product.show',
+                                                            'tenant.product.show',
                                                             item.produit.slug,
                                                         )}
                                                         className="line-clamp-2 text-sm leading-snug font-semibold hover:text-primary"

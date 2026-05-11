@@ -3,7 +3,7 @@
 namespace App\Filament\Vendeur\Resources\Comments\Pages;
 
 use App\Filament\Vendeur\Resources\Comments\CommentResource;
-use App\Filament\Vendeur\Widgets\CommentStats;
+use App\Filament\Widgets\CommentStats;
 use App\Models\Comment;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -70,12 +70,12 @@ class ListComments extends ListRecords
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('status', Comment::STATUS_PENDING)),
 
             // Comments expirés
-            'expired' => Tab::make('Supprimé')
-                ->badge(Comment::where('status', Comment::STATUS_TRASHED)->count())
-                ->badgeColor('danger')
-                ->icon('heroicon-m-x-circle')
-                ->iconPosition(IconPosition::Before)
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', Comment::STATUS_TRASHED)),
+            // 'expired' => Tab::make('Supprimé')
+            //     ->badge(Comment::where('status', Comment::STATUS_TRASHED)->count())
+            //     ->badgeColor('danger')
+            //     ->icon('heroicon-m-x-circle')
+            //     ->iconPosition(IconPosition::Before)
+            //     ->modifyQueryUsing(fn (Builder $query) => $query->where('status', Comment::STATUS_TRASHED)),
 
             'expired' => Tab::make('Signalés')
                 ->badge(Comment::where('status', Comment::STATUS_SPAM)->count())

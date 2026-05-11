@@ -19,7 +19,6 @@ class EntrepotsTable
     {
         return $table
             ->columns([
-
                 TextColumn::make('nom')
                     ->label('Entrepôt')
                     ->searchable()

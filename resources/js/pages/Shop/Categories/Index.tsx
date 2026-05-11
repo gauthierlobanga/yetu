@@ -84,7 +84,7 @@ export default function CategoriesIndex() {
                                             <img
                                                 src={
                                                     category.image ||
-                                                    '/images/placeholder-category.jpg'
+                                                    '/storage/images/Vue-Storefront.png'
                                                 }
                                                 alt={category.nom}
                                                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

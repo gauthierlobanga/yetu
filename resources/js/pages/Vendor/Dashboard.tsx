@@ -75,13 +75,13 @@ const vendorMainNavItems = (tenant: Props['tenant']) => [
         href: route('vendor.dashboard') + '#plan',
         icon: CreditCard,
     },
-    { title: 'Aide', href: route('page.help'), icon: HelpCircle },
+    { title: 'Aide', href: route('tenant.page.help'), icon: HelpCircle },
 ];
 
 const vendorFooterNavItems = [
-    { title: 'CGV', href: route('page.terms') },
-    { title: 'Confidentialité', href: route('page.privacy') },
-    { title: 'Contact', href: route('page.contact') },
+    { title: 'CGV', href: route('tenant.page.terms') },
+    { title: 'Confidentialité', href: route('tenant.page.privacy') },
+    { title: 'Contact', href: route('tenant.page.contact') },
 ];
 
 export default function VendorDashboard({

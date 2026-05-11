@@ -2,18 +2,14 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Pages\Tenancy\EditVendeurProfile;
-use App\Filament\Pages\Tenancy\RegisterVendeur;
+use App\Http\Middleware\EnsureTenantSubscription;
 use App\Http\Middleware\EnsureUserIsVendeur;
-use App\Models\Tenant;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
-use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
-use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -26,11 +22,9 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
-
-// use Stancl\Tenancy\Middleware\InitializeTenancyByPath;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
 class VendeurPanelProvider extends PanelProvider
 {
@@ -45,7 +39,6 @@ class VendeurPanelProvider extends PanelProvider
             ->sidebarWidth('16rem')
             ->profile()
             ->login()
-            ->spa()
             ->navigationGroups(groups: [
                 NavigationGroup::make()
                     ->label('Market')
@@ -90,22 +83,15 @@ class VendeurPanelProvider extends PanelProvider
                     ->label('Notifications')
                     ->icon(Heroicon::Bell),
             ])
-            ->navigationItems([
-                NavigationItem::make('Retour à l\'admin')
-                    ->url('/admin')
-                    ->icon('heroicon-o-arrow-right-circle')
-                    ->sort(-1)
-                    ->visible(fn () => Auth::user()?->hasRole('super_admin')),
-            ])
             ->sidebarCollapsibleOnDesktop()
             ->collapsedSidebarWidth('9rem')
             ->colors([
-                'danger' => Color::Red,
-                'gray' => Color::Zinc,
+                'danger' => Color::Rose,
+                'gray' => Color::Slate,
                 'info' => Color::Blue,
-                'primary' => Color::Amber,
-                'success' => Color::Green,
-                'warning' => Color::Amber,
+                'primary' => Color::Emerald,
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
             ])
             ->discoverResources(in: app_path('Filament/Vendeur/Resources'), for: 'App\\Filament\\Vendeur\\Resources')
             ->discoverPages(in: app_path('Filament/Vendeur/Pages'), for: 'App\\Filament\\Vendeur\\Pages')
@@ -128,23 +114,24 @@ class VendeurPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-
             ])
+            ->middleware([
+                'universal',
+                EnsureTenantSubscription::class,
+                InitializeTenancyByDomain::class,
+                PreventAccessFromCentralDomains::class,
+            ], isPersistent: true)
             ->authMiddleware([
                 Authenticate::class,
                 EnsureUserIsVendeur::class,
-                // InitializeTenancyByDomain::class,
             ])
             ->plugins(plugins: [
                 FilamentShieldPlugin::make()
                     ->navigationLabel('Bouclier')                  // string|Closure|null
                     ->navigationIcon('heroicon-o-home')         // string|Closure|null
                     ->activeNavigationIcon('heroicon-s-home')   // string|Closure|null
-                    // ->navigationGroup('Group')                  // string|Closure|null
-                    ->tenantRelationshipName(null)           // string|Closure|null
-                    ->tenantOwnershipRelationshipName(null) // string|Closure|null
                     ->navigationSort(10)                        // int|Closure|null
-                    ->navigationBadge('5')                      // string|Closure|null
+                    ->navigationBadge()                      // string|Closure|null
                     ->globallySearchable(true)                  // bool|Closure
                     ->globalSearchResultsLimit(50)              // int|Closure
                     ->navigationBadgeColor('success')           // string|Closure|null
@@ -165,22 +152,6 @@ class VendeurPanelProvider extends PanelProvider
                     ]),
 
             ])
-            ->tenant(Tenant::class, 'id')
-            ->tenantDomain('{tenant:slug}.'.config('app.domain'))
-            ->tenantRegistration(RegisterVendeur::class)
-            ->tenantProfile(EditVendeurProfile::class)
-            ->tenantMenuItems([
-                'register' => fn (Action $action): Action => $action
-                    ->label('Ajouter un vendeur')
-                    ->icon('heroicon-o-plus-circle')
-                    ->visible(fn (): bool => Auth::user()->hasRole('super_admin')),
-                'profile' => fn (Action $action): Action => $action
-                    ->label('Profil du vendeur')
-                    ->icon('heroicon-o-cog-6-tooth'),
-            ])
-            // ->strictAuthorization()
-            ->unsavedChangesAlerts()
-            ->searchableTenantMenu()
             ->resourceEditPageRedirect('index')
             ->resourceCreatePageRedirect('index');
     }

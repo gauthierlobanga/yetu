@@ -35,7 +35,7 @@ class EditPost extends EditRecord
             ->actions([
                 Action::make('view')
                     ->button()
-                    ->url(route('blog.show', $post), shouldOpenInNewTab: true),
+                    ->url(route('tenant.blog.show', $post), shouldOpenInNewTab: true),
                 Action::make('undo')
                     ->color('gray')
                     ->dispatch('undoEditingPost', [$post->id])

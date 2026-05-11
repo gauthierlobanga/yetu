@@ -49,7 +49,6 @@
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import type { PropsWithChildren } from 'react';
-import { homeIndex } from '@/actions/App/Http/Controllers/Home/HomeController';
 import AppLogoIcon from '@/components/app-logo-icon';
 import {
     Card,

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import SearchInput from '@/pages/searchInput';
 import { CartButton } from './CartButton';
 import { NotificationsDropdown } from './NotificationsDropdown';
-import { RegionSelector } from './RegionSelector';
+import { RegionSelectorForm } from './RegionSelectorForm';
 
 export function HeaderActions() {
     const { auth } = usePage().props;
@@ -21,7 +21,7 @@ export function HeaderActions() {
             </div>
 
             {/* Region & Language Selector */}
-            <RegionSelector />
+            <RegionSelectorForm />
 
             {/* Theme Toggle */}
             {/* <AppearanceToggle /> */}

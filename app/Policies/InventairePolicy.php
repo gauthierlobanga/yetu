@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Inventaire;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class InventairePolicy
 {
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
-
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny Inventaire');
@@ -47,6 +35,11 @@ class InventairePolicy
     public function delete(AuthUser $authUser, Inventaire $inventaire): bool
     {
         return $authUser->can('Delete Inventaire');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny Inventaire');
     }
 
     public function restore(AuthUser $authUser, Inventaire $inventaire): bool
@@ -78,4 +71,5 @@ class InventairePolicy
     {
         return $authUser->can('Reorder Inventaire');
     }
+
 }

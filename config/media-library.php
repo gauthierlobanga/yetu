@@ -1,6 +1,7 @@
 <?php
 
-use App\Support\TenantAwareUrlGenerator;
+use App\Support\Tenancy\TenantAwareUrlGenerator;
+// use App\Support\TenantAwareUrlGenerator;
 use Spatie\ImageOptimizer\Optimizers\Avifenc;
 use Spatie\ImageOptimizer\Optimizers\Cwebp;
 use Spatie\ImageOptimizer\Optimizers\Gifsicle;
@@ -66,7 +67,8 @@ return [
     /*
      * The fully qualified class name of the media model.
      */
-    'media_model' => Media::class,
+    'media_model' => App\Models\Media::class,
+    // 'media_model' => Media::class,
 
     /*
      * The fully qualified class name of the media observer.
@@ -128,8 +130,7 @@ return [
      * When urls to files get generated, this class will be called. Use the default
      * if your files are stored locally above the site root or on s3.
      */
-    // 'url_generator' => TenantAwareUrlGenerator::class,
-    'url_generator' => DefaultUrlGenerator::class,
+    'url_generator' => TenantAwareUrlGenerator::class,
 
     /*
      * Moves media on updating to keep path consistent. Enable it only with a custom

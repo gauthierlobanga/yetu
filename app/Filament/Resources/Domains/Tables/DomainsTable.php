@@ -9,10 +9,13 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -113,6 +116,10 @@ class DomainsTable
                 //     ->searchable()
                 //     ->preload(),
 
+                TrashedFilter::make()
+                    ->searchable()
+                    ->preload(),
+
                 SelectFilter::make('type')
                     ->label('Type')
                     ->options([
@@ -159,11 +166,18 @@ class DomainsTable
                 DeleteAction::make()
                     ->iconButton()
                     ->tooltip('Supprimer')
-                    ->requiresConfirmation(),
+                    ->requiresConfirmation()
+                    ->before(function ($action, $record) {
+                        if (! $record->tenant) {
+                            $action->halt();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');

@@ -94,8 +94,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
+import { login } from '@/routes/tenant';
 import type { User } from '@/types';
-import tenant from '@/routes/tenant';
 
 interface UserNavigationProps {
     user: User | null;
@@ -109,8 +109,7 @@ export function UserNavigation({ user }: UserNavigationProps) {
             <div className="flex items-center space-x-2">
                 {/* Sur tenant : connexion uniquement (pas d’inscription) */}
                 <Button variant="ghost" size="sm" asChild>
-                    <Link href={tenant.login()}>
-                        {/* <Link href={route('tenant.login')}> */}
+                    <Link href={login()}>
                         <LogIn className="mr-2 h-4 w-4" />
                         Connexion
                     </Link>

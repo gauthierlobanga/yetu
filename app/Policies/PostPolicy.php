@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Post;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class PostPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny Post');
@@ -47,6 +35,11 @@ class PostPolicy
     public function delete(AuthUser $authUser, Post $post): bool
     {
         return $authUser->can('Delete Post');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny Post');
     }
 
     public function restore(AuthUser $authUser, Post $post): bool
@@ -78,4 +71,5 @@ class PostPolicy
     {
         return $authUser->can('Reorder Post');
     }
+
 }

@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\CommentReport;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class CommentReportPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny CommentReport');
@@ -47,6 +35,11 @@ class CommentReportPolicy
     public function delete(AuthUser $authUser, CommentReport $commentReport): bool
     {
         return $authUser->can('Delete CommentReport');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny CommentReport');
     }
 
     public function restore(AuthUser $authUser, CommentReport $commentReport): bool
@@ -78,4 +71,5 @@ class CommentReportPolicy
     {
         return $authUser->can('Reorder CommentReport');
     }
+
 }

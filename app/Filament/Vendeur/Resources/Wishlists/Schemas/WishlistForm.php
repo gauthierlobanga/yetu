@@ -4,7 +4,6 @@ namespace App\Filament\Vendeur\Resources\Wishlists\Schemas;
 
 use App\Models\Client;
 use App\Models\Produit;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -75,7 +74,7 @@ class WishlistForm
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->formatStateUsing(fn ($record) => $record && $record->est_publique
-                                        ? route('wishlist.shared', $record->id)
+                                        ? route('tenant.wishlist.toggle', $record->id)
                                         : 'Rendez la liste publique pour obtenir un lien')
                                     ->visible(fn ($record) => $record !== null),
                             ]),

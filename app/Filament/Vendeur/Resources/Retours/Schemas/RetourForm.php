@@ -3,11 +3,9 @@
 namespace App\Filament\Vendeur\Resources\Retours\Schemas;
 
 use App\Models\Commande;
-use App\Models\Tenant;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\Placeholder;
+// use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -17,7 +15,6 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Auth;
 
 class RetourForm
 {
@@ -34,38 +31,7 @@ class RetourForm
                             ->schema([
                                 Grid::make(2)
                                     ->schema([
-                                        Select::make('tenant_id')
-                                            ->label('Organisation')
-                                            ->relationship('tenant', 'raison_sociale')
-                                            ->preload()
-                                            ->searchable()
-                                            ->options(function () {
-                                                $user = Auth::user();
 
-                                                // Si l'utilisateur est Super Admin, il voit toutes les Vendeurs
-                                                if ($user->hasRole(['super_admin'])) {
-                                                    return Tenant::pluck('raison_sociale', 'id');
-                                                }
-
-                                                // Sinon, il voit seulement ses Vendeurs
-                                                return $user->tenants()->pluck('raison_sociale', 'tenants.id');
-                                            })
-                                            ->default(function () {
-                                                $user = Auth::user();
-
-                                                // Si on est dans un contexte tenant, pré-remplir avec la Vendeur actuelle
-                                                if (Filament::hasTenancy() && Filament::getTenant()) {
-                                                    return Filament::getTenant()->id;
-                                                }
-
-                                                // Si l'utilisateur n'a qu'une seule Vendeur, la sélectionner par défaut
-                                                if ($user->tenants()->count() === 1) {
-                                                    return $user->tenants()->first()->id;
-                                                }
-
-                                                return null;
-                                            })
-                                            ->required(),
                                         Select::make('commande_id')
                                             ->label('Commande')
                                             ->relationship('commande', 'numero_commande')
@@ -183,13 +149,15 @@ class RetourForm
                         Section::make('Aperçu')
                             ->icon('heroicon-o-eye')
                             ->schema([
-                                Placeholder::make('client_nom')
+                                TextInput::make('client_nom')
                                     ->label('Client')
-                                    ->content(fn ($get) => $get('client_nom') ?? '-'),
+                                    ->dehydrated(false)
+                                    ->formatStateUsing(fn ($get) => $get('client_nom') ?? '-'),
 
-                                Placeholder::make('montant_total')
+                                TextInput::make('montant_total')
                                     ->label('Montant total')
-                                    ->content(fn ($get) => number_format($get('montant_total') ?? 0, 2).' €'),
+                                    ->dehydrated(false)
+                                    ->formatStateUsing(fn ($get) => number_format($get('montant_total') ?? 0, 2).' €'),
                             ]),
                     ]),
 

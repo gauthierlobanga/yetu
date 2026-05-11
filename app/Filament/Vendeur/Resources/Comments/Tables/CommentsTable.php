@@ -19,7 +19,6 @@ class CommentsTable
     {
         return $table
             ->columns([
-
                 // Auteur
                 TextColumn::make('user.name')
                     ->label('Auteur')
@@ -91,14 +90,14 @@ class CommentsTable
                     ->toggleable(),
 
                 // Ajoutez cette colonne
-                // TextColumn::make('comments_count')
-                //     ->label('💬')
-                //     ->counts('comments')
-                //     ->sortable()
-                //     ->alignCenter()
-                //     ->badge()
-                //     ->color('info')
-                //     ->toggleable(),
+                TextColumn::make('comments_count')
+                    ->label('💬')
+                    ->counts('comments')
+                    ->sortable()
+                    ->alignCenter()
+                    ->badge()
+                    ->color('info')
+                    ->toggleable(),
 
                 // Statut
                 TextColumn::make('status')

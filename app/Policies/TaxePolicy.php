@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Taxe;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class TaxePolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny Taxe');
@@ -47,6 +35,11 @@ class TaxePolicy
     public function delete(AuthUser $authUser, Taxe $taxe): bool
     {
         return $authUser->can('Delete Taxe');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny Taxe');
     }
 
     public function restore(AuthUser $authUser, Taxe $taxe): bool
@@ -78,4 +71,5 @@ class TaxePolicy
     {
         return $authUser->can('Reorder Taxe');
     }
+
 }

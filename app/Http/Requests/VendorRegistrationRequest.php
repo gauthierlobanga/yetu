@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
-use Propaganistas\LaravelPhone\Rules\Phone;
 
 class VendorRegistrationRequest extends FormRequest
 {
@@ -35,10 +34,11 @@ class VendorRegistrationRequest extends FormRequest
 
             // Contact
             'contact_email' => ['required', 'email', 'max:255'],
-            'contact_phone' => ['nullable', 'string', (new Phone('AUTO'))->type('mobile')],
+            'contact_phone' => ['nullable', 'string', 'max:30'],
             'phone_code' => ['nullable', 'string', 'max:10'],
-            // Validation du téléphone AVEC le code pays
-            'phone_full' => ['nullable', new Phone($this->currency)->type('mobile')],
+            // Validation légère côté serveur: certains vendeurs saisissent le numéro local sans indicatif.
+            'phone_full' => ['nullable', 'string', 'max:40'],
+            // 'password' => ['required', 'string', 'min:8', 'max:255', 'confirmed'],
 
             // Localisation & préférences
             'currency' => ['nullable', 'string', 'max:3'],

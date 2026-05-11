@@ -156,10 +156,12 @@ class ContactsTable
             ])
             ->recordActions([
                 ActionGroup::make([
+                    EditAction::make()
+                        ->icon(Heroicon::OutlinedPencilSquare),
                     Action::make('view')
                         ->label('Voir')
                         ->icon(Heroicon::OutlinedEye)
-                        ->url(fn ($record) => route('filament.admin.resources.contacts.edit', $record))
+                        ->url(fn ($record) => route('filament.vendeur.resources.contacts.edit', $record))
                         ->color('gray'),
 
                     Action::make('mark_as_read')
@@ -179,7 +181,7 @@ class ContactsTable
                         ->label('Répondre')
                         ->icon(Heroicon::OutlinedEnvelope)
                         ->color('success')
-                        ->url(fn ($record) => route('filament.admin.resources.contacts.edit', $record).'#reponse')
+                        ->url(fn ($record) => route('filament.vendeur.resources.contacts.edit', $record).'#reponse')
                         ->visible(fn ($record) => ! in_array($record->status, ['repondu', 'archive'])),
 
                     Action::make('mark_as_spam')
@@ -195,9 +197,6 @@ class ContactsTable
                                 ->title('Message marqué comme spam')
                                 ->send();
                         }),
-
-                    EditAction::make()
-                        ->icon(Heroicon::OutlinedPencilSquare),
 
                     Action::make('archive')
                         ->label('Archiver')

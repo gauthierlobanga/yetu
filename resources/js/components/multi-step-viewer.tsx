@@ -1,7 +1,9 @@
 import type { VariantProps } from 'class-variance-authority';
-import { AnimatePresence, type MotionProps, motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
+import type { MotionProps } from 'motion/react';
 import * as React from 'react';
-import { Button, type buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
+import type { buttonVariants } from '@/components/ui/button';
 import {
     Stepper,
     StepperIndicator,
@@ -18,7 +20,11 @@ const NextButton = (
         },
 ) => {
     const { isLastStep, goToNext } = useMultiStepForm();
-    if (isLastStep) return null;
+
+    if (isLastStep) {
+        return null;
+    }
+
     return (
         <Button size="sm" type="button" onClick={() => goToNext()} {...props} />
     );
@@ -31,7 +37,11 @@ const PreviousButton = (
         },
 ) => {
     const { isFirstStep, goToPrevious } = useMultiStepForm();
-    if (isFirstStep) return null;
+
+    if (isFirstStep) {
+        return null;
+    }
+
     return (
         <Button
             size="sm"
@@ -50,7 +60,11 @@ const SubmitButton = (
         },
 ) => {
     const { isLastStep } = useMultiStepForm();
-    if (!isLastStep) return null;
+
+    if (!isLastStep) {
+        return null;
+    }
+
     return <Button size="sm" type="button" {...props} />;
 };
 
@@ -65,6 +79,7 @@ const ResetButton = (
 
 const FormHeader = (props: React.ComponentProps<'div'>) => {
     const { currentStepIndex, steps } = useMultiStepForm();
+
     return (
         <div
             className="flex flex-col items-start justify-center gap-1 pb-4"
@@ -74,6 +89,7 @@ const FormHeader = (props: React.ComponentProps<'div'>) => {
                 {steps.map((_, index) => {
                     const stepNumber = index + 1;
                     const isLast = stepNumber === steps.length;
+
                     return (
                         <StepperItem
                             key={stepNumber}
@@ -103,6 +119,7 @@ const FormFooter = (props: React.ComponentProps<'div'>) => {
 const StepFields = (props: React.ComponentProps<'div'> & MotionProps) => {
     const { currentStepIndex, steps } = useMultiStepForm();
     const currentFormStep = steps[currentStepIndex - 1];
+
     if (
         !currentFormStep ||
         currentStepIndex < 1 ||
@@ -110,6 +127,7 @@ const StepFields = (props: React.ComponentProps<'div'> & MotionProps) => {
     ) {
         return null;
     }
+
     return (
         <AnimatePresence mode="popLayout">
             <motion.div

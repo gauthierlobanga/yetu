@@ -2,8 +2,7 @@
 
 namespace App\Filament\Vendeur\Resources\Produits\Schemas;
 
-use App\Models\Tenant;
-use Filament\Facades\Filament;
+// use App\Models\Tenant;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
@@ -20,7 +19,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class ProduitForm
@@ -41,38 +39,7 @@ class ProduitForm
                                     ->schema([
                                         Grid::make(3)
                                             ->schema([
-                                                Select::make('tenant_id')
-                                                    ->label('Organisation')
-                                                    ->relationship('tenant', 'raison_sociale')
-                                                    ->preload()
-                                                    ->searchable()
-                                                    ->options(function () {
-                                                        $user = Auth::user();
 
-                                                        // Si l'utilisateur est Super Admin, il voit toutes les Vendeurs
-                                                        if ($user->hasRole(['super_admin'])) {
-                                                            return Tenant::pluck('raison_sociale', 'id');
-                                                        }
-
-                                                        // Sinon, il voit seulement ses Vendeurs
-                                                        return $user->tenants()->pluck('raison_sociale', 'tenants.id');
-                                                    })
-                                                    ->default(function () {
-                                                        $user = Auth::user();
-
-                                                        // Si on est dans un contexte tenant, pré-remplir avec la Vendeur actuelle
-                                                        if (Filament::hasTenancy() && Filament::getTenant()) {
-                                                            return Filament::getTenant()->id;
-                                                        }
-
-                                                        // Si l'utilisateur n'a qu'une seule Vendeur, la sélectionner par défaut
-                                                        if ($user->tenants()->count() === 1) {
-                                                            return $user->tenants()->first()->id;
-                                                        }
-
-                                                        return null;
-                                                    })
-                                                    ->required(),
                                                 TextInput::make('nom')
                                                     ->label('Nom du produit')
                                                     ->required()
@@ -138,7 +105,6 @@ class ProduitForm
 
                                         Select::make('categories')
                                             ->label('Catégories')
-                                            // ->options(ProductCategory::active()->orderBy('nom')->pluck('nom', 'id'))
                                             ->relationship('categories', 'nom')
                                             ->multiple()
                                             ->searchable()
@@ -221,11 +187,11 @@ class ProduitForm
                             ->schema([
                                 Grid::make(3)
                                     ->schema([
-                                        Select::make('currency_id')
-                                            ->label('Devise')
-                                            ->relationship('currency', 'code')
-                                            ->required()
-                                            ->default(1),
+                                        // Select::make('currency_id')
+                                        //     ->label('Devise')
+                                        //     ->relationship('currency', 'code')
+                                        //     // ->required()
+                                        //     ->default(1),
 
                                         TextInput::make('prix_ht')
                                             ->label('Prix HT')
@@ -335,6 +301,8 @@ class ProduitForm
                                             ->label('Vidéos du produit')
                                             ->collection('videos')
                                             ->multiple()
+                                            ->disk('public')
+                                            ->directory('products/videos')
                                             ->acceptedFileTypes(['video/mp4', 'video/webm'])
                                             ->maxSize(51200) // 50MB
                                             ->helperText('Vidéos de présentation du produit (MP4, WebM)')
@@ -347,6 +315,8 @@ class ProduitForm
                                             ->label('Documents techniques')
                                             ->collection('documents')
                                             ->multiple()
+                                            ->disk('public')
+                                            ->directory('products/documents')
                                             ->acceptedFileTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
                                             ->maxSize(10240) // 10MB
                                             ->helperText('Manuels, fiches techniques, certificats')
@@ -398,6 +368,8 @@ class ProduitForm
                                             ->keyLabel('Propriété')
                                             ->valueLabel('Valeur')
                                             ->addActionLabel('Ajouter un attribut')
+                                            ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_filter($state, fn ($key, $value) => $key !== '' && $value !== '', ARRAY_FILTER_USE_BOTH) : $state)
+                                            ->afterStateHydrated(fn ($state) => is_array($state) ? array_filter($state, fn ($key) => $key !== '', ARRAY_FILTER_USE_KEY) : $state)
                                             ->columnSpanFull(),
                                     ])
                                     ->columns(1)
@@ -410,6 +382,8 @@ class ProduitForm
                                     ->keyLabel('Attribut')
                                     ->valueLabel('Valeur')
                                     ->addActionLabel('Ajouter un attribut')
+                                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_filter($state, fn ($key, $value) => $key !== '' && $value !== '', ARRAY_FILTER_USE_BOTH) : $state)
+                                    ->afterStateHydrated(fn ($state) => is_array($state) ? array_filter($state, fn ($key) => $key !== '', ARRAY_FILTER_USE_KEY) : $state)
                                     ->helperText('Attributs supplémentaires du produit (ex: Matière: Coton, Garantie: 2 ans)'),
                             ]),
                         Tab::make('Attributs supplémentaires')
@@ -424,6 +398,8 @@ class ProduitForm
                                     ->valuePlaceholder('Ex: Coton')
                                     ->addActionLabel('Ajouter une propriété')
                                     ->reorderable()
+                                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_filter($state, fn ($key, $value) => $key !== '' && $value !== '', ARRAY_FILTER_USE_BOTH) : $state)
+                                    ->afterStateHydrated(fn ($state) => is_array($state) ? array_filter($state, fn ($key) => $key !== '', ARRAY_FILTER_USE_KEY) : $state)
                                     ->helperText('Attributs supplémentaires pour cette variante'),
                             ]),
 
@@ -463,7 +439,9 @@ class ProduitForm
                                     ->keyLabel('Clé')
                                     ->valueLabel('Valeur')
                                     ->addActionLabel('Ajouter')
-                                    ->reorderable(),
+                                    ->reorderable()
+                                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_filter($state, fn ($key, $value) => $key !== '' && $value !== '', ARRAY_FILTER_USE_BOTH) : $state)
+                                    ->afterStateHydrated(fn ($state) => is_array($state) ? array_filter($state, fn ($key) => $key !== '', ARRAY_FILTER_USE_KEY) : $state),
                             ]),
                     ]),
             ]);

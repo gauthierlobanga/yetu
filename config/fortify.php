@@ -69,14 +69,21 @@ return [
     |
     | Here you may configure the path where users will get redirected during
     | authentication or password reset when the operations are successful
-    | and the user is authenticated. You are free to change this value.
+    | and the user is authenticated. You may free to change this value.
     |
     */
 
-    'home' => '/dashboard',
+    'home' => function () {
+        // Si on est dans un contexte de tenancy, rediriger vers la page d'accueil du tenant
+        if (function_exists('tenancy') && tenancy()->initialized) {
+            return '/';
+        }
+        // Sinon, rediriger vers le dashboard central
+        return '/dashboard';
+    },
 
     'redirects' => [
-        'logout' => '/home',
+        'logout' => '/',
     ],
 
     /*

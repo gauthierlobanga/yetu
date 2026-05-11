@@ -5,9 +5,12 @@ namespace App\Filament\Resources\Vendeurs\Tables;
 use App\Models\Tenant;
 use App\Models\User;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
@@ -15,6 +18,7 @@ use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
@@ -67,20 +71,6 @@ class VendeursTable
                     ->counts('documentsLegaux')
                     ->alignCenter(),
 
-                // TextColumn::make('produits_count')
-                //     ->label('Produits')
-                //     // ->counts('produits')
-                //     ->getStateUsing(fn (Tenant $record) => $record->produits()->count())
-                //     ->sortable()
-                //     ->alignCenter(),
-
-                // TextColumn::make('commandes_count')
-                //     ->label('Commandes')
-                //     // ->counts('commandes')
-                //     ->getStateUsing(fn (Tenant $record) => $record->commandes()->count())
-                //     ->sortable()
-                //     ->alignCenter(),
-
                 TextColumn::make('pourcentage_verification')
                     ->label('Vérification')
                     ->state(fn (Tenant $record) => $record->pourcentage_verification.'%')
@@ -103,6 +93,10 @@ class VendeursTable
                 TernaryFilter::make('is_active')
                     ->preload()
                     ->searchable(),
+                TrashedFilter::make()
+                    ->placeholder('Enregistrer supprimés')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 Action::make('members')
@@ -141,12 +135,16 @@ class VendeursTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    Action::make('activate')
+                    BulkAction::make('activate')                  // ← BulkAction au lieu de Action
                         ->label('Activer la sélection')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
                         ->action(fn ($records) => $records->each->update(['statut' => 'actif', 'is_active' => true]))
                         ->deselectRecordsAfterCompletion()
                         ->requiresConfirmation(),
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
                 ]),
             ]);
     }

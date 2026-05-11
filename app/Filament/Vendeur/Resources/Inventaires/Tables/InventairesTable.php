@@ -17,7 +17,6 @@ class InventairesTable
     {
         return $table
             ->columns([
-
                 TextColumn::make('entrepot.id')
                     ->searchable(),
                 TextColumn::make('reference')

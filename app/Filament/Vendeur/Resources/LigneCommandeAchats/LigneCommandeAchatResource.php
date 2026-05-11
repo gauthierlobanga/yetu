@@ -25,7 +25,7 @@ class LigneCommandeAchatResource extends Resource
 
     protected static ?string $cluster = AchatsCluster::class;
 
-    protected static ?string $recordTitleAttribute = 'commande_achat_id';
+    protected static ?string $recordTitleAttribute = 'commande_achat';
 
     protected static ?string $navigationLabel = 'Ligne Achats';
 

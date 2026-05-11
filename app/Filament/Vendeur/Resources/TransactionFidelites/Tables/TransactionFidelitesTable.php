@@ -21,15 +21,6 @@ class TransactionFidelitesTable
     {
         return $table
             ->columns([
-                TextColumn::make('tenant.raison_sociale')
-                    ->label('Organisation')
-                    ->searchable()
-                    ->badge()
-                    ->sortable()
-                    ->toggleable()
-                    ->badge()
-                    ->color('info')
-                    ->icon('heroicon-o-building-office'),
                 TextColumn::make('compteFidelite.client.full_name')
                     ->label('Client')
                     ->searchable()

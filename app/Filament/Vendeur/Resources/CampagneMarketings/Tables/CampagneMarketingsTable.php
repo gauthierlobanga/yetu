@@ -239,7 +239,7 @@ class CampagneMarketingsTable
 
                 Filter::make('date_range')
                     ->label('Période')
-                    ->form([
+                    ->schema([
                         DatePicker::make('date_from')
                             ->label('Du'),
                         DatePicker::make('date_to')

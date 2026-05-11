@@ -2,16 +2,22 @@
 
 namespace App\Support\Tenancy;
 
-use Illuminate\Support\Str;
 use Spatie\MediaLibrary\Support\UrlGenerator\DefaultUrlGenerator;
 
 class TenantAwareUrlGenerator extends DefaultUrlGenerator
 {
     public function getUrl(): string
     {
-        $url = $this->shouldUseTenantAssetRoute()
-            ? tenant_asset($this->getPathRelativeToRoot())
-            : $this->getDisk()->url($this->getUrlEncodedPathRelativeToRoot());
+        $diskName = $this->getDiskName();
+
+        // Si c'est un disk public dans le contexte tenant, utiliser l'URL avec le slug
+        if ($diskName === 'public' && function_exists('tenancy') && tenancy()->initialized) {
+            $tenant = tenancy()->tenant;
+            $path = $this->getPathRelativeToRoot();
+            $url = '/storage/tenant-'.$tenant->slug.'/'.$path;
+        } else {
+            $url = $this->getDisk()->url($this->getUrlEncodedPathRelativeToRoot());
+        }
 
         $url = $this->versionUrl($url);
 
@@ -20,22 +26,17 @@ class TenantAwareUrlGenerator extends DefaultUrlGenerator
 
     public function getResponsiveImagesDirectoryUrl(): string
     {
-        if (! $this->shouldUseTenantAssetRoute()) {
-            return parent::getResponsiveImagesDirectoryUrl();
-        }
-
-        return Str::finish(tenant_asset($this->pathGenerator->getPathForResponsiveImages($this->media)), '/');
-    }
-
-    protected function shouldUseTenantAssetRoute(): bool
-    {
-        if (! function_exists('tenancy') || ! tenancy()->initialized) {
-            return false;
-        }
-
         $diskName = $this->getDiskName();
 
-        return config("filesystems.disks.{$diskName}.driver") === 'local'
-            && in_array($diskName, config('tenancy.filesystem.disks', []), true);
+        // Si c'est un disk public dans le contexte tenant, utiliser l'URL avec le slug
+        if ($diskName === 'public' && function_exists('tenancy') && tenancy()->initialized) {
+            $tenant = tenancy()->tenant;
+            $path = $this->pathGenerator->getPathForResponsiveImages($this->media);
+            $url = '/storage/tenant-'.$tenant->slug.'/'.$path;
+        } else {
+            $url = parent::getResponsiveImagesDirectoryUrl();
+        }
+
+        return $url;
     }
 }

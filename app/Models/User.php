@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
@@ -26,18 +27,18 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
-use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
+/**
+ * @mixin HasRoles
+ */
 class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, HasName, HasTenants // , MustVerifyEmail
 {
-    // use BelongsToTenant;
-
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
 
     use HasRoles, InteractsWithMedia;
     use HasUserPreferences;
-    use HasUuids;
+    use HasUuids, SoftDeletes;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -160,11 +161,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
      */
     public function registerMediaCollections(): void
     {
-        $disk = tenancy()->initialized ? 'tenant' : 'public';
 
         $this->addMediaCollection('avatar')
             ->singleFile()
-            ->useDisk('public')
+            ->useDisk('tenant')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
     }
 
@@ -177,7 +177,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             ->height(300)
             ->fit(Fit::Crop, 400, 300)
             ->optimize()
-            ->nonQueued();
+            ->queued();
 
         // Conversion pour les avatars (carrés)
         $this->addMediaConversion('thumb')
@@ -206,12 +206,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
     public function canAccessPanel(Panel $panel): bool
     {
         if ($panel->getId() === 'admin') {
-            return str_ends_with($this->email, '@gmail.com')
-            && $this->is_active && $this->hasRole('super_admin');
+            return $this->is_active && $this->hasRole('super_admin');
         }
 
         if ($panel->getId() === 'vendeur') {
-            return $this->is_active && ($this->hasRole(['super_admin', 'vendeur']) || $this->tenants()->exists());
+            return $this->is_active && ($this->hasRole(['super_admin', 'Manager']) || $this->tenants()->exists());
         }
 
         return false;
@@ -241,6 +240,28 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
         return 'https://ui-avatars.com/api/?name='.urlencode($initials)
             .'&background=F59E0B&color=FFFFFF&size=128&bold=true';
     }
+
+    // public function getAvatarUrlAttribute(): string
+    // {
+    //     $media = $this->getFirstMedia('avatar');
+
+    //     if ($media) {
+    //         return tenant_asset($media->getPathRelativeToRoot());
+    //     }
+
+    //     $name = trim($this->name ?? $this->email);
+
+    //     $parts = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY);
+
+    //     $initials = collect($parts)
+    //         ->map(fn ($part) => strtoupper(mb_substr($part, 0, 1)))
+    //         ->take(2)
+    //         ->implode('');
+
+    //     return 'https://ui-avatars.com/api/?name='
+    //         .urlencode($initials)
+    //         .'&background=F59E0B&color=FFFFFF&size=128&bold=true';
+    // }
 
     public function getFullNameAttribute(): string
     {
@@ -388,6 +409,19 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
     }
 
     /**
+     * Get the database connection name for the model.
+     * Returns 'tenant' when tenancy is initialized, otherwise returns the default connection.
+     */
+    public function getConnectionName(): string
+    {
+        if (function_exists('tenancy') && tenancy()->initialized) {
+            return 'tenant';
+        }
+
+        return parent::getConnectionName() ?? config('database.default');
+    }
+
+    /**
      * Détermine si cet utilisateur peut impersonner d'autres utilisateurs
      */
     public function canImpersonate(): bool
@@ -463,7 +497,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             return false;
         }
 
-        if ($this->hasRole(['super_admin', 'vendeur'])) {
+        if ($this->hasRole(['super_admin'])) {
             return true;
         }
 

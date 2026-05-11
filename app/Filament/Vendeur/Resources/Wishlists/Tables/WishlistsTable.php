@@ -120,7 +120,7 @@ class WishlistsTable
                     ->color('success')
                     ->visible(fn ($record) => $record->est_publique)
                     ->action(function ($record) {
-                        $url = route('wishlist.shared', $record->id);
+                        $url = route('tenant.wishlist.toggle', $record->id);
                         Notification::make()
                             ->success()
                             ->title('Lien de partage')

@@ -17,7 +17,6 @@ class LigneRetoursTable
     {
         return $table
             ->columns([
-
                 TextColumn::make('retour.reference')
                     ->searchable(),
                 TextColumn::make('ligneCommande.produit.nom')

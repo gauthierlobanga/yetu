@@ -30,7 +30,7 @@ class LigneCommandeAchat extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'commande_achat_id',
+        'commande_achat',
         'produit_id',
         'quantite',
         'quantite_recue',
@@ -49,7 +49,7 @@ class LigneCommandeAchat extends Model
 
     public function commandeAchat(): BelongsTo
     {
-        return $this->belongsTo(CommandeAchat::class);
+        return $this->belongsTo(CommandeAchat::class, 'commande_achat');
     }
 
     public function produit(): BelongsTo

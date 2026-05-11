@@ -223,36 +223,6 @@ class VendorRegistrationController extends Controller
         return array_unique($variants);
     }
 
-    /**
-     * Étape 3 : Soumettre la demande.
-     */
-    // public function vendeurStore(VendorRegistrationRequest $request)
-    // {
-    //     $user = Auth::user();
-    //     $plan = Plan::findOrFail($request->plan_id);
-
-    //     if (! $this->vendorService->canBecomeVendor($user)) {
-    //         return back()->with('error', 'Vous avez déjà une demande en cours.');
-    //     }
-
-    //     if (! $this->vendorService->isShopSlugAvailable($request->shop_slug)) {
-    //         return back()->withErrors(['shop_slug' => 'Ce sous-domaine est déjà utilisé.']);
-    //     }
-
-    //     $vendorRequest = $this->vendorService->initiateRegistration($user, $request->validated());
-    //     session()->forget('selected_plan_id');
-
-    //     if ($plan->price > 0) {
-    //         session(['vendor_request_id' => $vendorRequest->id]);
-
-    //         return redirect()->route('vendor.payment');
-    //     }
-
-    //     $tenant = $this->vendorService->approve($vendorRequest);
-
-    //     // Au lieu de renvoyer directement la vue, on redirige vers la route de succès
-    //     return redirect()->route('vendor.success', ['tenant' => $tenant->slug]);
-    // }
     public function vendeurStore(VendorRegistrationRequest $request)
     {
         $user = Auth::user();
@@ -268,6 +238,9 @@ class VendorRegistrationController extends Controller
 
         $vendorRequest = $this->vendorService->initiateRegistration($user, $request->validated());
         session()->forget('selected_plan_id');
+
+        // Stocker le mot de passe en session pour l'utiliser lors de l'approbation
+        session(['temp_password' => $request->password]);
 
         // Sauvegarder temporairement le logo s'il existe
         if ($request->hasFile('logo')) {
@@ -320,16 +293,5 @@ class VendorRegistrationController extends Controller
                 'admin_url' => $this->vendorService->getVendeurUrl($tenant),
             ],
         ]);
-    }
-
-    private function getFlagEmoji(string $code): string
-    {
-        $flags = [
-            'fr' => '🇫🇷', 'en' => '🇬🇧', 'es' => '🇪🇸', 'de' => '🇩🇪',
-            'it' => '🇮🇹', 'pt' => '🇵🇹', 'nl' => '🇳🇱', 'ar' => '🇸🇦',
-            'sw' => '🇹🇿', 'ln' => '🇨🇩', 'rw' => '🇷🇼', 'pt-BR' => '🇧🇷',
-        ];
-
-        return $flags[$code] ?? '🌐';
     }
 }

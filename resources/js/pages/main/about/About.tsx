@@ -70,7 +70,7 @@ export default function About() {
                     <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-secondary/5" />
                     <div className="absolute -top-40 -left-40 h-150 w-150 rounded-full bg-primary/10 blur-[120px]" />
                     <div className="absolute -right-40 -bottom-40 h-150 w-150 rounded-full bg-secondary/10 blur-[120px]" />
-                    <div className="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-[0.02]" />
+                    <div className="absolute inset-0 bg-[url('/storage/images/working-at-night.jpg')] opacity-[0.02]" />
                 </div>
 
                 <div className="relative mx-auto max-w-6xl px-4 text-center">

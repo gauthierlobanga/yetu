@@ -43,7 +43,7 @@ import { useInitials } from '@/hooks/use-initials';
 import NewsletterSection from '@/layouts/app/app-newsletters-footer';
 import MainLayout from '@/layouts/main-layout';
 import { home } from '@/routes';
-import blog from '@/routes/blog';
+import blog from '@/routes/tenant/blog';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
 import type { Post, RelatedPost } from '@/types/posts/posts';
 

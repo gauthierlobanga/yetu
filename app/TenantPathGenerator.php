@@ -2,8 +2,6 @@
 
 namespace App;
 
-namespace App\Support;
-
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator;
 

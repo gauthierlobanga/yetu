@@ -30,6 +30,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useCart } from '@/hooks/ecommerce/use-cart';
 import MainLayout from '@/layouts/main-layout';
 import type { Product } from '@/types/ecommerce/products';
+import { ReviewsSection } from './avis/avis-clients';
 
 interface Review {
     id: number;
@@ -250,7 +251,6 @@ export default function ProductShow() {
                     <ChevronRight className="h-4 w-4" />
                     <span className="text-foreground">{product.nom}</span>
                 </nav>
-
                 <div className="grid gap-10 lg:grid-cols-2">
                     {/* Galerie */}
                     <div className="space-y-4">
@@ -704,151 +704,11 @@ export default function ProductShow() {
                 )}
 
                 {/* Avis */}
-                <div className="mt-16 grid gap-10 lg:grid-cols-3">
-                    <div className="lg:col-span-2">
-                        <h2 className="mb-6 font-heading text-2xl font-bold text-foreground">
-                            Avis clients
-                        </h2>
-                        {product.avis.length === 0 ? (
-                            <p className="text-muted-foreground">
-                                Aucun avis pour le moment. Soyez le premier à
-                                donner votre avis !
-                            </p>
-                        ) : (
-                            <div className="space-y-6">
-                                {product.avis.map((avis) => (
-                                    <div
-                                        key={avis.id}
-                                        className="border-b border-border pb-6"
-                                    >
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <div className="flex">
-                                                        {renderStars(
-                                                            avis.note,
-                                                            'sm',
-                                                        )}
-                                                    </div>
-                                                    <span className="font-medium text-foreground">
-                                                        {avis.client}
-                                                    </span>
-                                                </div>
-                                                <p className="mt-2 text-muted-foreground">
-                                                    {avis.commentaire}
-                                                </p>
-                                                <p className="mt-2 text-xs text-muted-foreground">
-                                                    {avis.date}
-                                                </p>
-                                            </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="gap-1"
-                                            >
-                                                <ThumbsUp className="h-4 w-4" />
-                                                {avis.utile || 0}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    <div className="space-y-6">
-                        <div className="rounded-lg border border-border p-6">
-                            <h3 className="font-semibold text-foreground">
-                                Note globale
-                            </h3>
-                            <div className="mt-3 flex items-baseline gap-2">
-                                <span className="text-4xl font-bold text-foreground">
-                                    {ratingStats.average.toFixed(1)}
-                                </span>
-                                <span className="text-muted-foreground">
-                                    sur 5
-                                </span>
-                            </div>
-                            <div className="mt-1 flex">
-                                {renderStars(ratingStats.average)}
-                            </div>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                {ratingStats.total} avis vérifiés
-                            </p>
-                            <div className="mt-6 space-y-2">
-                                {[5, 4, 3, 2, 1].map((star) => {
-                                    const count =
-                                        ratingStats.distribution[star] || 0;
-                                    const percentage =
-                                        ratingStats.total > 0
-                                            ? (count / ratingStats.total) * 100
-                                            : 0;
-
-                                    return (
-                                        <div
-                                            key={star}
-                                            className="flex items-center gap-2 text-sm text-foreground"
-                                        >
-                                            <span className="w-6">
-                                                {star} ★
-                                            </span>
-                                            <Progress
-                                                value={percentage}
-                                                className="h-2 flex-1"
-                                            />
-                                            <span className="w-10 text-right">
-                                                {percentage.toFixed(0)}%
-                                            </span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                        <div className="rounded-lg border border-border p-6">
-                            <h3 className="font-semibold text-foreground">
-                                Laisser un avis
-                            </h3>
-                            <div className="mt-4 space-y-4">
-                                <div>
-                                    <label className="mb-1 block text-sm text-muted-foreground">
-                                        Votre note
-                                    </label>
-                                    <div className="flex gap-1">
-                                        {[1, 2, 3, 4, 5].map((star) => (
-                                            <button
-                                                key={star}
-                                                onClick={() =>
-                                                    setReviewRating(star)
-                                                }
-                                            >
-                                                <Star
-                                                    className={`h-6 w-6 ${
-                                                        star <= reviewRating
-                                                            ? 'fill-yellow-400 text-yellow-400'
-                                                            : 'text-muted-foreground/20'
-                                                    }`}
-                                                />
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <Textarea
-                                    placeholder="Partagez votre expérience..."
-                                    value={reviewComment}
-                                    onChange={(e) =>
-                                        setReviewComment(e.target.value)
-                                    }
-                                    rows={4}
-                                />
-                                <Button
-                                    onClick={handleSubmitReview}
-                                    className="w-full"
-                                >
-                                    Envoyer mon avis
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <ReviewsSection
+                    productId={product.id}
+                    avis={product.avis}
+                    ratingStats={product.rating_stats}
+                />
             </div>
         </MainLayout>
     );

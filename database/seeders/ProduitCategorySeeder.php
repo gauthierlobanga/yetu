@@ -38,23 +38,26 @@ class ProduitCategorySeeder extends Seeder
 
         // Créer les catégories racines
         foreach ($racines as $index => $catData) {
-            $categorie = ProductCategory::create([
+            $slug = Str::slug($catData['nom']);
 
-                'nom' => $catData['nom'],
-                'slug' => Str::slug($catData['nom']),
-                'description' => $catData['description'],
-                'short_description' => $faker->sentence(6),
-                'parente_id' => null,
-                'est_active' => true,
-                'is_featured' => $index < 5,
-                'show_in_menu' => true,
-                'order' => $index * 10,
-                'color' => $faker->hexColor(),
-                'seo_title' => $catData['nom'].' - Achetez en ligne',
-                'seo_description' => 'Découvrez notre sélection de '.strtolower($catData['nom']).'. Livraison rapide et gratuite.',
-                'seo_keywords' => json_encode(explode(' ', strtolower($catData['nom']))),
-                'metadata' => json_encode(['niveau' => 1, 'type' => 'racine']),
-            ]);
+            $categorie = ProductCategory::firstOrCreate(
+                ['slug' => $slug],
+                [
+                    'nom' => $catData['nom'],
+                    'description' => $catData['description'],
+                    'short_description' => $faker->sentence(6),
+                    'parente_id' => null,
+                    'est_active' => true,
+                    'is_featured' => $index < 5,
+                    'show_in_menu' => true,
+                    'order' => $index * 10,
+                    'color' => $faker->hexColor(),
+                    'seo_title' => $catData['nom'].' - Achetez en ligne',
+                    'seo_description' => 'Découvrez notre sélection de '.strtolower($catData['nom']).'. Livraison rapide et gratuite.',
+                    'seo_keywords' => json_encode(explode(' ', strtolower($catData['nom']))),
+                    'metadata' => json_encode(['niveau' => 1, 'type' => 'racine']),
+                ]
+            );
 
             $categoriesCrees[] = $categorie;
         }
@@ -173,37 +176,42 @@ class ProduitCategorySeeder extends Seeder
                     $sousSousCats = $value;
 
                     // Créer la catégorie de niveau 2 (groupe)
-                    $catNiveau2 = ProductCategory::create([
+                    $slugNiveau2 = Str::slug($parent->slug.'-'.$nomGroupe);
 
-                        'nom' => $nomGroupe,
-                        'slug' => Str::slug($parent->slug.'-'.$nomGroupe),
-                        'description' => 'Découvrez notre collection '.strtolower($nomGroupe).' dans la catégorie '.$racineNom,
-                        'short_description' => $faker->sentence(6),
-                        'parente_id' => $parent->id,
-                        'est_active' => true,
-                        'is_featured' => $faker->boolean(30),
-                        'show_in_menu' => true,
-                        'order' => $faker->numberBetween(0, 100),
-                        'color' => $faker->hexColor(),
-                        'seo_title' => $nomGroupe.' '.$racineNom.' - Achetez en ligne',
-                        'seo_description' => 'Large choix de '.strtolower($nomGroupe).'. '.$faker->sentence(10),
-                        'seo_keywords' => json_encode([strtolower($nomGroupe), strtolower($racineNom)]),
-                        'metadata' => json_encode(['niveau' => 2, 'parent' => $racineNom]),
-                    ]);
+                    $catNiveau2 = ProductCategory::firstOrCreate(
+                        ['slug' => $slugNiveau2],
+                        [
+                            'nom' => $nomGroupe,
+                            'description' => 'Découvrez notre collection '.strtolower($nomGroupe).' dans la catégorie '.$racineNom,
+                            'short_description' => $faker->sentence(6),
+                            'parente_id' => $parent->id,
+                            'est_active' => true,
+                            'is_featured' => $faker->boolean(30),
+                            'show_in_menu' => true,
+                            'order' => $faker->numberBetween(0, 100),
+                            'color' => $faker->hexColor(),
+                            'seo_title' => $nomGroupe.' '.$racineNom.' - Achetez en ligne',
+                            'seo_description' => 'Large choix de '.strtolower($nomGroupe).'. '.$faker->sentence(10),
+                            'seo_keywords' => json_encode([strtolower($nomGroupe), strtolower($racineNom)]),
+                            'metadata' => json_encode(['niveau' => 2, 'parent' => $racineNom]),
+                        ]
+                    );
 
                     $niveau2Categories[] = $catNiveau2;
 
                     // Créer les catégories de niveau 3
                     foreach ($sousSousCats as $nomNiveau3) {
-                        ProductCategory::create([
+                        $slugNiveau3 = Str::slug($catNiveau2->slug.'-'.$nomNiveau3);
 
-                            'nom' => $nomNiveau3,
-                            'slug' => Str::slug($catNiveau2->slug.'-'.$nomNiveau3),
-                            'description' => $faker->sentence(15),
-                            'short_description' => $faker->sentence(6),
-                            'parente_id' => $catNiveau2->id,
-                            'est_active' => $faker->boolean(90),
-                            'is_featured' => $faker->boolean(20),
+                        ProductCategory::firstOrCreate(
+                            ['slug' => $slugNiveau3],
+                            [
+                                'nom' => $nomNiveau3,
+                                'description' => $faker->sentence(15),
+                                'short_description' => $faker->sentence(6),
+                                'parente_id' => $catNiveau2->id,
+                                'est_active' => $faker->boolean(90),
+                                'is_featured' => $faker->boolean(20),
                             'show_in_menu' => $faker->boolean(80),
                             'order' => $faker->numberBetween(0, 100),
                             'color' => $faker->hexColor(),
@@ -216,23 +224,26 @@ class ProduitCategorySeeder extends Seeder
                 } else {
                     // Catégorie simple de niveau 2
                     $nom = $value;
-                    ProductCategory::create([
+                    $slug = Str::slug($parent->slug.'-'.$nom);
 
-                        'nom' => $nom,
-                        'slug' => Str::slug($parent->slug.'-'.$nom),
-                        'description' => $faker->sentence(15),
-                        'short_description' => $faker->sentence(6),
-                        'parente_id' => $parent->id,
-                        'est_active' => true,
-                        'is_featured' => $faker->boolean(30),
-                        'show_in_menu' => true,
-                        'order' => $faker->numberBetween(0, 100),
-                        'color' => $faker->hexColor(),
-                        'seo_title' => $nom.' '.$racineNom.' - Achetez en ligne',
-                        'seo_description' => $faker->text(150),
-                        'seo_keywords' => json_encode([strtolower($nom), strtolower($racineNom)]),
-                        'metadata' => json_encode(['niveau' => 2, 'parent' => $racineNom]),
-                    ]);
+                    ProductCategory::firstOrCreate(
+                        ['slug' => $slug],
+                        [
+                            'nom' => $nom,
+                            'description' => $faker->sentence(15),
+                            'short_description' => $faker->sentence(6),
+                            'parente_id' => $parent->id,
+                            'est_active' => true,
+                            'is_featured' => $faker->boolean(30),
+                            'show_in_menu' => true,
+                            'order' => $faker->numberBetween(0, 100),
+                            'color' => $faker->hexColor(),
+                            'seo_title' => $nom.' '.$racineNom.' - Achetez en ligne',
+                            'seo_description' => $faker->text(150),
+                            'seo_keywords' => json_encode([strtolower($nom), strtolower($racineNom)]),
+                            'metadata' => json_encode(['niveau' => 2, 'parent' => $racineNom]),
+                        ]
+                    );
                 }
             }
         }

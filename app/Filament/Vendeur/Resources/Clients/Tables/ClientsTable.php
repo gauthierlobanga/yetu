@@ -175,7 +175,7 @@ class ClientsTable
                 Action::make('view_orders')
                     ->label('Voir commandes')
                     ->icon('heroicon-m-shopping-cart')
-                    ->url(fn ($record) => route('filament.admin.resources.comments.index', [
+                    ->url(fn ($record) => route('filament.vendeur.resources.comments.index', [
                         'tableFilters[client_id][value]' => $record->id,
                     ]))
                     ->color('info'),
@@ -183,7 +183,7 @@ class ClientsTable
                 Action::make('view_addresses')
                     ->label('Voir adresses')
                     ->icon('heroicon-m-map-pin')
-                    ->url(fn ($record) => route('filament.admin.resources.adresses.index', [
+                    ->url(fn ($record) => route('filament.vendeur.resources.adresses.index', [
                         'tableFilters[adressable_type][value]' => 'App\Models\Client',
                         'tableFilters[adressable_id][value]' => $record->id,
                     ]))

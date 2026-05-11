@@ -35,24 +35,33 @@ class BlogCategorySeeder extends Seeder
             // CORRECTION : Les mots-clés doivent être un tableau encodé en JSON, pas une chaîne
             $keywordsArray = explode(' ', strtolower($catData['nom']));
 
-            $categorieId = DB::table('posts_categories')->insertGetId([
-                'id' => Str::uuid(),
-                'parent_id' => null,
-                'nom' => $catData['nom'],
-                'slug' => Str::slug($catData['nom']),
-                'description' => $catData['description'],
-                'color' => $faker->hexColor(),
-                'metadata' => json_encode(['niveau' => 1, 'type' => 'racine']),
-                'ordre' => $index * 10,
-                'est_active' => true,
-                'est_visible_dans_menu' => true,
-                'meta_title' => $catData['nom'].' - Blog',
-                'meta_description' => 'Découvrez tous nos articles sur '.strtolower($catData['nom']),
-                // CORRECTION : encoder en JSON
-                'meta_keywords' => json_encode($keywordsArray),
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ]);
+            $slug = Str::slug($catData['nom']);
+
+            // Vérifier si la catégorie existe déjà
+            $existing = DB::table('posts_categories')->where('slug', $slug)->first();
+
+            if ($existing) {
+                $categorieId = $existing->id;
+            } else {
+                $categorieId = DB::table('posts_categories')->insertGetId([
+                    'id' => Str::uuid(),
+                    'parent_id' => null,
+                    'nom' => $catData['nom'],
+                    'slug' => $slug,
+                    'description' => $catData['description'],
+                    'color' => $faker->hexColor(),
+                    'metadata' => json_encode(['niveau' => 1, 'type' => 'racine']),
+                    'ordre' => $index * 10,
+                    'est_active' => true,
+                    'est_visible_dans_menu' => true,
+                    'meta_title' => $catData['nom'].' - Blog',
+                    'meta_description' => 'Découvrez tous nos articles sur '.strtolower($catData['nom']),
+                    // CORRECTION : encoder en JSON
+                    'meta_keywords' => json_encode($keywordsArray),
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
+            }
 
             $categoriesCrees[] = $categorieId;
         }
@@ -87,24 +96,31 @@ class BlogCategorySeeder extends Seeder
                     explode(' ', strtolower($racineNom))
                 );
 
-                DB::table('posts_categories')->insert([
-                    'id' => Str::uuid(),
-                    'parent_id' => $parent->id,
-                    'nom' => $nomSousCat,
-                    'slug' => Str::slug($parent->slug.'-'.$nomSousCat),
-                    'description' => $faker->sentence(10),
-                    'color' => $faker->hexColor(),
-                    'metadata' => json_encode(['niveau' => 2, 'parent' => $racineNom]),
-                    'ordre' => $index * 5,
-                    'est_active' => true,
-                    'est_visible_dans_menu' => $faker->boolean(80),
-                    'meta_title' => $nomSousCat.' - '.$racineNom,
-                    'meta_description' => $faker->text(150),
-                    // CORRECTION : encoder en JSON
-                    'meta_keywords' => json_encode($keywordsArray),
-                    'created_at' => Carbon::now(),
-                    'updated_at' => Carbon::now(),
-                ]);
+                $slug = Str::slug($parent->slug.'-'.$nomSousCat);
+
+                // Vérifier si la sous-catégorie existe déjà
+                $existing = DB::table('posts_categories')->where('slug', $slug)->first();
+
+                if (! $existing) {
+                    DB::table('posts_categories')->insert([
+                        'id' => Str::uuid(),
+                        'parent_id' => $parent->id,
+                        'nom' => $nomSousCat,
+                        'slug' => $slug,
+                        'description' => $faker->sentence(10),
+                        'color' => $faker->hexColor(),
+                        'metadata' => json_encode(['niveau' => 2, 'parent' => $racineNom]),
+                        'ordre' => $index * 5,
+                        'est_active' => true,
+                        'est_visible_dans_menu' => $faker->boolean(80),
+                        'meta_title' => $nomSousCat.' - '.$racineNom,
+                        'meta_description' => $faker->text(150),
+                        // CORRECTION : encoder en JSON
+                        'meta_keywords' => json_encode($keywordsArray),
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    ]);
+                }
             }
         }
 

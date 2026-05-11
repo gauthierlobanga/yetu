@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\RelancePanier;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class RelancePanierPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny RelancePanier');
@@ -47,6 +35,11 @@ class RelancePanierPolicy
     public function delete(AuthUser $authUser, RelancePanier $relancePanier): bool
     {
         return $authUser->can('Delete RelancePanier');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny RelancePanier');
     }
 
     public function restore(AuthUser $authUser, RelancePanier $relancePanier): bool
@@ -78,4 +71,5 @@ class RelancePanierPolicy
     {
         return $authUser->can('Reorder RelancePanier');
     }
+
 }

@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import MainLayout from '@/layouts/main-layout';
-import blog from '@/routes/blog';
+import blog from '@/routes/tenant/blog';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [

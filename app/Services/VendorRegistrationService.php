@@ -10,12 +10,14 @@ use App\Notifications\VendorApproved;
 use App\Notifications\VendorRejected;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\DB as DBSchema;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Stancl\Tenancy\Facades\Tenancy;
+use Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper;
+use Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper;
+use Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper;
+use Stancl\Tenancy\Tenancy;
 
 class VendorRegistrationService
 {
@@ -100,19 +102,26 @@ class VendorRegistrationService
         $plan = $vendorRequest->plan;
         $user = $vendorRequest->user;
 
-        // --- Étape 1 : Création du tenant / domaine / relation (contexte central) ---
-        $tenant = DB::transaction(function () use ($vendorRequest, $plan, $user) {
-            $tenant = Tenant::create([
-                'id' => $vendorRequest->shop_slug,
-                'raison_sociale' => $vendorRequest->shop_name,
-                'slug' => $vendorRequest->shop_slug,
-                'description' => $vendorRequest->shop_description,
-                'email' => $vendorRequest->contact_email,
-                'telephone' => $vendorRequest->contact_phone,
-                'plan_id' => $plan->id,
-                'statut' => Tenant::STATUT_ACTIF,
-                'is_active' => true,
-            ]);
+        // Récupère le mot de passe en clair stocké en session, ou utilise 'password' par défaut
+        $password = session('temp_password') ?? 'password';
+
+        $tenant = DB::transaction(function () use ($vendorRequest, $plan, $user, $password) {
+            $tenantId = (string) Str::orderedUuid();
+            $tenant = Tenant::withoutEvents(function () use ($vendorRequest, $plan, $password, $tenantId, $user) {
+                return Tenant::create([
+                    'id' => $tenantId,
+                    'raison_sociale' => $vendorRequest->shop_name,
+                    'slug' => $vendorRequest->shop_slug,
+                    'description' => $vendorRequest->shop_description,
+                    'email' => $vendorRequest->contact_email,
+                    'password' => $password,                // mot de passe en clair
+                    'telephone' => $vendorRequest->contact_phone,
+                    'plan_id' => $plan->id,
+                    'statut' => Tenant::STATUT_ACTIF,
+                    'is_active' => true,
+                    'user_id' => $user->id, // Stocker l'ID de l'utilisateur central
+                ]);
+            });
 
             $tenant->domains()->create([
                 'domain' => str_replace('_', '-', $vendorRequest->shop_slug).'.localhost',
@@ -120,8 +129,19 @@ class VendorRegistrationService
 
             $user->tenants()->attach($tenant->id, ['is_owner' => true]);
 
-            // ✅ Transférer les documents de la VendorRequest vers le Tenant
+            if ($plan->trial_days > 0) {
+                $tenant->update([
+                    'date_activation' => now(),
+                    'date_expiration' => now()->addDays($plan->trial_days),
+                ]);
+            } else {
+                $tenant->update(['date_activation' => now()]);
+            }
+
             $this->transferDocumentsToTenant($vendorRequest, $tenant);
+
+            // Créer le symlink pour le storage du tenant
+            $this->createTenantStorageSymlink($tenant);
 
             $vendorRequest->update([
                 'status' => VendorRequest::STATUS_APPROVED,
@@ -132,10 +152,13 @@ class VendorRegistrationService
             return $tenant;
         });
 
-        // --- Étape 2 : Initialisation du schéma du tenant (hors transaction) ---
-        $this->initializeTenantSchema($tenant);
+        // Déclencher manuellement l'événement TenantCreated pour exécuter les jobs
+        event(new \Stancl\Tenancy\Events\TenantCreated($tenant));
 
-        // --- Étape 3 : Rôles/Permissions (contexte central) ---
+        // Nettoyage de la session
+        session()->forget('temp_password');
+
+        // Rôles / permissions (contexte central)
         try {
             setPermissionsTeamId($tenant->id);
 
@@ -151,7 +174,6 @@ class VendorRegistrationService
             ]);
         }
 
-        // --- Étape 4 : Logger & notifier ---
         Log::info('Vendor approved', [
             'vendor_request_id' => $vendorRequest->id,
             'user_id' => $user->id,
@@ -172,7 +194,7 @@ class VendorRegistrationService
     }
 
     /**
-     * ✅ Transférer les documents légaux d'une VendorRequest vers le Tenant.
+     * Transférer les documents légaux d'une VendorRequest vers le Tenant.
      */
     protected function transferDocumentsToTenant(VendorRequest $vendorRequest, Tenant $tenant): void
     {
@@ -316,34 +338,6 @@ class VendorRegistrationService
         }
 
         return $errors;
-    }
-
-    /**
-     * Force l'initialisation du schéma du tenant et l'exécution des migrations locataires.
-     */
-    protected function initializeTenantSchema(Tenant $tenant): void
-    {
-        $schemaName = 'tenant_'.$tenant->getTenantKey(); // ex: tenant_shop
-
-        // 1. Créer le schéma s'il n'existe pas (redondant avec CreateDatabase, mais sécurisant)
-        DBSchema::statement("CREATE SCHEMA IF NOT EXISTS \"{$schemaName}\"");
-
-        // 2. Initialiser la tenance avec le tenant (cela appelle le DatabaseTenancyBootstrapper)
-        Tenancy::initialize($tenant);
-
-        // 3. Vérifier que la connexion 'tenant' a le bon search_path
-        config()->set('database.connections.tenant.search_path', $schemaName);
-        DBSchema::purge('tenant'); // purger le cache de connexion
-
-        // 4. Exécuter les migrations locataires
-        Artisan::call('migrate', [
-            '--database' => 'tenant',
-            '--path' => 'database/migrations/tenant',
-            '--force' => true,
-        ]);
-
-        // 5. Revenir au contexte central
-        Tenancy::end();
     }
 
     /**
@@ -513,20 +507,7 @@ class VendorRegistrationService
      */
     public function getVendeurUrl(Tenant $tenant): string
     {
-        $domain = $tenant->domains()->first();
-
-        if ($domain) {
-            $host = $domain->domain;
-        } else {
-            $host = $tenant->slug.'.'.config('app.domain');
-        }
-
-        // En développement local, utiliser le chemin
-        if (app()->environment('local')) {
-            return url('/vendeur/'.$tenant->slug);
-        }
-
-        return 'https://'.$host.'/vendeur';
+        return $this->tenantBaseUrl($tenant).'/vendeur';
     }
 
     /**
@@ -534,19 +515,76 @@ class VendorRegistrationService
      */
     public function getShopUrl(Tenant $tenant): string
     {
-        $domain = $tenant->domains()->first();
+        return $this->tenantBaseUrl($tenant);
+    }
 
-        if ($domain) {
-            $host = $domain->domain;
+    private function tenantBaseUrl(Tenant $tenant): string
+    {
+        $host = $tenant->domains()->value('domain')
+            ?: $tenant->slug.'.'.config('app.domain', parse_url(config('app.url'), PHP_URL_HOST));
+
+        $appUrl = config('app.url', 'http://localhost');
+        $scheme = parse_url($appUrl, PHP_URL_SCHEME) ?: 'http';
+        $port = parse_url($appUrl, PHP_URL_PORT);
+        $portSuffix = app()->environment('local') && $port && ! str_contains($host, ':')
+            ? ':'.$port
+            : '';
+
+        return rtrim($scheme.'://'.$host.$portSuffix, '/');
+    }
+
+    /**
+     * Créer le symlink pour le storage du tenant.
+     */
+    private function createTenantStorageSymlink(Tenant $tenant): void
+    {
+        $tenantId = $tenant->id;
+        $tenantSlug = $tenant->slug;
+        $tenantStoragePath = storage_path('tenant'.$tenantId.'/app/public');
+        $publicStoragePath = public_path('storage/tenant-'.$tenantSlug);
+
+        // Créer le répertoire public/storage s'il n'existe pas
+        if (! is_dir(public_path('storage'))) {
+            mkdir(public_path('storage'), 0755, true);
+        }
+
+        // Supprimer le symlink s'il existe déjà
+        if (is_link($publicStoragePath)) {
+            unlink($publicStoragePath);
+        } elseif (is_dir($publicStoragePath)) {
+            // Si c'est un répertoire, le supprimer
+            $this->deleteDirectory($publicStoragePath);
+        }
+
+        // Créer le symlink
+        if (PHP_OS_FAMILY === 'Windows') {
+            // Sur Windows, utiliser mklink /J pour créer une junction
+            exec(sprintf('mklink /J "%s" "%s"', $publicStoragePath, $tenantStoragePath));
         } else {
-            $host = $tenant->slug.'.'.config('app.domain');
+            // Sur Linux/Mac, utiliser symlink
+            symlink($tenantStoragePath, $publicStoragePath);
+        }
+    }
+
+    /**
+     * Supprimer un répertoire récursivement.
+     */
+    private function deleteDirectory(string $dir): void
+    {
+        if (! is_dir($dir)) {
+            return;
         }
 
-        if (app()->environment('local')) {
-            return url('/');
+        $files = array_diff(scandir($dir), ['.', '..']);
+        foreach ($files as $file) {
+            $path = $dir.'/'.$file;
+            if (is_dir($path)) {
+                $this->deleteDirectory($path);
+            } else {
+                unlink($path);
+            }
         }
-
-        return 'https://'.$host;
+        rmdir($dir);
     }
 
     /**

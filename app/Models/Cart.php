@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\Traits\BelongsToTenantConnection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Cart extends Model
 {
+    use BelongsToTenantConnection;
     use HasFactory, SoftDeletes;
     use HasUuids;
 

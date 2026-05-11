@@ -4,7 +4,6 @@ namespace App\Filament\Vendeur\Resources\VarianteProduits\Schemas;
 
 use App\Models\Produit;
 use Filament\Forms\Components\KeyValue;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
@@ -104,9 +103,10 @@ class VarianteProduitForm
                     ->icon('heroicon-o-calculator')
                     ->columnSpan(1)
                     ->schema([
-                        Placeholder::make('prix_base')
+                        TextInput::make('prix_base')
                             ->label('Prix de base du produit')
-                            ->content(function ($get) {
+                            ->dehydrated(false)
+                            ->formatStateUsing(function ($get) {
                                 $produit = Produit::find($get('produit_id'));
                                 if ($produit) {
                                     return number_format($produit->prix_ttc, 2).' €';
@@ -115,9 +115,10 @@ class VarianteProduitForm
                                 return 'Non défini';
                             }),
 
-                        Placeholder::make('prix_final')
+                        TextInput::make('prix_final')
                             ->label('Prix final de la variante')
-                            ->content(function ($get) {
+                            ->dehydrated(false)
+                            ->formatStateUsing(function ($get) {
                                 $produit = Produit::find($get('produit_id'));
                                 $supplement = floatval($get('supplement_prix') ?? 0);
                                 if ($produit) {

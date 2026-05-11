@@ -16,7 +16,7 @@ return new class extends Migration
             $table->enum('status', ['envoye', 'ouvert', 'clique', 'erreur', 'desabonne'])->default('envoye');
             $table->timestamp('opened_at')->nullable();
             $table->timestamp('clicked_at')->nullable();
-            $table->ipAddress()->nullable();
+            $table->ipAddress('ip_address')->nullable();
             $table->string('user_agent')->nullable();
             $table->jsonb('metadata')->nullable();
             $table->timestamps();

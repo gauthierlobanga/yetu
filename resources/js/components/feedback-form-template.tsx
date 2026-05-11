@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Check } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useForm, Controller } from 'react-hook-form';
-import * as z from 'zod';
+import type * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import {
     Field,

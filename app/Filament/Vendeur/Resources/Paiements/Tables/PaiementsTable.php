@@ -17,7 +17,6 @@ class PaiementsTable
     {
         return $table
             ->columns([
-
                 TextColumn::make('commande.id')
                     ->searchable(),
                 TextColumn::make('reference')

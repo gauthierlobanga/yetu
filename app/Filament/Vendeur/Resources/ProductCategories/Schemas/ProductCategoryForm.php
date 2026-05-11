@@ -2,8 +2,6 @@
 
 namespace App\Filament\Vendeur\Resources\ProductCategories\Schemas;
 
-use App\Models\Tenant;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
@@ -19,7 +17,6 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class ProductCategoryForm
@@ -62,38 +59,7 @@ class ProductCategoryForm
 
                                         Grid::make(2)
                                             ->schema([
-                                                Select::make('tenant_id')
-                                                    ->label('Organisation')
-                                                    ->relationship('tenant', 'raison_sociale')
-                                                    ->preload()
-                                                    ->searchable()
-                                                    ->options(function () {
-                                                        $user = Auth::user();
 
-                                                        // Si l'utilisateur est Super Admin, il voit toutes les Vendeurs
-                                                        if ($user->hasRole(['super_admin'])) {
-                                                            return Tenant::pluck('raison_sociale', 'id');
-                                                        }
-
-                                                        // Sinon, il voit seulement ses Vendeurs
-                                                        return $user->tenants()->pluck('raison_sociale', 'tenants.id');
-                                                    })
-                                                    ->default(function () {
-                                                        $user = Auth::user();
-
-                                                        // Si on est dans un contexte tenant, pré-remplir avec la Vendeur actuelle
-                                                        if (Filament::hasTenancy() && Filament::getTenant()) {
-                                                            return Filament::getTenant()->id;
-                                                        }
-
-                                                        // Si l'utilisateur n'a qu'une seule Vendeur, la sélectionner par défaut
-                                                        if ($user->tenants()->count() === 1) {
-                                                            return $user->tenants()->first()->id;
-                                                        }
-
-                                                        return null;
-                                                    })
-                                                    ->required(),
                                                 Select::make('parente_id')
                                                     ->label('Catégorie parente')
                                                     ->relationship('parent', 'nom', function ($query) {
@@ -191,6 +157,8 @@ class ProductCategoryForm
                                                     ->collection('image')
                                                     ->image()
                                                     ->imageEditor()
+                                                    ->disk('tenant')
+                                                    ->directory('categories/image')
                                                     ->maxSize(2048)
                                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
                                                     ->helperText('Image d\'illustration de la catégorie'),
@@ -204,6 +172,8 @@ class ProductCategoryForm
                                                     ->image()
                                                     ->imageEditor()
                                                     ->circleCropper()
+                                                    ->disk('tenant')
+                                                    ->directory('categories/icon')
                                                     ->maxSize(1024)
                                                     ->acceptedFileTypes(['image/svg+xml', 'image/png', 'image/webp'])
                                                     ->helperText('Petite icône pour la navigation (recommandé: SVG)'),
@@ -217,6 +187,8 @@ class ProductCategoryForm
                                             ->collection('banner')
                                             ->image()
                                             ->imageEditor()
+                                            ->disk('tenant')
+                                            ->directory('categories/banner')
                                             ->maxSize(5120)
                                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                             ->helperText('Bannière pour l\'en-tête de la catégorie'),
@@ -236,10 +208,11 @@ class ProductCategoryForm
                                             ->appendFiles()
                                             ->panelLayout('grid')
                                             ->visibility('public')
-                                            ->disk('public')
-                                            // ->directory('produits/categories/gallery')
+                                            ->disk('tenant')
+                                            ->directory('produits/categories/gallery')
                                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                             ->helperText('Images supplémentaires pour illustrer la catégorie'),
+
                                     ]),
                             ]),
 

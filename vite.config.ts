@@ -8,7 +8,12 @@ import path from 'path';;
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx','resources/css/filament/admin/theme.css'],
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.tsx',
+                'resources/css/filament/admin/theme.css',
+                'resources/js/filament-overlayscrollbars.js',
+            ],
             ssr: 'resources/js/ssr.tsx',
             refresh: true,
         }),
@@ -27,7 +32,7 @@ export default defineConfig({
     },
     // resolve: {
     //     alias: {
-      '@': path.resolve(__dirname, './src'),
+    '@': path.resolve(__dirname, './src'),
     //         'ziggy-js': path.resolve('vendor/tightenco/ziggy'),
     //     },
     // },

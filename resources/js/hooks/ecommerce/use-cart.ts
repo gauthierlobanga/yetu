@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/consistent-type-imports */
 // resources/js/hooks/ecommerce/use-cart.ts
 import { router, usePage } from '@inertiajs/react';
@@ -33,6 +33,138 @@ interface Cart {
     promotions: Array<{ code: string; montant: number }>;
 }
 
+function getToastStyle(type: 'success' | 'error' = 'success') {
+    const isDark = document.documentElement.classList.contains('dark');
+
+    const styles = {
+        success: {
+            light: {
+                background: '#ecfdf5',
+                color: '#064e3b',
+                border: '1px solid #a7f3d0',
+            },
+            dark: {
+                background: '#022c22',
+                color: '#d1fae5',
+                border: '1px solid #065f46',
+            },
+        },
+        error: {
+            light: {
+                background: '#fef2f2',
+                color: '#991b1b',
+                border: '1px solid #fecaca',
+            },
+            dark: {
+                background: '#450a0a',
+                color: '#fee2e2',
+                border: '1px solid #7f1d1d',
+            },
+        },
+    };
+
+    return isDark ? styles[type].dark : styles[type].light;
+}
+
+
+// export function useCartItems() {
+//     const { props } = usePage<{ cart?: Cart }>();
+//     const cart = props.cart;
+
+//     const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantite, 0) ?? 0;
+
+//     const updateQuantity = useCallback((itemId: number, quantity: number) => {
+//         router.patch(route('tenant.cart.update', itemId), { quantite: quantity }, {
+//             preserveScroll: true,
+//             preserveState: true,
+//             only: ['cart'],
+//             showProgress: false,
+//             onSuccess: () => {
+//                 router.reload({ only: ['cart'] });
+//             },
+//         });
+//     }, []);
+
+//     const addToCart = useCallback((productId: number, quantity = 1, variantId?: number) => {
+//         router.post(route('tenant.cart.add', productId), { quantity, variante_id: variantId }, {
+//             preserveScroll: true,
+//             preserveState: true,
+//             only: ['cart'],
+//             showProgress: false,
+//             onSuccess: () => {
+//                 router.reload({ only: ['cart'] });
+//                 toast.success('Produit ajouté au panier', {
+//                     description: 'L\'article a été ajouté avec succès.',
+//                     icon: createElement(ShoppingCart, { className: 'h-5 w-5 text-emerald-500' }),
+//                     duration: 2500,
+//                     style: getToastStyle('success'),
+//                 });
+//             },
+//         });
+//     }, []);
+
+//     const removeItem = useCallback((itemId: number) => {
+//         router.delete(route('tenant.cart.remove', itemId), {
+//             preserveScroll: true,
+//             preserveState: true,
+//             only: ['cart'],
+//             showProgress: false,
+//             onSuccess: () => {
+//                 router.reload({ only: ['cart'] });
+//                 toast.success('Produit retiré du panier', {
+//                     description: 'L\'article a été supprimé avec succès.',
+//                     icon: createElement(Trash2, { className: 'h-5 w-5 text-red-500' }),
+//                     duration: 2500,
+//                     style: getToastStyle('error'),
+//                 });
+//             },
+//         });
+//     }, []);
+
+//     const clearCart = useCallback(() => {
+//         router.post(route('tenant.cart.clear'), {}, {
+//             preserveScroll: true,
+//             only: ['cart'],
+//             showProgress: false,
+//             onSuccess: () => {
+//                 router.reload({ only: ['cart'] });
+//                 toast.success('Panier vidé');
+//             },
+//         });
+//     }, []);
+
+//     const applyCoupon = useCallback((code: string) => {
+//         router.post(route('tenant.cart.apply-coupon'), { code }, {
+//             preserveScroll: true,
+//             onSuccess: () => {
+//                 router.reload({ only: ['cart'] });
+//                 toast.success('Code promo appliqué');
+//             },
+//             onError: (errors) => toast.error(errors.code || 'Erreur'),
+//         });
+//     }, []);
+
+//     const removeCoupon = useCallback(() => {
+//         router.delete(route('tenant.cart.remove-coupon'), {
+//             preserveScroll: true,
+//             onSuccess: () => {
+//                 router.reload({ only: ['cart'] });
+//                 toast.success('Code promo retiré');
+//             },
+//         });
+//     }, []);
+
+//     return {
+//         cart,
+//         itemCount,
+//         addToCart,
+//         updateQuantity,
+//         removeItem,
+//         clearCart,
+//         applyCoupon,
+//         removeCoupon,
+//     };
+// }
 export function useCartItems() {
     const { props } = usePage<{ cart?: Cart }>();
     const cart = props.cart;
@@ -40,164 +172,193 @@ export function useCartItems() {
     const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantite, 0) ?? 0;
 
     const updateQuantity = useCallback((itemId: number, quantity: number) => {
-        router.patch(route('cart.update', itemId), { quantite: quantity }, {
+        router.patch(route('tenant.cart.update', itemId), { quantite: quantity }, {
             preserveScroll: true,
             preserveState: true,
             only: ['cart'],
             showProgress: false,
-            onSuccess: () => {
-                // Optionnel : toast léger de confirmation
-                // toast.success('Quantité mise à jour');
-            },
+            // eslint-disable-next-line react-hooks/immutability
+            onSuccess: () => reloadCart(),
         });
     }, []);
 
-
     const removeItem = useCallback((itemId: number) => {
-        router.delete(route('cart.remove', itemId), {
+        router.delete(route('tenant.cart.remove', itemId), {
             preserveScroll: true,
             preserveState: true,
             only: ['cart'],
             showProgress: false,
             onSuccess: () => {
+                reloadCart();
                 toast.success('Produit retiré du panier', {
                     description: 'L\'article a été supprimé avec succès.',
                     icon: createElement(Trash2, { className: 'h-5 w-5 text-white' }),
                     duration: 2500,
-                    style: {
-                        background: '#1e293b',
-                        color: '#f8fafc',
-                        border: '1px solid #334155',
-                    },
+                    style: { background: '#1e293b', color: '#f8fafc', border: '1px solid #334155' },
                 });
             },
         });
     }, []);
 
     const addToCart = useCallback((productId: number, quantity = 1, variantId?: number) => {
-        router.post(route('cart.add', productId), { quantity, variante_id: variantId }, {
+        router.post(route('tenant.cart.add', productId), { quantity, variante_id: variantId }, {
             preserveScroll: true,
             preserveState: true,
             only: ['cart'],
             showProgress: false,
             onSuccess: () => {
+                reloadCart();
                 toast.success('Produit ajouté au panier', {
                     description: 'L\'article a été ajouté avec succès.',
-                    icon: createElement(ShoppingCart, { className: 'h-5 w-5 text-white' }),
+                    icon: createElement(ShoppingCart, { className: 'h-8 w-8 text-emerald-800' }),
                     duration: 2500,
-                    style: {
-                        background: '#1e293b',
-                        color: '#f8fafc',
-                        border: '1px solid #334155'
-                    },
+                    style: { background: '#10f298', color: '#2f3030', border: '1px solid #09f5ba' },
                 });
             },
         });
     }, []);
 
     const clearCart = useCallback(() => {
-        router.post(route('cart.clear'), {}, {
+        router.post(route('tenant.cart.clear'), {}, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Panier vidé'),
+            preserveState: true,
+            only: ['cart'],
+            showProgress: false,
+            onSuccess: () => {
+                reloadCart();
+                toast.success('Panier vidé');
+            },
         });
     }, []);
 
     const applyCoupon = useCallback((code: string) => {
-        router.post(route('cart.apply-coupon'), { code }, {
+        router.post(route('tenant.cart.apply-coupon'), { code }, {
             preserveScroll: true,
-            onSuccess: () => toast.success('Code promo appliqué'),
+            preserveState: true,
+            only: ['cart'],
+            showProgress: false,
+            onSuccess: () => {
+                reloadCart();
+                toast.success('Code promo appliqué');
+            },
             onError: (errors) => toast.error(errors.code || 'Erreur'),
         });
     }, []);
 
     const removeCoupon = useCallback(() => {
-        router.delete(route('cart.remove-coupon'), {
+        router.delete(route('tenant.cart.remove-coupon'), {
             preserveScroll: true,
-            onSuccess: () => toast.success('Code promo retiré'),
+            preserveState: true,
+            only: ['cart'],
+            showProgress: false,
+            onSuccess: () => {
+                reloadCart();
+                toast.success('Code promo retiré');
+            },
+        });
+    }, []);
+
+    /** Force la mise à jour partielle de la prop `cart` sans recharger toute la page */
+    function reloadCart() {
+        router.get(window.location.href, {}, {
+            only: ['cart'],
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+            showProgress: false,
+        });
+    }
+
+    return { cart, itemCount, addToCart, updateQuantity, removeItem, clearCart, applyCoupon, removeCoupon };
+}
+
+export function useCart() {
+    const { props } = usePage<{ cart?: Cart }>();
+
+    const cart = props.cart;
+    const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantite, 0) ?? 0;
+
+    const updateQuantity = useCallback((itemId: number, quantity: number) => {
+        router.patch(route('tenant.cart.update', itemId), { quantite: quantity }, {
+            preserveScroll: true,
+            preserveState: true,
+            only: ['cart'],
+            showProgress: false,
+            onSuccess: () => router.reload({ only: ['cart'] }),
+        });
+    }, []);
+
+    const addToCart = useCallback((productId: number, quantity = 1, variantId?: number) => {
+        router.post(route('tenant.cart.add', productId), { quantity, variante_id: variantId }, {
+            preserveScroll: true,
+            preserveState: true,
+            only: ['cart'],
+            showProgress: false,
+            onSuccess: () => {
+                router.reload({ only: ['cart'] });
+                toast.success('Produit ajouté au panier', {
+                    description: 'L\'article a été ajouté avec succès.',
+                    icon: createElement(ShoppingCart, { className: 'h-5 w-5 text-emerald-500' }),
+                    duration: 2500,
+                    style: getToastStyle('success'),
+                });
+            },
+        });
+    }, []);
+
+    const removeItem = useCallback((itemId: number) => {
+        router.delete(route('tenant.cart.remove', itemId), {
+            preserveScroll: true,
+            preserveState: true,
+            only: ['cart'],
+            showProgress: false,
+            onSuccess: () => {
+                router.reload({ only: ['cart'] });
+                toast.success('Produit retiré du panier', {
+                    description: 'L\'article a été supprimé avec succès.',
+                    icon: createElement(Trash2, { className: 'h-5 w-5 text-red-500' }),
+                    duration: 2500,
+                    style: getToastStyle('error'),
+                });
+            },
+        });
+    }, []);
+
+    const clearCart = useCallback(() => {
+        router.post(route('tenant.cart.clear'), {}, {
+            preserveScroll: true,
+            only: ['cart'],
+            showProgress: false,
+            onSuccess: () => {
+                router.reload({ only: ['cart'] });
+                toast.success('Panier vidé');
+            },
+        });
+    }, []);
+
+    const applyCoupon = useCallback((code: string) => {
+        router.post(route('tenant.cart.apply-coupon'), { code }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.reload({ only: ['cart'] });
+                toast.success('Code promo appliqué');
+            },
+            onError: (errors) => toast.error(errors.code || 'Erreur'),
+        });
+    }, []);
+
+    const removeCoupon = useCallback(() => {
+        router.delete(route('tenant.cart.remove-coupon'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.reload({ only: ['cart'] });
+                toast.success('Code promo retiré');
+            },
         });
     }, []);
 
     return {
         cart,
-        itemCount,
-        addToCart,
-        updateQuantity,
-        removeItem,
-        clearCart,
-        applyCoupon,
-        removeCoupon,
-    };
-}
-
-
-
-export function useCart() {
-    const { props } = usePage<{ cart?: Cart }>();
-    const [localCart, setLocalCart] = useState<Cart | undefined>(props.cart);
-
-    // Quand les props changent (navigation Inertia complète), on se resynchronise
-    useEffect(() => {
-        setLocalCart(props.cart);
-    }, [props.cart]);
-
-    const itemCount = localCart?.items?.reduce((sum, item) => sum + item.quantite, 0) ?? 0;
-
-    // Fonction générique pour envoyer une requête et récupérer le nouveau panier
-    const updateCartFromResponse = useCallback(async (url: string, options?: RequestInit) => {
-        try {
-            const response = await fetch(url, {
-                ...options,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    ...(options?.headers ?? {}),
-                },
-            });
-            const data = await response.json();
-
-            if (data.cart) {
-                setLocalCart(data.cart);
-            }
-        } catch (error) {
-            console.error('Erreur de mise à jour du panier', error);
-        }
-    }, []);
-
-    const updateQuantity = useCallback((itemId: number, quantity: number) => {
-        updateCartFromResponse(route('cart.update', itemId), {
-            method: 'PATCH',
-            body: JSON.stringify({ quantite: quantity }),
-        });
-    }, [updateCartFromResponse]);
-
-    const removeItem = useCallback((itemId: number) => {
-        updateCartFromResponse(route('cart.remove', itemId), { method: 'DELETE' });
-    }, [updateCartFromResponse]);
-
-    const addToCart = useCallback((productId: number, quantity = 1, variantId?: number) => {
-        updateCartFromResponse(route('cart.add', productId), {
-            method: 'POST',
-            body: JSON.stringify({ quantite: quantity, variante_id: variantId }),
-        });
-    }, [updateCartFromResponse]);
-
-    const clearCart = useCallback(() => {
-        updateCartFromResponse(route('cart.clear'), { method: 'POST' });
-    }, [updateCartFromResponse]);
-
-    const applyCoupon = useCallback((code: string) => {
-        updateCartFromResponse(route('cart.apply-coupon'), {
-            method: 'POST',
-            body: JSON.stringify({ code }),
-        });
-    }, [updateCartFromResponse]);
-
-    const removeCoupon = useCallback(() => {
-        updateCartFromResponse(route('cart.remove-coupon'), { method: 'DELETE' });
-    }, [updateCartFromResponse]);
-
-    return {
-        cart: localCart,
         itemCount,
         addToCart,
         updateQuantity,

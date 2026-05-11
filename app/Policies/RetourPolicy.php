@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Retour;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Foundation\Auth\User as AuthUser;
 
 class RetourPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin')) {
-            return true;
-        }
-
-        return null;
-    }
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny Retour');
@@ -47,6 +35,11 @@ class RetourPolicy
     public function delete(AuthUser $authUser, Retour $retour): bool
     {
         return $authUser->can('Delete Retour');
+    }
+
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny Retour');
     }
 
     public function restore(AuthUser $authUser, Retour $retour): bool
@@ -78,4 +71,5 @@ class RetourPolicy
     {
         return $authUser->can('Reorder Retour');
     }
+
 }

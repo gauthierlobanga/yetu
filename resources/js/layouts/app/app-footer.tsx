@@ -1,4 +1,5 @@
 // resources/js/layouts/FooterSection.tsx
+import { FireIcon } from '@heroicons/react/24/outline';
 import { Link } from '@inertiajs/react';
 import { motion, useInView } from 'framer-motion';
 import {
@@ -92,12 +93,12 @@ const footerSections = [
             {
                 name: 'Promotions',
                 href: route('tenant.promotions.index'),
-                badge: '🔥',
+                badge: FireIcon,
             },
             {
                 name: 'Nouveautés',
                 href: route('tenant.product.index', { sort: 'newest' }),
-                badge: '✨',
+                badge: FireIcon,
             },
             {
                 name: 'Meilleures ventes',
@@ -160,7 +161,7 @@ export default function FooterSection() {
                 variants={containerVariants}
                 initial="hidden"
                 animate={isInView ? 'visible' : 'hidden'}
-                className="container mx-auto px-4 py-10"
+                className="container mx-auto px-6 py-10"
             >
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                     {guarantees.map((item, i) => (
@@ -241,14 +242,14 @@ export default function FooterSection() {
                                                 {link.name}
                                                 <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-emerald-500 transition-all duration-300 group-hover:w-full" />
                                             </span>
-                                            {link.badge && (
+                                            {/* {link.badge && (
                                                 <Badge
                                                     variant="secondary"
                                                     className="ml-2 px-1.5 py-0 text-[10px]"
                                                 >
                                                     {link.badge}
                                                 </Badge>
-                                            )}
+                                            )} */}
                                         </Link>
                                     </li>
                                 ))}
