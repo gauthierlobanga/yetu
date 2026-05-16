@@ -6,21 +6,39 @@ import { createRoot } from 'react-dom/client';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import '../css/app.css';
 import { initializeTheme } from '@/hooks/use-appearance';
-import { configureEcho } from '@laravel/echo-react';
+import { configureEcho, echo } from '@laravel/echo-react';
 
-configureEcho({
-    broadcaster: 'pusher',
-});
+const reverbScheme =
+    import.meta.env.VITE_REVERB_SCHEME ??
+    (typeof window !== 'undefined' && window.location.protocol === 'https:'
+        ? 'https'
+        : 'http');
+const reverbUsesTls = reverbScheme === 'https';
+const reverbHost =
+    import.meta.env.VITE_REVERB_HOST &&
+    import.meta.env.VITE_REVERB_HOST !== '0.0.0.0'
+        ? import.meta.env.VITE_REVERB_HOST
+        : typeof window !== 'undefined'
+          ? window.location.hostname
+          : 'localhost';
+const reverbPort = Number(
+    import.meta.env.VITE_REVERB_PORT || (reverbUsesTls ? 443 : 8081),
+);
 
 configureEcho({
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
-    wsHost: import.meta.env.VITE_REVERB_HOST,
-    wsPort: import.meta.env.VITE_REVERB_PORT,
-    wssPort: import.meta.env.VITE_REVERB_PORT,
-    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'http') === 'http',
-    enabledTransports: ['ws', 'wss'],
+    wsHost: reverbHost,
+    wsPort: reverbPort,
+    wssPort: reverbPort,
+    forceTLS: reverbUsesTls,
+    encrypted: reverbUsesTls,
+    enabledTransports: [reverbUsesTls ? 'wss' : 'ws'],
 });
+
+if (typeof window !== 'undefined') {
+    window.Echo = echo();
+}
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -42,7 +60,7 @@ createInertiaApp({
         );
     },
     progress: {
-        color: '#17c259',
+        color: '#069f41',
     },
 });
 

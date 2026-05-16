@@ -2,7 +2,17 @@
 
 namespace App\Providers;
 
+use App\Models\Client;
+use App\Models\Commande;
+use App\Models\ItemPanier;
+use App\Models\MouvementStock;
+use App\Models\Paiement;
+use App\Models\Panier;
+use App\Models\Produit;
+use App\Models\Promotion;
+use App\Models\Retour;
 use App\Models\VendorRequest;
+use App\Observers\TenantRealtimeActivityObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->registerTenantRealtimeObservers();
         View::addNamespace('layouts', resource_path('views/layouts'));
 
         // Event::listen(TenancyInitialized::class, function ($event) {
@@ -67,5 +78,20 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    protected function registerTenantRealtimeObservers(): void
+    {
+        $observer = TenantRealtimeActivityObserver::class;
+
+        Commande::observe($observer);
+        Paiement::observe($observer);
+        Produit::observe($observer);
+        Promotion::observe($observer);
+        Client::observe($observer);
+        Panier::observe($observer);
+        ItemPanier::observe($observer);
+        Retour::observe($observer);
+        MouvementStock::observe($observer);
     }
 }

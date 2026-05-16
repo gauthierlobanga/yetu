@@ -32,6 +32,7 @@
         "pragmarx/countries": "^1.0",
         "predis/predis": "^3.4",
         "propaganistas/laravel-phone": "^6.0",
+        "pusher/pusher-php-server": "^7.2",
         "relaticle/flowforge": "^4.0",
         "spatie/laravel-activitylog": "^5.0",
         "spatie/laravel-sitemap": "^8.1",
@@ -79,7 +80,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=300\" \"npm run dev\" --names='server,queue,vite'"
+            "npx concurrently -c \"#93c5fd,#c4b5fd,#86efac,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1 --timeout=300\" \"php artisan reverb:start --debug\" \"npm run dev\" --names='server,queue,reverb,vite'"
         ],
         "dev:ssr": [
             "npm run build:ssr",

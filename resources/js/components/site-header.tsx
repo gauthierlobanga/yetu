@@ -1,5 +1,5 @@
-// resources/js/components/site-header.tsx
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
+import { echo } from '@laravel/echo-react';
 import {
     Bell,
     BellRing,
@@ -10,7 +10,8 @@ import {
     Store,
     User,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,7 +19,6 @@ import {
     DropdownMenuContent,
     DropdownMenuGroup,
     DropdownMenuItem,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
@@ -36,62 +36,247 @@ import AppearanceToogle from './appearance-toogle';
 import { ExpandingSearchDock } from './ecommerce/others/ExpandingSearchDock';
 import ThemeCustomizer from './Themes/ThemeSettingsSheet';
 
-/**
- * En‑tête principal de l’application.
- * Récupère automatiquement les données partagées par Inertia (auth, tenant, notifications…).
- */
+type DashboardNotification = {
+    id: string;
+    type: string;
+    title: string;
+    message: string;
+    url: string | null;
+    read_at: string | null;
+    created_at: string;
+    data?: Record<string, unknown>;
+    isRealtime?: boolean;
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const stringValue = (value: unknown, fallback = ''): string =>
+    typeof value === 'string' && value.trim() !== '' ? value : fallback;
+
+const nullableStringValue = (value: unknown): string | null =>
+    typeof value === 'string' && value.trim() !== '' ? value : null;
+
+function normalizeNotification(
+    value: unknown,
+    fallbackCreatedAt = new Date().toISOString(),
+): DashboardNotification | null {
+    if (!isRecord(value)) {
+        return null;
+    }
+
+    const data = isRecord(value.data) ? value.data : {};
+    const id =
+        value.id ??
+        data.id ??
+        `realtime-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const title = stringValue(
+        value.title,
+        stringValue(data.title, stringValue(data.message, 'Notification')),
+    );
+    const message = stringValue(value.message, stringValue(data.message));
+    const createdAt = stringValue(
+        value.created_at,
+        stringValue(
+            data.created_at,
+            stringValue(data.occurred_at, fallbackCreatedAt),
+        ),
+    );
+
+    return {
+        id: String(id),
+        type: stringValue(value.type, stringValue(data.type, 'system')),
+        title,
+        message,
+        url: nullableStringValue(value.url ?? data.url),
+        read_at: nullableStringValue(value.read_at ?? data.read_at),
+        created_at: createdAt,
+        data: { ...data, ...value },
+    };
+}
+
+function formatNotificationDate(value: string | null): string {
+    if (!value) {
+        return 'Maintenant';
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return 'Maintenant';
+    }
+
+    return new Intl.DateTimeFormat('fr-FR', {
+        dateStyle: 'short',
+        timeStyle: 'short',
+    }).format(date);
+}
+
 export function SiteHeader() {
     const {
         auth,
         tenant,
-        notifications: rawNotifications = [],
+        notifications: serverNotifications = [],
     } = usePage().props as any;
 
     const user = auth?.user;
     const isTenant = Boolean(tenant);
+    const tenantId = tenant?.id ? String(tenant.id) : null;
+    const [notifOpen, setNotifOpen] = useState(false);
+    const [realtimeNotifications, setRealtimeNotifications] = useState<
+        DashboardNotification[]
+    >([]);
+    const [localReadAt, setLocalReadAt] = useState<Record<string, string>>({});
 
-    // Initiales pour l’avatar (fallback)
+    useEffect(() => {
+        if (!user?.id || !tenantId || typeof window === 'undefined') {
+            return;
+        }
+
+        const echoInstance = window.Echo ?? echo();
+        window.Echo = echoInstance;
+
+        const channelName = `tenant.${tenantId}.users.${user.id}`;
+        const channel = echoInstance.private(channelName);
+
+        const handleNotification = (payload: unknown) => {
+            const notification = normalizeNotification(payload);
+
+            if (!notification) {
+                return;
+            }
+
+            const realtimeNotification = {
+                ...notification,
+                read_at: null,
+                isRealtime: true,
+            };
+
+            setRealtimeNotifications((previous) =>
+                [
+                    realtimeNotification,
+                    ...previous.filter(
+                        (item) => item.id !== realtimeNotification.id,
+                    ),
+                ].slice(0, 50),
+            );
+
+            toast(realtimeNotification.title, {
+                description: realtimeNotification.message || undefined,
+            });
+        };
+
+        channel.notification(handleNotification);
+
+        return () => {
+            channel.stopListeningForNotification(handleNotification);
+            echoInstance.leave(channelName);
+        };
+    }, [tenantId, user?.id]);
+
+    const allNotifications = useMemo(() => {
+        const server = Array.isArray(serverNotifications)
+            ? serverNotifications
+                  .map((notification: unknown) =>
+                      normalizeNotification(notification),
+                  )
+                  .filter(
+                      (
+                          notification: DashboardNotification | null,
+                      ): notification is DashboardNotification =>
+                          notification !== null,
+                  )
+            : [];
+
+        const existingIds = new Set(
+            server.map((notification) => notification.id),
+        );
+        const realtimeOnly = realtimeNotifications.filter(
+            (notification) => !existingIds.has(notification.id),
+        );
+
+        return [...realtimeOnly, ...server].map((notification) => ({
+            ...notification,
+            read_at: localReadAt[notification.id] ?? notification.read_at,
+        }));
+    }, [serverNotifications, realtimeNotifications, localReadAt]);
+
+    const unreadCount = allNotifications.filter(
+        (notification) => !notification.read_at,
+    ).length;
+
+    const markAsRead = (id: string) => {
+        const readAt = new Date().toISOString();
+
+        setLocalReadAt((previous) => ({
+            ...previous,
+            [id]: readAt,
+        }));
+
+        setRealtimeNotifications((previous) =>
+            previous.map((notification) =>
+                notification.id === id
+                    ? { ...notification, read_at: readAt }
+                    : notification,
+            ),
+        );
+
+        router.post(
+            route('tenant.notifications.mark-as-read', { id }),
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
+    };
+
+    const markAllAsRead = () => {
+        const readAt = new Date().toISOString();
+
+        setLocalReadAt((previous) => ({
+            ...previous,
+            ...Object.fromEntries(
+                allNotifications.map((notification) => [
+                    notification.id,
+                    readAt,
+                ]),
+            ),
+        }));
+
+        setRealtimeNotifications((previous) =>
+            previous.map((notification) => ({
+                ...notification,
+                read_at: readAt,
+            })),
+        );
+
+        router.post(
+            route('tenant.notifications.mark-all-as-read'),
+            {},
+            {
+                preserveScroll: true,
+                preserveState: true,
+            },
+        );
+    };
+
     const initials = user?.name
         ? user.name
               .split(' ')
-              .map((n: string) => n[0])
+              .map((namePart: string) => namePart[0])
               .join('')
               .toUpperCase()
               .slice(0, 2)
         : '?';
 
-    // --- Notifications (exemple statique, à remplacer par des données réelles) ---
-    const [notifOpen, setNotifOpen] = useState(false);
-    // TODO: remplacer par un appel API ou des props partagées
-    const notifications = rawNotifications.length
-        ? rawNotifications
-        : [
-              {
-                  id: 1,
-                  title: 'Nouvelle commande',
-                  message: 'Commande #1234 passée il y a 5 min',
-                  read: false,
-                  created_at: 'À l’instant',
-              },
-              {
-                  id: 2,
-                  title: 'Mise à jour du stock',
-                  message: 'Le produit "T-shirt" est en rupture',
-                  read: true,
-                  created_at: 'Il y a 1 h',
-              },
-          ];
-    const unreadCount = notifications.filter((n: any) => !n.read).length;
-
     return (
         <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b border-slate-200 bg-white/80 backdrop-blur-xl transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) dark:border-slate-700 dark:bg-slate-900">
             <div className="flex w-full items-center gap-2 px-4 lg:gap-4 lg:px-6">
-                {/* Sidebar Trigger */}
                 <SidebarTrigger className="-ml-1 h-10 w-10 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" />
 
                 <Separator orientation="vertical" className="mx-2 h-4" />
 
-                {/* Lien Dashboard (contexte central ou tenant) */}
                 {isTenant && tenant ? (
                     <Link
                         href={tenant.url ?? route('vendor.dashboard')}
@@ -112,19 +297,15 @@ export function SiteHeader() {
                     </Link>
                 )}
 
-                {/* Barre de recherche (desktop) */}
                 <div className="hidden flex-1 justify-center lg:flex">
                     <ExpandingSearchDock />
                 </div>
 
-                {/* Actions de droite */}
                 <div className="ml-auto flex items-center gap-2">
-                    {/* Recherche mobile / fallback */}
                     <div className="lg:hidden">
                         <SearchInputPage />
                     </div>
 
-                    {/* Lien Admin (super_admin) */}
                     <CanRole roles="super_admin">
                         <Button
                             variant="ghost"
@@ -136,20 +317,20 @@ export function SiteHeader() {
                                 href={route('filament.admin.pages.dashboard')}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                title="Panneau d’administration"
+                                title="Panneau d'administration"
                             >
                                 <ShieldCheck className="h-5 w-5" />
                             </Link>
                         </Button>
                     </CanRole>
 
-                    {/* Notifications */}
                     <Popover open={notifOpen} onOpenChange={setNotifOpen}>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 className="relative h-10 w-10 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                                aria-label="Notifications"
                             >
                                 {unreadCount > 0 ? (
                                     <BellRing className="h-5 w-5 text-amber-500" />
@@ -157,8 +338,8 @@ export function SiteHeader() {
                                     <Bell className="h-5 w-5" />
                                 )}
                                 {unreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-                                        {unreadCount}
+                                    <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                                        {unreadCount > 99 ? '99+' : unreadCount}
                                     </span>
                                 )}
                             </Button>
@@ -172,39 +353,66 @@ export function SiteHeader() {
                                     Notifications
                                 </h3>
                                 {unreadCount > 0 && (
-                                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                        {unreadCount} non lues
-                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={markAllAsRead}
+                                        className="text-xs font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+                                    >
+                                        Tout lu
+                                    </button>
                                 )}
                             </div>
-                            <div className="max-h-64 overflow-y-auto">
-                                {notifications.length === 0 ? (
+                            <div className="max-h-80 overflow-y-auto">
+                                {allNotifications.length === 0 ? (
                                     <p className="px-4 py-6 text-center text-sm text-slate-500">
                                         Aucune notification
                                     </p>
                                 ) : (
-                                    notifications.map((notif: any) => (
+                                    allNotifications.map((notification) => (
                                         <div
-                                            key={notif.id}
-                                            className="flex items-start gap-3 border-b border-slate-50 px-4 py-3 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800"
+                                            key={notification.id}
+                                            className={`flex items-start gap-3 border-b border-slate-50 px-4 py-3 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800 ${
+                                                !notification.read_at
+                                                    ? 'bg-emerald-50/40 dark:bg-emerald-900/10'
+                                                    : ''
+                                            }`}
                                         >
-                                            <div
-                                                className={`mt-1 h-2 w-2 rounded-full ${
-                                                    notif.read
+                                            <span
+                                                className={`mt-2 h-2 w-2 shrink-0 rounded-full ${
+                                                    notification.read_at
                                                         ? 'bg-transparent'
                                                         : 'bg-emerald-500'
                                                 }`}
                                             />
-                                            <div className="flex-1">
-                                                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                                                    {notif.title}
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">
+                                                    {notification.title}
                                                 </p>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                    {notif.message}
-                                                </p>
-                                                <p className="mt-1 text-[10px] text-slate-400">
-                                                    {notif.created_at}
-                                                </p>
+                                                {notification.message && (
+                                                    <p className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
+                                                        {notification.message}
+                                                    </p>
+                                                )}
+                                                <div className="mt-2 flex items-center gap-2">
+                                                    <p className="text-[10px] text-slate-400">
+                                                        {formatNotificationDate(
+                                                            notification.created_at,
+                                                        )}
+                                                    </p>
+                                                    {!notification.read_at && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                markAsRead(
+                                                                    notification.id,
+                                                                )
+                                                            }
+                                                            className="text-[10px] font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+                                                        >
+                                                            Marquer lu
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     ))
@@ -213,14 +421,11 @@ export function SiteHeader() {
                         </PopoverContent>
                     </Popover>
 
-                    {/* Thème clair / sombre */}
                     <AppearanceToogle />
 
-                    {/* Personnalisation du thème (contexte tenant) */}
                     {isTenant && <ThemeCustomizer />}
 
-                    {/* Avatar utilisateur connecté */}
-                    {/* {user && (
+                    {user && (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -276,439 +481,9 @@ export function SiteHeader() {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
-                    )} */}
-                    {user && (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="group relative ml-1 h-11 w-11 rounded-full border border-slate-200/70 bg-white/80 p-0 shadow-sm backdrop-blur-xl transition-all duration-300 hover:scale-[1.02] hover:border-emerald-200 hover:bg-white hover:shadow-lg hover:shadow-emerald-100/50 dark:border-slate-800/80 dark:bg-slate-900/80 dark:hover:border-emerald-800/60 dark:hover:bg-slate-900"
-                                >
-                                    {/* Glow subtil */}
-                                    <span className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-                                    <Avatar className="relative h-9 w-9 ring-2 ring-white dark:ring-slate-950">
-                                        <AvatarImage
-                                            src={user.avatar_url}
-                                            alt={user.name}
-                                        />
-                                        <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-xs font-semibold text-white">
-                                            {initials}
-                                        </AvatarFallback>
-                                    </Avatar>
-
-                                    {/* Indicateur de présence */}
-                                    <span className="absolute right-0.5 bottom-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-950" />
-                                </Button>
-                            </DropdownMenuTrigger>
-
-                            <DropdownMenuContent
-                                align="end"
-                                sideOffset={10}
-                                className="w-72 overflow-hidden rounded-3xl border border-slate-200/70 bg-white/95 p-2 shadow-2xl shadow-slate-900/10 backdrop-blur-2xl dark:border-slate-800/80 dark:bg-slate-950/95"
-                            >
-                                {/* Header utilisateur */}
-                                <div className="mb-2 rounded-2xl border border-slate-200/60 bg-gradient-to-br from-slate-50 to-emerald-50/50 p-3 dark:border-slate-800 dark:from-slate-900 dark:to-emerald-950/30">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar className="h-11 w-11 shadow-sm ring-2 ring-white dark:ring-slate-800">
-                                            <AvatarImage
-                                                src={user.avatar_url}
-                                                alt={user.name}
-                                            />
-                                            <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-sm font-semibold text-white">
-                                                {initials}
-                                            </AvatarFallback>
-                                        </Avatar>
-
-                                        <div className="min-w-0 flex-1">
-                                            <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
-                                                {user.name}
-                                            </p>
-                                            <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                                                {user.email}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <DropdownMenuGroup className="space-y-1">
-                                    <DropdownMenuItem
-                                        asChild
-                                        className="rounded-2xl px-3 py-2.5 transition-colors focus:bg-emerald-50 dark:focus:bg-emerald-950/30"
-                                    >
-                                        <Link
-                                            href={route('profile.edit')}
-                                            className="flex items-center gap-3"
-                                        >
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
-                                                <User className="h-4 w-4 text-slate-600 dark:text-slate-300" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-medium">
-                                                    Mon profil
-                                                </span>
-                                                <span className="text-xs text-muted-foreground">
-                                                    Modifier vos informations
-                                                </span>
-                                            </div>
-                                        </Link>
-                                    </DropdownMenuItem>
-
-                                    <DropdownMenuItem
-                                        asChild
-                                        className="rounded-2xl px-3 py-2.5 transition-colors focus:bg-emerald-50 dark:focus:bg-emerald-950/30"
-                                    >
-                                        <Link
-                                            href={route('vendor.configure')}
-                                            className="flex items-center gap-3"
-                                        >
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-950/40">
-                                                <Settings className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-medium">
-                                                    Paramètres boutique
-                                                </span>
-                                                <span className="text-xs text-muted-foreground">
-                                                    Configurer votre espace
-                                                    vendeur
-                                                </span>
-                                            </div>
-                                        </Link>
-                                    </DropdownMenuItem>
-                                </DropdownMenuGroup>
-
-                                <DropdownMenuSeparator className="my-2 bg-slate-200 dark:bg-slate-800" />
-
-                                <DropdownMenuItem
-                                    asChild
-                                    className="rounded-2xl px-3 py-2.5 text-red-600 transition-colors focus:bg-red-50 focus:text-red-600 dark:text-red-400 dark:focus:bg-red-950/30 dark:focus:text-red-400"
-                                >
-                                    <Link
-                                        href={route('logout')}
-                                        method="post"
-                                        as="button"
-                                        className="flex w-full items-center gap-3"
-                                    >
-                                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-50 dark:bg-red-950/30">
-                                            <LogOut className="h-4 w-4" />
-                                        </div>
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-medium">
-                                                Déconnexion
-                                            </span>
-                                            <span className="text-xs text-red-400/80">
-                                                Quitter votre session
-                                            </span>
-                                        </div>
-                                    </Link>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
                     )}
                 </div>
             </div>
         </header>
     );
 }
-
-// import { Bell, ShieldCheck } from 'lucide-react';
-// import { Button } from '@/components/ui/button';
-// // resources/js/components/site-header.tsx
-// import { Link, usePage } from '@inertiajs/react';
-// import {
-//     Bell,
-//     BellRing,
-//     LogOut,
-//     Menu,
-//     PackagePlus,
-//     Settings,
-//     ShieldCheck,
-//     Store,
-//     User,
-// } from 'lucide-react';
-// import { useState } from 'react';
-// // eslint-disable-next-line @typescript-eslint/no-unused-vars
-// import { toast } from 'sonner';
-// import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-// import { Button } from '@/components/ui/button';
-// import {
-//     DropdownMenu,
-//     DropdownMenuContent,
-//     DropdownMenuGroup,
-//     DropdownMenuItem,
-//     DropdownMenuLabel,
-//     DropdownMenuSeparator,
-//     DropdownMenuTrigger,
-// } from '@/components/ui/dropdown-menu';
-// import {
-//     Popover,
-//     PopoverContent,
-//     PopoverTrigger,
-// } from '@/components/ui/popover';
-// import { Separator } from '@/components/ui/separator';
-// import { SidebarTrigger } from '@/components/ui/sidebar';
-// import { CanRole } from '@/core/permissions/Can';
-// import SearchInputPage from '@/pages/searchInput';
-// import AppearanceToogle from './appearance-toogle';
-// import { ExpandingSearchDock } from './ecommerce/others/ExpandingSearchDock';
-// import ThemeCustomizer from './Themes/ThemeSettingsSheet';
-
-// export function SiteHeader() {
-//     return (
-//         <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
-//             {/* Hero Section moderne */}
-//             <div className="flex w-full items-center gap-1 px-4 py-4 lg:gap-2 lg:px-6">
-//                 <SidebarTrigger className="-ml-1" />
-//         <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b border-slate-200 bg-white/80 backdrop-blur-xl transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) dark:border-slate-700 dark:bg-slate-900">
-//             <div className="flex w-full items-center gap-2 px-4 lg:gap-4 lg:px-6">
-//                 {/* Sidebar Trigger */}
-//                 <SidebarTrigger className="-ml-1 h-10 w-10 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" />
-//                 {/* <SidebarTrigger className="-ml-1 h-10 w-10 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" /> */}
-//                 <Separator
-//                     orientation="vertical"
-//                     className="mx-2 data-[orientation=vertical]:h-4"
-//                 />
-//                 <Link
-//                     href={route('vendor.dashboard')}
-//                     className="cursor-pointer text-base font-medium"
-//                 >
-//                     <h1>Dashboard</h1>
-//                 </Link>
-
-//                 {/* Logo / Nom de la boutique (tenant) ou Dashboard (central) */}
-//                 {isTenant && tenant ? (
-//                     <Link
-//                         href={tenant.url}
-//                         className="flex items-center gap-2 text-sm font-semibold text-slate-800 transition-colors hover:text-emerald-600 dark:text-slate-200 dark:hover:text-emerald-400"
-//                     >
-//                         <Store className="h-5 w-5 text-emerald-500" />
-//                         <span className="hidden md:inline">
-//                             {tenant.raison_sociale}
-//                         </span>
-//                     </Link>
-//                 ) : (
-//                     <Link
-//                         href={route('vendor.dashboard')}
-//                         className="flex items-center gap-2 text-base font-semibold text-slate-800 transition-colors hover:text-emerald-600 dark:text-slate-200 dark:hover:text-emerald-400"
-//                     >
-//                         <Menu className="h-5 w-5 text-emerald-500" />
-//                         <span>Tableau de bord</span>
-//                     </Link>
-//                 )}
-
-//                 {/* Barre de recherche centrée (visible sur desktop) */}
-//                 <ExpandingSearchDock />
-
-//                 {/* Actions de droite */}
-//                 <div className="ml-auto flex items-center gap-2">
-//                     <SearchInputPage />
-//                     <div className="relative flex items-center space-x-1">
-//                         <CanRole roles="super_admin">
-//                             <div className="relative flex items-center space-x-1 rounded-lg py-2.5">
-//                                 <ShieldCheck className="mr-2 h-8 w-8" />
-//                                 <Link
-//                                     target="_blank"
-//                                     rel="noopener noreferrer"
-//                                     className="block w-full cursor-pointer text-sm"
-//                                     href={route(
-//                                         'filament.admin.pages.dashboard',
-//                                     )}
-//                                 >
-//                                     Admin
-//                                 </Link>
-//                             </div>
-//                         </CanRole>
-//                         <Button
-//                             variant="ghost"
-//                             asChild
-//                             className="hidden h-10 w-10 bg-transparent text-amber-500 hover:bg-transparent lg:flex dark:hover:bg-transparent"
-//                         >
-//                             <Bell className="h-10 w-10 cursor-pointer text-amber-500" />
-//                         </Button>
-//                         <AppearanceToogle />
-//                     </div>
-
-//                     {/* Bouton Admin (super_admin) */}
-//                     {user && (
-//                         <DropdownMenu>
-//                             <DropdownMenuTrigger asChild>
-//                                 <Button
-//                                     variant="ghost"
-//                                     size="icon"
-//                                     className="relative h-8 w-8 rounded-lg border border-slate-600 bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
-//                                 >
-//                                     <ShieldCheck className="h-5 w-5" />
-//                                 </Button>
-//                             </DropdownMenuTrigger>
-//                             <DropdownMenuContent
-//                                 align="end"
-//                                 className="w-48 dark:bg-slate-900"
-//                             >
-//                                 <DropdownMenuLabel>
-//                                     Administration
-//                                 </DropdownMenuLabel>
-//                                 <DropdownMenuItem asChild>
-//                                     <a
-//                                         href={route(
-//                                             'filament.admin.pages.dashboard',
-//                                         )}
-//                                         className="cursor-pointer"
-//                                     >
-//                                         <ShieldCheck className="mr-2 h-4 w-4" />
-//                                         Panneau admin
-//                                     </a>
-//                                 </DropdownMenuItem>
-//                                 <DropdownMenuItem asChild>
-//                                     <a
-//                                         href={route('vendor.configure')}
-//                                         className="cursor-pointer"
-//                                     >
-//                                         <Settings className="mr-2 h-4 w-4" />
-//                                         Paramètres vendeur
-//                                     </a>
-//                                 </DropdownMenuItem>
-//                             </DropdownMenuContent>
-//                         </DropdownMenu>
-//                     )}
-
-//                     {/* Bouton de personnalisation du thème (tenant uniquement) */}
-//                     {isTenant && <ThemeCustomizer />}
-
-//                     {/* Notifications */}
-//                     <Popover open={notifOpen} onOpenChange={setNotifOpen}>
-//                         <PopoverTrigger asChild>
-//                             <Button
-//                                 variant="ghost"
-//                                 size="icon"
-//                                 className="relative h-10 w-10 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
-//                             >
-//                                 {unreadCount > 0 ? (
-//                                     <BellRing className="h-5 w-5 text-amber-500" />
-//                                 ) : (
-//                                     <Bell className="h-5 w-5" />
-//                                 )}
-//                                 {unreadCount > 0 && (
-//                                     <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
-//                                         {unreadCount}
-//                                     </span>
-//                                 )}
-//                             </Button>
-//                         </PopoverTrigger>
-//                         <PopoverContent
-//                             align="end"
-//                             className="w-80 border-slate-200 bg-white p-0 shadow-xl dark:border-slate-700 dark:bg-slate-900"
-//                         >
-//                             <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-700">
-//                                 <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-//                                     Notifications
-//                                 </h3>
-//                                 {unreadCount > 0 && (
-//                                     <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-//                                         {unreadCount} non lues
-//                                     </span>
-//                                 )}
-//                             </div>
-//                             <div className="max-h-64 overflow-y-auto">
-//                                 {notifications.length === 0 ? (
-//                                     <p className="px-4 py-6 text-center text-sm text-slate-500">
-//                                         Aucune notification
-//                                     </p>
-//                                 ) : (
-//                                     notifications.map((notif) => (
-//                                         <div
-//                                             key={notif.id}
-//                                             className="flex items-start gap-3 border-b border-slate-50 px-4 py-3 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800"
-//                                         >
-//                                             <div
-//                                                 className={`mt-1 h-2 w-2 rounded-full ${
-//                                                     notif.read
-//                                                         ? 'bg-transparent'
-//                                                         : 'bg-emerald-500'
-//                                                 }`}
-//                                             />
-//                                             <div className="flex-1">
-//                                                 <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-//                                                     {notif.title}
-//                                                 </p>
-//                                                 <p className="text-xs text-slate-500 dark:text-slate-400">
-//                                                     {notif.message}
-//                                                 </p>
-//                                                 <p className="mt-1 text-[10px] text-slate-400">
-//                                                     {notif.created_at}
-//                                                 </p>
-//                                             </div>
-//                                         </div>
-//                                     ))
-//                                 )}
-//                             </div>
-//                         </PopoverContent>
-//                     </Popover>
-
-//                     {/* Thème clair/sombre */}
-//                     <AppearanceToogle />
-
-//                     {/* Avatar utilisateur */}
-//                     {user && (
-//                         <DropdownMenu>
-//                             <DropdownMenuTrigger asChild>
-//                                 <Button
-//                                     variant="ghost"
-//                                     size="icon"
-//                                     className="ml-1 h-10 w-10 rounded-full"
-//                                 >
-//                                     <Avatar className="h-9 w-9 border-2 border-white shadow-sm dark:border-slate-700">
-//                                         <AvatarImage
-//                                             src={user.avatar_url}
-//                                             alt={user.name}
-//                                         />
-//                                         <AvatarFallback className="bg-emerald-100 text-xs font-medium text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
-//                                             {initials}
-//                                         </AvatarFallback>
-//                                     </Avatar>
-//                                 </Button>
-//                             </DropdownMenuTrigger>
-//                             <DropdownMenuContent
-//                                 align="end"
-//                                 className="w-56 border-slate-200 dark:border-slate-700"
-//                             >
-//                                 <DropdownMenuLabel className="text-xs text-slate-500">
-//                                     {user.email}
-//                                 </DropdownMenuLabel>
-//                                 <DropdownMenuGroup>
-//                                     <DropdownMenuItem asChild>
-//                                         <Link href={route('profile.edit')}>
-//                                             <User className="mr-2 h-4 w-4" />
-//                                             Profil
-//                                         </Link>
-//                                     </DropdownMenuItem>
-//                                     <DropdownMenuItem asChild>
-//                                         <Link href={route('vendor.configure')}>
-//                                             <Settings className="mr-2 h-4 w-4" />
-//                                             Paramètres boutique
-//                                         </Link>
-//                                     </DropdownMenuItem>
-//                                 </DropdownMenuGroup>
-//                                 <DropdownMenuSeparator />
-//                                 <DropdownMenuItem
-//                                     className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
-//                                     asChild
-//                                 >
-//                                     <Link
-//                                         href={route('logout')}
-//                                         method="post"
-//                                         as="button"
-//                                     >
-//                                         <LogOut className="mr-2 h-4 w-4" />
-//                                         Déconnexion
-//                                     </Link>
-//                                 </DropdownMenuItem>
-//                             </DropdownMenuContent>
-//                         </DropdownMenu>
-//                     )}
-//                 </div>
-//             </div>
-//         </header>
-//     );
-// }

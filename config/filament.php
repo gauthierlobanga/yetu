@@ -1,5 +1,8 @@
 <?php
 
+$reverbScheme = env('VITE_REVERB_SCHEME', env('REVERB_SCHEME', 'https'));
+$reverbUsesTls = $reverbScheme === 'https';
+
 return [
 
     /*
@@ -24,8 +27,9 @@ return [
             'wssPort' => env('VITE_REVERB_PORT'),
             'authEndpoint' => '/broadcasting/auth',
             'disableStats' => true,
-            'encrypted' => true,
-            'forceTLS' => true,
+            'encrypted' => $reverbUsesTls,
+            'forceTLS' => $reverbUsesTls,
+            'enabledTransports' => [$reverbUsesTls ? 'wss' : 'ws'],
         ],
 
         // 'echo' => [

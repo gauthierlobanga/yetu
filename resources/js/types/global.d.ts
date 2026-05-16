@@ -1,5 +1,5 @@
+import type Echo from 'laravel-echo';
 import type { Auth } from '@/types/auth';
-
 // Types pour les données flash
 interface FlashData {
     message?: string;
@@ -37,14 +37,20 @@ declare module '@inertiajs/react' {
 }
 
 export interface HeaderCategory {
-  id: number;
-  nom: string;
-  slug: string;
-  url: string;
-  image: string | null;
+    id: number;
+    nom: string;
+    slug: string;
+    url: string;
+    image: string | null;
 }
 
 export interface HeaderData {
-  categories: HeaderCategory[];
-  brands: { id: number; name: string; slug: string }[];
+    categories: HeaderCategory[];
+    brands: { id: number; name: string; slug: string }[];
+}
+
+declare global {
+    interface Window {
+        Echo?: Echo;
+    }
 }

@@ -30,6 +30,7 @@ use App\Http\Controllers\Shop\ReturnController;
 use App\Http\Controllers\Shop\ReviewController;
 use App\Http\Controllers\Shop\WishlistController;
 use App\Http\Controllers\vendor\TenantAiController;
+use App\Http\Controllers\Vendor\TenantDashboardNotificationController;
 use App\Http\Controllers\Vendor\TenantOrderController;
 use App\Http\Controllers\Vendor\TenantPaymentController;
 use App\Http\Controllers\Vendor\TenantProductController;
@@ -109,6 +110,13 @@ Route::middleware([
 
         Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])
             ->name('vendor.dashboard');
+
+        Route::prefix('notifications')->name('tenant.notifications.')->group(function () {
+            Route::post('/{id}/mark-as-read', [TenantDashboardNotificationController::class, 'markAsRead'])
+                ->name('mark-as-read');
+            Route::post('/mark-all-as-read', [TenantDashboardNotificationController::class, 'markAllAsRead'])
+                ->name('mark-all-as-read');
+        });
 
         Route::redirect('settings', '/settings/profile');
 

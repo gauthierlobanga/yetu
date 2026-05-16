@@ -421,6 +421,29 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
         return parent::getConnectionName() ?? config('database.default');
     }
 
+    public function receivesBroadcastNotificationsOn($notification = null): string
+    {
+        $tenantId = null;
+
+        if (
+            $notification
+            && method_exists($notification, 'tenantId')
+            && filled($notificationTenantId = $notification->tenantId())
+        ) {
+            $tenantId = $notificationTenantId;
+        }
+
+        if (! filled($tenantId) && function_exists('tenant') && tenant()?->id) {
+            $tenantId = tenant()->id;
+        }
+
+        if (filled($tenantId)) {
+            return "tenant.{$tenantId}.users.{$this->getKey()}";
+        }
+
+        return str_replace('\\', '.', self::class).'.'.$this->getKey();
+    }
+
     /**
      * Détermine si cet utilisateur peut impersonner d'autres utilisateurs
      */

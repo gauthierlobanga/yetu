@@ -393,4 +393,13 @@ class Panier extends Model
     {
         return $query->where('expires_at', '<', now());
     }
+
+    /**
+     * Vider complètement le panier (supprime tous les items).
+     */
+    public function vider(): void
+    {
+        $this->items()->delete();
+        $this->recalculerTotaux();
+    }
 }
