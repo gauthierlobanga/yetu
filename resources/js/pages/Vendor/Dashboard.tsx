@@ -296,6 +296,8 @@ export default function VendorDashboard({
 
                         <TrialCountdown trial={trial ?? null} />
 
+                        {aiEnabled && <ChatIA />}
+
                         {/* ======<<<< Actions rapides premium >>>>==========*/}
                         <section className="dashboard-section my-10">
                             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

@@ -8,15 +8,12 @@ use App\Models\User;
 use App\Models\VendorRequest;
 use App\Notifications\VendorApproved;
 use App\Notifications\VendorRejected;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Stancl\Tenancy\Bootstrappers\CacheTenancyBootstrapper;
-use Stancl\Tenancy\Bootstrappers\FilesystemTenancyBootstrapper;
-use Stancl\Tenancy\Bootstrappers\QueueTenancyBootstrapper;
+use Stancl\Tenancy\Events\TenantCreated;
 use Stancl\Tenancy\Tenancy;
 
 class VendorRegistrationService
@@ -153,7 +150,7 @@ class VendorRegistrationService
         });
 
         // Déclencher manuellement l'événement TenantCreated pour exécuter les jobs
-        event(new \Stancl\Tenancy\Events\TenantCreated($tenant));
+        event(new TenantCreated($tenant));
 
         // Nettoyage de la session
         session()->forget('temp_password');

@@ -12,8 +12,8 @@ class TenantDatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            BlogCategorySeeder::class,
-            PostSeeder::class,
+            // BlogCategorySeeder::class,
+            // PostSeeder::class,
             ProduitCategorySeeder::class,
             BrandSeeder::class,
             ProductSeeder::class,
