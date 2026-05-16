@@ -1,15 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Check } from 'lucide-react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useForm, Controller } from 'react-hook-form';
 
-import type {
-    ControllerFieldState,
-    ControllerRenderProps,
-} from 'react-hook-form';
-import * as z from 'zod';
+import type * as z from 'zod';
 import { FileUpload } from '@/components/file-upload';
 import {
     FormHeader,
@@ -44,7 +40,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { MultiStepFormProvider } from '@/hooks/use-multi-step-viewer';
 import { formSchema } from '@/lib/form-schema';
 
-//------------------------------
 type Schema = z.infer<typeof formSchema>;
 
 export function EmployeeForm() {
@@ -64,8 +59,9 @@ export function EmployeeForm() {
             // TODO: handle error
         }
     });
+
     const stepsFields = [
-        /** première section */
+        // Étape 1 : Informations personnelles
         {
             fields: [
                 'firstName',
@@ -99,13 +95,8 @@ export function EmployeeForm() {
                                     {...field}
                                     id="firstName"
                                     type="text"
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
-                                    aria-invalid={fieldState.invalid}
                                     placeholder="Enter your first name"
                                 />
-
                                 {fieldState.invalid && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}
@@ -128,13 +119,8 @@ export function EmployeeForm() {
                                     {...field}
                                     id="lastName"
                                     type="text"
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
-                                    aria-invalid={fieldState.invalid}
                                     placeholder="Enter your last name"
                                 />
-
                                 {fieldState.invalid && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}
@@ -157,13 +143,8 @@ export function EmployeeForm() {
                                     {...field}
                                     id="email"
                                     type="text"
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
-                                    aria-invalid={fieldState.invalid}
                                     placeholder="Enter your email address"
                                 />
-
                                 {fieldState.invalid && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}
@@ -186,13 +167,8 @@ export function EmployeeForm() {
                                     {...field}
                                     id="phone"
                                     type="text"
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
-                                    aria-invalid={fieldState.invalid}
                                     placeholder="Enter your phone number"
                                 />
-
                                 {fieldState.invalid && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}
@@ -214,13 +190,9 @@ export function EmployeeForm() {
                                 <Input
                                     {...field}
                                     id="dateOfBirth"
-                                    type="text"
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
+                                    type="date"
                                     aria-invalid={fieldState.invalid}
                                 />
-
                                 {fieldState.invalid && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}
@@ -245,7 +217,6 @@ export function EmployeeForm() {
                                     id="address"
                                     placeholder="Enter your complete home address"
                                 />
-
                                 {fieldState.invalid && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}
@@ -255,7 +226,7 @@ export function EmployeeForm() {
                 </>
             ),
         },
-        /** deuxième section */
+        // Étape 2 : Détails de l'emploi
         {
             fields: [
                 'position',
@@ -288,13 +259,8 @@ export function EmployeeForm() {
                                     {...field}
                                     id="position"
                                     type="text"
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
-                                    aria-invalid={fieldState.invalid}
                                     placeholder="Enter your job title"
                                 />
-
                                 {fieldState.invalid && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}
@@ -330,7 +296,6 @@ export function EmployeeForm() {
                                         <FieldLabel htmlFor="department">
                                             Department *
                                         </FieldLabel>
-
                                         <Select
                                             value={field.value}
                                             onValueChange={field.onChange}
@@ -372,13 +337,9 @@ export function EmployeeForm() {
                                     <Input
                                         {...field}
                                         id="startDate"
-                                        type="text"
-                                        onChange={(e) => {
-                                            field.onChange(e.target.value);
-                                        }}
+                                        type="date"
                                         aria-invalid={fieldState.invalid}
                                     />
-
                                     {fieldState.invalid && (
                                         <FieldError
                                             errors={[fieldState.error]}
@@ -408,7 +369,6 @@ export function EmployeeForm() {
                                     <FieldLabel htmlFor="employmentType">
                                         Employment Type *
                                     </FieldLabel>
-
                                     <RadioGroup
                                         value={field.value}
                                         onValueChange={field.onChange}
@@ -454,13 +414,8 @@ export function EmployeeForm() {
                                     {...field}
                                     id="manager"
                                     type="text"
-                                    onChange={(e) => {
-                                        field.onChange(e.target.value);
-                                    }}
-                                    aria-invalid={fieldState.invalid}
-                                    placeholder={`Enter your direct manager's name`}
+                                    placeholder="Enter your direct manager's name"
                                 />
-
                                 {fieldState.invalid && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}
@@ -470,7 +425,7 @@ export function EmployeeForm() {
                 </>
             ),
         },
-        /** troisième section */
+        // Étape 3 : Contact d'urgence
         {
             fields: [
                 'emergencyContactName',
@@ -503,13 +458,8 @@ export function EmployeeForm() {
                                         {...field}
                                         id="emergencyContactName"
                                         type="text"
-                                        onChange={(e) => {
-                                            field.onChange(e.target.value);
-                                        }}
-                                        aria-invalid={fieldState.invalid}
-                                        placeholder={`Enter contact's full name`}
+                                        placeholder="Enter contact's full name"
                                     />
-
                                     {fieldState.invalid && (
                                         <FieldError
                                             errors={[fieldState.error]}
@@ -539,7 +489,6 @@ export function EmployeeForm() {
                                         <FieldLabel htmlFor="emergencyContactRelationship">
                                             Relationship *
                                         </FieldLabel>
-
                                         <Select
                                             value={field.value}
                                             onValueChange={field.onChange}
@@ -585,13 +534,8 @@ export function EmployeeForm() {
                                         {...field}
                                         id="emergencyContactPhone"
                                         type="text"
-                                        onChange={(e) => {
-                                            field.onChange(e.target.value);
-                                        }}
-                                        aria-invalid={fieldState.invalid}
-                                        placeholder={`Enter contact's phone number`}
+                                        placeholder="Enter contact's phone number"
                                     />
-
                                     {fieldState.invalid && (
                                         <FieldError
                                             errors={[fieldState.error]}
@@ -609,19 +553,14 @@ export function EmployeeForm() {
                                     className="col-span-full gap-1"
                                 >
                                     <FieldLabel htmlFor="emergencyContactEmail">
-                                        Emergency Contact Email{' '}
+                                        Emergency Contact Email
                                     </FieldLabel>
                                     <Input
                                         {...field}
                                         id="emergencyContactEmail"
                                         type="text"
-                                        onChange={(e) => {
-                                            field.onChange(e.target.value);
-                                        }}
-                                        aria-invalid={fieldState.invalid}
-                                        placeholder={`Enter contact's email address`}
+                                        placeholder="Enter contact's email address"
                                     />
-
                                     {fieldState.invalid && (
                                         <FieldError
                                             errors={[fieldState.error]}
@@ -634,12 +573,11 @@ export function EmployeeForm() {
                 </>
             ),
         },
-        /** quatrième section */
+        // Étape 4 : Documents & accords (null retiré du tableau fields)
         {
             fields: [
                 'resume',
                 'idDocument',
-                null,
                 'handbookAgreement',
                 'confidentialityAgreement',
                 'codeOfConductAgreement',
@@ -658,40 +596,26 @@ export function EmployeeForm() {
                         name="resume"
                         control={form.control}
                         render={({ field, fieldState }) => (
-                            <div>
-                                <Field
-                                    data-invalid={fieldState.invalid}
-                                    className="col-span-full gap-1"
-                                >
-                                    <FieldLabel htmlFor="resume">
-                                        Resume/CV *
-                                    </FieldLabel>
-
-                                    <FileUpload
-                                        {...field}
-                                        setValue={form.setValue}
-                                        name="resume"
-                                        placeholder="Upload your resume (PDF, DOC, DOCX)"
-                                        accept={`application/pdf, application/doc, application/docx`}
-                                        maxFiles={1}
-                                        maxSize={1048576}
-                                    />
-                                </Field>
-                                {Array.isArray(fieldState.error) ? (
-                                    fieldState.error?.map((error, i) => (
-                                        <p
-                                            key={i}
-                                            role="alert"
-                                            data-slot="field-error"
-                                            className="text-sm text-destructive"
-                                        >
-                                            {error.message}
-                                        </p>
-                                    ))
-                                ) : (
+                            <Field
+                                data-invalid={fieldState.invalid}
+                                className="col-span-full gap-1"
+                            >
+                                <FieldLabel htmlFor="resume">
+                                    Resume/CV *
+                                </FieldLabel>
+                                <FileUpload
+                                    {...field}
+                                    setValue={form.setValue}
+                                    name="resume"
+                                    placeholder="Upload your resume (PDF, DOC, DOCX)"
+                                    accept="application/pdf, application/doc, application/docx"
+                                    maxFiles={1}
+                                    maxSize={1048576}
+                                />
+                                {fieldState.error && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}
-                            </div>
+                            </Field>
                         )}
                     />
 
@@ -699,45 +623,33 @@ export function EmployeeForm() {
                         name="idDocument"
                         control={form.control}
                         render={({ field, fieldState }) => (
-                            <div>
-                                <Field
-                                    data-invalid={fieldState.invalid}
-                                    className="col-span-full gap-1"
-                                >
-                                    <FieldLabel htmlFor="idDocument">
-                                        Government ID *
-                                    </FieldLabel>
-
-                                    <FileUpload
-                                        {...field}
-                                        setValue={form.setValue}
-                                        name="idDocument"
-                                        placeholder="Upload a copy of your government ID (PDF, JPG, PNG)"
-                                        accept={`application/pdf, image/jpeg, image/png`}
-                                        maxFiles={1}
-                                        maxSize={1048576}
-                                    />
-                                </Field>
-                                {Array.isArray(fieldState.error) ? (
-                                    fieldState.error?.map((error, i) => (
-                                        <p
-                                            key={i}
-                                            role="alert"
-                                            data-slot="field-error"
-                                            className="text-sm text-destructive"
-                                        >
-                                            {error.message}
-                                        </p>
-                                    ))
-                                ) : (
+                            <Field
+                                data-invalid={fieldState.invalid}
+                                className="col-span-full gap-1"
+                            >
+                                <FieldLabel htmlFor="idDocument">
+                                    Government ID *
+                                </FieldLabel>
+                                <FileUpload
+                                    {...field}
+                                    setValue={form.setValue}
+                                    name="idDocument"
+                                    placeholder="Upload a copy of your government ID (PDF, JPG, PNG)"
+                                    accept="application/pdf, image/jpeg, image/png"
+                                    maxFiles={1}
+                                    maxSize={1048576}
+                                />
+                                {fieldState.error && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}
-                            </div>
+                            </Field>
                         )}
                     />
+
                     <FieldSeparator className="col-span-full my-4">
                         Agreements
                     </FieldSeparator>
+
                     <Controller
                         name="handbookAgreement"
                         control={form.control}
@@ -764,6 +676,7 @@ export function EmployeeForm() {
                             </Field>
                         )}
                     />
+
                     <Controller
                         name="confidentialityAgreement"
                         control={form.control}
@@ -790,6 +703,7 @@ export function EmployeeForm() {
                             </Field>
                         )}
                     />
+
                     <Controller
                         name="codeOfConductAgreement"
                         control={form.control}
@@ -826,15 +740,14 @@ export function EmployeeForm() {
                                 className="col-span-full gap-1"
                             >
                                 <FieldLabel htmlFor="additionalNotes">
-                                    Additional Notes or Questions{' '}
+                                    Additional Notes or Questions
                                 </FieldLabel>
                                 <Textarea
                                     {...field}
                                     aria-invalid={fieldState.invalid}
                                     id="additionalNotes"
-                                    placeholder={`Any additional information or questions you'd like to share...`}
+                                    placeholder="Any additional information or questions you'd like to share..."
                                 />
-
                                 {fieldState.invalid && (
                                     <FieldError errors={[fieldState.error]} />
                                 )}

@@ -136,7 +136,7 @@ export default function CartContent() {
         const ids = cart.items.map((item) => item.id);
         setSelectedItems(ids);
 
-        // première sync propre
+        // 🔥 première sync propre
         syncSelection(ids);
 
         isInitialized.current = true;
@@ -171,6 +171,7 @@ export default function CartContent() {
             setItemToRemove(null);
         }
     };
+
     const cancelRemove = () => setItemToRemove(null);
 
     const handleSubmitCoupon = (e: React.FormEvent) => {
@@ -190,7 +191,7 @@ export default function CartContent() {
     const totalSavings = calculatedTotals?.total_remises ?? 0;
 
     return (
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col pt-10">
             {/* En-tête */}
             <div className="flex items-center justify-between border-b pb-3">
                 <div className="flex items-center gap-3">

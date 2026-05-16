@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/pages/dashboard.tsx
 import { AppSidebar } from '@/components/app-sidebar';
+import { ChartAreaInteractive } from '@/components/board/AreaChartInteractive';
 import { ChartBarMixed } from '@/components/board/BarChartMixed';
 import { ChartCategoryPerformance } from '@/components/board/chart-category-performance';
 import { ChartHourlyPosts } from '@/components/board/chart-hourly-posts';
@@ -12,7 +13,6 @@ import { ChartWeeklyActivity } from '@/components/board/chart-weekly-activity';
 import { ChartBarLabel } from '@/components/board/ChartBarLabelPost';
 import { DashboardFilters } from '@/components/board/dashboard-filters';
 import { ChartPieInteractive } from '@/components/board/PieChartInteractivePost';
-import { ChartAreaInteractive } from '@/components/chart-area-interactive';
 import { DataTable } from '@/components/data-table-post';
 import { SectionCards } from '@/components/section-cards-post';
 import { SiteHeader } from '@/components/site-header';
@@ -195,9 +195,9 @@ export default function Dashboard({
                         <SectionCards />
 
                         {/* Tableau des articles */}
-                        <div className="px-4 lg:px-6">
+                        {/* <div className="px-4 lg:px-6">
                             <ChartAreaInteractive chartData={chartStats} />
-                        </div>
+                        </div> */}
 
                         {/* Ligne 1: Graphiques principaux */}
                         <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-2 lg:px-6">

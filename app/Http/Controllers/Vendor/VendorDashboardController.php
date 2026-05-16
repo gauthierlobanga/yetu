@@ -8,20 +8,20 @@ use App\Models\Commande;
 use App\Models\Panier;
 use App\Models\Plan;
 use App\Models\Produit;
+use App\Services\TenantPropsService;
 use App\Services\VendorRegistrationService;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class VendorDashboardController extends Controller
 {
-    public function index()
+    public function index(TenantPropsService $tenantProps)
     {
         $user = Auth::user();
         $tenant = $user->tenants()->wherePivot('is_owner', true)->first();
 
         if (! $tenant) {
-            return redirect()->route('vendor.register')
-                ->with('error', 'Vous nʼavez pas encore de boutique.');
+            return redirect()->route('vendor.register')->with('error', 'Vous n\'avez pas encore de boutique.');
         }
 
         $plan = $tenant->plan;
@@ -72,15 +72,16 @@ class VendorDashboardController extends Controller
                         'prix' => $p->prix_actuel,
                         'stock' => $p->quantite_stock,
                         'statut' => $p->statut,
-                        'image' => $p->getImageUrl('thumb') ?? '/placeholder.jpg',
+                        'image' => $p->getImageUrl('thumb') ?? '/storage/images/Vue-Storefront.png',
                         'edit_url' => $adminUrl.'/produits/'.$p->id.'/edit',
                     ];
                 });
         });
 
         // Fonctionnalités des plans (centrales)
-        $allPlans = Plan::all()
-            ->keyBy('name')
+        $allPlans = Plan::where('is_active', true)
+            ->get()
+            // ->keyBy('name')
             ->map(function ($plan) {
                 $features = is_array($plan->features) ? $plan->features : json_decode($plan->features, true) ?? [];
 
@@ -99,30 +100,39 @@ class VendorDashboardController extends Controller
         }
 
         return Inertia::render('Vendor/Dashboard', [
-            'tenant' => [
-                'id' => $tenant->id,
-                'raison_sociale' => $tenant->raison_sociale,
-                'slug' => $tenant->slug,
-                'description' => $tenant->description,
-                'email' => $tenant->email,
-                'telephone' => $tenant->telephone,
-                'statut' => $tenant->statut,
-                'is_active' => $tenant->is_active,
-                'domain' => $tenant->domains()->first()?->domain,
-                'url' => app(VendorRegistrationService::class)->getShopUrl($tenant),
-                'admin_url' => $adminUrl,
-                'plan' => $plan ? [
-                    'name' => $plan->name,
-                    'price' => $plan->price,
-                    'currency' => $plan->currency,
-                    'features' => $currentPlanFeatures,
-                ] : null,
-            ],
+            'tenant' => $tenantProps->getTenantProps($tenant),
+            'theme' => $tenant->theme,
             'stats' => $stats,
             'trial' => $trial,
             'recentProducts' => $recentProducts,
             'currentPlanFeatures' => $currentPlanFeatures,
             'allPlansFeatures' => $allPlans->pluck('features', 'name')->toArray(),
         ]);
+    }
+
+    private function getFreeFeatures(): array
+    {
+        return [
+            'Gestion des produits (illimités selon plan)',
+            'Gestion des commandes',
+            'Statistiques de base',
+            'Personnalisation du thème (basique)',
+            'Sous-domaine gratuit',
+            'Paiement à la livraison',
+        ];
+    }
+
+    private function getPaidFeatures(): array
+    {
+        return [
+            'Nom de domaine personnalisé',
+            'Thèmes premium',
+            'Paiement en ligne (Stripe, PayPal)',
+            'Statistiques avancées',
+            'API REST',
+            'Marketplace multi-vendeurs',
+            'Programme de fidélité',
+            'Support prioritaire',
+        ];
     }
 }

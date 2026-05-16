@@ -1,4 +1,5 @@
 import type { Key } from 'react';
+import type { PlatformStats } from './products';
 
 export interface HeaderCategory {
     id: number;
@@ -181,15 +182,15 @@ export interface CalculatedTotals {
     selected_count: number;
 }
 
-export interface PlatformStats {
-    pageLoadTime?: string;
-    uptime?: string;
-    supportResponseTime?: string;
-    productsCount?: number;
-    ordersProcessed?: number;
-    paymentMethods?: number;
-    countriesServed?: number;
-}
+// export interface PlatformStats {
+//     pageLoadTime?: string;
+//     uptime?: string;
+//     supportResponseTime?: string;
+//     productsCount?: number;
+//     ordersProcessed?: number;
+//     paymentMethods?: number;
+//     countriesServed?: number;
+// }
 
 export interface Address {
     id: number;

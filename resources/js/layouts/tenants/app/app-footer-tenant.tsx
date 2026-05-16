@@ -82,7 +82,7 @@ const footerSections = [
     {
         title: 'Support',
         links: [
-            { name: 'Contact', href: route('tenant.contact.index') },
+            { name: 'Contact', href: route('tenant.page.contact') },
             { name: 'FAQ', href: route('tenant.pages.faq') },
             { name: 'Suivi de commande', href: route('tenant.orders.index') },
             { name: 'Retours', href: route('tenant.returns.index') },

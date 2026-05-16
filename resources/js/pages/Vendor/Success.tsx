@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/purity */
 // resources/js/Pages/Vendor/Success.tsx
-import { Head, Link } from '@inertiajs/react';
+
+import { Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { gsap } from 'gsap';
 import {
     Rocket,
     ExternalLink,
@@ -12,21 +12,26 @@ import {
     LayoutDashboard,
     ShoppingBag,
     Sparkles,
+    ShieldCheck,
+    Globe,
+    PartyPopper,
 } from 'lucide-react';
-import { useEffect, useRef, useState, useMemo } from 'react';
-import { CanRole } from '@/core/permissions/Can';
+import { useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
+import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 
 interface Props {
-    tenant: { raison_sociale: string; admin_url: string; url: string };
+    tenant: Tenant;
 }
 
-// Particules d’arrière‑plan : positions aléatoires stables
 function useParticlePositions(count: number) {
     return useMemo(
         () =>
             Array.from({ length: count }).map(() => ({
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
+                duration: 6 + Math.random() * 8,
+                delay: Math.random() * 4,
             })),
         [count],
     );
@@ -34,233 +39,283 @@ function useParticlePositions(count: number) {
 
 export default function VendorSuccess({ tenant }: Props) {
     const [copied, setCopied] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-    const circleRef = useRef<HTMLDivElement>(null);
-    const titleRef = useRef<HTMLHeadingElement>(null);
-    const subtitleRef = useRef<HTMLParagraphElement>(null);
-    const ctaRef = useRef<HTMLDivElement>(null);
-    const urlBlockRef = useRef<HTMLDivElement>(null);
-    const actionsRef = useRef<HTMLDivElement>(null);
-
-    const particles = useParticlePositions(12);
-
-    // Animation d’entrée orchestrée
-    useEffect(() => {
-        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-        tl.fromTo(
-            circleRef.current,
-            { scale: 0, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 0.8 },
-        )
-            .fromTo(
-                titleRef.current,
-                { y: 30, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.6 },
-                '-=0.3',
-            )
-            .fromTo(
-                subtitleRef.current,
-                { y: 20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.5 },
-                '-=0.2',
-            )
-            .fromTo(
-                ctaRef.current,
-                { y: 20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.5 },
-                '-=0.2',
-            )
-            .fromTo(
-                urlBlockRef.current,
-                { y: 20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.5 },
-                '-=0.2',
-            )
-            .fromTo(
-                actionsRef.current,
-                { y: 20, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.5 },
-                '-=0.2',
-            );
-
-        // Particules flottantes discrètes
-        const particleElements = document.querySelectorAll('.success-particle');
-        particleElements.forEach((p, i) => {
-            gsap.to(p, {
-                y: 'random(-80, 80)',
-                x: 'random(-80, 80)',
-                opacity: 0.15,
-                scale: 0.8,
-                duration: 3 + i * 0.3,
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut',
-                delay: i * 0.2,
-            });
-        });
-    }, []);
+    const particles = useParticlePositions(14);
 
     const copyToClipboard = async () => {
         try {
             await navigator.clipboard.writeText(tenant.url);
             setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
+            setTimeout(() => setCopied(false), 2200);
         } catch {
-            const ta = document.createElement('textarea');
-            ta.value = tenant.url;
-            document.body.appendChild(ta);
-            ta.select();
+            // fallback
+            const textarea = document.createElement('textarea');
+            textarea.value = tenant.url;
+            document.body.appendChild(textarea);
+            textarea.select();
             document.execCommand('copy');
-            document.body.removeChild(ta);
+            document.body.removeChild(textarea);
+
             setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
+            setTimeout(() => setCopied(false), 2200);
         }
     };
 
+    const summary = [
+        {
+            label: 'Boutique',
+            value: tenant.raison_sociale,
+            icon: ShoppingBag,
+        },
+        {
+            label: 'Statut',
+            value: 'Active et accessible',
+            icon: ShieldCheck,
+        },
+        {
+            label: 'URL publique',
+            value: new URL(tenant.url).hostname,
+            icon: Globe,
+        },
+    ];
+
     return (
         <>
-            <Head title="Boutique créée avec succès !" />
+            <Head title="Boutique créée avec succès" />
 
-            <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white dark:bg-slate-950">
-                {/* Arrière‑plan décoratif */}
-                <div className="pointer-events-none absolute inset-0 -z-10">
-                    {/* Cercles flous emerald / slate */}
-                    <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-emerald-300/20 blur-3xl dark:bg-emerald-800/10" />
-                    <div className="absolute bottom-0 left-0 h-72 w-72 rounded-full bg-slate-300/20 blur-3xl dark:bg-slate-700/10" />
-                    <div className="absolute top-1/2 left-1/4 h-48 w-48 rounded-full bg-emerald-400/10 blur-2xl dark:bg-emerald-600/10" />
+            <div className="relative min-h-screen overflow-hidden bg-linear-to-br from-white via-slate-50 to-emerald-50/40 dark:from-slate-950 dark:via-slate-950 dark:to-emerald-950/20">
+                {/* Background Effects */}
+                <div className="pointer-events-none absolute inset-0">
+                    {/* Glow blobs */}
+                    <div className="absolute top-0 left-1/2 h-144 w-xl -translate-x-1/2 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-500/10" />
+                    <div className="absolute -top-32 right-0 h-96 w-96 rounded-full bg-teal-400/10 blur-3xl dark:bg-teal-500/10" />
+                    <div className="absolute bottom-0 left-0 h-96 w-96 rounded-full bg-slate-300/20 blur-3xl dark:bg-slate-700/10" />
+
+                    {/* Grid overlay */}
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.04)_1px,transparent_1px)] bg-size-[48px_48px]" />
                 </div>
 
-                {/* Particules subtiles */}
-                <div className="pointer-events-none absolute inset-0">
-                    {particles.map((pos, i) => (
-                        <Sparkles
+                {/* Floating particles */}
+                <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                    {particles.map((particle, i) => (
+                        <motion.div
                             key={i}
-                            className="success-particle absolute h-4 w-4 text-emerald-400/30 dark:text-emerald-500/20"
-                            style={pos}
-                        />
+                            className="absolute"
+                            style={{
+                                left: particle.left,
+                                top: particle.top,
+                            }}
+                            animate={{
+                                y: [0, -20, 0],
+                                opacity: [0.08, 0.2, 0.08],
+                                scale: [1, 1.15, 1],
+                            }}
+                            transition={{
+                                duration: particle.duration,
+                                repeat: Infinity,
+                                ease: 'easeInOut',
+                                delay: particle.delay,
+                            }}
+                        >
+                            <Sparkles className="h-4 w-4 text-emerald-400/30 dark:text-emerald-500/20" />
+                        </motion.div>
                     ))}
                 </div>
 
-                <div
-                    className="relative z-10 mx-auto max-w-3xl px-4 py-20 text-center"
-                    ref={containerRef}
-                >
-                    {/* Cercle du succès */}
-                    <div ref={circleRef} className="mb-10 inline-flex">
-                        <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-200 dark:shadow-emerald-900/30">
-                            <Rocket className="h-14 w-14 text-white" />
-                            <Check className="absolute -top-2 -right-2 h-8 w-8 rounded-full bg-green-500 p-1 text-white shadow-md" />
-                        </div>
-                    </div>
-
-                    {/* Titre principal */}
-                    <h1
-                        ref={titleRef}
-                        className="mb-4 text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl dark:text-white"
-                    >
-                        Félicitations&nbsp;!{' '}
-                    </h1>
-
-                    {/* Sous‑titre */}
-                    <p
-                        ref={subtitleRef}
-                        className="mb-2 text-xl text-slate-600 dark:text-slate-300"
-                    >
-                        Votre boutique{' '}
-                        <strong className="bg-gradient-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-300">
-                            {tenant.raison_sociale}
-                        </strong>{' '}
-                        est prête&nbsp;!
-                    </p>
-                    <p className="mb-12 text-slate-500 dark:text-slate-400">
-                        Vous pouvez maintenant configurer vos produits, gérer
-                        vos commandes et commencer à vendre.
-                    </p>
-
-                    {/* Bouton principal (CTA) */}
+                {/* Main Content */}
+                <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
                     <motion.div
-                        ref={ctaRef}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
-                        className="mb-8"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.7 }}
+                        className="w-full max-w-5xl"
                     >
-                        <CanRole roles="super_admin">
-                            <a
-                                href={tenant.admin_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-10 py-4 text-lg font-semibold text-white shadow-lg shadow-emerald-200 transition-all hover:from-emerald-700 hover:to-emerald-800 hover:shadow-xl dark:shadow-emerald-900/30"
-                            >
-                                <Rocket className="h-6 w-6 transition-transform group-hover:-rotate-12" />
-                                Accéder à ma boutique
-                                <ArrowRight className="h-6 w-6 transition-transform group-hover:translate-x-1" />
-                            </a>
-                        </CanRole>
-                    </motion.div>
+                        <div className="overflow-hidden rounded-[2rem] border border-white/70 bg-white/85 shadow-[0_30px_120px_-20px_rgba(16,185,129,0.15)] backdrop-blur-2xl dark:border-slate-800/70 dark:bg-slate-900/85 dark:shadow-[0_30px_120px_-20px_rgba(16,185,129,0.08)]">
+                            {/* Header */}
+                            <div className="relative border-b border-slate-200/60 px-6 py-10 sm:px-10 dark:border-slate-800/60">
+                                <div className="absolute inset-0 bg-linear-to-r from-emerald-500/3 via-transparent to-teal-500/3" />
 
-                    {/* Bloc URL avec copie */}
-                    <div
-                        ref={urlBlockRef}
-                        className="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white/80 p-5 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80"
-                    >
-                        <p className="mb-3 text-sm font-medium text-slate-500 dark:text-slate-400">
-                            Votre boutique est accessible à l’adresse&nbsp;:
-                        </p>
-                        <div className="flex items-center gap-3">
-                            <div className="flex flex-1 items-center gap-2 rounded-lg bg-slate-100 px-4 py-3 dark:bg-slate-900">
-                                <ExternalLink className="h-4 w-4 shrink-0 text-slate-400" />
-                                <a
-                                    href={tenant.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="truncate text-sm font-medium text-emerald-600 hover:underline dark:text-emerald-400"
-                                >
-                                    {tenant.url}
-                                </a>
+                                <div className="relative flex flex-col items-center text-center">
+                                    {/* Success Icon */}
+                                    <motion.div
+                                        initial={{ scale: 0.7, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        transition={{
+                                            delay: 0.15,
+                                            duration: 0.6,
+                                            type: 'spring',
+                                            stiffness: 140,
+                                        }}
+                                        className="relative mb-8"
+                                    >
+                                        {/* Outer ring */}
+                                        <div className="absolute inset-0 scale-125 rounded-full bg-emerald-500/10 blur-xl" />
+
+                                        <div className="relative flex h-28 w-28 items-center justify-center rounded-[2rem] bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-600 shadow-[0_20px_60px_-10px_rgba(16,185,129,0.45)]">
+                                            <Rocket className="h-12 w-12 text-white" />
+
+                                            <div className="absolute -right-2 -bottom-2 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white bg-white shadow-lg dark:border-slate-900 dark:bg-slate-900">
+                                                <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+
+                                    {/* Badge */}
+                                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50 px-4 py-1.5 text-xs font-semibold tracking-wide text-emerald-700 uppercase dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                        <PartyPopper className="h-3.5 w-3.5" />
+                                        Configuration terminée
+                                    </div>
+
+                                    {/* Title */}
+                                    <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
+                                        Votre boutique est prête à vendre
+                                    </h1>
+
+                                    {/* Subtitle */}
+                                    <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg dark:text-slate-300">
+                                        <span className="font-semibold text-slate-900 dark:text-white">
+                                            {tenant.raison_sociale}
+                                        </span>{' '}
+                                        a été créée avec succès. Vous pouvez
+                                        maintenant ajouter vos produits,
+                                        configurer vos paiements et commencer à
+                                        recevoir des commandes.
+                                    </p>
+                                </div>
                             </div>
-                            <button
-                                onClick={copyToClipboard}
-                                className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 transition hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-700"
-                                aria-label="Copier l’URL"
-                            >
-                                {copied ? (
-                                    <Check className="h-5 w-5 text-green-500" />
-                                ) : (
-                                    <Copy className="h-5 w-5 text-slate-500" />
-                                )}
-                            </button>
-                        </div>
-                    </div>
 
-                    {/* Actions secondaires */}
-                    <div
-                        ref={actionsRef}
-                        className="mt-8 flex flex-wrap items-center justify-center gap-4"
-                    >
-                        <CanRole roles="super_admin">
-                            <Link
-                                href={route('vendor.dashboard')}
-                                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 hover:shadow dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                            >
-                                <LayoutDashboard className="h-5 w-5" /> Tableau
-                                de bord
-                            </Link>
-                        </CanRole>
-                        <span className="text-slate-300 dark:text-slate-600">
-                            •
-                        </span>
-                        <CanRole roles="super_admin">
-                            <a
-                                href={`${tenant.admin_url}/products/produits`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 transition hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
-                            >
-                                <ShoppingBag className="h-4 w-4" /> Créer mon
-                                premier produit →
-                            </a>
-                        </CanRole>
-                    </div>
+                            {/* Body */}
+                            <div className="grid gap-8 px-6 py-8 sm:px-10 lg:grid-cols-5">
+                                {/* Left Content */}
+                                <div className="space-y-6 lg:col-span-3">
+                                    {/* URL Card */}
+                                    <div className="rounded-3xl border border-slate-200/70 bg-slate-50/70 p-5 dark:border-slate-800 dark:bg-slate-950/40">
+                                        <div className="mb-3 flex items-center gap-2">
+                                            <Globe className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                                URL publique de votre boutique
+                                            </p>
+                                        </div>
+
+                                        <div className="flex flex-col gap-3 sm:flex-row">
+                                            <a
+                                                href={tenant.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="group flex min-w-0 flex-1 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm transition-all hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                                            >
+                                                <ExternalLink className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-emerald-500" />
+                                                <span className="truncate font-medium text-emerald-700 dark:text-emerald-400">
+                                                    {tenant.url}
+                                                </span>
+                                            </a>
+
+                                            <button
+                                                type="button"
+                                                onClick={copyToClipboard}
+                                                className={cn(
+                                                    'inline-flex h-12 items-center justify-center gap-2 rounded-2xl border px-4 text-sm font-semibold transition-all',
+                                                    copied
+                                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300'
+                                                        : 'border-slate-200 bg-white text-slate-700 hover:border-emerald-200 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300',
+                                                )}
+                                            >
+                                                {copied ? (
+                                                    <>
+                                                        <Check className="h-4 w-4" />
+                                                        Copié
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Copy className="h-4 w-4" />
+                                                        Copier
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Primary CTA */}
+                                    <a
+                                        href={tenant.admin_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="group inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-4 text-base font-semibold text-white shadow-[0_15px_40px_-10px_rgba(16,185,129,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:from-emerald-700 hover:to-teal-700 hover:shadow-[0_20px_50px_-10px_rgba(16,185,129,0.55)]"
+                                    >
+                                        <Rocket className="h-5 w-5 transition-transform group-hover:-rotate-12" />
+                                        Accéder au panneau d'administration
+                                        <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                                    </a>
+
+                                    {/* Secondary Actions */}
+                                    <div className="grid gap-3 sm:grid-cols-2">
+                                        <a
+                                            href={`${tenant.url}/vendor/dashboard`}
+                                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-emerald-200 hover:text-emerald-700 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                                        >
+                                            <LayoutDashboard className="h-4 w-4" />
+                                            Tableau de bord
+                                        </a>
+
+                                        <a
+                                            href={`${tenant.admin_url}/products/produits`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-emerald-200 hover:text-emerald-700 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                                        >
+                                            <ShoppingBag className="h-4 w-4" />
+                                            Ajouter un produit
+                                        </a>
+                                    </div>
+                                </div>
+
+                                {/* Right Summary */}
+                                <div className="lg:col-span-2">
+                                    <div className="rounded-3xl border border-slate-200/70 bg-slate-50/70 p-6 dark:border-slate-800 dark:bg-slate-950/40">
+                                        <h3 className="mb-5 text-sm font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                                            Résumé de création
+                                        </h3>
+
+                                        <div className="space-y-4">
+                                            {summary.map((item) => {
+                                                const Icon = item.icon;
+
+                                                return (
+                                                    <div
+                                                        key={item.label}
+                                                        className="flex items-start gap-3"
+                                                    >
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm dark:bg-slate-900">
+                                                            <Icon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                                        </div>
+
+                                                        <div className="min-w-0">
+                                                            <p className="text-xs font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                                                                {item.label}
+                                                            </p>
+                                                            <p className="mt-1 truncate text-sm font-semibold text-slate-900 dark:text-white">
+                                                                {item.value}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* Security Notice */}
+                                        <div className="mt-6 rounded-2xl border border-emerald-200/70 bg-emerald-50/80 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
+                                            <div className="flex items-start gap-3">
+                                                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                                                <p className="text-sm leading-6 text-emerald-800 dark:text-emerald-200">
+                                                    Votre boutique est sécurisée
+                                                    et accessible en ligne.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
                 </div>
             </div>
         </>

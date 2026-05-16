@@ -61,110 +61,35 @@ function getToastStyle(type: 'success' | 'error' = 'success') {
                 border: '1px solid #7f1d1d',
             },
         },
+        warning: {
+            light: {
+                background: '#fef2f2',
+                color: '#991b1b',
+                border: '1px solid #fecaca',
+            },
+            dark: {
+                background: '#450a0a',
+                color: '#fee2e2',
+                border: '1px solid #7f1d1d',
+            },
+        },
+        info: {
+            light: {
+                background: '#fef2f2',
+                color: '#991b1b',
+                border: '1px solid #fecaca',
+            },
+            dark: {
+                background: '#450a0a',
+                color: '#fee2e2',
+                border: '1px solid #7f1d1d',
+            },
+        },
     };
 
     return isDark ? styles[type].dark : styles[type].light;
 }
 
-
-// export function useCartItems() {
-//     const { props } = usePage<{ cart?: Cart }>();
-//     const cart = props.cart;
-
-//     const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantite, 0) ?? 0;
-
-//     const updateQuantity = useCallback((itemId: number, quantity: number) => {
-//         router.patch(route('tenant.cart.update', itemId), { quantite: quantity }, {
-//             preserveScroll: true,
-//             preserveState: true,
-//             only: ['cart'],
-//             showProgress: false,
-//             onSuccess: () => {
-//                 router.reload({ only: ['cart'] });
-//             },
-//         });
-//     }, []);
-
-//     const addToCart = useCallback((productId: number, quantity = 1, variantId?: number) => {
-//         router.post(route('tenant.cart.add', productId), { quantity, variante_id: variantId }, {
-//             preserveScroll: true,
-//             preserveState: true,
-//             only: ['cart'],
-//             showProgress: false,
-//             onSuccess: () => {
-//                 router.reload({ only: ['cart'] });
-//                 toast.success('Produit ajouté au panier', {
-//                     description: 'L\'article a été ajouté avec succès.',
-//                     icon: createElement(ShoppingCart, { className: 'h-5 w-5 text-emerald-500' }),
-//                     duration: 2500,
-//                     style: getToastStyle('success'),
-//                 });
-//             },
-//         });
-//     }, []);
-
-//     const removeItem = useCallback((itemId: number) => {
-//         router.delete(route('tenant.cart.remove', itemId), {
-//             preserveScroll: true,
-//             preserveState: true,
-//             only: ['cart'],
-//             showProgress: false,
-//             onSuccess: () => {
-//                 router.reload({ only: ['cart'] });
-//                 toast.success('Produit retiré du panier', {
-//                     description: 'L\'article a été supprimé avec succès.',
-//                     icon: createElement(Trash2, { className: 'h-5 w-5 text-red-500' }),
-//                     duration: 2500,
-//                     style: getToastStyle('error'),
-//                 });
-//             },
-//         });
-//     }, []);
-
-//     const clearCart = useCallback(() => {
-//         router.post(route('tenant.cart.clear'), {}, {
-//             preserveScroll: true,
-//             only: ['cart'],
-//             showProgress: false,
-//             onSuccess: () => {
-//                 router.reload({ only: ['cart'] });
-//                 toast.success('Panier vidé');
-//             },
-//         });
-//     }, []);
-
-//     const applyCoupon = useCallback((code: string) => {
-//         router.post(route('tenant.cart.apply-coupon'), { code }, {
-//             preserveScroll: true,
-//             onSuccess: () => {
-//                 router.reload({ only: ['cart'] });
-//                 toast.success('Code promo appliqué');
-//             },
-//             onError: (errors) => toast.error(errors.code || 'Erreur'),
-//         });
-//     }, []);
-
-//     const removeCoupon = useCallback(() => {
-//         router.delete(route('tenant.cart.remove-coupon'), {
-//             preserveScroll: true,
-//             onSuccess: () => {
-//                 router.reload({ only: ['cart'] });
-//                 toast.success('Code promo retiré');
-//             },
-//         });
-//     }, []);
-
-//     return {
-//         cart,
-//         itemCount,
-//         addToCart,
-//         updateQuantity,
-//         removeItem,
-//         clearCart,
-//         applyCoupon,
-//         removeCoupon,
-//     };
-// }
 export function useCartItems() {
     const { props } = usePage<{ cart?: Cart }>();
     const cart = props.cart;

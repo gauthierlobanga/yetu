@@ -29,9 +29,14 @@ use App\Http\Controllers\Shop\PromotionController;
 use App\Http\Controllers\Shop\ReturnController;
 use App\Http\Controllers\Shop\ReviewController;
 use App\Http\Controllers\Shop\WishlistController;
+use App\Http\Controllers\vendor\TenantAiController;
+use App\Http\Controllers\Vendor\TenantOrderController;
+use App\Http\Controllers\Vendor\TenantPaymentController;
+use App\Http\Controllers\Vendor\TenantProductController;
 use App\Http\Controllers\Vendor\VendorDashboardController;
 use App\Http\Controllers\vendor\VendorSettingsController;
 use App\Http\Controllers\Vendor\VendorStatisticsController;
+use App\Http\Controllers\Vendor\VendorThemeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
@@ -136,8 +141,24 @@ Route::middleware([
 
         Route::get('/statistiques', [VendorStatisticsController::class, 'index'])
             ->name('vendor.statistics');
+
+        Route::get('/api/theme', [VendorThemeController::class, 'show'])
+            ->name('vendor.theme.show');
+
+        Route::post('/api/theme', [VendorThemeController::class, 'update'])
+            ->name('vendor.theme.update');
+
+        Route::get('/products', [TenantProductController::class, 'index'])->name('dashboard.products.index');
+
     });
 
+    Route::middleware(['auth', 'verified'])->prefix('ai')->name('ai.')->group(function () {
+        Route::post('/toggle', [TenantAiController::class, 'toggle'])
+            ->name('toggle');
+        Route::post('/chat', [TenantAiController::class, 'chat'])->name('chat');
+        Route::get('/recommendations', [TenantAiController::class, 'recommendations'])->name('recommendations');
+        Route::post('/generate-product', [TenantAiController::class, 'generateProduct'])->name('generate-product');
+    });
     /*
     |--------------------------------------------------------------------------
     | ROUTES PUBLICS TENANT
@@ -237,7 +258,6 @@ Route::middleware([
             Route::get('/quick-view/{produit:slug}', [ProductController::class, 'productsQuickView'])->name('product.quick-view');
             Route::get('/{produit:slug}', [ProductController::class, 'productsShow'])->name('product.show');
             Route::post('/search/by-image', [ProductController::class, 'searchByImage'])->name('product.search.by-image');
-            Route::get('/search/suggestions', [SearchController::class, 'suggestions'])->name('search.suggestions');
             Route::get('/{produit:slug}/reviews', [ReviewController::class, 'productsReviewsIndex'])->name('product.reviews.index');
         });
 
@@ -331,11 +351,24 @@ Route::middleware([
                 Route::post('/subscribe', [NewsletterController::class, 'newsletterSubscribe'])->name('newsletter.subscribe');
                 Route::post('/unsubscribe', [NewsletterController::class, 'newsletterUnsubscribe'])->name('newsletter.unsubscribe');
             });
+
+            Route::get('/vendor/orders', [TenantOrderController::class, 'index'])
+                ->name('vendor.orders.index');
+            Route::get('/vendor/orders/{commande}', [TenantOrderController::class, 'show'])
+                ->name('vendor.orders.show');
+            Route::get('/vendor/payments', [TenantPaymentController::class, 'index'])
+                ->name('vendor.payments.index');
         });
     });
 
     Route::get('/subscription/required', function () {
         return inertia('Subscription/Required');
     })->name('tenant.subscription.required');
+
+    Route::post('/flash/clear', function () {
+        session()->forget(['success', 'error']);
+
+        return response()->noContent();
+    })->name('flash.clear');
 
 });

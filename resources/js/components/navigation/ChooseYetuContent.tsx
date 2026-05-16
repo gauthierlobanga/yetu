@@ -46,13 +46,23 @@ const features = [
 ];
 
 const resources = [
-    { icon: BookOpen, label: 'Blog', href: route('tenant.blog.index') },
+    { icon: BookOpen, label: 'Blog', href: route('blog.index') },
     {
         icon: HelpCircle,
         label: "Centre d'aide",
-        href: route('tenant.page.help'),
+        href: route('page.help'),
     },
-    { icon: Mail, label: 'Contact', href: route('tenant.page.contact') },
+    {
+        icon: HelpCircle,
+        label: "Centre d'aide",
+        href: route('page.help'),
+    },
+    {
+        icon: HelpCircle,
+        label: 'A propos',
+        href: route('page.about'),
+    },
+    { icon: Mail, label: 'Contact', href: route('page.contact') },
 ];
 
 export function ChooseYetuContent() {

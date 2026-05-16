@@ -44,6 +44,16 @@ import type { PageProps } from '@/types/ecommerce/products';
 export default function About() {
     const { props } = usePage<PageProps>();
 
+    // Mapping des icônes (à compléter selon vos besoins)
+    const iconMap: Record<
+        string,
+        React.ComponentType<{ className?: string }>
+    > = {
+        ShieldCheck,
+        Zap,
+        Heart,
+    };
+
     const { platformStats } = props;
 
     const statsRef = useRef(null);
@@ -61,7 +71,7 @@ export default function About() {
 
     return (
         <MainLayout>
-            <Head title="À propos de shop" />
+            <Head title="À propos de Yetu" />
 
             {/* HERO SECTION – IMMERSIVE */}
             <section className="relative overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-28">
@@ -126,7 +136,7 @@ export default function About() {
             </section>
 
             {/* STATISTIQUES CLÉS – ANIMÉES */}
-            <section
+            {/* <section
                 ref={statsRef}
                 className="border-y border-border/40 bg-muted/20 py-16"
             >
@@ -149,6 +159,59 @@ export default function About() {
                                 icon: Star,
                             },
                             { value: '45+', label: 'Pays livrés', icon: Globe },
+                            {
+                                value: '24/7',
+                                label: 'Support client',
+                                icon: Clock,
+                            },
+                        ].map((stat, i) => (
+                            <motion.div
+                                key={i}
+                                variants={fadeInUp}
+                                className="text-center"
+                            >
+                                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                                    <stat.icon className="h-7 w-7" />
+                                </div>
+                                <div className="font-heading text-4xl font-bold tracking-tight">
+                                    {stat.value}
+                                </div>
+                                <div className="mt-1 text-sm text-muted-foreground">
+                                    {stat.label}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </div>
+            </section> */}
+            {/* STATISTIQUES CLÉS – DYNAMIQUES */}
+            <section
+                ref={statsRef}
+                className="border-y border-border/40 bg-muted/20 py-16"
+            >
+                <div className="mx-auto max-w-6xl px-4">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="hidden"
+                        animate={statsInView ? 'visible' : 'hidden'}
+                        className="grid grid-cols-2 gap-8 md:grid-cols-4"
+                    >
+                        {[
+                            {
+                                value: platformStats?.productsCount ?? 0,
+                                label: 'Produits disponibles',
+                                icon: Package,
+                            },
+                            {
+                                value: `${platformStats?.ordersProcessed ?? 0}+`,
+                                label: 'Commandes traitées',
+                                icon: Star,
+                            },
+                            {
+                                value: `${platformStats?.countriesServed ?? 0}`,
+                                label: 'Pays livrés',
+                                icon: Globe,
+                            },
                             {
                                 value: '24/7',
                                 label: 'Support client',
@@ -254,7 +317,7 @@ export default function About() {
             </section>
 
             {/* NOS VALEURS */}
-            <section className="bg-muted/30 py-20">
+            {/* <section className="bg-muted/30 py-20">
                 <div className="mx-auto max-w-6xl px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -317,10 +380,38 @@ export default function About() {
                         ))}
                     </div>
                 </div>
-            </section>
+            </section> */}
+
+            {platformStats?.values?.map((value: any, i: number) => {
+                const IconComponent = iconMap[value.icon] || ShieldCheck;
+
+                return (
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.1 }}
+                    >
+                        <Card className="h-full border-0 bg-background/60 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-lg">
+                            <CardContent className="p-6">
+                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                    <IconComponent className="h-6 w-6" />
+                                </div>
+                                <h3 className="mb-2 text-lg font-semibold">
+                                    {value.title}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {value.description}
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                );
+            })}
 
             {/* TÉMOIGNAGES */}
-            <section className="py-20">
+            {/* <section className="py-20">
                 <div className="mx-auto max-w-6xl px-4">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -392,56 +483,57 @@ export default function About() {
                         ))}
                     </div>
                 </div>
-            </section>
+            </section> */}
+            {platformStats?.testimonials?.map((testimonial: any, i: number) => (
+                <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                >
+                    <Card className="h-full border-border/60 bg-card/60 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Quote className="mb-4 h-8 w-8 text-primary/40" />
+                            <p className="mb-6 text-sm italic">
+                                {testimonial.quote}
+                            </p>
+                            <div className="flex items-center gap-3">
+                                <Avatar>
+                                    {/* Si vous aviez un champ avatar, utilisez‑le ici */}
+                                    <AvatarFallback>
+                                        {testimonial.name?.[0] ?? '?'}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="text-sm font-medium">
+                                        {testimonial.name}
+                                    </p>
+                                    {testimonial.role && (
+                                        <p className="text-xs text-muted-foreground">
+                                            {testimonial.role}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            ))}
 
             {/* FAQ */}
-            <section className="bg-muted/20 py-20">
-                <div className="mx-auto max-w-3xl px-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="mb-12 text-center"
-                    >
-                        <h2 className="font-heading text-3xl font-bold">
-                            Questions fréquentes
-                        </h2>
-                        <p className="mt-4 text-muted-foreground">
-                            Tout ce que vous devez savoir sur shop
-                        </p>
-                    </motion.div>
-
-                    <Accordion type="single" collapsible className="w-full">
-                        {[
-                            {
-                                q: 'Comment passer une commande ?',
-                                a: 'Parcourez notre catalogue, ajoutez des articles au panier, puis suivez les étapes de paiement sécurisé.',
-                            },
-                            {
-                                q: 'Quels sont les délais de livraison ?',
-                                a: "La livraison standard prend 3 à 5 jours ouvrés. L'express est disponible en 24-48h.",
-                            },
-                            {
-                                q: 'Puis-je retourner un article ?',
-                                a: "Oui, vous disposez de 30 jours pour retourner un article non utilisé dans son emballage d'origine.",
-                            },
-                            {
-                                q: 'Les paiements sont-ils sécurisés ?',
-                                a: 'Absolument. Toutes les transactions sont cryptées et conformes aux normes PCI DSS.',
-                            },
-                        ].map((item, i) => (
-                            <AccordionItem key={i} value={`item-${i}`}>
-                                <AccordionTrigger className="text-left">
-                                    {item.q}
-                                </AccordionTrigger>
-                                <AccordionContent className="text-muted-foreground">
-                                    {item.a}
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                </div>
-            </section>
+            <Accordion type="single" collapsible className="w-full">
+                {platformStats?.faqs?.map((faq: any, i: number) => (
+                    <AccordionItem key={i} value={`item-${i}`}>
+                        <AccordionTrigger className="text-left">
+                            {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground">
+                            {faq.answer}
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
+            </Accordion>
 
             {/* CTA FINAL */}
             <section className="relative overflow-hidden py-24">
@@ -482,8 +574,6 @@ export default function About() {
             </section>
             {/* Section BentoGrids */}
             <BentoGrids stats={platformStats} />
-
-            <InteractiveImageSliderPage />
         </MainLayout>
     );
 }

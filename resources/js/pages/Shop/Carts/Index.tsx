@@ -7,10 +7,8 @@ export default function CartIndex() {
     return (
         <MainLayout>
             <Head title="Panier" />
-            <div className="lg:18 container mx-auto sm:px-14 md:py-16">
-                <h1 className="mb-6 text-2xl font-semibold tracking-tight">
-                    Votre panier
-                </h1>
+            <div className="container mx-auto py-8">
+                <h1 className="mb-6 text-2xl font-bold">Votre panier</h1>
                 <CartContent />
             </div>
         </MainLayout>

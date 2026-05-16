@@ -16,17 +16,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* @import 'tailwindcss';
-@import 'tw-animate-css';
-@import 'shadcn/tailwind.css';
-@import '@fontsource-variable/inter';
-@plugin "@tailwindcss/typography";
-
-@source '../views';
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-
-@custom-variant dark (&:is(.dark *)); */
-
 /*
 |--------------------------------------------------------------------------
 | 🌿 Re-map Zinc → Slate (global)

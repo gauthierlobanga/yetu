@@ -155,20 +155,18 @@ export default function ProductShow() {
     const renderStars = (rating: number, size: 'sm' | 'md' = 'md') => {
         const starSize = size === 'sm' ? 'h-3 w-3' : 'h-4 w-4';
 
-        return Array.from({ length: 5 }).map((_, i) => {
-            return (
-                <Star
-                    key={i}
-                    className={`${starSize} ${
-                        i < Math.floor(rating)
-                            ? 'fill-yellow-400 text-yellow-400'
-                            : i < rating
-                              ? 'fill-yellow-400/50 text-yellow-400'
-                              : 'fill-muted-foreground/20 text-muted-foreground/20'
-                    }`}
-                />
-            );
-        });
+        return Array.from({ length: 5 }).map((_, i) => (
+            <Star
+                key={i}
+                className={`${starSize} ${
+                    i < Math.floor(rating)
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : i < rating
+                          ? 'fill-yellow-400/50 text-yellow-400'
+                          : 'fill-muted-foreground/20 text-muted-foreground/20'
+                }`}
+            />
+        ));
     };
 
     const handleAddToCart = () => {
@@ -282,7 +280,7 @@ export default function ProductShow() {
                                     -{product.reduction_pourcentage}%
                                 </Badge>
                             )}
-                            {showZoom && (
+                            {/* {showZoom && (
                                 <div
                                     className="pointer-events-none absolute flex h-24 w-24 items-center justify-center rounded-full border-2 border-white bg-black/30 text-sm font-medium text-white shadow-lg backdrop-blur-sm"
                                     style={{
@@ -292,7 +290,7 @@ export default function ProductShow() {
                                 >
                                     <ZoomIn className="h-6 w-6" />
                                 </div>
-                            )}
+                            )} */}
                             <Dialog>
                                 <DialogTrigger asChild>
                                     <button className="absolute top-4 right-4 z-10 rounded-full bg-white/80 p-2 shadow backdrop-blur-sm transition hover:bg-white">

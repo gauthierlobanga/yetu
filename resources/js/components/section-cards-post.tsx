@@ -4,15 +4,13 @@ import { usePage } from '@inertiajs/react';
 import {
     IconTrendingDown,
     IconTrendingUp,
-    IconEye,
-    IconHeart,
-    IconMessage,
     IconFileText,
     IconCalendar,
     IconUser,
     IconRocket,
     IconClock,
     IconChartBar,
+    IconShoppingCart,
 } from '@tabler/icons-react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useEffect, useState } from 'react';
@@ -26,34 +24,35 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 
-interface PostStats {
-    total_posts: number;
-    published_posts: number;
-    draft_posts: number;
-    scheduled_posts: number;
-    archived_posts: number;
-    total_views: number;
-    total_likes: number;
-    total_comments: number;
-    views_change: number;
-    likes_change: number;
-    posts_change: number;
-    avg_engagement: number;
-    max_engagement: number;
-    old_drafts_count: number;
-    posts_this_month: number;
-    posts_this_month_change: number;
-    active_authors: number;
-    active_authors_change: number;
+interface EcommerceStats {
+    total_products: number;
+    published_products: number;
+    draft_products: number;
+    total_orders: number;
+    completed_orders: number;
+    pending_orders: number;
+    cancelled_orders: number;
+    total_revenue: number;
+    revenue_change: number;
+    orders_change: number;
+    total_customers: number;
+    customers_change: number;
+    active_carts: number;
+    abandoned_carts: number;
+    avg_order_value: number;
     conversion_rate: number;
-    days_since_last_post: number | null;
-    views_trend: number;
-    pending_drafts: number;
-    pending_drafts_change: number;
+    return_rate: number;
+    inventory_count: number;
+    low_stock_count: number;
+    out_of_stock_count: number;
+    revenue_this_month: number;
+    revenue_this_month_change: number;
+    orders_this_month: number;
+    orders_this_month_change: number;
 }
 
 interface PageProps {
-    stats: PostStats;
+    stats: EcommerceStats;
     [key: string]: unknown;
 }
 
@@ -82,155 +81,128 @@ export function SectionCards() {
         );
     }
 
-    const getDaysSinceLastPost = () => {
-        const days = stats.days_since_last_post;
-
-        if (
-            days === null ||
-            days === undefined ||
-            days < 0 ||
-            days > 10000 ||
-            isNaN(days)
-        ) {
-            return null;
-        }
-
-        return days;
-    };
-
-    const daysValue = getDaysSinceLastPost();
-
     const cards = [
         {
-            title: 'Total des articles',
-            value: stats.total_posts.toLocaleString(),
+            title: 'Total des produits',
+            value: stats.total_products.toLocaleString(),
             description: 'Tous statuts confondus',
-            trend: stats.posts_change,
+            trend: stats.orders_change,
             icon: <IconFileText className="size-6" />,
-            subText: `${stats.published_posts} publiés, ${stats.draft_posts} brouillons`,
-            trendUp: stats.posts_change >= 0,
+            subText: `${stats.published_products} publiés, ${stats.draft_products} brouillons`,
+            trendUp: stats.orders_change >= 0,
         },
         {
-            title: 'Articles publiés',
-            value: stats.published_posts.toLocaleString(),
+            title: 'Produits publiés',
+            value: stats.published_products.toLocaleString(),
             description: 'Accessibles au public',
             trend:
-                stats.published_posts > 0
+                stats.published_products > 0
                     ? Math.round(
-                          (stats.published_posts / stats.total_posts) * 100,
-                      )
+                        (stats.published_products / stats.total_products) * 100,
+                    )
                     : 0,
-            icon: <IconFileText className="size-6 text-green-500" />,
-            subText: `${stats.scheduled_posts} programmés`,
+            icon: <IconFileText className="size-6 text-primary" />,
+            subText: `${stats.low_stock_count} en stock faible`,
             trendUp: true,
         },
         {
-            title: 'Vues totales',
-            value: stats.total_views.toLocaleString(),
-            description: 'Nombre total de vues',
-            trend: stats.views_change,
-            icon: <IconEye className="size-6" />,
-            subText: 'Performance des articles',
-            trendUp: stats.views_change >= 0,
+            title: 'Chiffre d\'affaires',
+            value: new Intl.NumberFormat('fr-CD', {
+                style: 'currency',
+                currency: 'CDF',
+            }).format(stats.total_revenue),
+            description: 'Revenu total',
+            trend: stats.revenue_change,
+            icon: <IconChartBar className="size-6" />,
+            subText: 'Performance des ventes',
+            trendUp: stats.revenue_change >= 0,
         },
         {
-            title: "J'aime",
-            value: stats.total_likes.toLocaleString(),
-            description: 'Likes cumulés',
-            trend: stats.likes_change,
-            icon: <IconHeart className="size-6 text-red-500" />,
-            subText: 'Engagement des lecteurs',
-            trendUp: stats.likes_change >= 0,
+            title: 'Commandes totales',
+            value: stats.total_orders.toLocaleString(),
+            description: 'Commandes reçues',
+            trend: stats.orders_change,
+            icon: <IconRocket className="size-6 text-primary" />,
+            subText: `${stats.completed_orders} complétées, ${stats.pending_orders} en attente`,
+            trendUp: stats.orders_change >= 0,
         },
         {
-            title: 'Commentaires',
-            value: stats.total_comments.toLocaleString(),
-            description: 'Commentaires reçus',
-            trend:
-                stats.total_comments > 0
-                    ? Math.round(
-                          (stats.total_comments / stats.total_views) * 100,
-                      )
-                    : 0,
-            icon: <IconMessage className="size-6 text-blue-500" />,
-            subText: `${stats.avg_engagement}% d'engagement moyen`,
-            trendUp: true,
+            title: 'Clients',
+            value: stats.total_customers.toLocaleString(),
+            description: 'Clients enregistrés',
+            trend: stats.customers_change,
+            icon: <IconUser className="size-6 text-primary" />,
+            subText: 'Base de clients',
+            trendUp: stats.customers_change >= 0,
+        },
+        {
+            title: 'Paniers actifs',
+            value: stats.active_carts.toLocaleString(),
+            description: 'Paniers en cours',
+            trend: stats.abandoned_carts,
+            icon: <IconShoppingCart className="size-6 text-primary" />,
+            subText: `${stats.abandoned_carts} abandonnés`,
+            trendUp: false,
+        },
+        {
+            title: 'Paniers abandonnés',
+            value: stats.abandoned_carts.toLocaleString(),
+            description: 'Paniers non finalisés',
+            trend: stats.return_rate,
+            icon: <IconClock className="size-6 text-destructive" />,
+            subText: 'Taux d\'abandon',
+            trendUp: false,
+        },
+        {
+            title: 'Panier moyen',
+            value: new Intl.NumberFormat('fr-CD', {
+                style: 'currency',
+                currency: 'CDF',
+            }).format(stats.avg_order_value),
+            description: 'Valeur moyenne par commande',
+            trend: stats.revenue_change,
+            icon: <IconChartBar className="size-6 text-primary" />,
+            subText: 'vs période précédente',
+            trendUp: stats.revenue_change >= 0,
         },
         {
             title: 'Taux de conversion',
             value: `${stats.conversion_rate}%`,
-            description: 'Publications vs période précédente',
+            description: 'Visiteurs → Clients',
             trend: stats.conversion_rate,
-            icon: <IconRocket className="size-6 text-purple-500" />,
-            subText: 'Rythme de publication',
+            icon: <IconRocket className="size-6 text-primary" />,
+            subText: 'Performance de conversion',
             trendUp: stats.conversion_rate >= 0,
         },
         {
-            title: 'Dernière publication',
-            value:
-                daysValue === 0
-                    ? "Aujourd'hui"
-                    : daysValue !== null
-                      ? `J-${daysValue}`
-                      : 'Jamais',
-            description: 'Dernier article publié',
-            trend: daysValue !== null ? -daysValue : 0,
-            icon: <IconClock className="size-6 text-orange-500" />,
-            subText:
-                daysValue === 0
-                    ? "Publié aujourd'hui"
-                    : daysValue !== null
-                      ? `Il y a ${daysValue} jour${daysValue > 1 ? 's' : ''}`
-                      : 'Aucun article publié',
-            trendUp: false,
-        },
-        {
-            title: 'Tendance des vues',
-            value: `${stats.views_trend}%`,
-            description: 'Évolution sur 7 jours',
-            trend: stats.views_trend,
-            icon: <IconChartBar className="size-6 text-indigo-500" />,
+            title: 'Taux de retour',
+            value: `${stats.return_rate}%`,
+            description: 'Produits retournés',
+            trend: stats.return_rate,
+            icon: <IconClock className="size-6 text-destructive" />,
             subText: 'vs période précédente',
-            trendUp: stats.views_trend >= 0,
+            trendUp: stats.return_rate <= 0,
         },
         {
-            title: 'Articles ce mois',
-            value: stats.posts_this_month.toLocaleString(),
-            description: 'Créés ce mois-ci',
-            trend: stats.posts_this_month_change,
-            icon: <IconCalendar className="size-6" />,
-            subText: 'Rythme de publication',
-            trendUp: stats.posts_this_month_change >= 0,
+            title: 'Stock total',
+            value: stats.inventory_count.toLocaleString(),
+            description: 'Unités en stock',
+            trend: stats.out_of_stock_count,
+            icon: <IconFileText className="size-6 text-primary" />,
+            subText: `${stats.out_of_stock_count} rupture de stock`,
+            trendUp: stats.out_of_stock_count === 0,
         },
         {
-            title: 'Auteurs actifs',
-            value: stats.active_authors.toLocaleString(),
-            description: 'Contributeurs',
-            trend: stats.active_authors_change,
-            icon: <IconUser className="size-6" />,
-            subText: 'Équipe éditoriale',
-            trendUp: stats.active_authors_change >= 0,
-        },
-        {
-            title: 'Brouillons',
-            value: stats.draft_posts.toLocaleString(),
-            description: 'À terminer',
-            trend:
-                stats.draft_posts > 0
-                    ? Math.round((stats.draft_posts / stats.total_posts) * 100)
-                    : 0,
-            icon: <IconFileText className="size-6 text-yellow-500" />,
-            subText: `${stats.old_drafts_count} brouillons anciens (30j+)`,
-            trendUp: false,
-        },
-        {
-            title: 'Brouillons en attente',
-            value: stats.pending_drafts?.toLocaleString() ?? '0',
-            description: 'Modifiés cette semaine',
-            trend: stats.pending_drafts_change ?? 0,
-            icon: <IconFileText className="size-6 text-orange-500" />,
-            subText: 'À publier prochainement',
-            trendUp: (stats.pending_drafts_change ?? 0) >= 0,
+            title: 'Revenu ce mois',
+            value: new Intl.NumberFormat('fr-CD', {
+                style: 'currency',
+                currency: 'CDF',
+            }).format(stats.revenue_this_month),
+            description: 'Revenu mensuel',
+            trend: stats.revenue_this_month_change,
+            icon: <IconCalendar className="size-6 text-primary" />,
+            subText: 'vs mois précédent',
+            trendUp: stats.revenue_this_month_change >= 0,
         },
     ];
 
