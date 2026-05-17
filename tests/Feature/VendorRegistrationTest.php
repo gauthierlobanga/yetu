@@ -5,9 +5,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Models\VendorRequest;
 use App\Services\VendorRegistrationService;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 beforeEach(function () {
     // Nettoyer la base de données avant chaque test
@@ -56,7 +54,7 @@ test('tenant schema is created', function () {
     $tenant = $service->approve($vendorRequest);
 
     $schemaName = 'tenant_'.$tenant->id;
-    $schemaExists = DB::select("SELECT schema_name FROM information_schema.schemata WHERE schema_name = ?", [$schemaName]);
+    $schemaExists = DB::select('SELECT schema_name FROM information_schema.schemata WHERE schema_name = ?', [$schemaName]);
 
     expect($schemaExists)->not->toBeEmpty();
 });
@@ -110,7 +108,7 @@ test('tenant migrations are run', function () {
 
     // Vérifier que les tables existent dans le tenant
     tenancy()->initialize($tenant);
-    $tables = DB::select("SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema()");
+    $tables = DB::select('SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema()');
     tenancy()->end();
 
     $tableNames = collect($tables)->pluck('table_name');

@@ -4,12 +4,11 @@ namespace App\Filament\Vendeur\Resources\Promotions\Schemas;
 
 use App\Models\ProductCategory;
 use App\Models\Produit;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-// use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -47,15 +46,15 @@ class PromotionForm
                                                     ->label('Description')
                                                     ->rows(3)
                                                     ->maxLength(500),
-                                                // SpatieMediaLibraryFileUpload::make('banner')
-                                                //     ->label('Bannière promotionnelle')
-                                                //     ->image()
-                                                //     ->collection('banner')
-                                                //     ->disk('public')
-                                                //     ->directory('promotions')
-                                                //     ->visibility('public')
-                                                //     ->imageEditor()
-                                                //     ->helperText('Image affichée dans la section promotion (format paysage recommandé)'),
+                                                SpatieMediaLibraryFileUpload::make('banner')
+                                                    ->label('Bannière promotionnelle')
+                                                    ->image()
+                                                    ->collection('banner')
+                                                    ->disk('public')
+                                                    ->directory('promotions')
+                                                    ->visibility('public')
+                                                    ->imageEditor()
+                                                    ->helperText('Image affichée dans la section promotion (format paysage recommandé)'),
                                                 Toggle::make('est_active')
                                                     ->label('Promotion active')
                                                     ->inline(false)

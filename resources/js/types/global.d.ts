@@ -1,5 +1,6 @@
 import type Echo from 'laravel-echo';
 import type { Auth } from '@/types/auth';
+import type { DashboardNotification } from './ecommerce/notifications/notification';
 // Types pour les données flash
 interface FlashData {
     message?: string;
@@ -33,6 +34,8 @@ declare module '@inertiajs/react' {
         flash?: FlashData;
         errors?: Record<string, string>;
         headerData?: HeaderData;
+        notifications: DashboardNotification[];
+        unreadNotificationsCount: number;
     }
 }
 

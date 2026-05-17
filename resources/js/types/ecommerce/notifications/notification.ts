@@ -15,3 +15,17 @@ export interface Notification {
     created_at: string;
     updated_at?: string;
 }
+
+
+/** Notification telle que retournée par le middleware (notifications partagées) */
+export interface DashboardNotification {
+    id: string;
+    type: string;
+    title: string;
+    message: string;
+    url: string | null;
+    read_at: string | null;
+    created_at: string;
+    data?: NotificationData;
+    isRealtime?: boolean;
+}

@@ -100,42 +100,42 @@ class VendorDashboardController extends Controller
             $currentPlanFeatures = is_array($featuresRaw) ? $featuresRaw : json_decode($featuresRaw, true) ?? [];
         }
 
-        $userId = (string) $user->id;
+        // $userId = (string) $user->id;
 
-        $dashboardNotifications = $tenant->run(function () use ($userId) {
-            $tenantUser = User::query()->find($userId);
+        // $dashboardNotifications = $tenant->run(function () use ($userId) {
+        //     $tenantUser = User::query()->find($userId);
 
-            if (! $tenantUser) {
-                return [
-                    'items' => [],
-                    'unread_count' => 0,
-                ];
-            }
+        //     if (! $tenantUser) {
+        //         return [
+        //             'items' => [],
+        //             'unread_count' => 0,
+        //         ];
+        //     }
 
-            $items = $tenantUser->notifications()
-                ->latest()
-                ->limit(20)
-                ->get()
-                ->map(function ($notification) {
-                    return [
-                        'id' => $notification->id,
-                        'type' => data_get($notification->data, 'type', 'system'),
-                        'title' => data_get($notification->data, 'title', 'Notification'),
-                        'message' => data_get($notification->data, 'message', ''),
-                        'url' => data_get($notification->data, 'url'),
-                        'read_at' => $notification->read_at?->toIso8601String(),
-                        'created_at' => $notification->created_at?->toIso8601String(),
-                        'data' => $notification->data,
-                    ];
-                })
-                ->values()
-                ->all();
+        //     $items = $tenantUser->notifications()
+        //         ->latest()
+        //         ->limit(20)
+        //         ->get()
+        //         ->map(function ($notification) {
+        //             return [
+        //                 'id' => $notification->id,
+        //                 'type' => data_get($notification->data, 'type', 'system'),
+        //                 'title' => data_get($notification->data, 'title', 'Notification'),
+        //                 'message' => data_get($notification->data, 'message', ''),
+        //                 'url' => data_get($notification->data, 'url'),
+        //                 'read_at' => $notification->read_at?->toIso8601String(),
+        //                 'created_at' => $notification->created_at?->toIso8601String(),
+        //                 'data' => $notification->data,
+        //             ];
+        //         })
+        //         ->values()
+        //         ->all();
 
-            return [
-                'items' => $items,
-                'unread_count' => $tenantUser->unreadNotifications()->count(),
-            ];
-        });
+        //     return [
+        //         'items' => $items,
+        //         'unread_count' => $tenantUser->unreadNotifications()->count(),
+        //     ];
+        // });
 
         return Inertia::render('Vendor/Dashboard', [
             'tenant' => $tenantProps->getTenantProps($tenant),
@@ -145,8 +145,8 @@ class VendorDashboardController extends Controller
             'recentProducts' => $recentProducts,
             'currentPlanFeatures' => $currentPlanFeatures,
             'allPlansFeatures' => $allPlans->pluck('features', 'name')->toArray(),
-            'notifications' => $dashboardNotifications['items'],
-            'unreadNotificationsCount' => $dashboardNotifications['unread_count'],
+            // 'notifications' => $dashboardNotifications['items'],
+            // 'unreadNotificationsCount' => $dashboardNotifications['unread_count'],
         ]);
     }
 

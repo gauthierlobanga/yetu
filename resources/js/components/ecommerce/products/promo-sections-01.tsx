@@ -1,8 +1,20 @@
+/* eslint-disable react-hooks/purity */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/components/home/promo-section.tsx
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { Copy, Calendar, ArrowRight, Check } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
+import {
+    ArrowRight,
+    Calendar,
+    Check,
+    Clock3,
+    Copy,
+    Sparkles,
+    Ticket,
+    Zap,
+} from 'lucide-react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { PromoData } from '@/types/ecommerce/products';
@@ -17,177 +29,178 @@ interface TimeLeft {
     minutes: number;
     seconds: number;
 }
+
+function formatNumber(value: number): string {
+    return String(value).padStart(2, '0');
+}
+
+function formatDate(date: Date): string {
+    return date.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+}
+
+function CountdownItem({ label, value }: { label: string; value: number }) {
+    return (
+        <div className="flex flex-col items-center">
+            <span className="text-2xl font-black text-slate-900 tabular-nums dark:text-white">
+                {formatNumber(value)}
+            </span>
+            <span className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
+                {label}
+            </span>
+        </div>
+    );
+}
+
 export default function PromoSection({ promo }: PromoSectionProps) {
     const targetDate = useMemo(
         () => new Date(promo.end_date),
         [promo.end_date],
     );
-
-    const useNow = () => {
-        const [now, setNow] = useState(Date.now());
-
-        useEffect(() => {
-            const t = setInterval(() => setNow(Date.now()), 1000);
-
-            return () => clearInterval(t);
-        }, []);
-
-        return now;
-    };
-
-    const now = useNow();
-    const isExpired = targetDate.getTime() < now;
-
     const coupons = promo.coupons ?? [];
-
-    const [timeLeft, setTimeLeft] = useState<TimeLeft>({
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-    });
-
+    const [now, setNow] = useState(Date.now());
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
     useEffect(() => {
-        if (isExpired) {
-            return;
-        }
+        const interval = setInterval(() => setNow(Date.now()), 1000);
 
-        const calculateTimeLeft = () => {
-            const diff = targetDate.getTime() - Date.now();
+        return () => clearInterval(interval);
+    }, []);
 
-            if (diff > 0) {
-                setTimeLeft({
-                    days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-                    hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
-                    minutes: Math.floor((diff / 1000 / 60) % 60),
-                    seconds: Math.floor((diff / 1000) % 60),
-                });
-            }
-        };
+    const diff = Math.max(targetDate.getTime() - now, 0);
+    const isExpired = diff <= 0;
+    const isAlmostExpired = diff > 0 && diff < 24 * 60 * 60 * 1000;
 
-        calculateTimeLeft();
-        const timer = setInterval(calculateTimeLeft, 1000);
-
-        return () => clearInterval(timer);
-    }, [targetDate, isExpired]);
-
-    const formatNumber = (n: number) => String(n).padStart(2, '0');
-
-    const formatDate = (date: Date) =>
-        date.toLocaleDateString('fr-FR', {
-            day: 'numeric',
-            month: 'long',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-
-    const copyCode = async (code: string) => {
-        await navigator.clipboard.writeText(code);
-        setCopiedCode(code);
-        setTimeout(() => setCopiedCode(null), 2000);
+    const timeLeft: TimeLeft = {
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
     };
 
+    const copyCode = useCallback(async (code: string) => {
+        try {
+            await navigator.clipboard.writeText(code);
+            setCopiedCode(code);
+            setTimeout(() => setCopiedCode(null), 2000);
+        } catch (error) {
+            console.error(error);
+        }
+    }, []);
+
     return (
-        <section className="relative overflow-hidden py-8 md:py-12">
-            {/* Fond et glow (inchangé) */}
-            <div className="absolute inset-0 bg-linear-to-r from-orange-50 via-amber-50/80 to-yellow-50 dark:from-orange-950/20 dark:to-yellow-950/20" />
-            <div className="absolute -top-32 -left-32 h-64 w-64 rounded-full bg-orange-300/20 blur-3xl" />
-            <div className="absolute -right-32 -bottom-32 h-64 w-64 rounded-full bg-yellow-300/20 blur-3xl" />
+        <section className="relative overflow-hidden py-12 md:py-16">
+            {/* Fond épuré */}
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/80 via-white to-slate-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20" />
+            <div className="absolute top-0 left-0 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-400/5" />
+            <div className="absolute right-0 bottom-0 h-64 w-64 rounded-full bg-slate-400/10 blur-3xl dark:bg-slate-500/5" />
 
-            <div className="relative mx-auto max-w-7xl px-4">
-                <div className="grid items-start gap-8 lg:grid-cols-2">
-                    {/* Colonne gauche */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5 }}
-                        className="space-y-5"
-                    >
-                        {/* Badge date */}
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary backdrop-blur-sm">
-                            <Calendar className="h-4 w-4" />
-                            Fin de la promo : {formatDate(targetDate)}
-                        </span>
+            <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    className="overflow-hidden rounded-3xl border border-white/80 bg-white/80 shadow-2xl shadow-slate-200/50 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80 dark:shadow-black/30"
+                >
+                    <div className="grid items-center gap-8 p-6 md:p-10 lg:grid-cols-5 lg:gap-12 lg:p-12">
+                        {/* Contenu principal (3/5) */}
+                        <div className="space-y-6 lg:col-span-3">
+                            {/* Badges */}
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Badge className="gap-1 bg-emerald-600 text-white hover:bg-emerald-700">
+                                    <Sparkles className="h-3 w-3" /> Offre
+                                    exclusive
+                                </Badge>
+                                <Badge variant="secondary">
+                                    <Calendar className="mr-1 h-3 w-3" />
+                                    Jusqu’au {formatDate(targetDate)}
+                                </Badge>
+                            </div>
 
-                        {/* Titre */}
-                        <h2 className="text-2xl font-bold md:text-3xl">
-                            {promo.title}{' '}
-                            {promo.discount_percentage && (
-                                <span className="bg-linear-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                                    -{promo.discount_percentage}%
-                                </span>
-                            )}
-                        </h2>
-                        <p className="max-w-md text-sm text-muted-foreground">
-                            {promo.description}
-                        </p>
-
-                        {/* Compte à rebours */}
-                        <div className="flex gap-3">
-                            {Object.entries(timeLeft).map(([unit, value]) => (
-                                <motion.div
-                                    key={unit}
-                                    whileHover={{ scale: 1.05 }}
-                                    className="flex flex-col items-center"
-                                >
-                                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/70 shadow-sm backdrop-blur dark:bg-white/10">
-                                        <span className="text-xl font-bold tabular-nums">
-                                            {formatNumber(value)}
+                            {/* Titre et réduction */}
+                            <div>
+                                <h2 className="text-2xl leading-tight font-extrabold text-slate-900 md:text-3xl dark:text-white">
+                                    {promo.title}
+                                </h2>
+                                {promo.discount_percentage && (
+                                    <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-2 text-white shadow-lg shadow-emerald-500/20">
+                                        <Zap className="h-4 w-4" />
+                                        <span className="text-lg font-bold">
+                                            -{promo.discount_percentage}%
                                         </span>
                                     </div>
-                                    <span className="mt-1 text-xs font-medium text-muted-foreground uppercase">
-                                        {unit === 'days'
-                                            ? 'J'
-                                            : unit === 'hours'
-                                              ? 'H'
-                                              : unit === 'minutes'
-                                                ? 'M'
-                                                : 'S'}
-                                    </span>
-                                </motion.div>
-                            ))}
-                        </div>
+                                )}
+                                {promo.description && (
+                                    <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                                        {promo.description}
+                                    </p>
+                                )}
+                            </div>
 
-                        {/* Coupons */}
-                        {coupons.length > 0 && (
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium">
-                                    Codes promo disponibles :
-                                </p>
-                                <div className="flex flex-wrap gap-3">
-                                    {coupons.map((coupon, idx) => (
-                                        <motion.div
-                                            key={idx}
-                                            whileHover={{ scale: 1.02 }}
-                                            className="flex items-center gap-3 rounded-xl border border-dashed border-primary/30 bg-white/60 px-4 py-2.5 backdrop-blur-sm dark:bg-white/10"
-                                        >
-                                            <div>
-                                                <div className="text-lg leading-tight font-bold">
-                                                    -{coupon.discount}€
-                                                </div>
-                                                <div className="text-xs text-muted-foreground">
-                                                    dès {coupon.min_amount}€
-                                                    d'achat
-                                                </div>
-                                            </div>
-                                            <div className="ml-2 flex items-center gap-1.5">
-                                                <code className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs font-semibold">
+                            {/* Compteur */}
+                            {!isExpired && (
+                                <div>
+                                    <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                                        <Clock3
+                                            className={cn(
+                                                'h-4 w-4',
+                                                isAlmostExpired
+                                                    ? 'animate-pulse text-red-500'
+                                                    : 'text-emerald-500',
+                                            )}
+                                        />
+                                        Fin de l’offre :
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <CountdownItem
+                                            label="Jours"
+                                            value={timeLeft.days}
+                                        />
+                                        <CountdownItem
+                                            label="Heures"
+                                            value={timeLeft.hours}
+                                        />
+                                        <CountdownItem
+                                            label="Min"
+                                            value={timeLeft.minutes}
+                                        />
+                                        <CountdownItem
+                                            label="Sec"
+                                            value={timeLeft.seconds}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Coupons */}
+                            {coupons.length > 0 && (
+                                <div>
+                                    <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                                        <Ticket className="h-4 w-4 text-emerald-500" />
+                                        Codes promo
+                                    </div>
+                                    <div className="flex flex-wrap gap-3">
+                                        {coupons.map((coupon, idx) => (
+                                            <motion.div
+                                                key={`${coupon.code}-${idx}`}
+                                                whileHover={{ y: -2 }}
+                                                className="flex items-center gap-3 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/60 px-3 py-2 backdrop-blur dark:border-emerald-800 dark:bg-emerald-950/20"
+                                            >
+                                                <div className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
                                                     {coupon.code}
-                                                </code>
-                                                <button
+                                                </div>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-7 w-7 rounded-lg text-emerald-600 hover:bg-emerald-200 dark:hover:bg-emerald-800"
                                                     onClick={() =>
                                                         copyCode(coupon.code)
                                                     }
-                                                    className={cn(
-                                                        'rounded-md p-1.5 transition-all',
-                                                        copiedCode ===
-                                                            coupon.code
-                                                            ? 'bg-green-500 text-white'
-                                                            : 'bg-primary/10 hover:bg-primary/20',
-                                                    )}
                                                 >
                                                     {copiedCode ===
                                                     coupon.code ? (
@@ -195,52 +208,60 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                                                     ) : (
                                                         <Copy className="h-3.5 w-3.5" />
                                                     )}
-                                                </button>
-                                            </div>
-                                        </motion.div>
-                                    ))}
+                                                </Button>
+                                            </motion.div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-
-                        {/* Bouton CTA */}
-                        <Button size="lg" className="shadow-md" asChild>
-                            <Link href={route('tenant.promotions.index')}>
-                                Voir toutes les offres
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                        </Button>
-                    </motion.div>
-
-                    {/* Colonne droite : Image (inchangée) */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="relative hidden lg:block"
-                    >
-                        <div className="group relative mx-auto aspect-4/3 w-full max-w-md overflow-hidden rounded-2xl shadow-xl">
-                            <img
-                                src={promo.image || '/images/promo-default.jpg'}
-                                alt={promo.title}
-                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent" />
-                            {promo.discount_percentage && (
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="absolute bottom-4 left-4 rounded-full bg-red-500 px-4 py-2 text-white shadow-lg"
-                                >
-                                    <span className="text-lg font-bold">
-                                        -{promo.discount_percentage}%
-                                    </span>
-                                </motion.div>
                             )}
+
+                            {/* CTA */}
+                            <div className="flex flex-wrap items-center gap-3">
+                                <Button
+                                    asChild
+                                    className="bg-emerald-600 hover:bg-emerald-700"
+                                >
+                                    <Link
+                                        href={route('tenant.promotions.index')}
+                                    >
+                                        Profiter de l’offre
+                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Link>
+                                </Button>
+                                {isExpired && (
+                                    <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                                        Offre expirée
+                                    </span>
+                                )}
+                                {isAlmostExpired && !isExpired && (
+                                    <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
+                                        ⏰ Plus que quelques heures !
+                                    </span>
+                                )}
+                            </div>
                         </div>
-                    </motion.div>
-                </div>
+
+                        {/* Image (2/5) */}
+                        <div className="relative hidden lg:col-span-2 lg:block">
+                            <div className="relative mx-auto max-w-xs overflow-hidden rounded-2xl shadow-2xl">
+                                <img
+                                    src={
+                                        promo.image ||
+                                        '/images/promo-default.jpg'
+                                    }
+                                    alt={promo.title}
+                                    className="aspect-[3/4] w-full object-cover transition-transform duration-700 hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                {promo.discount_percentage && (
+                                    <div className="absolute top-3 right-3 rounded-xl bg-white/90 px-3 py-1.5 text-sm font-bold text-emerald-700 shadow backdrop-blur dark:bg-slate-900/80 dark:text-emerald-300">
+                                        -{promo.discount_percentage}%
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
         </section>
     );

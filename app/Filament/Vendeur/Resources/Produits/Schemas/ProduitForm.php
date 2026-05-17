@@ -123,8 +123,8 @@ class ProduitForm
                                                     ->options([
                                                         'brouillon' => 'Brouillon',
                                                         'publie' => 'Publié',
-                                                        // 'out_of_stock' => 'Rupture de stock',
-                                                        // 'discontinued' => 'Abandonné',
+                                                        'out_of_stock' => 'Rupture de stock',
+                                                        'discontinued' => 'Abandonné',
                                                     ])
                                                     ->searchable()
                                                     ->preload()

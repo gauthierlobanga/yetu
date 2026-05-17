@@ -37,6 +37,7 @@ class PromotionsTable
                     ->label('Image')
                     ->square()
                     ->collection('banner')
+                    ->disk('public')
                     ->visibility('public')
                     ->imageHeight(40)
                     ->imageWidth(50)

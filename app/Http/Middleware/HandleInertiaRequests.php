@@ -8,10 +8,12 @@ use App\Models\Brand;
 use App\Models\ProductCategory;
 use App\Models\Produit;
 use App\Models\User;
+use App\Services\TenantPropsService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Middleware;
@@ -40,6 +42,8 @@ class HandleInertiaRequests extends Middleware
      * @var string
      */
     protected $rootView = 'app';
+
+    public function __construct(protected TenantPropsService $tenantProps) {}
 
     /**
      * Determines the current asset version.
@@ -76,14 +80,8 @@ class HandleInertiaRequests extends Middleware
             'cart' => $this->resolveCart($request, $shouldShareCommerceData),
             'recommendedProducts' => $this->getRecommendedProducts($request, $shouldShareCommerceData),
             'isTenant' => $isTenant,
-            'tenant' => $tenant ? [
-                'id' => $tenant->id,
-                'raison_sociale' => $tenant->raison_sociale,
-                'slug' => $tenant->slug,
-                'logo' => $tenant->getFilamentAvatarUrl(),
-            ] : null,
+            'tenant' => $tenant ? $this->tenantProps->getTenantProps($tenant) : null,
             'tenantRoutePrefix' => $tenantRoutePrefix,
-            // Région : données optimisées
             ...$this->getRegionData($request),
             'megaMenuCategories' => $this->getMegaMenuCategories(),
             'subscription' => function () use ($tenant) {
@@ -98,6 +96,9 @@ class HandleInertiaRequests extends Middleware
                 ];
             },
         ];
+        if ($this->shouldLoadTenantNotifications($request)) {
+            $sharedData = array_merge($sharedData, $this->getTenantNotifications($request));
+        }
 
         return $sharedData;
     }
@@ -431,5 +432,57 @@ class HandleInertiaRequests extends Middleware
         } catch (\Throwable) {
             return [];
         }
+    }
+
+    /**
+     * Vérifie si on doit charger les notifications du tenant.
+     */
+    protected function shouldLoadTenantNotifications(Request $request): bool
+    {
+        return function_exists('tenancy')
+            && tenancy()->initialized
+            && $request->user();
+    }
+
+    /**
+     * Récupère les notifications de l'utilisateur dans le contexte du tenant.
+     */
+    protected function getTenantNotifications(Request $request): array
+    {
+        $user = $request->user();
+        $tenant = tenant();
+
+        $notifications = $tenant->run(function () use ($user) {
+            return DB::table('notifications')
+                ->where('notifiable_id', $user->id)
+                ->where('notifiable_type', get_class($user))
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->map(function ($notification) {
+                    $data = json_decode($notification->data, true) ?? [];
+
+                    return [
+                        'id' => $notification->id,
+                        'type' => $data['type'] ?? 'system',
+                        'title' => $data['title'] ?? $data['message'] ?? 'Notification',
+                        'message' => $data['message'] ?? '',
+                        'url' => $data['url'] ?? null,
+                        'read_at' => $notification->read_at,
+                        'created_at' => $notification->created_at,
+                        'data' => $data,
+                    ];
+                })
+                ->values()
+                ->all();
+        });
+
+        $notifications = $notifications ?? [];
+        $unreadCount = count(array_filter($notifications, fn ($n) => is_null($n['read_at'])));
+
+        return [
+            'notifications' => $notifications,
+            'unreadNotificationsCount' => $unreadCount,
+        ];
     }
 }
