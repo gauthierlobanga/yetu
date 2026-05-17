@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\TenantDatabaseNotificationsSent;
 use App\Models\Client;
 use App\Models\Commande;
 use App\Models\ItemPanier;
@@ -57,6 +58,13 @@ class TenantRealtimeActivityService
             }
 
             Notification::send($recipients, new TenantDashboardActivityNotification($payload));
+
+            $recipients->each(
+                fn (User $user) => TenantDatabaseNotificationsSent::dispatch(
+                    userId: (string) $user->getKey(),
+                    tenantId: (string) $tenant->id,
+                ),
+            );
         } catch (Throwable $exception) {
             Log::warning('Tenant realtime notification failed.', [
                 'model' => $model::class,
@@ -498,7 +506,10 @@ class TenantRealtimeActivityService
                 'vendor.dashboard',
             ]),
             $model instanceof ItemPanier,
-            $model instanceof Panier => $this->firstAvailableRoute(['vendor.dashboard']),
+            $model instanceof Panier => $this->firstAvailableRoute([
+                'filament.vendeur.paniers.resources.paniers.index',
+                'vendor.dashboard',
+            ]),
             default => $this->firstAvailableRoute(['vendor.dashboard']),
         };
     }

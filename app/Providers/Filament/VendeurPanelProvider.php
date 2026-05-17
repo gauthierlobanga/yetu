@@ -153,6 +153,7 @@ class VendeurPanelProvider extends PanelProvider
 
             ])
             ->resourceEditPageRedirect('index')
+            ->databaseNotifications()
             ->resourceCreatePageRedirect('index');
     }
 }

@@ -72,9 +72,24 @@ function normalizeNotification(
         `realtime-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const title = stringValue(
         value.title,
-        stringValue(data.title, stringValue(data.message, 'Notification')),
+        stringValue(
+            data.title,
+            stringValue(
+                value.body,
+                stringValue(
+                    data.body,
+                    stringValue(data.message, 'Notification'),
+                ),
+            ),
+        ),
     );
-    const message = stringValue(value.message, stringValue(data.message));
+    const message = stringValue(
+        value.message,
+        stringValue(
+            data.message,
+            stringValue(value.body, stringValue(data.body)),
+        ),
+    );
     const createdAt = stringValue(
         value.created_at,
         stringValue(
@@ -323,7 +338,7 @@ export function SiteHeader() {
                             </Link>
                         </Button>
                     </CanRole>
-
+                    {/*
                     <Popover open={notifOpen} onOpenChange={setNotifOpen}>
                         <PopoverTrigger asChild>
                             <Button
@@ -418,6 +433,228 @@ export function SiteHeader() {
                                     ))
                                 )}
                             </div>
+                        </PopoverContent>
+                    </Popover> */}
+                    {/* Notifications Center */}
+                    <Popover open={notifOpen} onOpenChange={setNotifOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label={`Notifications ${
+                                    unreadCount > 0
+                                        ? `(${unreadCount} non lues)`
+                                        : ''
+                                }`}
+                                className={`relative h-10 w-10 rounded-2xl border transition-all duration-300 ${
+                                    unreadCount > 0
+                                        ? 'border-amber-200/80 bg-gradient-to-br from-amber-50 via-white to-orange-50 text-amber-600 shadow-[0_8px_30px_rgba(251,191,36,0.18)] hover:scale-105 hover:shadow-[0_12px_40px_rgba(251,191,36,0.28)] dark:border-amber-500/20 dark:from-amber-500/10 dark:via-slate-900 dark:to-orange-500/10 dark:text-amber-400'
+                                        : 'border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-100 dark:text-slate-400 dark:hover:border-slate-700 dark:hover:bg-slate-800'
+                                } `}
+                            >
+                                {/* Halo animé */}
+                                {unreadCount > 0 && (
+                                    <>
+                                        <span className="absolute inset-0 animate-ping rounded-2xl bg-amber-400/20" />
+                                        <span className="absolute inset-0 animate-pulse rounded-2xl ring-2 ring-amber-400/30" />
+                                    </>
+                                )}
+
+                                {/* Icône */}
+                                <span className="relative z-10">
+                                    {unreadCount > 0 ? (
+                                        <BellRing className="h-5 w-5 animate-[swing_2.5s_ease-in-out_infinite]" />
+                                    ) : (
+                                        <Bell className="h-5 w-5" />
+                                    )}
+                                </span>
+
+                                {/* Badge compteur */}
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1.5 -right-1.5 z-20 flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-rose-600 px-1 text-[10px] font-bold text-white shadow-lg ring-2 ring-white dark:ring-slate-900">
+                                        {unreadCount > 99 ? '99+' : unreadCount}
+                                    </span>
+                                )}
+
+                                {/* Petit point de présence */}
+                                {unreadCount > 0 && (
+                                    <span className="absolute right-1 bottom-1 z-10 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
+                                )}
+                            </Button>
+                        </PopoverTrigger>
+
+                        <PopoverContent
+                            align="end"
+                            sideOffset={12}
+                            className="w-[390px] overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-0 shadow-2xl backdrop-blur-2xl dark:border-slate-700/70 dark:bg-slate-900/95"
+                        >
+                            {/* Header */}
+                            <div className="relative overflow-hidden border-b border-slate-100 dark:border-slate-800">
+                                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-cyan-500/5 to-violet-500/5" />
+
+                                <div className="relative flex items-center justify-between px-5 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-600 text-white shadow-lg">
+                                            <BellRing className="h-5 w-5" />
+                                        </div>
+
+                                        <div>
+                                            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                                                Notifications
+                                            </h3>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                {unreadCount > 0
+                                                    ? `${unreadCount} non lue${
+                                                          unreadCount > 1
+                                                              ? 's'
+                                                              : ''
+                                                      }`
+                                                    : 'Tout est à jour'}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {unreadCount > 0 && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={markAllAsRead}
+                                            className="h-8 rounded-xl px-3 text-xs font-medium text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-500/10"
+                                        >
+                                            Tout lire
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Liste */}
+                            <div className="max-h-[420px] overflow-y-auto">
+                                {allNotifications.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+                                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                                            <Bell className="h-7 w-7 text-slate-400" />
+                                        </div>
+                                        <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                            Aucune notification
+                                        </p>
+                                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                            Vous êtes parfaitement à jour.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    allNotifications.map((notification) => {
+                                        const isUnread = !notification.read_at;
+
+                                        return (
+                                            <button
+                                                key={notification.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    if (isUnread) {
+                                                        markAsRead(
+                                                            notification.id,
+                                                        );
+                                                    }
+
+                                                    if (notification.url) {
+                                                        setNotifOpen(false);
+                                                        router.visit(
+                                                            notification.url,
+                                                        );
+                                                    }
+                                                }}
+                                                className={`group relative w-full border-b border-slate-100 px-5 py-4 text-left transition-all duration-200 dark:border-slate-800 ${
+                                                    isUnread
+                                                        ? 'bg-gradient-to-r from-emerald-50/70 to-transparent hover:from-emerald-50 dark:from-emerald-500/5'
+                                                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                                                } `}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    {/* Indicateur */}
+                                                    <div className="relative mt-1 shrink-0">
+                                                        <div
+                                                            className={`h-2.5 w-2.5 rounded-full ${
+                                                                isUnread
+                                                                    ? 'bg-emerald-500'
+                                                                    : 'bg-slate-300 dark:bg-slate-600'
+                                                            } `}
+                                                        />
+                                                        {isUnread && (
+                                                            <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400 opacity-75" />
+                                                        )}
+                                                    </div>
+
+                                                    {/* Contenu */}
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex items-start justify-between gap-2">
+                                                            <p
+                                                                className={`truncate text-sm ${
+                                                                    isUnread
+                                                                        ? 'font-semibold text-slate-900 dark:text-white'
+                                                                        : 'font-medium text-slate-700 dark:text-slate-200'
+                                                                } `}
+                                                            >
+                                                                {
+                                                                    notification.title
+                                                                }
+                                                            </p>
+
+                                                            {notification.isRealtime && (
+                                                                <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold tracking-wide text-emerald-700 uppercase dark:bg-emerald-500/10 dark:text-emerald-400">
+                                                                    Live
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        {notification.message && (
+                                                            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                                                                {
+                                                                    notification.message
+                                                                }
+                                                            </p>
+                                                        )}
+
+                                                        <div className="mt-3 flex items-center justify-between">
+                                                            <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                                                                {formatNotificationDate(
+                                                                    notification.created_at,
+                                                                )}
+                                                            </span>
+
+                                                            {isUnread && (
+                                                                <span className="text-[11px] font-medium text-emerald-600 opacity-0 transition-opacity group-hover:opacity-100 dark:text-emerald-400">
+                                                                    Marquer
+                                                                    comme lu
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        );
+                                    })
+                                )}
+                            </div>
+
+                            {/* Footer */}
+                            {allNotifications.length > 0 && (
+                                <div className="border-t border-slate-100 bg-slate-50/70 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/60">
+                                    <Button
+                                        variant="ghost"
+                                        className="h-9 w-full rounded-xl text-xs font-medium text-slate-600 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"
+                                        onClick={() => {
+                                            setNotifOpen(false);
+                                            router.visit(
+                                                route(
+                                                    'tenant.notifications.index',
+                                                ),
+                                            );
+                                        }}
+                                    >
+                                        Voir toutes les notifications
+                                    </Button>
+                                </div>
+                            )}
                         </PopoverContent>
                     </Popover>
 
