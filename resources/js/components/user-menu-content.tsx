@@ -1,22 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-//resources/js/components/user-menu-content
-/**
- * La troisième modification
- */
+// resources/js/components/user-menu-content.tsx
 import { Link, router } from '@inertiajs/react';
-import { ro } from 'date-fns/locale';
 import {
-    LogOut,
-    Settings,
+    ArrowRight,
     HelpCircle,
     Heart,
-    ShoppingBag,
-    Shield,
     LayoutDashboard,
+    LogOut,
+    Settings,
+    ShoppingBag,
+    Store,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { useId, Fragment } from 'react';
-import { Badge } from '@/components/ui/badge';
+import { useId } from 'react';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -24,62 +19,144 @@ import {
     DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { UserInfo } from '@/components/user-info';
-import { Can, CanRole } from '@/core/permissions/Can';
+import { CanRole } from '@/core/permissions/Can';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
+import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
 import { edit } from '@/routes/profile';
 import type { User } from '@/types';
+
 type Props = {
     user: User;
 };
 
 interface MenuItem {
-    key: string;
     icon: LucideIcon;
     label: string;
     href: string;
-    badge?: number;
-    permission?: string;
+    target?: '_blank';
     roles?: string[];
-    variant?: 'default' | 'destructive';
-    target?: string;
+    destructive?: boolean;
 }
 
-// Composant helper pour éviter la duplication de code
-const MenuItemComponent = ({
+/* -------------------------------------------------------------------------- */
+/*                               Menu Configuration                           */
+/* -------------------------------------------------------------------------- */
+
+const menuSections: { key: string; items: MenuItem[] }[] = [
+    {
+        key: 'main',
+        items: [
+            {
+                icon: LayoutDashboard,
+                label: 'Mon compte',
+                href: route('dashboard'),
+            },
+            {
+                icon: Store,
+                label: 'Ma boutique',
+                href: route('vendor.dashboard'),
+            },
+            {
+                icon: ShoppingBag,
+                label: 'Mes commandes',
+                href: route('tenant.orders.index'),
+            },
+            {
+                icon: Heart,
+                label: 'Liste de souhaits',
+                href: route('tenant.wishlist.index'),
+            },
+        ],
+    },
+    {
+        key: 'admin',
+        items: [
+            {
+                icon: LayoutDashboard,
+                label: 'Administration',
+                href: route('filament.admin.pages.dashboard'),
+                roles: ['admin', 'super_admin'],
+                target: '_blank',
+            },
+        ],
+    },
+    {
+        key: 'account',
+        items: [
+            { icon: Settings, label: 'Paramètres', href: edit().url },
+            {
+                icon: HelpCircle,
+                label: "Centre d'aide",
+                href: route('tenant.page.help'),
+            },
+        ],
+    },
+];
+
+/* -------------------------------------------------------------------------- */
+/*                                Menu Item UI                                */
+/* -------------------------------------------------------------------------- */
+
+function MenuLink({
     item,
-    onClick,
+    onNavigate,
 }: {
     item: MenuItem;
-    onClick: () => void;
-}) => (
-    <DropdownMenuItem
-        asChild
-        className={
-            item.variant === 'destructive'
-                ? 'text-destructive focus:text-destructive'
-                : ''
-        }
-    >
-        <Link
-            href={item.href}
-            target={item.target}
-            rel={item.target === '_blank' ? 'noopener noreferrer' : undefined}
-            className="flex w-full cursor-pointer items-center justify-between"
-            onClick={onClick}
-        >
-            <div className="flex items-center">
-                <item.icon className="mr-2 h-4 w-4" />
-                <span>{item.label}</span>
-            </div>
-            {item.badge && (
-                <Badge variant="secondary" className="ml-2">
-                    {item.badge}
-                </Badge>
-            )}
-        </Link>
-    </DropdownMenuItem>
-);
+    onNavigate: () => void;
+}) {
+    const content = (
+        <DropdownMenuItem asChild className="p-0 focus:bg-transparent">
+            <Link
+                href={item.href}
+                target={item.target}
+                rel={
+                    item.target === '_blank' ? 'noopener noreferrer' : undefined
+                }
+                onClick={onNavigate}
+                className={cn(
+                    'group mx-2 my-0.5 flex items-center gap-3 rounded-xl px-3 py-2.5',
+                    'transition-all duration-200',
+                    'hover:bg-emerald-50/80 hover:text-emerald-700',
+                    'dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400',
+                    item.destructive &&
+                        'hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400',
+                )}
+            >
+                <div
+                    className={cn(
+                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
+                        'bg-slate-100 text-slate-500',
+                        'transition-all duration-200',
+                        'group-hover:bg-white group-hover:text-emerald-600 group-hover:shadow-sm',
+                        'dark:bg-slate-800 dark:text-slate-400',
+                        'dark:group-hover:bg-slate-900 dark:group-hover:text-emerald-400',
+                        item.destructive &&
+                            'group-hover:text-red-600 dark:group-hover:text-red-400',
+                    )}
+                >
+                    <item.icon className="h-4 w-4" />
+                </div>
+
+                <span className="flex-1 text-sm font-medium">{item.label}</span>
+
+                {!item.destructive && (
+                    <ArrowRight className="h-3.5 w-3.5 translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100" />
+                )}
+            </Link>
+        </DropdownMenuItem>
+    );
+
+    if (item.roles) {
+        return <CanRole roles={item.roles}>{content}</CanRole>;
+    }
+
+    return content;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                             Main Component                                 */
+/* -------------------------------------------------------------------------- */
 
 export function UserMenuContent({ user }: Props) {
     const cleanup = useMobileNavigation();
@@ -90,137 +167,66 @@ export function UserMenuContent({ user }: Props) {
         router.post(logout());
     };
 
-    // Configuration centralisée des items du menu
-    const menuConfig = {
-        main: [
-            {
-                key: 'dashboard',
-                icon: LayoutDashboard,
-                label: 'Mon compte',
-                href: route('dashboard'),
-            },
-            {
-                key: 'dashboard-vendor',
-                icon: LayoutDashboard,
-                label: 'Ma boutique',
-                href: route('vendor.dashboard'),
-            },
-            {
-                key: 'orders',
-                icon: ShoppingBag,
-                label: 'Mes commandes',
-                href: route('tenant.orders.index'),
-            },
-            {
-                key: 'wishlist',
-                icon: Heart,
-                label: 'Liste de souhaits',
-                href: route('tenant.wishlist.index'),
-            },
-        ] as MenuItem[],
-
-        account: [
-            {
-                key: 'settings',
-                icon: Settings,
-                label: 'Paramètres',
-                href: edit(),
-            },
-            {
-                key: 'help',
-                icon: HelpCircle,
-                label: "Centre d'aide",
-                href: route('tenant.page.help'),
-            },
-        ] as MenuItem[],
-
-        admin: {
-            key: 'admin-dashboard',
-            icon: LayoutDashboard,
-            label: 'Administration',
-            href: route('filament.admin.pages.dashboard'),
-            roles: ['admin', 'super_admin'],
-            target: '_blank',
-        } as MenuItem,
-
-        roles: {
-            key: 'manage-roles',
-            icon: Shield,
-            label: 'Gestion des rôles',
-            href: route('filament.admin.resources.shield.roles.index'),
-            permission: 'Manage Roles',
-        } as MenuItem,
-    };
-
-    // Fonction de rendu conditionnel avec permissions
-    const renderMenuItem = (item: MenuItem) => {
-        const element = (
-            <MenuItemComponent
-                key={`${id}-${item.key}`}
-                item={item}
-                onClick={cleanup}
-            />
-        );
-
-        if (item.permission) {
-            return (
-                <Can key={`${id}-can-${item.key}`} permission={item.permission}>
-                    {element}
-                </Can>
-            );
-        }
-
-        if (item.roles) {
-            return (
-                <CanRole key={`${id}-role-${item.key}`} roles={item.roles}>
-                    {element}
-                </CanRole>
-            );
-        }
-
-        return element;
-    };
-
     return (
         <>
             {/* En-tête utilisateur */}
             <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-3 px-3 py-3">
-                    <UserInfo user={user} showEmail={true} />
+                <div className="relative overflow-hidden px-4 py-4">
+                    <div className="absolute inset-0 bg-linear-to-br from-emerald-50/70 via-white to-slate-50/70 dark:from-emerald-950/20 dark:via-slate-950 dark:to-slate-900" />
+                    <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-500/50 to-transparent" />
+                    <div className="relative">
+                        <UserInfo user={user} showEmail />
+                    </div>
                 </div>
             </DropdownMenuLabel>
 
-            <DropdownMenuSeparator />
-
-            {/* Menu principal */}
-            <DropdownMenuGroup>
-                {menuConfig.main.map(renderMenuItem)}
-            </DropdownMenuGroup>
-
-            <DropdownMenuSeparator />
-
-            {/* Administration */}
-            {renderMenuItem(menuConfig.admin)}
-            {menuConfig.admin.roles && <DropdownMenuSeparator />}
-
-            {/* Gestion du compte */}
-            <DropdownMenuGroup>
-                {menuConfig.account.map(renderMenuItem)}
-            </DropdownMenuGroup>
-
-            <DropdownMenuSeparator />
-
-            {/* Gestion des rôles */}
-            {renderMenuItem(menuConfig.roles)}
+            {/* Sections du menu */}
+            {menuSections.map((section) => (
+                <div key={`${id}-${section.key}`}>
+                    <DropdownMenuSeparator className="mx-4 bg-slate-200/70 dark:bg-slate-800/70" />
+                    <DropdownMenuGroup className="py-2">
+                        {section.items.map((item) => (
+                            <MenuLink
+                                key={`${section.key}-${item.label}`}
+                                item={item}
+                                onNavigate={cleanup}
+                            />
+                        ))}
+                    </DropdownMenuGroup>
+                </div>
+            ))}
 
             {/* Déconnexion */}
+            <DropdownMenuSeparator className="mx-4 bg-slate-200/70 dark:bg-slate-800/70" />
             <DropdownMenuItem
-                key={`${id}-logout`}
                 onClick={handleLogout}
-                className="cursor-pointer text-destructive focus:text-destructive"
+                className="p-0 focus:bg-transparent"
             >
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Se déconnecter</span>
+                <button
+                    type="button"
+                    className={cn(
+                        'group mx-2 my-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5',
+                        'transition-all duration-200',
+                        'hover:bg-red-50 hover:text-red-600',
+                        'dark:hover:bg-red-500/10 dark:hover:text-red-400',
+                    )}
+                >
+                    <div
+                        className={cn(
+                            'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
+                            'bg-red-50 text-red-500',
+                            'transition-all duration-200',
+                            'group-hover:bg-white group-hover:shadow-sm',
+                            'dark:bg-red-500/10 dark:text-red-400',
+                        )}
+                    >
+                        <LogOut className="h-4 w-4" />
+                    </div>
+
+                    <span className="flex-1 text-left text-sm font-medium">
+                        Se déconnecter
+                    </span>
+                </button>
             </DropdownMenuItem>
         </>
     );

@@ -1,5 +1,7 @@
+// resources/js/components/layout/AppHeader.tsx
 import { Link, usePage } from '@inertiajs/react';
-import { ArrowRight, List, Menu } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, List, Menu, SearchIcon } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -8,6 +10,7 @@ import { CentreAcheteurs } from '@/components/navigation/CentreAcheteurs';
 import { ChooseYetuContent } from '@/components/navigation/ChooseYetuContent';
 import { ProductsMenuContent } from '@/components/navigation/ProductsMenuContent';
 import { Support } from '@/components/navigation/Support';
+import SearchExperience from '@/components/search-my-input'; // uniquement pour la recherche mobile
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -17,10 +20,9 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { useTenant } from '@/hooks/useTenant';
-// import { login } from '@/routes/tenant';
 import { login } from '@/routes/tenant';
 import type { BreadcrumbItem, NavItem } from '@/types';
-import { HeaderActions } from './HeaderActions'; // import du nouveau composant d'actions
+import { HeaderActions } from './HeaderActions';
 import { MainNavigation } from './MainNavigation';
 import { MobileNavigation } from './MobileNavigation';
 import { UserNavigation } from './UserNavigation';
@@ -33,7 +35,6 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     const { isTenant } = useTenant();
     const { auth } = usePage().props;
 
-    // Liens centraux (SaaS)
     const centralNavItems: NavItem[] = [
         { title: 'Choisir Yetu', content: <ChooseYetuContent />, href: '' },
         { title: 'Produits', content: <ProductsMenuContent />, href: '' },
@@ -41,7 +42,6 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         { title: 'Enterprise', href: route('entreprise.index') },
     ];
 
-    // Liens pour les boutiques (tenants)
     const tenantNavItems: NavItem[] = [
         {
             title: 'Explorer les catégories',
@@ -65,77 +65,123 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
     return (
         <>
-            <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-md supports-backdrop-filter:bg-background/60">
-                <div className="mx-auto flex h-16 min-w-xl items-center justify-between px-10 lg:px-12">
-                    {/* Mobile menu */}
-                    <div className="mr-2 lg:hidden">
+            <motion.header
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.3 }}
+                className="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/80"
+            >
+                <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+                    {/* Menu mobile */}
+                    <div className="lg:hidden">
                         <Sheet>
                             <SheetTrigger asChild>
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-9 w-9"
-                                    aria-label="Menu"
+                                    className="h-10 w-10 rounded-full"
+                                    aria-label="Menu principal"
                                 >
                                     <Menu className="h-5 w-5" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="left" className="w-72 p-0">
-                                <SheetHeader className="border-b p-4">
-                                    <SheetTitle className="flex items-center gap-2">
-                                        <AppLogoIcon className="h-6 w-6" />
-                                        <span>Menu</span>
+                            <SheetContent side="left" className="w-80 p-0">
+                                <SheetHeader className="border-b border-slate-200 p-5 dark:border-slate-700">
+                                    <SheetTitle className="flex items-center gap-3">
+                                        <AppLogoIcon className="h-7 w-7" />
+                                        <span className="text-lg font-bold text-slate-800 dark:text-white">
+                                            Menu
+                                        </span>
                                     </SheetTitle>
                                 </SheetHeader>
-                                <MobileNavigation items={mainNavItems} />
+                                <div className="flex h-full flex-col justify-between">
+                                    <MobileNavigation items={mainNavItems} />
+                                    <div className="border-t border-slate-200 p-5 dark:border-slate-700">
+                                        {!auth.user && isTenant && (
+                                            <Button
+                                                asChild
+                                                className="w-full"
+                                                size="lg"
+                                            >
+                                                <Link href={login()}>
+                                                    Se connecter
+                                                </Link>
+                                            </Button>
+                                        )}
+                                    </div>
+                                </div>
                             </SheetContent>
                         </Sheet>
                     </div>
 
-                    {/* Logo + Navigation */}
-                    <div className="flex items-center gap-8">
+                    {/* Logo */}
+                    <div className="flex shrink-0 items-center">
                         <Link
                             href={
                                 isTenant ? route('tenant.home') : route('home')
                             }
-                            className="flex shrink-0 items-center"
+                            className="flex items-center gap-2 transition-opacity hover:opacity-80"
                         >
                             <AppLogo />
                         </Link>
-                        <div className="hidden h-full lg:flex">
-                            <MainNavigation items={mainNavItems} />
-                        </div>
+                    </div>
+
+                    {/* Navigation principale desktop */}
+                    <div className="hidden h-full items-center lg:flex">
+                        <MainNavigation items={mainNavItems} />
                     </div>
 
                     {/* Actions à droite */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        {/* Recherche mobile (tenant) */}
+                        {isTenant && (
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="lg:hidden"
+                                        aria-label="Rechercher"
+                                    >
+                                        <SearchIcon className="h-5 w-5" />
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="top" className="p-4 pt-6">
+                                    <SearchExperience
+                                        buttonText="Rechercher..."
+                                        hitsPerPage={5}
+                                    />
+                                </SheetContent>
+                            </Sheet>
+                        )}
+
                         {!isTenant ? (
                             <>
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     asChild
-                                    className="text-[1.0rem] font-medium text-muted-foreground hover:text-foreground"
+                                    className="hidden text-sm font-medium text-slate-700 hover:text-slate-900 sm:inline-flex dark:text-slate-300 dark:hover:text-white"
                                 >
                                     <Link href={login()}>Se connecter</Link>
                                 </Button>
                                 <Button
                                     size="lg"
-                                    className="group py-4.7 relative overflow-hidden rounded-full bg-primary px-4 text-base font-semibold text-primary-foreground transition hover:shadow-xs"
+                                    className="group relative overflow-hidden rounded-full bg-linear-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 transition-all hover:shadow-lg hover:shadow-emerald-300 dark:shadow-emerald-900/30 dark:hover:shadow-emerald-800/40"
                                     asChild
                                 >
                                     <Link href={route('vendor.register')}>
                                         <span className="relative z-10 flex items-center">
                                             Démarrer gratuitement
-                                            <ArrowRight className="ml-2 h-5 w-5 transition group-hover:translate-x-1" />
+                                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                         </span>
-                                        {/* Effet de survol brillant */}
                                         <span className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
                                     </Link>
                                 </Button>
                             </>
                         ) : (
                             <>
+                                {/* HeaderActions contient déjà SearchExperience (desktop), RegionSelector, Notifications, Cart, etc. */}
                                 <HeaderActions />
                                 {auth.user ? (
                                     <UserNavigation user={auth.user} />
@@ -144,7 +190,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         variant="ghost"
                                         size="sm"
                                         asChild
-                                        className="text-[1.0rem] font-medium"
+                                        className="text-sm font-medium"
                                     >
                                         <Link href={login()}>Se connecter</Link>
                                     </Button>
@@ -153,16 +199,23 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                         )}
                     </div>
                 </div>
-            </header>
+            </motion.header>
 
             {/* Breadcrumbs */}
-            {breadcrumbs.length > 1 && (
-                <div className="border-b border-border/40">
-                    <div className="container mx-auto flex h-10 items-center px-4 sm:px-6 lg:px-8">
-                        <Breadcrumbs breadcrumbs={breadcrumbs} />
-                    </div>
-                </div>
-            )}
+            <AnimatePresence>
+                {breadcrumbs.length > 1 && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="border-b border-slate-200/60 dark:border-slate-700/50"
+                    >
+                        <div className="container mx-auto flex h-10 items-center px-4 sm:px-6 lg:px-8">
+                            <Breadcrumbs breadcrumbs={breadcrumbs} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </>
     );
 }

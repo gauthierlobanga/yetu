@@ -32,7 +32,7 @@ class WishlistItem extends Model
         'wishlist_id',
         'produit_id',
         'quantite',
-        'note',
+        // 'note',
         'added_at',
     ];
 

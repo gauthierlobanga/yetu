@@ -26,6 +26,6 @@ export interface DashboardNotification {
     url: string | null;
     read_at: string | null;
     created_at: string;
-    data?: NotificationData;
+    data?: Record<string, unknown>;
     isRealtime?: boolean;
 }

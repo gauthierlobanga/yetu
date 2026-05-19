@@ -49,6 +49,8 @@ export interface ProductReview {
 
 // Interface principale Product
 export interface Product {
+    [x: string]: number;
+    quantite_stock: number;
     id: number;
     nom: string;
     slug: string;
@@ -80,7 +82,6 @@ export interface Product {
     variantes?: ProductVariant[];
     avis?: ProductReview[];
     stock_disponible?: number;
-    //
     seller_name?: string; // Nom du vendeur
     orders_this_week?: number; // Commandes cette semaine
     old_price?: number; // Prix barré (si différent de prix_ttc)
@@ -181,16 +182,6 @@ export interface CalculatedTotals {
     total_general: number;
     selected_count: number;
 }
-
-// export interface PlatformStats {
-//     pageLoadTime?: string;
-//     uptime?: string;
-//     supportResponseTime?: string;
-//     productsCount?: number;
-//     ordersProcessed?: number;
-//     paymentMethods?: number;
-//     countriesServed?: number;
-// }
 
 export interface Address {
     id: number;

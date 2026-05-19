@@ -2,7 +2,7 @@
 
 import DropdownSearch from '@/components/dropdown-search';
 
-export default function Page() {
+export default function DropdownSearchExperience() {
     return (
         <div className="relative flex min-h-25 items-center justify-center p-4 md:min-h-100">
             <div className="w-full max-w-md">

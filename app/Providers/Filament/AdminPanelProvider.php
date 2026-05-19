@@ -103,7 +103,6 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
                 EnsureUserIsSuperAdmin::class,
             ])
-            // ->strictAuthorization()
             ->databaseNotifications()
             ->resourceCreatePageRedirect('index')
             ->resourceEditPageRedirect('index');

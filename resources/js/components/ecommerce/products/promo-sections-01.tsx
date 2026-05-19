@@ -96,7 +96,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
     return (
         <section className="relative overflow-hidden py-12 md:py-16">
             {/* Fond épuré */}
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/80 via-white to-slate-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20" />
+            <div className="absolute inset-0 bg-linear-to-br from-emerald-50/80 via-white to-slate-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20" />
             <div className="absolute top-0 left-0 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-400/5" />
             <div className="absolute right-0 bottom-0 h-64 w-64 rounded-full bg-slate-400/10 blur-3xl dark:bg-slate-500/5" />
 
@@ -128,7 +128,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                                     {promo.title}
                                 </h2>
                                 {promo.discount_percentage && (
-                                    <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 px-4 py-2 text-white shadow-lg shadow-emerald-500/20">
+                                    <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-emerald-600 to-emerald-500 px-4 py-2 text-white shadow-lg shadow-emerald-500/20">
                                         <Zap className="h-4 w-4" />
                                         <span className="text-lg font-bold">
                                             -{promo.discount_percentage}%
@@ -245,14 +245,11 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                         <div className="relative hidden lg:col-span-2 lg:block">
                             <div className="relative mx-auto max-w-xs overflow-hidden rounded-2xl shadow-2xl">
                                 <img
-                                    src={
-                                        promo.image ||
-                                        '/images/promo-default.jpg'
-                                    }
+                                    src={promo.image || undefined}
                                     alt={promo.title}
-                                    className="aspect-[3/4] w-full object-cover transition-transform duration-700 hover:scale-105"
+                                    className="aspect-3/4 w-full object-cover transition-transform duration-700 hover:scale-105"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
                                 {promo.discount_percentage && (
                                     <div className="absolute top-3 right-3 rounded-xl bg-white/90 px-3 py-1.5 text-sm font-bold text-emerald-700 shadow backdrop-blur dark:bg-slate-900/80 dark:text-emerald-300">
                                         -{promo.discount_percentage}%

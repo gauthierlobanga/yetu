@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/Shop/Categories/Show.tsx
 import { Head, Link, router } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChevronRight,
     ArrowUpDown,
@@ -10,16 +9,18 @@ import {
     Star,
     Package,
     TrendingUp,
-    Sparkles,
     Grid3X3,
     List,
+    LayoutDashboard,
     X,
 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import ProductCard from '@/components/ecommerce/products/ProductCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
     Select,
     SelectContent,
@@ -34,6 +35,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { Slider } from '@/components/ui/slider';
 import MainLayout from '@/layouts/main-layout';
 import type { Category, Product } from '@/types/ecommerce/products';
 
@@ -51,8 +53,10 @@ interface Props {
     };
     subcategories: Category[];
     breadcrumb: Array<{ name: string; url: string }>;
-    filters?: { sort?: string };
+    filters?: { sort?: string; search?: string };
 }
+
+type ViewMode = 'grid' | 'list' | 'bento';
 
 export default function CategoryShow({
     category,
@@ -61,31 +65,83 @@ export default function CategoryShow({
     breadcrumb,
     filters = {},
 }: Props) {
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-
-    // Filtres (à connecter plus tard)
+    const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [priceRange, setPriceRange] = useState<[number, number]>([0, 5000]);
     const [minRating, setMinRating] = useState(0);
     const [inStockOnly, setInStockOnly] = useState(false);
 
-    const updateSort = (value: string) => {
+    // Filtrage local (pour une UI réactive, en complément du serveur)
+    const filteredProducts = useMemo(() => {
+        let result = products.data;
+
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            result = result.filter(
+                (p) =>
+                    p.nom.toLowerCase().includes(q) ||
+                    (p.description && p.description.toLowerCase().includes(q)),
+            );
+        }
+
+        if (inStockOnly) {
+            result = result.filter((p) => (p.quantite_stock ?? 0) > 0);
+        }
+
+        if (minRating > 0) {
+            result = result.filter((p) => (p.note_moyenne ?? 0) >= minRating);
+        }
+
+        // Filtre de prix local (si les champs sont disponibles)
+        result = result.filter((p) => {
+            const price = p.prix_actuel ?? p.prix_ttc ?? 0;
+
+            return price >= priceRange[0] && price <= priceRange[1];
+        });
+
+        return result;
+    }, [products.data, searchQuery, inStockOnly, minRating, priceRange]);
+
+    const updateSort = useCallback(
+        (value: string) => {
+            router.get(
+                window.location.pathname,
+                { sort: value, search: searchQuery || undefined },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    only: ['products'],
+                },
+            );
+        },
+        [searchQuery],
+    );
+
+    const applySearch = useCallback(() => {
         router.get(
             window.location.pathname,
-            { sort: value },
+            { search: searchQuery || undefined, sort: filters.sort },
             {
                 preserveState: true,
                 preserveScroll: true,
                 only: ['products'],
-                showProgress: false,
             },
+        );
+    }, [searchQuery, filters.sort]);
+
+    const clearSearch = () => {
+        setSearchQuery('');
+        router.get(
+            window.location.pathname,
+            { sort: filters.sort },
+            { preserveState: true, preserveScroll: true, only: ['products'] },
         );
     };
 
+    const totalProducts = products.total ?? products.data.length;
     const totalPages = products.last_page;
     const currentPage = products.current_page;
-    const totalProducts = products.total ?? products.data.length;
 
     const pagesToShow = useMemo(() => {
         const pages: (number | string)[] = [];
@@ -122,10 +178,17 @@ export default function CategoryShow({
     const goToPage = (page: number) => {
         router.get(
             window.location.pathname,
-            { page, sort: filters.sort },
+            { page, sort: filters.sort, search: searchQuery || undefined },
             { preserveState: true, preserveScroll: true },
         );
     };
+
+    // Grille responsive selon le mode
+    const gridClass = {
+        grid: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4',
+        list: 'grid-cols-1',
+        bento: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4',
+    }[viewMode];
 
     return (
         <MainLayout>
@@ -133,21 +196,24 @@ export default function CategoryShow({
 
             <div className="mx-auto max-w-7xl px-4 py-8">
                 {/* Fil d’Ariane */}
-                <nav className="mb-6 flex flex-wrap items-center text-sm text-muted-foreground">
-                    <Link href="/" className="hover:text-foreground">
+                <nav className="mb-6 flex flex-wrap items-center text-sm text-slate-500 dark:text-slate-400">
+                    <Link
+                        href="/"
+                        className="hover:text-slate-700 dark:hover:text-white"
+                    >
                         Accueil
                     </Link>
                     {breadcrumb.map((item, idx) => (
                         <span key={idx} className="flex items-center">
                             <ChevronRight className="mx-1 h-4 w-4" />
                             {idx === breadcrumb.length - 1 ? (
-                                <span className="font-medium text-foreground">
+                                <span className="font-medium text-slate-900 dark:text-white">
                                     {item.name}
                                 </span>
                             ) : (
                                 <Link
                                     href={item.url}
-                                    className="hover:text-foreground"
+                                    className="hover:text-slate-700 dark:hover:text-white"
                                 >
                                     {item.name}
                                 </Link>
@@ -156,34 +222,38 @@ export default function CategoryShow({
                     ))}
                 </nav>
 
-                {/* En‑tête catégorie épuré */}
-                <div className="mb-12 rounded-xl border bg-linear-to-r from-emerald-50 via-white to-white p-6 dark:from-emerald-950/20 dark:via-gray-900 dark:to-gray-900">
-                    <div className="flex flex-wrap items-center justify-between gap-4">
-                        <div>
-                            <h1 className="text-3xl font-bold tracking-tight text-foreground">
-                                {category.nom}
-                            </h1>
-                            {category.description && (
-                                <p className="mt-2 max-w-2xl text-muted-foreground">
-                                    {category.description}
-                                </p>
-                            )}
+                {/* En‑tête catégorie */}
+                <div className="mb-12 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/80 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/80">
+                    <div className="relative p-6 md:p-8">
+                        {/* Fond décoratif */}
+                        <div className="absolute top-0 right-0 h-48 w-48 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-400/5" />
+                        <div className="relative flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                    {category.nom}
+                                </h1>
+                                {category.description && (
+                                    <p className="mt-2 max-w-2xl text-slate-500 dark:text-slate-400">
+                                        {category.description}
+                                    </p>
+                                )}
+                            </div>
+                            <Badge
+                                variant="secondary"
+                                className="px-4 py-1.5 text-sm"
+                            >
+                                <Package className="mr-1 h-4 w-4" />
+                                {totalProducts} produit
+                                {totalProducts > 1 ? 's' : ''}
+                            </Badge>
                         </div>
-                        <Badge
-                            variant="secondary"
-                            className="px-4 py-1.5 text-sm"
-                        >
-                            <Package className="mr-1 h-4 w-4" />
-                            {totalProducts} produit
-                            {totalProducts > 1 ? 's' : ''}
-                        </Badge>
                     </div>
                 </div>
 
                 {/* Sous‑catégories */}
                 {subcategories.length > 0 && (
                     <div className="mb-10">
-                        <h2 className="mb-4 text-lg font-semibold text-foreground">
+                        <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">
                             Explorer les sous‑catégories
                         </h2>
                         <div className="flex flex-wrap gap-3">
@@ -191,9 +261,9 @@ export default function CategoryShow({
                                 <Link
                                     key={sub.id}
                                     href={sub.url}
-                                    className="flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-medium transition hover:border-emerald-200"
+                                    className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-emerald-700 dark:hover:bg-emerald-900/20"
                                 >
-                                    <div className="h-8 w-8 overflow-hidden rounded-full bg-muted">
+                                    <div className="h-8 w-8 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
                                         {sub.image && (
                                             <img
                                                 src={sub.image}
@@ -203,30 +273,41 @@ export default function CategoryShow({
                                         )}
                                     </div>
                                     <span>{sub.nom}</span>
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                    <ChevronRight className="h-4 w-4 text-slate-400" />
                                 </Link>
                             ))}
                         </div>
                     </div>
                 )}
 
-                {/* Barre d’outils */}
-                <div className="sticky top-16 z-20 mb-6 flex flex-wrap items-center gap-3 rounded-xl border bg-card p-3">
-                    <div className="relative max-w-md flex-1">
-                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                {/* Barre d’outils collante */}
+                <div className="sticky top-16 z-20 mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200/80 bg-white/80 p-3 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/80">
+                    <div className="relative flex-1 sm:max-w-md">
+                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <Input
                             placeholder="Rechercher dans cette catégorie..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="h-10 rounded-lg border-0 bg-muted pl-9"
+                            onKeyDown={(e) =>
+                                e.key === 'Enter' && applySearch()
+                            }
+                            className="h-10 rounded-lg border-slate-200 bg-slate-50 pr-8 pl-9 dark:border-slate-700 dark:bg-slate-800/50"
                         />
+                        {searchQuery && (
+                            <button
+                                onClick={clearSearch}
+                                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
                     </div>
 
                     <Select
                         value={filters.sort || 'newest'}
                         onValueChange={updateSort}
                     >
-                        <SelectTrigger className="w-40 rounded-lg">
+                        <SelectTrigger className="w-40 rounded-lg border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50">
                             <ArrowUpDown className="mr-2 h-4 w-4" />
                             <SelectValue placeholder="Trier" />
                         </SelectTrigger>
@@ -245,25 +326,40 @@ export default function CategoryShow({
                         </SelectContent>
                     </Select>
 
-                    <div className="hidden rounded-lg border p-1 md:flex">
-                        <Button
-                            variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                            size="icon"
-                            className="h-8 w-8 rounded-md"
-                            onClick={() => setViewMode('grid')}
-                        >
-                            <Grid3X3 className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            variant={viewMode === 'list' ? 'default' : 'ghost'}
-                            size="icon"
-                            className="h-8 w-8 rounded-md"
-                            onClick={() => setViewMode('list')}
-                        >
-                            <List className="h-4 w-4" />
-                        </Button>
+                    <div className="hidden rounded-lg border border-slate-200 bg-slate-50 p-1 md:flex dark:border-slate-700 dark:bg-slate-800/50">
+                        {(['grid', 'list', 'bento'] as ViewMode[]).map(
+                            (mode) => (
+                                <Button
+                                    key={mode}
+                                    variant={
+                                        viewMode === mode ? 'default' : 'ghost'
+                                    }
+                                    size="icon"
+                                    className="h-8 w-8 rounded-md"
+                                    onClick={() => setViewMode(mode)}
+                                    title={
+                                        mode === 'grid'
+                                            ? 'Grille'
+                                            : mode === 'list'
+                                              ? 'Liste'
+                                              : 'Bento'
+                                    }
+                                >
+                                    {mode === 'grid' && (
+                                        <Grid3X3 className="h-4 w-4" />
+                                    )}
+                                    {mode === 'list' && (
+                                        <List className="h-4 w-4" />
+                                    )}
+                                    {mode === 'bento' && (
+                                        <LayoutDashboard className="h-4 w-4" />
+                                    )}
+                                </Button>
+                            ),
+                        )}
                     </div>
 
+                    {/* Filtres mobiles */}
                     <Sheet
                         open={mobileFiltersOpen}
                         onOpenChange={setMobileFiltersOpen}
@@ -284,48 +380,44 @@ export default function CategoryShow({
                             </SheetHeader>
                             <div className="space-y-6 py-6">
                                 <div>
-                                    <label className="text-sm font-medium">
+                                    <Label className="text-sm font-medium">
                                         Prix (CDF)
-                                    </label>
-                                    <div className="mt-2 flex gap-2">
-                                        <Input
-                                            type="number"
-                                            placeholder="Min"
-                                            value={priceRange[0]}
-                                            onChange={(e) =>
-                                                setPriceRange([
-                                                    +e.target.value,
-                                                    priceRange[1],
-                                                ])
+                                    </Label>
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <span className="text-xs">
+                                            {priceRange[0]}
+                                        </span>
+                                        <Slider
+                                            min={0}
+                                            max={5000}
+                                            step={10}
+                                            value={priceRange}
+                                            onValueChange={(v) =>
+                                                setPriceRange([v[0], v[1]])
                                             }
-                                            className="h-9"
+                                            className="flex-1"
                                         />
-                                        <Input
-                                            type="number"
-                                            placeholder="Max"
-                                            value={priceRange[1]}
-                                            onChange={(e) =>
-                                                setPriceRange([
-                                                    priceRange[0],
-                                                    +e.target.value,
-                                                ])
-                                            }
-                                            className="h-9"
-                                        />
+                                        <span className="text-xs">
+                                            {priceRange[1]}
+                                        </span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-sm font-medium">
+                                    <Label className="text-sm font-medium">
                                         Note minimum
-                                    </label>
+                                    </Label>
                                     <div className="mt-2 flex gap-1">
                                         {[1, 2, 3, 4, 5].map((star) => (
                                             <button
                                                 key={star}
                                                 onClick={() =>
-                                                    setMinRating(star)
+                                                    setMinRating(
+                                                        star === minRating
+                                                            ? 0
+                                                            : star,
+                                                    )
                                                 }
-                                                className={`rounded-full p-1 transition ${star <= minRating ? 'text-yellow-400' : 'text-gray-300'}`}
+                                                className={`rounded-full p-1 transition ${star <= minRating ? 'text-amber-400' : 'text-slate-300'}`}
                                             >
                                                 <Star className="h-6 w-6 fill-current" />
                                             </button>
@@ -333,17 +425,16 @@ export default function CategoryShow({
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
+                                    <Checkbox
+                                        id="inStock"
                                         checked={inStockOnly}
-                                        onChange={(e) =>
-                                            setInStockOnly(e.target.checked)
+                                        onCheckedChange={(c) =>
+                                            setInStockOnly(!!c)
                                         }
-                                        className="rounded border-gray-300"
                                     />
-                                    <label className="text-sm">
+                                    <Label htmlFor="inStock">
                                         En stock uniquement
-                                    </label>
+                                    </Label>
                                 </div>
                                 <Button
                                     className="w-full rounded-lg"
@@ -356,17 +447,21 @@ export default function CategoryShow({
                     </Sheet>
                 </div>
 
-                {/* Grille produits */}
-                <div className="min-h-75">
-                    {products.data.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-center">
-                            <Package className="mx-auto h-16 w-16 text-muted-foreground" />
-                            <h3 className="mt-4 text-xl font-semibold">
+                {/* Résultats */}
+                <div className="min-h-100">
+                    {filteredProducts.length === 0 ? (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex flex-col items-center justify-center py-20 text-center"
+                        >
+                            <Package className="mx-auto h-16 w-16 text-slate-300 dark:text-slate-600" />
+                            <h3 className="mt-4 text-xl font-semibold text-slate-800 dark:text-white">
                                 Aucun produit trouvé
                             </h3>
-                            <p className="mt-2 max-w-md text-muted-foreground">
-                                Il n’y a pas encore de produits dans cette
-                                catégorie.
+                            <p className="mt-2 max-w-md text-slate-500 dark:text-slate-400">
+                                Essayez d'ajuster vos filtres ou votre
+                                recherche.
                             </p>
                             <div className="mt-6 flex gap-3">
                                 <Button asChild className="rounded-lg">
@@ -389,82 +484,109 @@ export default function CategoryShow({
                                     </Link>
                                 </Button>
                             </div>
-                        </div>
+                        </motion.div>
                     ) : (
                         <>
-                            <div
-                                className={`grid gap-4 ${
-                                    viewMode === 'grid'
-                                        ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
-                                        : 'grid-cols-1'
-                                }`}
-                            >
-                                {products.data.map((product) => (
-                                    <motion.div
-                                        key={product.id}
-                                        layout
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <ProductCard
-                                            product={product}
-                                            viewMode={viewMode}
-                                        />
-                                    </motion.div>
-                                ))}
-                            </div>
+                            <AnimatePresence mode="wait">
+                                <motion.div
+                                    key={viewMode}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.15 }}
+                                    className={`grid gap-4 ${gridClass}`}
+                                >
+                                    {filteredProducts.map((product, index) => (
+                                        <motion.div
+                                            key={product.id}
+                                            layout
+                                            initial={{ opacity: 0, y: 15 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -15 }}
+                                            transition={{
+                                                delay: index * 0.02,
+                                                duration: 0.2,
+                                            }}
+                                            className={
+                                                viewMode === 'bento'
+                                                    ? index === 0
+                                                        ? 'sm:col-span-2 sm:row-span-2'
+                                                        : index === 3
+                                                          ? 'sm:col-span-2'
+                                                          : ''
+                                                    : ''
+                                            }
+                                        >
+                                            <ProductCard
+                                                product={product}
+                                                viewMode={
+                                                    viewMode === 'list'
+                                                        ? 'list'
+                                                        : 'grid'
+                                                }
+                                            />
+                                        </motion.div>
+                                    ))}
+                                </motion.div>
+                            </AnimatePresence>
 
+                            {/* Pagination */}
                             {totalPages > 1 && (
                                 <div className="mt-10 flex justify-center">
                                     <nav
                                         className="flex items-center gap-1"
                                         aria-label="Pagination"
                                     >
-                                        <button
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
                                             onClick={() =>
                                                 goToPage(currentPage - 1)
                                             }
                                             disabled={currentPage === 1}
-                                            className="rounded-lg p-2 hover:bg-muted disabled:opacity-50"
+                                            className="h-10 w-10 rounded-lg"
                                         >
                                             <ChevronRight className="h-5 w-5 rotate-180" />
-                                        </button>
+                                        </Button>
                                         {pagesToShow.map((page, idx) =>
                                             page === '...' ? (
                                                 <span
                                                     key={`dots-${idx}`}
-                                                    className="px-2 text-muted-foreground"
+                                                    className="px-2 text-slate-400"
                                                 >
                                                     ...
                                                 </span>
                                             ) : (
-                                                <button
+                                                <Button
                                                     key={page}
+                                                    variant={
+                                                        page === currentPage
+                                                            ? 'default'
+                                                            : 'outline'
+                                                    }
+                                                    size="icon"
                                                     onClick={() =>
                                                         goToPage(page as number)
                                                     }
-                                                    className={`h-10 w-10 rounded-lg text-sm font-medium transition ${
-                                                        page === currentPage
-                                                            ? 'bg-emerald-600 text-white'
-                                                            : 'hover:bg-muted'
-                                                    }`}
+                                                    className="h-10 w-10 rounded-lg"
                                                 >
                                                     {page}
-                                                </button>
+                                                </Button>
                                             ),
                                         )}
-                                        <button
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
                                             onClick={() =>
                                                 goToPage(currentPage + 1)
                                             }
                                             disabled={
                                                 currentPage === totalPages
                                             }
-                                            className="rounded-lg p-2 hover:bg-muted disabled:opacity-50"
+                                            className="h-10 w-10 rounded-lg"
                                         >
                                             <ChevronRight className="h-5 w-5" />
-                                        </button>
+                                        </Button>
                                     </nav>
                                 </div>
                             )}
@@ -474,14 +596,14 @@ export default function CategoryShow({
 
                 {/* Section "À ne pas manquer" */}
                 {products.data.length > 0 && (
-                    <div className="mt-16 border-t pt-10">
+                    <div className="mt-16 border-t border-slate-200 pt-10 dark:border-slate-800">
                         <div className="mb-6 flex items-center justify-between">
                             <div>
                                 <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
                                     <TrendingUp className="h-4 w-4" />
                                     Populaires dans {category.nom}
                                 </span>
-                                <h2 className="mt-2 text-2xl font-bold text-foreground">
+                                <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
                                     À ne pas manquer
                                 </h2>
                             </div>

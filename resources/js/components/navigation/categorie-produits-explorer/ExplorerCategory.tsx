@@ -1,20 +1,27 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 // resources/js/components/navigation/ProductsMegaMenu.tsx
 import { Link } from '@inertiajs/react';
-import gsap from 'gsap';
+import { motion } from 'framer-motion';
 import {
-    Store,
-    ShoppingCart,
-    Smartphone,
+    ArrowRight,
+    ChevronRight,
     Globe,
     Palette,
     Settings,
-    Sparkles,
-    ChevronRight,
     ShoppingBag,
+    ShoppingCart,
+    Smartphone,
+    Sparkles,
+    Store,
+    Zap,
 } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
 
-// Types correspondant à votre modèle Eloquent
+/* -------------------------------------------------------------------------- */
+/*                                    Types                                   */
+/* -------------------------------------------------------------------------- */
+
 interface Product {
     id: number;
     nom: string;
@@ -33,7 +40,14 @@ interface Category {
     icone?: string;
 }
 
-// Mapping d’icônes (à adapter avec vos propres icônes)
+interface Props {
+    categories: Category[];
+}
+
+/* -------------------------------------------------------------------------- */
+/*                               Icon Mapping                                 */
+/* -------------------------------------------------------------------------- */
+
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     boutique: Store,
     panier: ShoppingCart,
@@ -43,322 +57,295 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
     parametres: Settings,
 };
 
-// Props attendues depuis le contrôleur Inertia
-interface Props {
-    categories: Category[];
-}
+/* -------------------------------------------------------------------------- */
+/*                                  Helpers                                   */
+/* -------------------------------------------------------------------------- */
 
-// Composant pour l'absence totale de catégories (animé)
+const formatPrice = (price: number) =>
+    new Intl.NumberFormat('fr-CD', {
+        style: 'currency',
+        currency: 'CDF',
+        maximumFractionDigits: 0,
+    }).format(price);
+
+const getCategoryIcon = (category: Category) =>
+    iconMap[category.icone ?? ''] ?? Store;
+
+/* -------------------------------------------------------------------------- */
+/*                              Empty Categories                              */
+/* -------------------------------------------------------------------------- */
+
 function EmptyCategories() {
-    const iconRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (!iconRef.current) {
-            return;
-        }
-
-        const ctx = gsap.context(() => {
-            gsap.fromTo(
-                iconRef.current,
-                { scale: 0, rotation: -180, opacity: 0 },
-                {
-                    scale: 1,
-                    rotation: 0,
-                    opacity: 1,
-                    duration: 0.6,
-                    ease: 'back.out(1.7)',
-                },
-            );
-            gsap.fromTo(
-                textRef.current,
-                { y: 20, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.5,
-                    delay: 0.2,
-                    ease: 'power2.out',
-                },
-            );
-        });
-
-        return () => ctx.revert();
-    }, []);
-
     return (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div
-                ref={iconRef}
-                className="mb-6 rounded-full bg-linear-to-br from-emerald-100 to-emerald-200 p-5 shadow-lg shadow-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/20 dark:shadow-emerald-800/20"
-            >
+        <div className="flex min-h-50 flex-col items-center justify-center px-6 py-12 text-center">
+            <div className="relative mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-emerald-200/70 bg-linear-to-br from-emerald-500/15 to-slate-100 shadow-xl shadow-emerald-500/10 dark:border-emerald-800/50 dark:from-emerald-400/10 dark:to-slate-800">
                 <Store className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <div ref={textRef}>
-                <h3 className="text-lg font-semibold text-foreground">
-                    Aucune catégorie pour le moment
-                </h3>
-                <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-                    Notre marketplace s'anime bientôt. Revenez très vite !
-                </p>
-            </div>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                Aucune catégorie disponible
+            </h3>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                Les catégories seront bientôt disponibles. Revenez prochainement
+                pour découvrir nos nouveautés.
+            </p>
         </div>
     );
 }
 
-// Composant pour une catégorie sans produits (animé)
+/* -------------------------------------------------------------------------- */
+/*                               Empty Products                               */
+/* -------------------------------------------------------------------------- */
+
 function EmptyProducts({ categoryName }: { categoryName: string }) {
-    const iconRef = useRef<HTMLDivElement>(null);
-    const textRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (!iconRef.current) {
-            return;
-        }
-
-        const ctx = gsap.context(() => {
-            gsap.fromTo(
-                iconRef.current,
-                { scale: 0, rotation: 180, opacity: 0 },
-                {
-                    scale: 1,
-                    rotation: 0,
-                    opacity: 1,
-                    duration: 0.6,
-                    ease: 'back.out(1.7)',
-                },
-            );
-            gsap.fromTo(
-                textRef.current,
-                { y: 20, opacity: 0 },
-                {
-                    y: 0,
-                    opacity: 1,
-                    duration: 0.5,
-                    delay: 0.2,
-                    ease: 'power2.out',
-                },
-            );
-        });
-
-        return () => ctx.revert();
-    }, []);
-
     return (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div
-                ref={iconRef}
-                className="mb-6 rounded-full bg-linear-to-br from-amber-100 to-amber-200 p-5 shadow-lg shadow-amber-100/50 dark:from-amber-900/30 dark:to-amber-800/20 dark:shadow-amber-800/20"
-            >
-                <ShoppingBag className="h-10 w-10 text-amber-600 dark:text-amber-400" />
+        <div className="flex min-h-50 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-slate-50/80 p-8 text-center dark:border-slate-700 dark:bg-slate-800/30">
+            <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 ring-1 ring-amber-500/20">
+                <ShoppingBag className="h-8 w-8 text-amber-500" />
             </div>
-            <div ref={textRef}>
-                <h3 className="text-lg font-semibold text-foreground">
-                    Pas encore de produits
-                </h3>
-                <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-                    La catégorie « {categoryName} » sera bientôt remplie.
-                </p>
-            </div>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                Aucun produit disponible
+            </h3>
+            <p className="mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+                La catégorie{' '}
+                <span className="font-medium">« {categoryName} »</span> sera
+                bientôt enrichie avec de nouveaux produits.
+            </p>
         </div>
     );
 }
+
+/* -------------------------------------------------------------------------- */
+/*                             Main Mega Menu                                 */
+/* -------------------------------------------------------------------------- */
 
 export function ProductsMegaMenu({ categories = [] }: Props) {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-        categories.length > 0 ? categories[0] : null,
+        categories[0] ?? null,
     );
-    const productsRef = useRef<HTMLDivElement>(null);
     const [isTransitioning, setIsTransitioning] = useState(false);
 
-    const handleCategoryChange = (cat: Category) => {
-        if (productsRef.current && !isTransitioning) {
-            setIsTransitioning(true);
-            const oldProducts =
-                productsRef.current.querySelectorAll('.product-card');
-            gsap.to(oldProducts, {
-                opacity: 0,
-                y: -8,
-                duration: 0.15,
-                stagger: 0.02,
-                onComplete: () => {
-                    setSelectedCategory(cat);
-                },
-            });
-        } else if (!isTransitioning) {
-            setSelectedCategory(cat);
-        }
-    };
-
-    // Déclenche l'animation d'entrée après mise à jour du DOM
+    // Synchronise si les catégories changent
     useEffect(() => {
-        if (productsRef.current && selectedCategory && isTransitioning) {
-            const timer = setTimeout(() => {
-                const newProducts =
-                    productsRef.current?.querySelectorAll('.product-card');
-
-                if (newProducts && newProducts.length > 0) {
-                    gsap.fromTo(
-                        newProducts,
-                        { opacity: 0, y: 10 },
-                        {
-                            opacity: 1,
-                            y: 0,
-                            duration: 0.25,
-                            stagger: 0.03,
-                            ease: 'power2.out',
-                            onComplete: () => setIsTransitioning(false),
-                        },
-                    );
-                } else {
-                    setIsTransitioning(false);
-                }
-            }, 50);
-
-            return () => clearTimeout(timer);
+        if (categories.length > 0 && !selectedCategory) {
+            setSelectedCategory(categories[0]);
         }
-    }, [selectedCategory, isTransitioning]);
+    }, [categories, selectedCategory]);
 
-    const getIcon = (cat: Category) => {
-        if (cat.icone && iconMap[cat.icone]) {
-            return iconMap[cat.icone];
+    const selectedCat = useMemo(
+        () => selectedCategory ?? categories[0] ?? null,
+        [selectedCategory, categories],
+    );
+
+    const handleCategoryChange = (category: Category) => {
+        if (isTransitioning || selectedCat?.id === category.id) {
+            return;
         }
 
-        return Store;
+        setIsTransitioning(true);
+        setTimeout(() => {
+            setSelectedCategory(category);
+            setIsTransitioning(false);
+        }, 100);
     };
 
-    // Aucune catégorie → état vide
-    if (categories.length === 0) {
-        return (
-            <div className="p-8">
-                <EmptyCategories />
-            </div>
-        );
+    if (!categories.length) {
+        return <EmptyCategories />;
     }
 
-    const selectedCat = selectedCategory as Category;
+    if (!selectedCat) {
+        return null;
+    }
+
     const hasProducts = selectedCat.produits?.length > 0;
 
     return (
-        <div className="grid grid-cols-[1fr_2fr] gap-6 p-6">
-            {/* Colonne des catégories */}
-            <div>
-                <h4 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                    <Sparkles className="h-4 w-4 text-emerald-500" />
-                    Catégories
-                </h4>
-                <div className="max-h-128 space-y-1 overflow-y-auto pr-2">
-                    {categories.map((cat) => {
-                        const Icon = getIcon(cat);
-                        const isSelected = selectedCat?.id === cat.id;
+        <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="relative w-full overflow-hidden rounded-b-[2rem] border-x border-b border-slate-200/70 bg-white/95 shadow-[0_30px_80px_-20px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-slate-700/60 dark:bg-slate-900/95 dark:shadow-[0_30px_80px_-20px_rgba(0,0,0,0.65)]"
+        >
+            {/* Glow décoratif */}
+            <div className="pointer-events-none absolute -top-24 left-10 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
+            <div className="pointer-events-none absolute top-1/2 right-0 h-72 w-72 -translate-y-1/2 rounded-full bg-slate-400/10 blur-3xl dark:bg-emerald-400/5" />
 
-                        return (
-                            <button
-                                key={cat.id}
-                                onClick={() => handleCategoryChange(cat)}
-                                disabled={isTransitioning}
-                                className={`group flex w-full items-center gap-3 rounded-lg p-3 text-left transition-all duration-200 ${
-                                    isSelected
-                                        ? 'border border-emerald-200 bg-emerald-50 shadow-sm dark:border-emerald-800 dark:bg-emerald-800/20'
-                                        : 'border border-transparent hover:bg-emerald-50/50 dark:hover:bg-emerald-800/10'
-                                }`}
-                            >
-                                <div
-                                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors ${
+            {/* Liseré supérieur */}
+            <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-400/60 to-transparent" />
+
+            <div className="grid w-full grid-cols-12">
+                {/* Sidebar catégories */}
+                <aside className="col-span-4 border-r border-slate-200/70 bg-slate-50/70 p-6 dark:border-slate-700/60 dark:bg-slate-900/40">
+                    <div className="mb-5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10">
+                                <Sparkles className="h-4 w-4 text-emerald-500" />
+                            </div>
+                            <span className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
+                                Catégories
+                            </span>
+                        </div>
+                        <span className="rounded-full bg-slate-200/70 px-2.5 py-1 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                            {categories.length}
+                        </span>
+                    </div>
+
+                    <div className="max-h-96 space-y-2 overflow-y-auto pr-1">
+                        {categories.map((category) => {
+                            const Icon = getCategoryIcon(category);
+                            const isSelected = selectedCat.id === category.id;
+
+                            return (
+                                <button
+                                    key={category.id}
+                                    type="button"
+                                    disabled={isTransitioning}
+                                    onClick={() =>
+                                        handleCategoryChange(category)
+                                    }
+                                    className={cn(
+                                        'group relative flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all duration-300',
                                         isSelected
-                                            ? 'bg-emerald-200 text-emerald-700 dark:bg-emerald-700 dark:text-emerald-200'
-                                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                                    }`}
+                                            ? 'border-emerald-200 bg-white shadow-lg shadow-emerald-500/10 dark:border-emerald-800/50 dark:bg-slate-800'
+                                            : 'border-transparent hover:border-slate-200 hover:bg-white/80 dark:hover:border-slate-700 dark:hover:bg-slate-800/60',
+                                    )}
                                 >
-                                    <Icon className="h-4 w-4" />
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <h5 className="truncate text-sm font-medium text-foreground">
-                                        {cat.nom}
-                                    </h5>
-                                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                        {cat.description}
-                                    </p>
-                                </div>
-                                {isSelected && (
-                                    <ChevronRight className="h-4 w-4 shrink-0 text-emerald-500" />
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Colonne latérale */}
-            <div className="pl-4">
-                <h4 className="mb-4 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                    Produits dans « {selectedCat.nom} »
-                </h4>
-
-                {/* Sous‑catégories */}
-                {selectedCat.sous_categories?.length > 0 && (
-                    <div className="mb-4 flex flex-wrap gap-2">
-                        {selectedCat.sous_categories.map((sub) => (
-                            <Link
-                                key={sub}
-                                href={`/category/${selectedCat.slug}/${sub.toLowerCase()}`}
-                                className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 transition-colors hover:bg-emerald-100 hover:text-emerald-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
-                            >
-                                {sub}
-                            </Link>
-                        ))}
-                    </div>
-                )}
-
-                {/* Produits ou état vide */}
-                {hasProducts ? (
-                    <div
-                        ref={productsRef}
-                        className="grid max-h-128 grid-cols-5 gap-3 overflow-y-auto pr-2"
-                    >
-                        {selectedCat.produits.map((product) => (
-                            <Link
-                                key={product.id}
-                                href={`/product/${product.slug}`}
-                                className="product-card group flex flex-col rounded-xl p-2 transition-all hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                            >
-                                <div className="mb-2 aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
-                                    <img
-                                        src={product.image_url}
-                                        alt={product.nom}
-                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                        loading="lazy"
+                                    {isSelected && (
+                                        <div className="absolute inset-y-3 left-0 w-1 rounded-r-full bg-emerald-500" />
+                                    )}
+                                    <div
+                                        className={cn(
+                                            'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all',
+                                            isSelected
+                                                ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
+                                                : 'bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-emerald-500/10 dark:group-hover:text-emerald-400',
+                                        )}
+                                    >
+                                        <Icon className="h-5 w-5" />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                            {category.nom}
+                                        </p>
+                                        <p className="mt-0.5 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">
+                                            {category.description}
+                                        </p>
+                                    </div>
+                                    <ChevronRight
+                                        className={cn(
+                                            'h-4 w-4 shrink-0 transition-all',
+                                            isSelected
+                                                ? 'translate-x-0 text-emerald-500 opacity-100'
+                                                : 'translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100',
+                                        )}
                                     />
-                                </div>
-                                <p className="line-clamp-1 text-xs font-medium text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400">
-                                    {product.nom}
-                                </p>
-                                <p className="mt-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                                    {new Intl.NumberFormat('fr-CD', {
-                                        style: 'currency',
-                                        currency: 'CDF',
-                                    }).format(product.prix)}
-                                </p>
-                            </Link>
-                        ))}
+                                </button>
+                            );
+                        })}
                     </div>
-                ) : (
-                    <EmptyProducts categoryName={selectedCat.nom} />
-                )}
+                </aside>
 
-                {/* CTA */}
-                <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20">
-                    <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-                        Boostez votre activité
-                    </p>
-                    <Link
-                        href={route('vendor.register')}
-                        className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
-                    >
-                        Créer ma boutique →
-                    </Link>
-                </div>
+                {/* Panel produits */}
+                <section className="col-span-8 p-6">
+                    <div className="mb-6 flex items-start justify-between gap-4">
+                        <div>
+                            <p className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
+                                Produits
+                            </p>
+                            <h3 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                {selectedCat.nom}
+                            </h3>
+                            <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+                                {selectedCat.description}
+                            </p>
+                        </div>
+                        <Link
+                            href={`/category/${selectedCat.slug}`}
+                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all hover:border-emerald-200 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-emerald-800 dark:hover:text-emerald-400"
+                        >
+                            Voir tout
+                            <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </div>
+
+                    {/* Sous-catégories – correction TS */}
+                    {(selectedCat.sous_categories?.length ?? 0) > 0 && (
+                        <div className="mb-6 flex flex-wrap gap-2">
+                            {selectedCat.sous_categories!.map((sub) => (
+                                <Link
+                                    key={sub}
+                                    href={`/category/${selectedCat.slug}/${sub.toLowerCase()}`}
+                                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:border-emerald-800 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
+                                >
+                                    {sub}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Produits */}
+                    {hasProducts ? (
+                        <div className="grid max-h-80 grid-cols-2 gap-4 overflow-y-auto pr-1 xl:grid-cols-4">
+                            {selectedCat.produits
+                                .slice(0, 12)
+                                .map((product) => (
+                                    <Link
+                                        key={product.id}
+                                        href={`/product/${product.slug}`}
+                                        className="group rounded-2xl border border-slate-200/70 bg-white p-3 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-500/10 dark:border-slate-700 dark:bg-slate-800/70 dark:hover:border-emerald-800"
+                                    >
+                                        <div className="relative mb-3 aspect-square overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
+                                            <img
+                                                src={product.image_url}
+                                                alt={product.nom}
+                                                loading="lazy"
+                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                            />
+                                        </div>
+                                        <h4 className="line-clamp-2 min-h-10 text-sm font-medium text-slate-800 transition-colors group-hover:text-emerald-600 dark:text-slate-200 dark:group-hover:text-emerald-400">
+                                            {product.nom}
+                                        </h4>
+                                        <div className="mt-2 flex items-center justify-between">
+                                            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                                {formatPrice(product.prix)}
+                                            </span>
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 opacity-0 transition-all duration-300 group-hover:opacity-100 dark:text-emerald-400">
+                                                <ShoppingCart className="h-4 w-4" />
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                        </div>
+                    ) : (
+                        <EmptyProducts categoryName={selectedCat.nom} />
+                    )}
+
+                    {/* CTA */}
+                    <div className="mt-6 rounded-3xl border border-emerald-200/60 bg-linear-to-r from-emerald-50 to-slate-50 p-5 dark:border-emerald-800/40 dark:from-emerald-950/30 dark:to-slate-900">
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
+                                <Zap className="h-5 w-5" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                                    Lancez votre boutique en ligne
+                                </p>
+                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    Créez votre marketplace professionnelle et
+                                    commencez à vendre dès aujourd'hui.
+                                </p>
+                                <Link
+                                    href={route('vendor.register')}
+                                    className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                                >
+                                    Créer ma boutique
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </div>
+        </motion.div>
     );
 }

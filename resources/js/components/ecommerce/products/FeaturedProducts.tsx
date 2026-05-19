@@ -8,13 +8,13 @@ import type { Product } from '@/types/ecommerce/products';
 import ProductCardCompact from './ProductCardCompact';
 
 interface FeaturedProductsProps {
-    products: Product[];
+    products?: Product[]; // facultatif pour éviter l'erreur
     loadMore?: () => void;
     hasMore?: boolean;
 }
 
 export default function FeaturedProducts({
-    products,
+    products = [], // valeur par défaut
     loadMore,
     hasMore = false,
 }: FeaturedProductsProps) {
@@ -27,9 +27,8 @@ export default function FeaturedProducts({
 
             if (entry.isIntersecting && hasMore && !isLoading && loadMore) {
                 setIsLoading(true);
-                // On laisse loadMore gérer son propre état, on remet isLoading à false après un court délai
                 loadMore();
-                setTimeout(() => setIsLoading(false), 500); // évite les appels successifs trop rapides
+                setTimeout(() => setIsLoading(false), 500);
             }
         },
         [hasMore, isLoading, loadMore],
@@ -54,10 +53,13 @@ export default function FeaturedProducts({
         <section className="py-12 lg:py-16">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <header className="mb-8 text-center">
-                    <h2 className="text-3xl font-bold tracking-tight text-foreground">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        <PackageSearch className="h-4 w-4" /> Sélection
+                    </span>
+                    <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                         Nos produits phares
                     </h2>
-                    <p className="mt-2 text-muted-foreground">
+                    <p className="mt-2 text-slate-500 dark:text-slate-400">
                         Découvrez notre sélection de produits d'exception
                     </p>
                 </header>
@@ -66,7 +68,7 @@ export default function FeaturedProducts({
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-8 text-center"
+                        className="flex min-h-75 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center backdrop-blur dark:border-slate-800 dark:bg-slate-900/30"
                     >
                         <motion.div
                             animate={{
@@ -82,15 +84,15 @@ export default function FeaturedProducts({
                         >
                             <PackageSearch className="h-10 w-10" />
                         </motion.div>
-                        <h3 className="text-xl font-semibold text-foreground">
+                        <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
                             Aucun produit mis en avant
                         </h3>
-                        <p className="mt-2 max-w-md text-muted-foreground">
+                        <p className="mt-2 max-w-md text-slate-500 dark:text-slate-400">
                             Nos produits phares seront bientôt disponibles.
                             Explorez notre catalogue complet pour ne rien
                             manquer.
                         </p>
-                        <Button asChild className="mt-6 rounded-lg">
+                        <Button asChild className="mt-6 rounded-full">
                             <Link href={route('tenant.product.index')}>
                                 Découvrir tous les produits
                             </Link>

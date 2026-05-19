@@ -1,9 +1,14 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 // resources/js/components/ecommerce/products/ProductCardCompact.tsx
 import { Link } from '@inertiajs/react';
-import { Star, ShoppingCart } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Heart, ShoppingBag, Star, Sparkles, Eye } from 'lucide-react';
+import { useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/ecommerce/use-cart';
+import { useWishlist } from '@/hooks/ecommerce/use-wishlist';
+import { cn } from '@/lib/utils';
 import type { Product } from '@/types/ecommerce/products';
 
 interface ProductCardCompactProps {
@@ -11,117 +16,249 @@ interface ProductCardCompactProps {
     showDiscountBadge?: boolean;
 }
 
-/** Retourne une URL d’image valide ou un placeholder */
-function getImageUrl(image: string | null | undefined): string {
+function getImageUrl(image?: string | null): string {
     if (!image) {
         return '/storage/images/getting-business.jpg';
     }
 
-    if (image.startsWith('http') || image.startsWith('/storage')) {
+    if (
+        image.startsWith('http') ||
+        image.startsWith('/storage') ||
+        image.startsWith('/')
+    ) {
         return image;
     }
 
     return `/storage/${image.replace(/^\//, '')}`;
 }
 
-/** Formate un montant en CDF */
 function formatPrice(amount: number): string {
     return new Intl.NumberFormat('fr-CD', {
         style: 'currency',
         currency: 'CDF',
-        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
     }).format(amount);
+}
+
+function compactNumber(value: number): string {
+    if (value >= 1000) {
+        return `${(value / 1000).toFixed(1).replace('.0', '')}k`;
+    }
+
+    return String(value);
 }
 
 export default function ProductCardCompact({
     product,
     showDiscountBadge = false,
 }: ProductCardCompactProps) {
-    const noteMoyenne = Number(product.note_moyenne) || 0;
-    const soldCount = Number(product.sold_count) || 0;
     const { addToCart } = useCart();
+    const { toggleWishlist, isInWishlist } = useWishlist();
 
-    const renderStars = () => (
-        <div className="flex items-center gap-0.5 text-xs text-muted-foreground">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span className="font-medium text-foreground">
-                {noteMoyenne.toFixed(1)}
-            </span>
-        </div>
+    if (!product) {
+        return null;
+    } // sécurité
+
+    const isWishlisted = isInWishlist(product.id);
+    const rating = Number(product.note_moyenne) || 0;
+    const sold = Number(product.sold_count) || 0;
+    const outOfStock = (product.quantite_stock ?? 0) <= 0;
+
+    const currentPrice = product.prix_actuel ?? product.prix_ttc;
+    const oldPrice =
+        product.est_en_promotion && product.prix_ttc > currentPrice
+            ? product.prix_ttc
+            : null;
+    const discount = oldPrice
+        ? Math.round(((oldPrice - currentPrice) / oldPrice) * 100)
+        : product.reduction_pourcentage || 0;
+
+    const handleAddToCart = useCallback(
+        (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!outOfStock) {
+                addToCart(product.id, 1);
+            }
+        },
+        [outOfStock, product.id, addToCart],
     );
 
-    const handleAddToCart = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        addToCart(product.id, 1);
-    };
+    const handleToggleWishlist = useCallback(
+        (e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleWishlist(product.id);
+        },
+        [product.id, toggleWishlist],
+    );
 
     return (
-        <Link href={product.url} className="group block">
-            <div className="relative overflow-hidden rounded-lg bg-muted">
-                <div className="aspect-square w-full">
-                    <img
-                        src={getImageUrl(product.image_principale)}
-                        alt={product.nom}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
-                    />
-                </div>
-
-                {/* Badges */}
-                <div className="absolute top-1.5 left-1.5 flex flex-col gap-1">
-                    {showDiscountBadge && product.est_en_promotion && (
-                        <Badge className="bg-red-500 px-1.5 py-0 text-[10px] text-white">
-                            -{product.reduction_pourcentage}%
-                        </Badge>
+        <motion.div
+            layout
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="group h-full"
+        >
+            <Link href={product.url} className="block h-full">
+                <article
+                    className={cn(
+                        'relative flex h-full flex-col overflow-hidden rounded-3xl',
+                        'border border-slate-200/70 bg-white/90 backdrop-blur-xl',
+                        'shadow-[0_8px_30px_rgb(15,23,42,0.06)]',
+                        'transition-all duration-500',
+                        'hover:-translate-y-1.5',
+                        'hover:border-emerald-200/80',
+                        'hover:shadow-[0_20px_60px_rgba(16,185,129,0.12)]',
+                        'dark:border-slate-800/80 dark:bg-slate-900/90',
+                        'dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)]',
+                        'dark:hover:border-emerald-800/60',
+                        'dark:hover:shadow-[0_20px_60px_rgba(16,185,129,0.08)]',
                     )}
-                    {product.badge && (
-                        <Badge className="bg-emerald-600 px-1.5 py-0 text-[10px] text-white">
-                            {product.badge}
-                        </Badge>
-                    )}
-                </div>
+                >
+                    {/* Glow subtil */}
+                    <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-emerald-500/3 via-transparent to-cyan-500/3 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-                {/* Bouton panier au survol */}
-                <div className="absolute inset-x-0 bottom-0 p-1.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    <Button
-                        onClick={handleAddToCart}
-                        size="sm"
-                        className="w-full gap-1.5 border-0 bg-white/90 text-xs text-foreground backdrop-blur-sm hover:bg-white dark:bg-gray-900/90 dark:hover:bg-gray-900"
-                    >
-                        <ShoppingCart className="h-3.5 w-3.5" />
-                        Ajouter
-                    </Button>
-                </div>
-            </div>
+                    {/* Zone image */}
+                    <div className="relative">
+                        <div className="aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
+                            <img
+                                src={getImageUrl(product.image_principale)}
+                                alt={product.nom}
+                                loading="lazy"
+                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
+                        </div>
 
-            <div className="mt-1.5 space-y-0.5">
-                <h3 className="line-clamp-2 text-xs leading-tight font-medium text-foreground">
-                    {product.nom}
-                </h3>
+                        {/* Overlay linear */}
+                        <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-                <div className="flex items-center gap-1">
-                    {renderStars()}
-                    <span className="text-[10px] text-muted-foreground">•</span>
-                    <span className="text-[10px] text-muted-foreground">
-                        {soldCount >= 1000
-                            ? `${Math.floor(soldCount / 1000)}k+`
-                            : soldCount}{' '}
-                        vendu{soldCount > 1 ? 's' : ''}
-                    </span>
-                </div>
+                        {/* Badges */}
+                        <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                            {showDiscountBadge &&
+                                product.est_en_promotion &&
+                                discount > 0 && (
+                                    <Badge className="rounded-full border-0 bg-rose-500 px-2.5 py-1 text-[10px] font-semibold text-white shadow-lg shadow-rose-500/25">
+                                        -{discount}%
+                                    </Badge>
+                                )}
+                            {product.badge && (
+                                <Badge className="rounded-full border-0 bg-emerald-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-lg shadow-emerald-500/20">
+                                    <Sparkles className="mr-1 h-3 w-3" />
+                                    {product.badge}
+                                </Badge>
+                            )}
+                            {outOfStock && (
+                                <Badge
+                                    variant="secondary"
+                                    className="rounded-full bg-slate-900/85 px-2.5 py-1 text-[10px] font-medium text-white backdrop-blur"
+                                >
+                                    Rupture
+                                </Badge>
+                            )}
+                        </div>
 
-                <div className="flex items-baseline gap-1.5">
-                    <span className="text-sm font-bold text-foreground">
-                        {formatPrice(product.prix_actuel ?? product.prix_ttc)}
-                    </span>
-                    {product.est_en_promotion && (
-                        <span className="text-xs text-muted-foreground line-through">
-                            {formatPrice(product.prix_ttc)}
-                        </span>
-                    )}
-                </div>
-            </div>
-        </Link>
+                        {/* Actions flottantes */}
+                        <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
+                            {/* Wishlist */}
+                            <button
+                                type="button"
+                                onClick={handleToggleWishlist}
+                                aria-label="Ajouter aux favoris"
+                                className={cn(
+                                    'flex h-10 w-10 items-center justify-center rounded-2xl',
+                                    'border border-white/70 bg-white/85 backdrop-blur-xl',
+                                    'shadow-lg shadow-slate-900/10',
+                                    'transition-all duration-300',
+                                    'hover:scale-105 hover:bg-white',
+                                    'dark:border-slate-700/70 dark:bg-slate-900/85',
+                                    isWishlisted &&
+                                        'border-rose-200 bg-rose-50 text-rose-500 dark:border-rose-800 dark:bg-rose-950/30',
+                                )}
+                            >
+                                <Heart
+                                    className={cn(
+                                        'h-4 w-4 transition-all',
+                                        isWishlisted && 'fill-current',
+                                    )}
+                                />
+                            </button>
+
+                            {/* Aperçu */}
+                            <span
+                                className={cn(
+                                    'flex h-10 w-10 items-center justify-center rounded-2xl',
+                                    'border border-white/70 bg-white/85 backdrop-blur-xl',
+                                    'text-slate-600 shadow-lg shadow-slate-900/10',
+                                    'opacity-0 transition-all duration-300',
+                                    'translate-y-2 group-hover:translate-y-0 group-hover:opacity-100',
+                                    'dark:border-slate-700/70 dark:bg-slate-900/85 dark:text-slate-300',
+                                )}
+                            >
+                                <Eye className="h-4 w-4" />
+                            </span>
+                        </div>
+
+                        {/* CTA Ajouter au panier */}
+                        <div className="absolute inset-x-3 bottom-3 z-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+                            <Button
+                                size="sm"
+                                onClick={handleAddToCart}
+                                disabled={outOfStock}
+                                className={cn(
+                                    'h-11 w-full rounded-2xl border-0',
+                                    'bg-linear-to-r from-emerald-600 via-emerald-500 to-teal-500',
+                                    'text-sm font-semibold text-white',
+                                    'shadow-lg shadow-emerald-500/25',
+                                    'transition-all duration-300',
+                                    'hover:shadow-xl hover:shadow-emerald-500/35',
+                                    'disabled:cursor-not-allowed disabled:opacity-60',
+                                )}
+                            >
+                                <ShoppingBag className="mr-2 h-4 w-4" />
+                                Ajouter au panier
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Contenu */}
+                    <div className="flex flex-1 flex-col p-4">
+                        {/* Note + ventes */}
+                        <div className="mb-2 flex items-center gap-2 text-xs">
+                            <div className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
+                                <Star className="h-3 w-3 fill-current" />
+                                {rating.toFixed(1)}
+                            </div>
+                            {sold > 0 && (
+                                <span className="text-slate-500 dark:text-slate-400">
+                                    {compactNumber(sold)} vendus
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Nom produit */}
+                        <h3 className="line-clamp-2 min-h-11 text-sm leading-5 font-semibold text-slate-900 transition-colors group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-400">
+                            {product.nom}
+                        </h3>
+
+                        {/* Prix */}
+                        <div className="mt-auto pt-3">
+                            <div className="flex flex-wrap items-end gap-2">
+                                <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+                                    {formatPrice(currentPrice)}
+                                </span>
+                                {oldPrice && (
+                                    <span className="text-xs font-medium text-slate-400 line-through">
+                                        {formatPrice(oldPrice)}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </Link>
+        </motion.div>
     );
 }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Shop;
 
+use App\Events\WishlistActivity;
 use App\Http\Controllers\Controller;
+use App\Models\Client;
 use App\Models\Produit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,24 +46,70 @@ class WishlistController extends Controller
         ]);
     }
 
+    // public function wishlistToggle(Request $request, Produit $produit)
+    // {
+    //     $client = Auth::user()->client;
+    //     if (! $client) {
+    //         $client = Auth::user()->client()->create([
+    //             'nom' => Auth::user()->name ?? 'Client',
+    //             'prenom' => '',
+    //             'email' => Auth::user()->email,
+    //             'type' => Client::TYPE_PARTICULIER,
+    //             'statut' => Client::STATUT_ACTIF,
+    //         ]);
+    //     }
+
+    //     $wishlist = $client->wishlists()->firstOrCreate(['nom' => 'Ma liste des souhaits']);
+
+    //     if ($wishlist->items()->where('produit_id', $produit->id)->exists()) {
+    //         $wishlist->removeProduct($produit);
+    //         $message = 'Produit retiré de la wishlist';
+    //     } else {
+    //         $wishlist->addProduct($produit);
+    //         $message = 'Produit ajouté à la wishlist';
+    //     }
+
+    //     // Réponse JSON systématique pour les appels API et Inertia
+    //     return response()->json(['success' => true, 'message' => $message]);
+    // }
+
     public function wishlistToggle(Request $request, Produit $produit)
     {
         $client = Auth::user()->client;
+        if (! $client) {
+            $client = Auth::user()->client()->create([
+                'nom' => Auth::user()->name ?? 'Client',
+                'prenom' => '',
+                'email' => Auth::user()->email,
+                'type' => Client::TYPE_PARTICULIER,
+                'statut' => Client::STATUT_ACTIF,
+            ]);
+        }
+
         $wishlist = $client->wishlists()->firstOrCreate(['nom' => 'Ma liste']);
 
         if ($wishlist->items()->where('produit_id', $produit->id)->exists()) {
             $wishlist->removeProduct($produit);
             $message = 'Produit retiré de la wishlist';
+            $type = 'wishlist_remove';
         } else {
             $wishlist->addProduct($produit);
             $message = 'Produit ajouté à la wishlist';
+            $type = 'wishlist_add';
         }
 
-        if ($request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => $message]);
+        // Notification au tenant en temps réel
+        $tenant = tenant(); // fonction stancl/tenancy
+        if ($tenant) {
+            event(new WishlistActivity(
+                $tenant->id,
+                'Activité wishlist',
+                "Un client a {$message} : {$produit->nom}",
+                $type
+            ));
         }
 
-        return back()->with('success', $message);
+        return response()->json(['success' => true, 'message' => $message]);
     }
 
     public function wishlistRemove(Produit $produit)

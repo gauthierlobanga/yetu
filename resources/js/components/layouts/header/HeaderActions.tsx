@@ -1,7 +1,8 @@
 import { usePage } from '@inertiajs/react';
 import { useState } from 'react';
 // import AppearanceToggle from '@/components/appearance-toogle';
-import SearchInput from '@/pages/searchInput';
+import AppearanceToggle from '@/components/appearance-toogle';
+import SearchExperience from '@/components/search-my-input';
 import { CartButton } from './CartButton';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { RegionSelectorForm } from './RegionSelectorForm';
@@ -17,14 +18,14 @@ export function HeaderActions() {
         <>
             {/* Search */}
             <div className="hidden md:block">
-                <SearchInput />
+                <SearchExperience />
             </div>
 
             {/* Region & Language Selector */}
             <RegionSelectorForm />
 
             {/* Theme Toggle */}
-            {/* <AppearanceToggle /> */}
+            <AppearanceToggle />
 
             {/* Cart - Visible pour tous */}
             {!isCartPage && <CartButton />}

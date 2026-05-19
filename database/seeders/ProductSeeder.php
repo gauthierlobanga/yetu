@@ -15,22 +15,17 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        // Vérifier que les marques existent
         if (Brand::count() === 0) {
             $this->command->error('Aucune marque trouvée. Veuillez d\'abord exécuter BrandSeeder.');
 
             return;
         }
-
-        // Vérifier que les catégories existent
         if (ProductCategory::count() === 0) {
             $this->command->error('Aucune catégorie trouvée. Veuillez d\'abord exécuter ProductCategorySeeder.');
 
             return;
         }
 
-        // Récupérer les UUID des marques (indexées par ordre de création ou par nom)
-        // On peut récupérer les marques dans l'ordre où elles ont été seedées (par ex. les 5 premières)
         $brandUuids = Brand::orderBy('created_at')->pluck('id')->toArray();
         if (count($brandUuids) < 5) {
             $this->command->error('Il faut au moins 5 marques pour ce seeder.');
@@ -38,7 +33,6 @@ class ProductSeeder extends Seeder
             return;
         }
 
-        // Assigner les marques dans l'ordre (1 → première marque, 2 → deuxième, etc.)
         $brandIds = [
             1 => $brandUuids[0],
             2 => $brandUuids[1],
@@ -47,35 +41,14 @@ class ProductSeeder extends Seeder
             5 => $brandUuids[4],
         ];
 
-        // Récupérer les catégories
         $categoryIds = ProductCategory::pluck('id')->toArray();
-
         $this->command->info('IDs des catégories disponibles : '.implode(', ', array_slice($categoryIds, 0, 10)).'...');
 
         $faker = Factory::create('fr_FR');
 
         // ==========================================
-        // RÉCUPÉRER LES VRAIS IDs DES CATÉGORIES
+        // Produits détaillés
         // ==========================================
-
-        // Si les noms exacts ne correspondent pas, on prend les premiers IDs disponibles
-        $categoryIds = ProductCategory::pluck('id')->toArray();
-
-        // Afficher les IDs disponibles pour debug
-        $this->command->info('IDs des catégories disponibles : '.implode(', ', array_slice($categoryIds, 0, 10)).'...');
-
-        // ==========================================
-        // FONCTION POUR OBTENIR UN ID DE CATÉGORIE PAR INDEX
-        // ==========================================
-        $getCategoryId = function ($index) use ($categoryIds) {
-            // Prendre l'ID à l'index spécifié, ou un ID aléatoire si l'index n'existe pas
-            return $categoryIds[$index] ?? $categoryIds[array_rand($categoryIds)];
-        };
-
-        // ==========================================
-        // PRODUITS DÉTAILLÉS - Utiliser les vrais IDs
-        // ==========================================
-
         $produits = [
             [
                 'nom' => 'Veste Polaire Boreal Trail',
@@ -352,15 +325,14 @@ class ProductSeeder extends Seeder
             ],
         ];
 
-        // Insérer les produits détaillés
         foreach ($produits as $produitData) {
             $this->createProduit($produitData);
         }
 
         // ==========================================
-        // CRÉATION DES PRODUITS RESTANTS (jusqu'à 50)
+        // Produits aléatoires
         // ==========================================
-        $brandIds = Brand::pluck('id')->toArray();
+        $allBrandIds = Brand::pluck('id')->toArray();
 
         $nomsProduits = [
             'T-shirt', 'Pantalon', 'Veste', 'Pull', 'Chemise', 'Robe', 'Jupe', 'Short',
@@ -377,14 +349,10 @@ class ProductSeeder extends Seeder
         $poidsStatuts = [15, 80, 5];
 
         $produitsRestants = 50 - count($produits);
-
         for ($i = 0; $i < $produitsRestants; $i++) {
             $nom = $faker->randomElement($adjectifs).' '.$faker->randomElement($nomsProduits);
-            $brandId = $faker->randomElement($brandIds);
-
-            // Utiliser les vrais IDs de catégories
+            $brandId = $faker->randomElement($allBrandIds);
             $categories = $faker->randomElements($categoryIds, $faker->numberBetween(1, 3));
-
             $statut = $this->getRandomWeightedElement($statutsValides, $poidsStatuts);
             $prixHt = $faker->randomFloat(2, 5, 800);
 
@@ -424,7 +392,6 @@ class ProductSeeder extends Seeder
                 'tags' => $faker->words(3),
                 'variantes' => [],
             ];
-
             $this->createProduit($produitData);
         }
 
@@ -435,70 +402,80 @@ class ProductSeeder extends Seeder
         $this->command->info('   - Produits archivés : '.Produit::where('statut', 'archive')->count());
     }
 
-    // ... le reste des méthodes reste identique ...
-
     /**
-     * Crée un produit avec ses relations
+     * Crée un produit avec ses relations.
+     * Toute colonne castée en `array` ou `json` dans le modèle sera automatiquement
+     * convertie en chaîne JSON avant l'insertion, ce qui évite les erreurs de type.
      */
     private function createProduit(array $data): Produit
     {
-        // Extraire les relations
+        // Relations à synchroniser après création
         $categories = $data['categories'] ?? [];
         $tags = $data['tags'] ?? [];
         $variantes = $data['variantes'] ?? [];
 
         unset($data['categories'], $data['tags'], $data['variantes']);
 
-        // Convertir les tableaux en JSON
-        if (isset($data['seo_keywords']) && is_array($data['seo_keywords'])) {
-            $data['seo_keywords'] = json_encode($data['seo_keywords']);
-        }
-        if (isset($data['metadata']) && is_array($data['metadata'])) {
-            $data['metadata'] = json_encode($data['metadata']);
-        }
-        if (isset($data['attributes']) && is_array($data['attributes'])) {
-            $data['attributes'] = json_encode($data['attributes']);
+        // Récupérer les colonnes qui doivent être encodées en JSON
+        $casts = (new Produit)->getCasts();
+        $jsonColumns = [];
+        foreach ($casts as $column => $cast) {
+            if (in_array($cast, ['array', 'json', 'object', 'collection'])) {
+                $jsonColumns[] = $column;
+            }
         }
 
-        // Valeurs par défaut
-        $data['seo_keywords'] = $data['seo_keywords'] ?? json_encode([]);
-        $data['attributes'] = $data['attributes'] ?? json_encode([]);
+        // Encoder toutes les colonnes JSON présentes dans $data
+        foreach ($jsonColumns as $col) {
+            if (array_key_exists($col, $data)) {
+                if (is_array($data[$col])) {
+                    $data[$col] = json_encode($data[$col]);
+                } elseif (is_null($data[$col])) {
+                    $data[$col] = json_encode([]);
+                }
+                // Si c'est déjà une chaîne, on la laisse
+            }
+        }
+
+        // Valeurs par défaut pour les colonnes JSON qui ne sont pas encore définies
+        foreach (['seo_keywords', 'metadata', 'attributes'] as $col) {
+            if (! array_key_exists($col, $data)) {
+                $data[$col] = json_encode([]);
+            }
+        }
+
         $data['vues'] = 0;
         $data['views_count'] = 0;
         $data['sold_count'] = 0;
         $data['average_rating'] = 0;
         $data['reviews_count'] = 0;
 
-        // Créer le produit avec vérification de duplication sur le slug
+        // Création ou récupération du produit (évite les doublons de slug)
         $produit = Produit::firstOrCreate(
             ['slug' => $data['slug']],
             $data
         );
 
-        // Attacher les catégories avec DB::table
-        if (! empty($categories)) {
-            foreach ($categories as $index => $categorieId) {
-                // Vérifier que la catégorie existe avant d'insérer
-                if (ProductCategory::where('id', $categorieId)->exists()) {
-                    // Vérifier si la relation existe déjà
-                    $existing = DB::table('produit_categorie_pivot')
-                        ->where('produit_id', $produit->id)
-                        ->where('category_id', $categorieId)
-                        ->first();
+        // Attacher les catégories
+        foreach ($categories as $index => $categorieId) {
+            if (ProductCategory::where('id', $categorieId)->exists()) {
+                $existing = DB::table('produit_categorie_pivot')
+                    ->where('produit_id', $produit->id)
+                    ->where('category_id', $categorieId)
+                    ->first();
 
-                    if (! $existing) {
-                        DB::table('produit_categorie_pivot')->insert([
-                            'produit_id' => $produit->id,
-                            'category_id' => $categorieId,
-                            'is_primary' => ($index === 0),
-                            'order' => $index,
-                        ]);
-                    }
+                if (! $existing) {
+                    DB::table('produit_categorie_pivot')->insert([
+                        'produit_id' => $produit->id,
+                        'category_id' => $categorieId,
+                        'is_primary' => ($index === 0),
+                        'order' => $index,
+                    ]);
                 }
             }
         }
 
-        // Attacher les tags
+        // Attacher les tags (nécessite le package spatie/laravel-tags)
         if (! empty($tags) && method_exists($produit, 'attachTags')) {
             $produit->attachTags($tags);
         }
@@ -506,7 +483,6 @@ class ProductSeeder extends Seeder
         // Créer les variantes
         if (! empty($variantes) && method_exists($produit, 'variantes')) {
             foreach ($variantes as $varianteData) {
-                // Utiliser firstOrCreate pour éviter les duplications sur sku_variante
                 $produit->variantes()->firstOrCreate(
                     ['sku_variante' => $varianteData['sku_variante']],
                     $varianteData
@@ -518,7 +494,7 @@ class ProductSeeder extends Seeder
     }
 
     /**
-     * Retourne un élément aléatoire basé sur des poids
+     * Retourne un élément aléatoire basé sur des poids.
      */
     private function getRandomWeightedElement(array $elements, array $weights): mixed
     {

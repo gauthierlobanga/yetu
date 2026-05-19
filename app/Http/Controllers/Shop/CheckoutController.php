@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
 use App\Models\Commande;
+// Optionnel : service dédié
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -19,34 +20,73 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Affiche la page de checkout avec le récapitulatif du panier.
+     * Page de checkout enrichie avec les options de livraison et de paiement.
      */
     public function checkoutIndex(Request $request)
     {
         $cart = $this->cartController->getCart($request);
 
         if ($cart->est_vide) {
-            return redirect()->route('tenant.cart.index')->with('error', 'Votre panier est vide.');
+            return redirect()->route('tenant.cart.index')
+                ->with('error', 'Votre panier est vide.');
         }
 
-        // Récupérer les adresses de l'utilisateur connecté
         $addresses = Auth::user()?->adresses()->get() ?? collect();
+
+        // Méthodes de livraison (peuvent être dynamiques depuis la base / config)
+        $shippingMethods = [
+            [
+                'id' => 'standard',
+                'name' => 'Standard',
+                'description' => 'Livraison à domicile sous 5-7 jours ouvrés',
+                'price' => 0,
+                'estimatedDays' => '5-7 jours',
+            ],
+            [
+                'id' => 'express',
+                'name' => 'Express',
+                'description' => 'Livraison prioritaire sous 24-48h',
+                'price' => 15000,
+                'estimatedDays' => '1-2 jours',
+            ],
+        ];
+
+        // Méthodes de paiement
+        $paymentMethods = [
+            [
+                'id' => 'mobile_money',
+                'name' => 'Mobile Money',
+                'description' => 'M-Pesa, Airtel Money, Orange Money',
+            ],
+            [
+                'id' => 'card',
+                'name' => 'Carte bancaire',
+                'description' => 'Visa, Mastercard',
+            ],
+            [
+                'id' => 'cash',
+                'name' => 'Paiement à la livraison',
+            ],
+        ];
 
         return Inertia::render('Shop/Checkout/Index', [
             'cart' => $this->cartController->formatCart($cart),
             'addresses' => $addresses,
+            'shippingMethods' => $shippingMethods,
+            'paymentMethods' => $paymentMethods,
         ]);
     }
 
     /**
-     * Traite la commande : vérifie le stock, convertit le panier en commande et décrémente les stocks.
+     * Traitement final de la commande.
      */
     public function checkoutProcess(Request $request)
     {
         $validated = $request->validate([
             'adresse_facturation_id' => 'required|exists:adresses,id',
             'adresse_livraison_id' => 'required|exists:adresses,id',
-            'mode_paiement' => 'required|string',
+            'payment_method_id' => 'required|string',
+            'shipping_method_id' => 'sometimes|string',
             'notes' => 'nullable|string|max:1000',
         ]);
 
@@ -71,7 +111,8 @@ class CheckoutController extends Controller
             $commande->update([
                 'adresse_facturation_id' => $validated['adresse_facturation_id'],
                 'adresse_livraison_id' => $validated['adresse_livraison_id'],
-                'mode_paiement' => $validated['mode_paiement'],
+                'mode_paiement' => $validated['payment_method_id'],
+                'shipping_method_id' => $validated['shipping_method_id'] ?? null,
                 'notes' => $validated['notes'] ?? null,
             ]);
 
@@ -85,10 +126,14 @@ class CheckoutController extends Controller
 
             return redirect()->route('tenant.payment.pay', $commande);
         } catch (\Exception $e) {
-            Log::error('Erreur lors de la création de la commande : '.$e->getMessage());
+            Log::error('Checkout error', [
+                'message' => $e->getMessage(),
+                'user' => Auth::id(),
+                'cart' => $cart->id,
+            ]);
 
             return back()->withErrors([
-                'checkout' => 'Une erreur est survenue lors du traitement de votre commande. Veuillez réessayer.',
+                'checkout' => 'Une erreur inattendue est survenue. Veuillez réessayer.',
             ]);
         }
     }
@@ -98,7 +143,6 @@ class CheckoutController extends Controller
      */
     public function checkoutSuccess(Commande $commande)
     {
-        // Vérifier que l'utilisateur est bien le propriétaire de la commande
         if ($commande->client_id !== optional(Auth::user()->client)->id) {
             abort(403);
         }

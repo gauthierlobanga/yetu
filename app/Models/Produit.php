@@ -112,6 +112,12 @@ class Produit extends Model implements HasMedia, Sitemapable
         // 'search_embedding_synced_at' => 'datetime',
     ];
 
+    protected $attributes = [
+        'attributs' => [],
+        'attributes' => [],
+        'metadata' => [],
+    ];
+
     const STATUS_DRAFT = 'brouillon';
 
     const STATUS_PUBLISHED = 'publie';
@@ -464,7 +470,7 @@ class Produit extends Model implements HasMedia, Sitemapable
 
     public function getUrlAttribute(): string
     {
-        return route('tenant.tenant.product.show', $this->slug);
+        return route('tenant.product.show', $this->slug);
     }
 
     public function getSeoTitleAttribute(): string
@@ -677,16 +683,16 @@ class Produit extends Model implements HasMedia, Sitemapable
         return $variations;
     }
 
-    // public function clearCache(): void
-    // {
-    //     Cache::forget("product_{$this->id}_image_thumb");
-    //     Cache::forget("product_{$this->id}_image_card");
-    //     Cache::forget("product_{$this->id}_image_small");
-    //     Cache::forget("product_{$this->id}_image_medium");
-    //     Cache::forget("product_{$this->id}_image_large");
-    //     Cache::forget("product_{$this->id}_image_zoom");
-    //     Cache::forget("product_{$this->id}_all_images");
-    // }
+    public function clearCache(): void
+    {
+        Cache::forget("product_{$this->id}_image_thumb");
+        Cache::forget("product_{$this->id}_image_card");
+        Cache::forget("product_{$this->id}_image_small");
+        Cache::forget("product_{$this->id}_image_medium");
+        Cache::forget("product_{$this->id}_image_large");
+        Cache::forget("product_{$this->id}_image_zoom");
+        Cache::forget("product_{$this->id}_all_images");
+    }
 
     public function toSitemapTag(): Url|string|array
     {

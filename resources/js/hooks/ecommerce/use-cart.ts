@@ -125,7 +125,7 @@ export function useCartItems() {
         });
     }, []);
 
-    const addToCart = useCallback((productId: number, quantity = 1, variantId?: number) => {
+    const addToCart = useCallback((productId: number | string, quantity = 1, variantId?: number) => {
         router.post(route('tenant.cart.add', productId), { quantity, variante_id: variantId }, {
             preserveScroll: true,
             preserveState: true,
@@ -213,7 +213,7 @@ export function useCart() {
         });
     }, []);
 
-    const addToCart = useCallback((productId: number, quantity = 1, variantId?: number) => {
+    const addToCart = useCallback((productId: number | string, quantity = 1, variantId?: number) => {
         router.post(route('tenant.cart.add', productId), { quantity, variante_id: variantId }, {
             preserveScroll: true,
             preserveState: true,

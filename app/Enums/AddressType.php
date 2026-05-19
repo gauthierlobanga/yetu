@@ -54,8 +54,8 @@ enum AddressType: string implements HasColor, HasDescription, HasLabel
         return match ($this) {
             self::TYPE_FACTURATION => 'Adresse utilisée pour les factures et documents légaux',
             self::TYPE_LIVRAISON => 'Adresse utilisée pour la livraison des commandes',
-            self::TYPE_PRINCIPALE => 'Adresse utilisée pour la livraison des commandes',
-            self::TYPE_SECONDAIRE => 'Adresse utilisée pour la livraison des commandes',
+            self::TYPE_PRINCIPALE => 'Adresse principale',
+            self::TYPE_SECONDAIRE => 'Adresse secondaire',
         };
     }
 }

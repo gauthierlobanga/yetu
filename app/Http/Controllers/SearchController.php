@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\PostCategory;
+use App\Models\ProductCategory;
 use App\Models\Produit;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ use Inertia\Inertia;
 class SearchController extends Controller
 {
     /**
-     * Page de résultats de recherche
+     * Page de résultats de recherche (Inertia)
      */
     public function shopSearch(Request $request)
     {
@@ -28,32 +29,47 @@ class SearchController extends Controller
     }
 
     /**
-     * API pour les requêtes AJAX (recherche en temps réel)
+     * API pour la recherche instantanée (JSON)
      */
     public function shopApi(Request $request)
     {
         $query = $request->input('q', '');
-        $limit = $request->input('limit', 8);
+        $limit = $request->input('limit', 5); // faible pour les suggestions
 
         $results = $this->performSearch($query, $limit);
 
-        return response()->json([
-            'results' => $results,
-            'query' => $query,
-            'total' => count($results),
-        ]);
+        return response()->json(['results' => $results]);
     }
 
     /**
-     * Logique de recherche commune
+     * Logique de recherche commune (pour la page et l'API)
      */
     private function performSearch(string $query, int $limit): array
     {
-        $results = [];
+        $all = [];
 
         if (strlen($query) >= 2) {
-            // Recherche dans les articles
-            $posts = Post::with(['user', 'categories', 'media'])
+            // 1. Produits
+            $produits = Produit::where('statut', Produit::STATUS_PUBLISHED)
+                ->where(function ($q) use ($query) {
+                    $q->where('nom', 'like', "%{$query}%")
+                        ->orWhere('description_longue', 'like', "%{$query}%")
+                        ->orWhere('short_description', 'like', "%{$query}%");
+                })
+                ->limit($limit)
+                ->get()
+                ->map(fn ($p) => [
+                    'id' => $p->id,
+                    'title' => $p->nom,
+                    'slug' => $p->slug,
+                    'image' => $p->getImageUrl('thumb') ?? '/storage/images/Vue-Storefront.png',
+                    'url' => route('tenant.product.show', $p->slug),
+                    'price' => number_format($p->prix_actuel, 2, ',', ' ').' €',
+                    'type' => 'product',
+                ]);
+
+            // 2. Articles
+            $posts = Post::with('user', 'categories', 'media')
                 ->where('status', 'published')
                 ->where(function ($q) use ($query) {
                     $q->where('title', 'LIKE', "%{$query}%")
@@ -61,95 +77,67 @@ class SearchController extends Controller
                         ->orWhere('excerpt', 'LIKE', "%{$query}%");
                 })
                 ->limit($limit)
-                ->get();
-
-            foreach ($posts as $post) {
-                $results[] = [
+                ->get()
+                ->map(fn ($post) => [
                     'id' => $post->id,
                     'title' => $post->title,
                     'slug' => $post->slug,
-                    'excerpt' => $post->excerpt,
-                    'featured_image_thumb' => $post->featured_image_thumb,
-                    'categories' => $post->categories->map(fn ($c) => [
-                        'id' => $c->id,
-                        'nom' => $c->nom,
-                        'slug' => $c->slug,
-                    ]),
-                    'published_at' => $post->published_at,
-                    '_type' => 'post',
-                ];
-            }
+                    'image' => $post->featured_image_thumb,
+                    'url' => route('tenant.blog.show', $post->slug),
+                    'description' => $post->excerpt,
+                    'type' => 'post',
+                ]);
 
-            // Recherche dans les catégories
-            $categories = PostCategory::where('est_active', true)
+            // 3. Catégories de produits (pour le shop)
+            $productCategories = ProductCategory::where('est_active', true)
                 ->where('nom', 'LIKE', "%{$query}%")
-                ->limit(3)
-                ->get();
+                ->limit($limit)
+                ->get()
+                ->map(fn ($cat) => [
+                    'id' => $cat->id,
+                    'title' => $cat->nom,
+                    'slug' => $cat->slug,
+                    'url' => route('tenant.product.category.show', $cat->slug),
+                    'image' => $cat->getFirstMediaUrl('icon'),
+                    'type' => 'product_category',
+                ]);
 
-            foreach ($categories as $category) {
-                $results[] = [
-                    'id' => $category->id,
-                    'nom' => $category->nom,
-                    'slug' => $category->slug,
-                    'posts_count' => $category->posts()->published()->count(),
-                    '_type' => 'category',
-                ];
-            }
+            // 4. Catégories de blog
+            $blogCategories = PostCategory::where('est_active', true)
+                ->where('nom', 'LIKE', "%{$query}%")
+                ->limit(2)
+                ->get()
+                ->map(fn ($cat) => [
+                    'id' => $cat->id,
+                    'title' => $cat->nom,
+                    'slug' => $cat->slug,
+                    'url' => route('tenant.blog.category', $cat->slug),
+                    'type' => 'blog_category',
+                ]);
 
-            // Recherche dans les utilisateurs
+            // 5. Utilisateurs (facultatif)
             $users = User::where('name', 'LIKE', "%{$query}%")
-                ->limit(3)
-                ->get();
-
-            foreach ($users as $user) {
-                $results[] = [
+                ->limit(2)
+                ->get()
+                ->map(fn ($user) => [
                     'id' => $user->id,
-                    'name' => $user->name,
-                    'avatar_url' => $user->avatar_url,
-                    'views_count' => Post::where('user_id', $user->id)->count(),
-                    '_type' => 'user',
-                ];
-            }
+                    'title' => $user->name,
+                    'image' => $user->avatar_url,
+                    'url' => route('profile.show', $user->id) ?? '#',
+                    'type' => 'user',
+                ]);
 
-            // Trier par pertinence
-            usort($results, function ($a, $b) {
-                $order = ['post' => 1, 'category' => 2, 'user' => 3];
-
-                return $order[$a['_type']] <=> $order[$b['_type']];
-            });
-
-            $results = array_slice($results, 0, $limit);
+            // Fusion et tri par pertinence (ordre souhaité)
+            $all = collect()
+                ->merge($produits)
+                ->merge($productCategories)
+                ->merge($posts)
+                ->merge($blogCategories)
+                ->merge($users)
+                ->take($limit)
+                ->toArray();
         }
 
-        return $results;
-    }
-
-    /**
-     * Suggestions de produits pour la recherche instantanée.
-     */
-    public function suggestions(Request $request)
-    {
-        $query = $request->input('q', '');
-        if (strlen($query) < 2) {
-            return response()->json(['suggestions' => []]);
-        }
-
-        $produits = Produit::where('statut', Produit::STATUS_PUBLISHED)
-            ->where(function ($q) use ($query) {
-                $q->where('nom', 'like', "%{$query}%")
-                    ->orWhere('description_longue', 'like', "%{$query}%")
-                    ->orWhere('short_description', 'like', "%{$query}%");
-            })
-            ->limit(5)
-            ->get()
-            ->map(fn ($p) => [
-                'id' => $p->id,
-                'nom' => $p->nom,
-                'slug' => $p->slug,
-                'prix' => $p->prix_actuel,          // accesseur
-                'image' => $p->getImageUrl('thumb') ?? '/storage/images/Vue-Storefront.png',
-            ]);
-
-        return response()->json(['suggestions' => $produits]);
+        return $all;
     }
 }

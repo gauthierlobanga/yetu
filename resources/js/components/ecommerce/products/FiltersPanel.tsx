@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Select,
     SelectContent,
@@ -27,6 +26,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { cn } from '@/lib/utils';
 import type { Category } from '@/types/ecommerce/products';
 
 interface LocalFilters {
@@ -151,125 +151,134 @@ export default function FiltersPanel({
     const hasActiveFilters = activeFilters.length > 0;
 
     return (
-        <div className="space-y-5 border-r-2 border-r-gray-50 bg-card p-5">
-            {/* En‑tête */}
-            <div className="flex items-center justify-between border-b pb-3">
-                <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                    <h2 className="text-base font-semibold text-foreground">
-                        Filtres
-                    </h2>
-                </div>
-                {hasActiveFilters && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearAllFilters}
-                        className="h-8 cursor-pointer gap-1 text-sm text-muted-foreground hover:text-foreground"
-                    >
-                        <RotateCcw className="h-3.5 w-3.5" />
-                        Réinitialiser
-                    </Button>
-                )}
-            </div>
-
-            {/* Badges des filtres actifs */}
-            <AnimatePresence>
-                {hasActiveFilters && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="flex flex-wrap gap-2 overflow-hidden"
-                    >
-                        {activeFilters.map((filter) => (
-                            <Badge
-                                key={filter.key}
-                                variant="secondary"
-                                className="gap-1.5 py-1.5 pr-1.5 pl-3 text-xs font-normal"
-                            >
-                                <span className="text-muted-foreground">
-                                    {filter.label}:
-                                </span>
-                                <span className="max-w-30 truncate font-medium">
-                                    {filter.value}
-                                </span>
-                                <button
-                                    onClick={() => removeFilter(filter.key)}
-                                    className="ml-1 cursor-pointer rounded-full p-0.5 transition-colors hover:bg-muted-foreground/20"
-                                    aria-label={`Supprimer le filtre ${filter.label}`}
-                                >
-                                    <X className="h-3 w-3" />
-                                </button>
-                            </Badge>
-                        ))}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Recherche rapide */}
-            <div className="space-y-2">
-                <Label className="text-sm font-medium text-foreground">
-                    Recherche
-                </Label>
-                <div className="relative">
-                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                        placeholder="Nom du produit..."
-                        value={searchInput}
-                        onChange={(e) => setSearchInput(e.target.value)}
-                        onKeyDown={(e) =>
-                            e.key === 'Enter' && handleSearchSubmit()
-                        }
-                        className="h-9 border-0 bg-muted pr-16 pl-9 text-sm"
-                    />
-                    {searchInput && (
-                        <button
-                            onClick={clearSearch}
-                            className="absolute top-1/2 right-12 -translate-y-1/2 rounded-full p-1 transition-colors hover:bg-muted-foreground/20"
-                        >
-                            <X className="h-3.5 w-3.5 text-muted-foreground" />
-                        </button>
-                    )}
-                    <Button
-                        size="sm"
-                        onClick={handleSearchSubmit}
-                        className="absolute top-1/2 right-1 h-7 -translate-y-1/2 px-3 text-xs"
-                    >
-                        OK
-                    </Button>
-                </div>
-            </div>
-
-            {/* Catégories */}
-            <Collapsible
-                open={isCategoriesOpen}
-                onOpenChange={setIsCategoriesOpen}
-            >
-                <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
-                    <Label className="cursor-pointer text-sm font-medium text-foreground">
-                        Catégories
-                    </Label>
-                    <ChevronDown
-                        className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isCategoriesOpen ? 'rotate-180' : ''}`}
-                    />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-2 pt-3">
-                    <div className="relative mb-2">
-                        <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                            placeholder="Filtrer les catégories..."
-                            value={categorySearch}
-                            onChange={(e) => setCategorySearch(e.target.value)}
-                            className="h-8 border-0 bg-muted pl-8 text-xs"
-                        />
+        <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/80">
+            {/* En‑tête fixe */}
+            <div className="shrink-0 border-b border-slate-200 p-5 dark:border-slate-800">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <SlidersHorizontal className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                        <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+                            Filtres
+                        </h2>
                     </div>
-                    <ScrollArea className="max-h-56 pr-2">
-                        <div className="space-y-0.5">
+                    {hasActiveFilters && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={clearAllFilters}
+                            className="h-8 cursor-pointer gap-1 text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+                        >
+                            <RotateCcw className="h-3.5 w-3.5" />
+                            Réinitialiser
+                        </Button>
+                    )}
+                </div>
+
+                {/* Badges des filtres actifs */}
+                <AnimatePresence>
+                    {hasActiveFilters && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-3 flex flex-wrap gap-2 overflow-hidden"
+                        >
+                            {activeFilters.map((filter) => (
+                                <Badge
+                                    key={filter.key}
+                                    variant="secondary"
+                                    className="gap-1.5 py-1.5 pr-1.5 pl-3 text-xs font-normal"
+                                >
+                                    <span className="text-slate-500 dark:text-slate-400">
+                                        {filter.label}:
+                                    </span>
+                                    <span className="max-w-30 truncate font-medium text-slate-700 dark:text-slate-200">
+                                        {filter.value}
+                                    </span>
+                                    <button
+                                        onClick={() => removeFilter(filter.key)}
+                                        className="ml-1 rounded-full p-0.5 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+                                        aria-label={`Supprimer le filtre ${filter.label}`}
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </button>
+                                </Badge>
+                            ))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            {/* Contenu défilant */}
+            <div className="flex-1 space-y-5 overflow-y-auto px-5 py-4">
+                {/* Recherche rapide */}
+                <div className="space-y-2">
+                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Recherche
+                    </Label>
+                    <div className="relative">
+                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                        <Input
+                            placeholder="Nom du produit..."
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            onKeyDown={(e) =>
+                                e.key === 'Enter' && handleSearchSubmit()
+                            }
+                            className="h-9 border-slate-200 bg-slate-50 pr-16 pl-9 text-sm dark:border-slate-700 dark:bg-slate-800/50"
+                        />
+                        {searchInput && (
+                            <button
+                                onClick={clearSearch}
+                                className="absolute top-1/2 right-12 -translate-y-1/2 rounded-full p-1 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+                            >
+                                <X className="h-3.5 w-3.5 text-slate-400" />
+                            </button>
+                        )}
+                        <Button
+                            size="sm"
+                            onClick={handleSearchSubmit}
+                            className="absolute top-1/2 right-1 h-7 -translate-y-1/2 px-3 text-xs"
+                        >
+                            OK
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Catégories */}
+                <Collapsible
+                    open={isCategoriesOpen}
+                    onOpenChange={setIsCategoriesOpen}
+                >
+                    <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
+                        <Label className="cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Catégories
+                        </Label>
+                        <ChevronDown
+                            className={cn(
+                                'h-4 w-4 text-slate-400 transition-transform duration-200',
+                                isCategoriesOpen && 'rotate-180',
+                            )}
+                        />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-2 pt-2">
+                        <div className="relative mb-2">
+                            <Search className="absolute top-1/2 left-2.5 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                            <Input
+                                placeholder="Filtrer les catégories..."
+                                value={categorySearch}
+                                onChange={(e) =>
+                                    setCategorySearch(e.target.value)
+                                }
+                                className="h-8 border-slate-200 bg-slate-50 pl-8 text-xs dark:border-slate-700 dark:bg-slate-800/50"
+                            />
+                        </div>
+                        {/* Liste des catégories avec hauteur max pour éviter de tout pousser */}
+                        <div className="max-h-48 space-y-0.5 overflow-y-auto pr-1">
                             {filteredCategories.map((cat) => (
                                 <label
                                     key={cat.id}
-                                    className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-muted/50"
+                                    className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                                 >
                                     <Checkbox
                                         checked={
@@ -283,112 +292,115 @@ export default function FiltersPanel({
                                             })
                                         }
                                     />
-                                    <span className="text-foreground">
+                                    <span className="text-slate-700 dark:text-slate-300">
                                         {cat.nom}
                                     </span>
                                 </label>
                             ))}
                             {filteredCategories.length === 0 && (
-                                <p className="py-4 text-center text-xs text-muted-foreground">
+                                <p className="py-4 text-center text-xs text-slate-400">
                                     Aucune catégorie trouvée
                                 </p>
                             )}
                         </div>
-                    </ScrollArea>
-                </CollapsibleContent>
-            </Collapsible>
+                    </CollapsibleContent>
+                </Collapsible>
 
-            {/* Marques */}
-            {brands.length > 0 && (
-                <div className="space-y-2">
-                    <Label className="text-sm font-medium text-foreground">
-                        Marque
-                    </Label>
-                    <Select
-                        value={localFilters.brand || 'all'}
-                        onValueChange={(value) =>
-                            applyFilters({
-                                brand: value === 'all' ? undefined : value,
-                            })
-                        }
-                    >
-                        <SelectTrigger className="h-9 border-0 bg-muted">
-                            <SelectValue placeholder="Toutes les marques" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">
-                                Toutes les marques
-                            </SelectItem>
-                            {brands.map((brand) => (
-                                <SelectItem
-                                    key={brand.id}
-                                    value={String(brand.id)}
-                                >
-                                    {brand.name}
+                {/* Marques */}
+                {brands.length > 0 && (
+                    <div className="space-y-2">
+                        <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Marque
+                        </Label>
+                        <Select
+                            value={localFilters.brand || 'all'}
+                            onValueChange={(value) =>
+                                applyFilters({
+                                    brand: value === 'all' ? undefined : value,
+                                })
+                            }
+                        >
+                            <SelectTrigger className="h-9 border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50">
+                                <SelectValue placeholder="Toutes les marques" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">
+                                    Toutes les marques
                                 </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            )}
-
-            {/* Prix */}
-            <Collapsible open={isPriceOpen} onOpenChange={setIsPriceOpen}>
-                <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
-                    <Label className="cursor-pointer text-sm font-medium text-foreground">
-                        Prix (CDF)
-                    </Label>
-                    <ChevronDown
-                        className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isPriceOpen ? 'rotate-180' : ''}`}
-                    />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-3 pt-3">
-                    <Slider
-                        min={minPossiblePrice}
-                        max={maxPossiblePrice}
-                        step={Math.max(
-                            1,
-                            Math.floor(
-                                (maxPossiblePrice - minPossiblePrice) / 50,
-                            ),
-                        )}
-                        value={priceRange}
-                        onValueChange={(value: number[]) =>
-                            setPriceRange([value[0], value[1]])
-                        }
-                        className="my-4"
-                    />
-                    <div className="flex items-center gap-2">
-                        <div className="flex-1">
-                            <Label className="text-xs text-muted-foreground">
-                                Min
-                            </Label>
-                            <div className="mt-1 rounded-md border-0 bg-muted px-3 py-1.5 text-sm tabular-nums">
-                                {priceRange[0]}
-                            </div>
-                        </div>
-                        <div className="flex-1">
-                            <Label className="text-xs text-muted-foreground">
-                                Max
-                            </Label>
-                            <div className="mt-1 rounded-md border-0 bg-muted px-3 py-1.5 text-sm tabular-nums">
-                                {priceRange[1]}
-                            </div>
-                        </div>
+                                {brands.map((brand) => (
+                                    <SelectItem
+                                        key={brand.id}
+                                        value={String(brand.id)}
+                                    >
+                                        {brand.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <Button
-                        size="sm"
-                        className="w-full cursor-pointer rounded-2xl py-4.5"
-                        onClick={applyPriceFilter}
-                        disabled={
-                            priceRange[0] === minPossiblePrice &&
-                            priceRange[1] === maxPossiblePrice
-                        }
-                    >
-                        Appliquer
-                    </Button>
-                </CollapsibleContent>
-            </Collapsible>
+                )}
+
+                {/* Prix */}
+                <Collapsible open={isPriceOpen} onOpenChange={setIsPriceOpen}>
+                    <CollapsibleTrigger className="flex w-full items-center justify-between py-1">
+                        <Label className="cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Prix (CDF)
+                        </Label>
+                        <ChevronDown
+                            className={cn(
+                                'h-4 w-4 text-slate-400 transition-transform duration-200',
+                                isPriceOpen && 'rotate-180',
+                            )}
+                        />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-3 pt-3">
+                        <Slider
+                            min={minPossiblePrice}
+                            max={maxPossiblePrice}
+                            step={Math.max(
+                                1,
+                                Math.floor(
+                                    (maxPossiblePrice - minPossiblePrice) / 50,
+                                ),
+                            )}
+                            value={priceRange}
+                            onValueChange={(value: number[]) =>
+                                setPriceRange([value[0], value[1]])
+                            }
+                            className="my-4"
+                        />
+                        <div className="flex items-center gap-2">
+                            <div className="flex-1">
+                                <Label className="text-xs text-slate-500">
+                                    Min
+                                </Label>
+                                <div className="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm tabular-nums dark:border-slate-700 dark:bg-slate-800/50">
+                                    {priceRange[0]}
+                                </div>
+                            </div>
+                            <div className="flex-1">
+                                <Label className="text-xs text-slate-500">
+                                    Max
+                                </Label>
+                                <div className="mt-1 rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm tabular-nums dark:border-slate-700 dark:bg-slate-800/50">
+                                    {priceRange[1]}
+                                </div>
+                            </div>
+                        </div>
+                        <Button
+                            size="sm"
+                            className="w-full rounded-xl py-4"
+                            onClick={applyPriceFilter}
+                            disabled={
+                                priceRange[0] === minPossiblePrice &&
+                                priceRange[1] === maxPossiblePrice
+                            }
+                        >
+                            Appliquer
+                        </Button>
+                    </CollapsibleContent>
+                </Collapsible>
+            </div>
         </div>
     );
 }

@@ -56,7 +56,7 @@ class Wishlist extends Model
     public function products()
     {
         return $this->belongsToMany(Produit::class, 'wishlist_items', 'wishlist_id', 'produit_id')
-            ->withPivot('quantite', 'note', 'added_at')
+            ->withPivot('quantite', 'added_at')
             ->withTimestamps();
     }
 

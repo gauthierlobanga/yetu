@@ -1,27 +1,41 @@
-import { usePage, router } from '@inertiajs/react';
-import { Globe, Check, Loader2 } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+// resources/js/components/region/RegionSelectorForm.tsx
+
+import type { PageProps } from '@inertiajs/core';
+import { router, usePage } from '@inertiajs/react';
+import {
+    Check,
+    ChevronDown,
+    Globe,
+    Loader2,
+    MapPin,
+    Languages,
+    BadgeDollarSign,
+    Sparkles,
+} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import {
-    Combobox,
-    ComboboxContent,
-    ComboboxEmpty,
-    ComboboxInput,
-    ComboboxItem,
-    ComboboxList,
-} from '@/components/ui/combobox';
-import {
-    Item,
-    ItemContent,
-    ItemDescription,
-    ItemTitle,
-} from '@/components/ui/item';
+    Command,
+    CommandEmpty,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from '@/components/ui/command';
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+
+/* -------------------------------------------------------------------------- */
+/*                                   Types                                    */
+/* -------------------------------------------------------------------------- */
+
+// resources/js/components/region/RegionSelectorForm.tsx
 
 interface Country {
     code: string;
@@ -42,8 +56,133 @@ interface Language {
     name: string;
 }
 
+/**
+ * SharedProps doit étendre PageProps pour être compatible avec :
+ * usePage<SharedProps>()
+ */
+interface SharedProps extends PageProps {
+    countries?: Country[];
+    currencies?: Currency[];
+    languages?: Language[];
+    currentCountry?: string;
+    currentCurrency?: string;
+    currentLanguage?: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              Helper Components                             */
+/* -------------------------------------------------------------------------- */
+
+interface SelectionCardProps {
+    icon: React.ElementType;
+    label: string;
+    value?: string;
+}
+
+function SelectionCard({ icon: Icon, label, value }: SelectionCardProps) {
+    return (
+        <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-900/60">
+            <div className="mb-1 flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                    <Icon className="h-3.5 w-3.5" />
+                </div>
+                <span className="text-[11px] font-semibold tracking-[0.16em] text-slate-500 uppercase dark:text-slate-400">
+                    {label}
+                </span>
+            </div>
+            <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
+                {value || 'Non défini'}
+            </p>
+        </div>
+    );
+}
+
+interface SelectorSectionProps<T extends { code: string; name: string }> {
+    title: string;
+    placeholder: string;
+    items: T[];
+    selected: T | null;
+    onSelect: (item: T) => void;
+    formatMeta?: (item: T) => string;
+}
+
+function SelectorSection<T extends { code: string; name: string }>({
+    title,
+    placeholder,
+    items,
+    selected,
+    onSelect,
+    formatMeta,
+}: SelectorSectionProps<T>) {
+    return (
+        <div className="space-y-2">
+            <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold tracking-[0.18em] text-slate-500 uppercase dark:text-slate-400">
+                    {title}
+                </label>
+
+                {selected && (
+                    <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                        {selected.code.toUpperCase()}
+                    </span>
+                )}
+            </div>
+
+            <Command className="rounded-2xl border border-slate-200/70 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/60">
+                <CommandInput placeholder={placeholder} className="h-10" />
+
+                <CommandList className="max-h-56">
+                    <CommandEmpty>Aucun résultat trouvé.</CommandEmpty>
+
+                    {items.map((item) => {
+                        const isSelected = selected?.code === item.code;
+
+                        return (
+                            <CommandItem
+                                key={item.code}
+                                value={`${item.name} ${item.code}`}
+                                onSelect={() => onSelect(item)}
+                                className={cn(
+                                    'group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2',
+                                    'aria-selected:bg-emerald-50 dark:aria-selected:bg-emerald-950/30',
+                                )}
+                            >
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
+                                        {item.name}
+                                    </p>
+
+                                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                                        {formatMeta
+                                            ? formatMeta(item)
+                                            : item.code.toUpperCase()}
+                                    </p>
+                                </div>
+
+                                <Check
+                                    className={cn(
+                                        'h-4 w-4 shrink-0 text-emerald-500 transition-opacity',
+                                        isSelected
+                                            ? 'opacity-100'
+                                            : 'opacity-0',
+                                    )}
+                                />
+                            </CommandItem>
+                        );
+                    })}
+                </CommandList>
+            </Command>
+        </div>
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              Main Component                                */
+/* -------------------------------------------------------------------------- */
+
 export function RegionSelectorForm() {
-    const { props } = usePage();
+    const { props } = usePage<SharedProps>();
+
     const {
         countries = [],
         currencies = [],
@@ -51,50 +190,48 @@ export function RegionSelectorForm() {
         currentCountry,
         currentCurrency,
         currentLanguage,
-    } = props as any;
+    } = props;
+
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const [selectedCountry, setSelectedCountry] = useState<Country | null>(
         null,
     );
+
     const [selectedCurrency, setSelectedCurrency] = useState<Currency | null>(
         null,
     );
+
     const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(
         null,
     );
 
-    const [countrySearch, setCountrySearch] = useState('');
-    const [currencySearch, setCurrencySearch] = useState('');
-    const [languageSearch, setLanguageSearch] = useState('');
-    const [loading, setLoading] = useState(false);
+    /* ---------------------------------------------------------------------- */
+    /* Initial values                                                         */
+    /* ---------------------------------------------------------------------- */
 
-    // Initialiser les valeurs à partir des props backend
     useEffect(() => {
         if (currentCountry) {
-            const match = countries.find(
-                (c: Country) => c.code === currentCountry,
-            );
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSelectedCountry(
-                match || { code: currentCountry, name: currentCountry },
+                countries.find((country) => country.code === currentCountry) ??
+                    null,
             );
         }
 
         if (currentCurrency) {
-            const match = currencies.find(
-                (c: Currency) => c.code === currentCurrency,
-            );
             setSelectedCurrency(
-                match || { code: currentCurrency, name: currentCurrency },
+                currencies.find(
+                    (currency) => currency.code === currentCurrency,
+                ) ?? null,
             );
         }
 
         if (currentLanguage) {
-            const match = languages.find(
-                (l: Language) => l.code === currentLanguage,
-            );
             setSelectedLanguage(
-                match || { code: currentLanguage, name: currentLanguage },
+                languages.find(
+                    (language) => language.code === currentLanguage,
+                ) ?? null,
             );
         }
     }, [
@@ -106,38 +243,30 @@ export function RegionSelectorForm() {
         languages,
     ]);
 
-    const filteredCountries = useMemo(() => {
-        if (!Array.isArray(countries)) {
-            return [];
-        }
+    /* ---------------------------------------------------------------------- */
+    /* Derived data                                                           */
+    /* ---------------------------------------------------------------------- */
 
-        return countries.filter((country: Country) =>
-            country.name.toLowerCase().includes(countrySearch.toLowerCase()),
-        );
-    }, [countries, countrySearch]);
+    const summary = useMemo(() => {
+        const country = selectedCountry?.code?.toUpperCase() ?? 'CD';
+        const currency = selectedCurrency?.code?.toUpperCase() ?? 'USD';
+        const language = selectedLanguage?.code?.toUpperCase() ?? 'FR';
 
-    const filteredCurrencies = useMemo(() => {
-        if (!Array.isArray(currencies)) {
-            return [];
-        }
+        return `${country} • ${currency} • ${language}`;
+    }, [selectedCountry, selectedCurrency, selectedLanguage]);
 
-        return currencies.filter((currency: Currency) =>
-            currency.name.toLowerCase().includes(currencySearch.toLowerCase()),
-        );
-    }, [currencies, currencySearch]);
+    const hasChanges =
+        selectedCountry?.code !== currentCountry ||
+        selectedCurrency?.code !== currentCurrency ||
+        selectedLanguage?.code !== currentLanguage;
 
-    const filteredLanguages = useMemo(() => {
-        if (!Array.isArray(languages)) {
-            return [];
-        }
+    /* ---------------------------------------------------------------------- */
+    /* Submit                                                                 */
+    /* ---------------------------------------------------------------------- */
 
-        return languages.filter((language: Language) =>
-            language.name.toLowerCase().includes(languageSearch.toLowerCase()),
-        );
-    }, [languages, languageSearch]);
-
-    const handleSubmit = () => {
+    const handleSubmit = useCallback(() => {
         setLoading(true);
+
         router.post(
             route('preferences.update'),
             {
@@ -146,199 +275,162 @@ export function RegionSelectorForm() {
                 locale: selectedLanguage?.code,
             },
             {
+                preserveScroll: true,
                 onSuccess: () => {
-                    toast.success('Préférences enregistrées.');
-                    setLoading(false);
+                    toast.success(
+                        'Vos préférences ont été enregistrées avec succès.',
+                    );
+                    setOpen(false);
                 },
-                onError: (errors) => {
-                    toast.error('Erreur lors de la mise à jour.');
-                    console.error(errors);
+                onError: () => {
+                    toast.error(
+                        'Une erreur est survenue lors de la mise à jour.',
+                    );
+                },
+                onFinish: () => {
                     setLoading(false);
                 },
             },
         );
-    };
+    }, [selectedCountry, selectedCurrency, selectedLanguage]);
 
-    const itemToStringValue = (item: any) => item?.name || '';
-
-    // Texte indicatif dans le déclencheur
-    const countryCode = selectedCountry?.code?.toUpperCase() || '??';
-    const currencyCode = selectedCurrency?.code?.toUpperCase() || '??';
-    const languageCode = selectedLanguage?.code?.toUpperCase() || '??';
+    /* ---------------------------------------------------------------------- */
+    /* Render                                                                 */
+    /* ---------------------------------------------------------------------- */
 
     return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
+            {/* Trigger */}
             <PopoverTrigger asChild>
                 <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    className="gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+                    className={cn(
+                        'group h-10 rounded-full border-slate-200/70 bg-white/85 px-3.5',
+                        'shadow-sm backdrop-blur-xl transition-all duration-300',
+                        'hover:border-emerald-300 hover:bg-white hover:shadow-md hover:shadow-emerald-500/10',
+                        'dark:border-slate-700 dark:bg-slate-900/80',
+                        'dark:hover:border-emerald-700 dark:hover:bg-slate-900',
+                    )}
                 >
-                    <Globe className="h-4 w-4" />
-                    <span className="hidden sm:inline">
-                        {countryCode} / {currencyCode} / {languageCode}
-                    </span>
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            <Globe className="h-4 w-4" />
+                        </div>
+
+                        <span className="hidden text-sm font-medium text-slate-700 sm:inline dark:text-slate-300">
+                            {summary}
+                        </span>
+
+                        <ChevronDown
+                            className={cn(
+                                'h-4 w-4 text-slate-400 transition-transform duration-300',
+                                open && 'rotate-180',
+                            )}
+                        />
+                    </div>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-95 p-6 shadow-xl">
-                <div className="space-y-6">
-                    {/* Pays */}
-                    <div className="space-y-2">
-                        <label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                            Pays
-                        </label>
-                        <Combobox
-                            items={filteredCountries}
-                            value={selectedCountry}
-                            onValueChange={setSelectedCountry}
-                            itemToStringValue={itemToStringValue}
-                            inputValue={countrySearch}
-                            onInputValueChange={setCountrySearch}
-                        >
-                            <ComboboxInput
-                                placeholder="Rechercher un pays..."
-                                className="h-10"
-                            />
-                            <ComboboxContent>
-                                <ComboboxEmpty>
-                                    Aucun pays trouvé.
-                                </ComboboxEmpty>
-                                <ComboboxList>
-                                    {(country: Country) => (
-                                        <ComboboxItem
-                                            key={country.code}
-                                            value={country}
-                                        >
-                                            <Item size="sm">
-                                                <ItemContent>
-                                                    <ItemTitle>
-                                                        {country.name}
-                                                    </ItemTitle>
-                                                    <ItemDescription>
-                                                        {country.continent !==
-                                                        '—'
-                                                            ? `${country.continent} · `
-                                                            : ''}
-                                                        {country.code?.toUpperCase()}
-                                                    </ItemDescription>
-                                                </ItemContent>
-                                                {selectedCountry?.code ===
-                                                    country.code && (
-                                                    <Check className="ml-auto h-4 w-4 text-primary" />
-                                                )}
-                                            </Item>
-                                        </ComboboxItem>
-                                    )}
-                                </ComboboxList>
-                            </ComboboxContent>
-                        </Combobox>
-                    </div>
 
-                    {/* Devise */}
-                    <div className="space-y-2">
-                        <label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                            Devise
-                        </label>
-                        <Combobox
-                            items={filteredCurrencies}
-                            value={selectedCurrency}
-                            onValueChange={setSelectedCurrency}
-                            itemToStringValue={itemToStringValue}
-                            inputValue={currencySearch}
-                            onInputValueChange={setCurrencySearch}
-                        >
-                            <ComboboxInput
-                                placeholder="Choisir une devise..."
-                                className="h-10"
-                            />
-                            <ComboboxContent>
-                                <ComboboxEmpty>
-                                    Aucune devise trouvée.
-                                </ComboboxEmpty>
-                                <ComboboxList>
-                                    {(currency: Currency) => (
-                                        <ComboboxItem
-                                            key={currency.code}
-                                            value={currency}
-                                        >
-                                            <Item size="sm">
-                                                <ItemContent>
-                                                    <ItemTitle>
-                                                        {currency.name}
-                                                    </ItemTitle>
-                                                    <ItemDescription>
-                                                        {currency.code?.toUpperCase()}
-                                                        {currency.symbol
-                                                            ? ` (${currency.symbol})`
-                                                            : ''}
-                                                    </ItemDescription>
-                                                </ItemContent>
-                                                {selectedCurrency?.code ===
-                                                    currency.code && (
-                                                    <Check className="ml-auto h-4 w-4 text-primary" />
-                                                )}
-                                            </Item>
-                                        </ComboboxItem>
-                                    )}
-                                </ComboboxList>
-                            </ComboboxContent>
-                        </Combobox>
-                    </div>
+            {/* Content */}
+            <PopoverContent
+                align="end"
+                sideOffset={12}
+                className={cn(
+                    'w-104 overflow-hidden rounded-3xl p-0',
+                    'border border-slate-200/70 bg-white/95 backdrop-blur-2xl',
+                    'shadow-[0_24px_80px_-20px_rgba(15,23,42,0.20)]',
+                    'dark:border-slate-800 dark:bg-slate-950/95',
+                    'dark:shadow-[0_24px_80px_-20px_rgba(0,0,0,0.65)]',
+                )}
+            >
+                {/* Header */}
+                <div className="relative overflow-hidden border-b border-slate-200/70 bg-linear-to-r from-emerald-50/90 via-white to-slate-50/90 px-5 py-4 dark:border-slate-800 dark:from-emerald-950/20 dark:via-slate-950 dark:to-slate-900">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.10),transparent_45%)]" />
 
-                    {/* Langue */}
-                    <div className="space-y-2">
-                        <label className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">
-                            Langue
-                        </label>
-                        <Combobox
-                            items={filteredLanguages}
-                            value={selectedLanguage}
-                            onValueChange={setSelectedLanguage}
-                            itemToStringValue={itemToStringValue}
-                            inputValue={languageSearch}
-                            onInputValueChange={setLanguageSearch}
-                        >
-                            <ComboboxInput
-                                placeholder="Choisir une langue..."
-                                className="h-10"
-                            />
-                            <ComboboxContent>
-                                <ComboboxEmpty>
-                                    Aucune langue trouvée.
-                                </ComboboxEmpty>
-                                <ComboboxList>
-                                    {(lang: Language) => (
-                                        <ComboboxItem
-                                            key={lang.code}
-                                            value={lang}
-                                        >
-                                            <Item size="sm">
-                                                <ItemContent>
-                                                    <ItemTitle>
-                                                        {lang.name}
-                                                    </ItemTitle>
-                                                    <ItemDescription>
-                                                        {lang.code?.toUpperCase()}
-                                                    </ItemDescription>
-                                                </ItemContent>
-                                                {selectedLanguage?.code ===
-                                                    lang.code && (
-                                                    <Check className="ml-auto h-4 w-4 text-primary" />
-                                                )}
-                                            </Item>
-                                        </ComboboxItem>
-                                    )}
-                                </ComboboxList>
-                            </ComboboxContent>
-                        </Combobox>
+                    <div className="relative">
+                        <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-200/60 bg-white/80 px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] text-emerald-700 uppercase dark:border-emerald-800/40 dark:bg-emerald-500/10 dark:text-emerald-300">
+                            <Sparkles className="h-3 w-3" />
+                            Préférences régionales
+                        </div>
+
+                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                            Région, devise et langue
+                        </h3>
+
+                        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                            Personnalisez votre expérience d’achat.
+                        </p>
                     </div>
                 </div>
 
-                <div className="mt-6 border-t border-border pt-4">
+                {/* Summary cards */}
+                <div className="grid grid-cols-3 gap-3 px-5 py-4">
+                    <SelectionCard
+                        icon={MapPin}
+                        label="Pays"
+                        value={selectedCountry?.name}
+                    />
+                    <SelectionCard
+                        icon={BadgeDollarSign}
+                        label="Devise"
+                        value={selectedCurrency?.code}
+                    />
+                    <SelectionCard
+                        icon={Languages}
+                        label="Langue"
+                        value={selectedLanguage?.name}
+                    />
+                </div>
+
+                {/* Selectors */}
+                <div className="max-h-112 space-y-5 overflow-y-auto px-5 pb-5">
+                    <SelectorSection
+                        title="Pays"
+                        placeholder="Rechercher un pays..."
+                        items={countries}
+                        selected={selectedCountry}
+                        onSelect={setSelectedCountry}
+                        formatMeta={(country) => country.code.toUpperCase()}
+                    />
+
+                    <SelectorSection
+                        title="Devise"
+                        placeholder="Rechercher une devise..."
+                        items={currencies}
+                        selected={selectedCurrency}
+                        onSelect={setSelectedCurrency}
+                        formatMeta={(currency) =>
+                            `${currency.code.toUpperCase()}${
+                                currency.symbol ? ` • ${currency.symbol}` : ''
+                            }`
+                        }
+                    />
+
+                    <SelectorSection
+                        title="Langue"
+                        placeholder="Rechercher une langue..."
+                        items={languages}
+                        selected={selectedLanguage}
+                        onSelect={setSelectedLanguage}
+                        formatMeta={(language) => language.code.toUpperCase()}
+                    />
+                </div>
+
+                {/* Footer */}
+                <div className="border-t border-slate-200/70 bg-slate-50/70 px-5 py-4 dark:border-slate-800 dark:bg-slate-900/50">
                     <Button
                         onClick={handleSubmit}
-                        disabled={loading}
-                        className="w-full"
+                        disabled={loading || !hasChanges}
+                        className={cn(
+                            'h-11 w-full rounded-2xl',
+                            'bg-linear-to-r from-emerald-600 to-emerald-500',
+                            'font-medium text-white',
+                            'shadow-lg shadow-emerald-500/20',
+                            'transition-all duration-300',
+                            'hover:shadow-xl hover:shadow-emerald-500/30',
+                            'disabled:cursor-not-allowed disabled:opacity-60',
+                        )}
                     >
                         {loading ? (
                             <>

@@ -1,6 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/components/search-my-input.tsx
-
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowDown,
     ArrowUp,
@@ -18,7 +21,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation-app';
 import { cn } from '@/lib/utils';
 
-// Types
+// Types (inchangés)
 export interface SearchResult {
     id: number;
     title?: string;
@@ -44,14 +47,12 @@ export interface SearchConfig {
     buttonProps?: React.ComponentProps<typeof SearchButton>;
     openResultsInNewTab?: boolean;
     onResultClick?: (result: SearchResult) => void;
-    searchEndpoint?: string; // 🔥 Ajout du endpoint configurable
+    searchEndpoint?: string;
 }
 
 // ============================================================================
-// Search Button Component
+// Search Button (modernisé avec thème Emerald/Slate)
 // ============================================================================
-
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface SearchButtonProps extends React.ComponentProps<typeof Button> {}
 
 export const SearchButton: React.FC<SearchButtonProps> = ({
@@ -68,10 +69,8 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
             return;
         }
 
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setModifierLabel(
             /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '' : '',
-            // /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl',
         );
     }, []);
 
@@ -85,7 +84,6 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
                 setIsKPressed(true);
             }
         };
-
         const handleKeyUp = (event: KeyboardEvent) => {
             if (!event.metaKey && !event.ctrlKey) {
                 setIsModifierPressed(false);
@@ -95,12 +93,10 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
                 setIsKPressed(false);
             }
         };
-
         const resetKeys = () => {
             setIsModifierPressed(false);
             setIsKPressed(false);
         };
-
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
         window.addEventListener('blur', resetKeys);
@@ -112,39 +108,29 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
         };
     }, []);
 
-    const baseClassName = cn(
-        'h-auto cursor-pointer justify-between py-3 transition-all duration-200 md:min-w-[200px]',
-        className,
-    );
-
     return (
         <Button
-            type="button"
             variant="outline"
-            className={baseClassName}
+            type="button"
+            className={cn(
+                'h-auto cursor-pointer justify-between gap-2 rounded-xl border-slate-200 bg-white/80 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm backdrop-blur transition-all hover:border-emerald-300 hover:bg-white hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-emerald-600 dark:hover:bg-slate-800',
+                className,
+            )}
             aria-label="Open search"
             {...buttonProps}
         >
-            <span className="flex items-center gap-2 text-muted-foreground opacity-80">
-                <SearchIcon size={20} />
+            <span className="flex items-center gap-2">
+                <SearchIcon
+                    size={18}
+                    className="text-slate-400 dark:text-slate-500"
+                />
                 <span className="hidden sm:inline">{children}</span>
             </span>
             <div className="hidden gap-0.5 md:flex">
-                <kbd
-                    className={cn(
-                        'grid h-5 min-w-5 place-items-center rounded bg-muted text-xs text-muted-foreground transition-all duration-200',
-                        isModifierPressed && 'inset-shadow-foreground/30',
-                    )}
-                >
+                <kbd className="grid h-5 min-w-5 place-items-center rounded bg-slate-100 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">
                     {modifierLabel}
                 </kbd>
-                <kbd
-                    className={cn(
-                        'grid h-5 min-w-5 place-items-center rounded bg-muted text-xs text-muted-foreground transition-all duration-200',
-                        isKPressed &&
-                            'inset-shadow-md inset-shadow-foreground/50',
-                    )}
-                >
+                <kbd className="grid h-5 min-w-5 place-items-center rounded bg-slate-100 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">
                     K
                 </kbd>
             </div>
@@ -153,9 +139,8 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
 };
 
 // ============================================================================
-// Modal Component
+// Modal (adapté au thème Emerald/Slate)
 // ============================================================================
-
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -187,24 +172,27 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 
     return createPortal(
         <div
-            className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 backdrop-blur-sm md:pt-[10vh] dark:bg-black/60"
+            className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm md:pt-[10vh] dark:bg-black/60"
             onClick={onClose}
         >
-            <div
-                className="h-full w-full max-w-full animate-in overflow-hidden bg-background shadow-2xl fade-in-0 zoom-in-95 md:h-auto md:max-h-[80vh] md:w-[90%] md:max-w-2xl md:rounded-xl"
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="h-full w-full max-w-full overflow-hidden bg-white/95 shadow-2xl shadow-emerald-500/10 backdrop-blur-xl md:h-auto md:max-h-[80vh] md:w-[90%] md:max-w-2xl md:rounded-2xl dark:bg-slate-900/95 dark:shadow-emerald-900/20"
                 onClick={(e) => e.stopPropagation()}
             >
                 {children}
-            </div>
+            </motion.div>
         </div>,
         document.body,
     );
 };
 
 // ============================================================================
-// Search Input Component
+// Search Input (modernisé)
 // ============================================================================
-
 interface SearchInputFieldProps {
     query: string;
     setQuery: (query: string) => void;
@@ -229,12 +217,12 @@ const SearchInputField = memo(function SearchInputField({
     isLoading,
 }: SearchInputFieldProps) {
     return (
-        <div className="flex flex-row items-center rounded-t-sm border-b border-muted bg-background p-3">
-            <SearchIcon className="mr-2 h-5 w-5 text-muted-foreground" />
+        <div className="flex items-center gap-3 border-b border-slate-200/80 bg-white/80 px-4 py-3 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80">
+            <SearchIcon className="h-5 w-5 shrink-0 text-slate-400 dark:text-slate-500" />
             <input
                 ref={inputRef}
                 type="text"
-                className="flex-1 bg-transparent text-lg outline-none placeholder:text-muted-foreground"
+                className="flex-1 bg-transparent text-lg font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
                 placeholder={
                     placeholder || 'Rechercher des articles, catégories...'
                 }
@@ -254,15 +242,16 @@ const SearchInputField = memo(function SearchInputField({
                 }}
                 autoFocus
             />
-            <div className="ml-auto flex items-center gap-2">
+            <div className="flex items-center gap-2">
                 {isLoading && (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
                 )}
                 {query && (
                     <Button
                         type="button"
                         variant="ghost"
-                        size="sm"
+                        size="icon"
+                        className="h-8 w-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
                         onClick={() => {
                             setQuery('');
                             inputRef.current?.focus();
@@ -275,9 +264,10 @@ const SearchInputField = memo(function SearchInputField({
                     type="button"
                     variant="outline"
                     size="sm"
+                    className="h-8 rounded-lg border-slate-200 bg-white px-2 text-xs font-medium text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
                     onClick={onClose}
                 >
-                    esc
+                    ESC
                 </Button>
             </div>
         </div>
@@ -285,16 +275,13 @@ const SearchInputField = memo(function SearchInputField({
 });
 
 // ============================================================================
-// Results Panel Component
+// Results Panel (modernisé avec thème Emerald/Slate)
 // ============================================================================
-
 interface ResultsPanelProps {
     results: SearchResult[];
-    query: string;
     selectedIndex: number;
     onResultClick: (result: SearchResult) => void;
     onHoverIndex?: (index: number) => void;
-    openResultsInNewTab?: boolean;
 }
 
 const ResultsPanel = memo(function ResultsPanel({
@@ -339,9 +326,7 @@ const ResultsPanel = memo(function ResultsPanel({
             return;
         }
 
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setHoverEnabled(false);
-
         const enable = () => setHoverEnabled(true);
         container.addEventListener('pointermove', enable, { once: true });
 
@@ -349,41 +334,38 @@ const ResultsPanel = memo(function ResultsPanel({
             container.removeEventListener('pointermove', enable as any);
     }, []);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const renderResult = (result: SearchResult, isSelected: boolean) => {
-        const isPost = result._type === 'post';
-        const isCategory = result._type === 'category';
-        const isUser = result._type === 'user';
-
-        if (isPost) {
+    const renderResult = (result: SearchResult) => {
+        if (result._type === 'post') {
             return (
                 <div className="flex items-start gap-3">
                     {result.featured_image_thumb ? (
                         <img
                             src={result.featured_image_thumb}
                             alt={result.title}
-                            className="h-12 w-12 rounded-lg object-cover"
+                            className="h-12 w-12 rounded-xl object-cover shadow-sm"
                         />
                     ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                            <SearchIcon className="h-5 w-5 text-muted-foreground" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+                            <SearchIcon className="h-5 w-5 text-slate-400" />
                         </div>
                     )}
                     <div className="flex-1">
-                        <p className="font-medium text-foreground">
+                        <p className="font-medium text-slate-800 dark:text-slate-200">
                             {result.title}
                         </p>
-                        <p className="line-clamp-1 text-sm text-muted-foreground">
+                        <p className="line-clamp-1 text-sm text-slate-500 dark:text-slate-400">
                             {result.excerpt || 'Aucun extrait'}
                         </p>
-                        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                            <Badge variant="outline" className="text-xs">
+                        <div className="mt-1 flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+                            <Badge
+                                variant="outline"
+                                className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
+                            >
                                 Article
                             </Badge>
-                            {result.categories &&
-                                result.categories.length > 0 && (
-                                    <span>{result.categories[0].nom}</span>
-                                )}
+                            {result.categories?.[0]?.nom && (
+                                <span>{result.categories[0].nom}</span>
+                            )}
                             {result.published_at && (
                                 <span>
                                     {new Date(
@@ -397,19 +379,17 @@ const ResultsPanel = memo(function ResultsPanel({
             );
         }
 
-        if (isCategory) {
+        if (result._type === 'category') {
             return (
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900">
-                        <span className="text-blue-600 dark:text-blue-400">
-                            #
-                        </span>
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        #
                     </div>
                     <div className="flex-1">
-                        <p className="font-medium text-foreground">
+                        <p className="font-medium text-slate-800 dark:text-slate-200">
                             {result.nom}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
                             Catégorie • {result.posts_count || 0} articles
                         </p>
                     </div>
@@ -417,26 +397,28 @@ const ResultsPanel = memo(function ResultsPanel({
             );
         }
 
-        if (isUser) {
+        if (result._type === 'user') {
             return (
                 <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-10 w-10 ring-2 ring-slate-200 dark:ring-slate-700">
                         {result.avatar_url ? (
                             <AvatarImage
                                 src={result.avatar_url}
                                 alt={result.name}
                             />
                         ) : (
-                            <AvatarFallback>
+                            <AvatarFallback className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
                                 {result.name?.charAt(0).toUpperCase() || 'U'}
                             </AvatarFallback>
                         )}
                     </Avatar>
                     <div className="flex-1">
-                        <p className="font-medium text-foreground">
+                        <p className="font-medium text-slate-800 dark:text-slate-200">
                             {result.name}
                         </p>
-                        <p className="text-sm text-muted-foreground">Auteur</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Auteur
+                        </p>
                     </div>
                 </div>
             );
@@ -448,7 +430,7 @@ const ResultsPanel = memo(function ResultsPanel({
     return (
         <div
             ref={containerRef}
-            className="flex h-[60vh] flex-col gap-1 overflow-y-auto bg-muted/30 p-2 md:h-[50vh]"
+            className="flex h-[60vh] flex-col gap-1 overflow-y-auto bg-slate-50/80 p-2 md:h-[50vh] dark:bg-slate-800/30"
             role="listbox"
         >
             {results.map((result, idx) => {
@@ -458,10 +440,11 @@ const ResultsPanel = memo(function ResultsPanel({
                     <div
                         key={`${result._type}-${result.id}`}
                         className={cn(
-                            'cursor-pointer rounded-lg p-3 transition-colors',
-                            isSelected && 'bg-blue-50 dark:bg-blue-900/30',
+                            'cursor-pointer rounded-xl p-3 transition-all duration-150',
+                            isSelected &&
+                                'bg-emerald-50/90 shadow-sm dark:bg-emerald-900/20',
                             !isSelected &&
-                                'hover:bg-gray-100 dark:hover:bg-gray-800',
+                                'hover:bg-white dark:hover:bg-slate-800/80',
                         )}
                         role="option"
                         aria-selected={isSelected}
@@ -472,7 +455,7 @@ const ResultsPanel = memo(function ResultsPanel({
                             }
                         }}
                     >
-                        {renderResult(result, isSelected)}
+                        {renderResult(result)}
                     </div>
                 );
             })}
@@ -481,25 +464,25 @@ const ResultsPanel = memo(function ResultsPanel({
 });
 
 // ============================================================================
-// No Results Component
+// No Results (modernisé)
 // ============================================================================
-
-interface NoResultsProps {
+const NoResults = memo(function NoResults({
+    query,
+    onClear,
+}: {
     query: string;
     onClear: () => void;
-}
-
-const NoResults = memo(function NoResults({ query, onClear }: NoResultsProps) {
+}) {
     return (
-        <div className="flex h-[60vh] flex-col items-center justify-center gap-4 bg-muted/30 p-8 text-center md:h-[50vh]">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <SearchIcon className="h-6 w-6 text-muted-foreground" />
+        <div className="flex h-[60vh] flex-col items-center justify-center gap-4 bg-slate-50/80 p-8 text-center md:h-[50vh] dark:bg-slate-800/30">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
+                <SearchIcon className="h-6 w-6 text-slate-500 dark:text-slate-400" />
             </div>
             <div>
-                <p className="text-lg font-medium">
+                <p className="text-lg font-medium text-slate-700 dark:text-slate-200">
                     Aucun résultat pour "{query}"
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                     Essayez une autre recherche ou parcourez nos catégories
                 </p>
             </div>
@@ -511,50 +494,48 @@ const NoResults = memo(function NoResults({ query, onClear }: NoResultsProps) {
 });
 
 // ============================================================================
-// Footer Component
+// Footer (modernisé)
 // ============================================================================
-
-interface FooterProps {
+const Footer = memo(function Footer({
+    resultsCount,
+}: {
     resultsCount: number;
-}
-
-const Footer = memo(function Footer({ resultsCount }: FooterProps) {
+}) {
     return (
-        <div className="flex items-center justify-between rounded-b-sm bg-background p-3 text-sm text-muted-foreground">
+        <div className="flex items-center justify-between border-t border-slate-200/80 bg-white/80 px-4 py-3 text-xs text-slate-500 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-400">
             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                    <kbd className="flex h-6 items-center justify-center rounded bg-muted px-2 text-muted-foreground">
-                        <CornerDownLeft size={16} />
+                <div className="flex items-center gap-1.5">
+                    <kbd className="flex h-6 items-center justify-center rounded-md bg-slate-100 px-2 font-medium dark:bg-slate-800">
+                        <CornerDownLeft size={14} />
                     </kbd>
-                    <span>Sélectionner</span>
+                    <span>Ouvrir</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <kbd className="flex h-6 items-center justify-center rounded bg-muted px-2 text-muted-foreground">
-                        <ArrowUp size={16} />
+                <div className="flex items-center gap-1.5">
+                    <kbd className="flex h-6 items-center justify-center rounded-md bg-slate-100 px-2 font-medium dark:bg-slate-800">
+                        <ArrowUp size={14} />
                     </kbd>
-                    <kbd className="flex h-6 items-center justify-center rounded bg-muted px-2 text-muted-foreground">
-                        <ArrowDown size={16} />
+                    <kbd className="flex h-6 items-center justify-center rounded-md bg-slate-100 px-2 font-medium dark:bg-slate-800">
+                        <ArrowDown size={14} />
                     </kbd>
                     <span>Naviguer</span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <kbd className="flex h-6 items-center justify-center rounded bg-muted px-2 text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                    <kbd className="flex h-6 items-center justify-center rounded-md bg-slate-100 px-2 font-medium dark:bg-slate-800">
                         ESC
                     </kbd>
                     <span>Fermer</span>
                 </div>
             </div>
-            <div className="text-xs">
-                {resultsCount} résultat{resultsCount > 1 ? 's' : ''}
+            <div className="text-right">
+                {resultsCount} résultat{resultsCount !== 1 && 's'}
             </div>
         </div>
     );
 });
 
 // ============================================================================
-// Search Modal Component
+// Search Modal Component (modernisé)
 // ============================================================================
-
 interface SearchModalProps {
     onClose: () => void;
     config: SearchConfig;
@@ -578,22 +559,20 @@ function SearchModal({ onClose, config }: SearchModalProps) {
             setIsLoading(true);
 
             try {
-                const response = await axios.get(route('search.api'), {
-                    params: {
-                        q: debouncedQuery.trim(),
-                        limit: config.hitsPerPage || 8,
+                const response = await axios.get(
+                    config.searchEndpoint || route('tenant.api'),
+                    {
+                        params: {
+                            q: debouncedQuery.trim(),
+                            limit: config.hitsPerPage || 8,
+                        },
+                        headers: {
+                            Accept: 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
                     },
-                    headers: {
-                        Accept: 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                });
-
-                if (response.data && Array.isArray(response.data.results)) {
-                    setResults(response.data.results);
-                } else {
-                    setResults([]);
-                }
+                );
+                setResults(response.data?.results || []);
             } catch (error) {
                 console.error('Search error:', error);
                 setResults([]);
@@ -601,9 +580,8 @@ function SearchModal({ onClose, config }: SearchModalProps) {
                 setIsLoading(false);
             }
         };
-
         fetchResults();
-    }, [debouncedQuery, config.hitsPerPage]);
+    }, [debouncedQuery, config.hitsPerPage, config.searchEndpoint]);
 
     const { selectedIndex, moveDown, moveUp, hoverIndex } =
         useKeyboardNavigation<SearchResult>(
@@ -612,10 +590,20 @@ function SearchModal({ onClose, config }: SearchModalProps) {
             config.openResultsInNewTab ?? false,
         );
 
-    const handleResultClick = useCallback((result: SearchResult) => {
-        const url = `/blog/${result.slug}`;
-        window.location.href = url;
-    }, []);
+    const handleResultClick = useCallback(
+        (result: SearchResult) => {
+            const url = config.onResultClick
+                ? undefined
+                : `/blog/${result.slug}`;
+
+            if (config.onResultClick) {
+                config.onResultClick(result);
+            } else {
+                window.location.href = url!;
+            }
+        },
+        [config],
+    );
 
     const handleActivateSelection = useCallback(() => {
         if (selectedIndex >= 0 && selectedIndex < results.length) {
@@ -627,12 +615,11 @@ function SearchModal({ onClose, config }: SearchModalProps) {
         return false;
     }, [selectedIndex, results, handleResultClick]);
 
-    const showResults = results.length > 0 && !!query && query.length >= 2;
-    const noResults =
-        !isLoading && results.length === 0 && !!query && query.length >= 2;
+    const showResults = results.length > 0 && query.length >= 2;
+    const noResults = !isLoading && results.length === 0 && query.length >= 2;
 
     return (
-        <div className="flex flex-col">
+        <div className="flex h-full flex-col">
             <SearchInputField
                 query={query}
                 setQuery={setQuery}
@@ -647,20 +634,18 @@ function SearchModal({ onClose, config }: SearchModalProps) {
 
             {isLoading && (
                 <div className="space-y-3 p-4">
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full rounded-xl" />
+                    <Skeleton className="h-16 w-full rounded-xl" />
+                    <Skeleton className="h-16 w-full rounded-xl" />
                 </div>
             )}
 
             {showResults && (
                 <ResultsPanel
                     results={results}
-                    query={query}
                     selectedIndex={selectedIndex}
                     onResultClick={handleResultClick}
                     onHoverIndex={hoverIndex}
-                    openResultsInNewTab={config.openResultsInNewTab}
                 />
             )}
 
@@ -680,14 +665,10 @@ function SearchModal({ onClose, config }: SearchModalProps) {
 }
 
 // ============================================================================
-// Search Modal Component SearchExperience
+// Export principal
 // ============================================================================
-
 export default function SearchExperience(config: SearchConfig) {
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const openModal = () => setIsModalOpen(true);
-    const closeModal = () => setIsModalOpen(false);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -699,25 +680,32 @@ export default function SearchExperience(config: SearchConfig) {
                 setIsModalOpen(true);
             }
         };
-
         document.addEventListener('keydown', handleKeyDown);
 
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, []);
 
-    const buttonProps = {
-        ...config.buttonProps,
-        onClick: openModal,
-    };
-
     return (
         <>
-            <SearchButton {...buttonProps}>
+            <SearchButton
+                onClick={() => setIsModalOpen(true)}
+                {...(config.buttonProps || {})}
+            >
                 {config.buttonText || 'Rechercher'}
             </SearchButton>
-            <Modal isOpen={isModalOpen} onClose={closeModal}>
-                <SearchModal onClose={closeModal} config={config} />
-            </Modal>
+            <AnimatePresence>
+                {isModalOpen && (
+                    <Modal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                    >
+                        <SearchModal
+                            onClose={() => setIsModalOpen(false)}
+                            config={config}
+                        />
+                    </Modal>
+                )}
+            </AnimatePresence>
         </>
     );
 }

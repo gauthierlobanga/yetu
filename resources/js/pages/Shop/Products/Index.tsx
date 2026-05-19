@@ -1,15 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { Head, usePage, router } from '@inertiajs/react';
+// resources/js/Pages/Products/Index.tsx
+import { Head, usePage, router, Link } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Filter,
     X,
     Search,
-    Grid2X2,
     LayoutGrid,
     SlidersHorizontal,
     ChevronRight,
-    Link,
     Camera,
     Loader2,
 } from 'lucide-react';
@@ -40,9 +37,9 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { Skeleton } from '@/components/ui/skeleton';
 import MainLayout from '@/layouts/main-layout';
-import tenant from '@/routes/tenant';
-import type { PageProps, Product, Category } from '@/types/ecommerce/products';
+import type { Product, Category } from '@/types/ecommerce/products';
 
 interface LocalFilters {
     category?: string;
@@ -59,10 +56,8 @@ interface BrandSimple {
     name: string;
 }
 
-interface Props extends Omit<
-    PageProps,
-    'products' | 'categories' | 'brands' | 'filters'
-> {
+// On étend Record<string, unknown> pour satisfaire la contrainte d'index de PageProps
+interface Props extends Record<string, unknown> {
     products: {
         data: Product[];
         current_page: number;
@@ -103,6 +98,13 @@ export default function ProductsIndex() {
     );
     const [searchInput, setSearchInput] = useState(initialFilters.search || '');
     const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isSearchingByImage, setIsSearchingByImage] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        console.log('Produits reçus :', products.data);
+    }, [products]);
 
     useEffect(() => {
         setLocalFilters(initialFilters);
@@ -112,62 +114,6 @@ export default function ProductsIndex() {
             Number(initialFilters.max_price) || serverPriceRange.max,
         ]);
     }, [initialFilters, serverPriceRange]);
-
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [isSearchingByImage, setIsSearchingByImage] = useState(false);
-
-    const handleImageSearch = () => {
-        fileInputRef.current?.click();
-    };
-
-    const handleImageUpload = async (
-        e: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-        const file = e.target.files?.[0];
-
-        if (!file) {
-            return;
-        }
-
-        setIsSearchingByImage(true);
-        const formData = new FormData();
-        formData.append('image', file);
-
-        try {
-            const response = await fetch(route('products.search.by-image'), {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': (
-                        document.querySelector(
-                            'meta[name="csrf-token"]',
-                        ) as HTMLMetaElement
-                    )?.content,
-                },
-            });
-
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else {
-                const data = await response.json();
-
-                if (data.redirect_url) {
-                    window.location.href = data.redirect_url;
-                } else if (data.error) {
-                    toast.error(data.error);
-                }
-            }
-        } catch (error) {
-            toast.error('Erreur lors de la recherche par image');
-        } finally {
-            setIsSearchingByImage(false);
-
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-        }
-    };
 
     const applyFilters = (newFilters: Partial<LocalFilters>) => {
         const updated = { ...localFilters, ...newFilters };
@@ -180,11 +126,12 @@ export default function ProductsIndex() {
             }
         });
 
-        router.get(tenant.product.index().url, query, {
+        setIsLoading(true);
+        router.get(route('tenant.product.index'), query, {
             preserveState: true,
             preserveScroll: true,
             only: ['products'],
-            showProgress: false,
+            onFinish: () => setIsLoading(false),
         });
     };
 
@@ -192,15 +139,15 @@ export default function ProductsIndex() {
         setLocalFilters({});
         setSearchInput('');
         setPriceRange([serverPriceRange.min, serverPriceRange.max]);
-
+        setIsLoading(true);
         router.get(
-            tenant.product.index().url,
+            route('tenant.product.index'),
             {},
             {
                 preserveState: true,
                 preserveScroll: true,
                 only: ['products'],
-                showProgress: false,
+                onFinish: () => setIsLoading(false),
             },
         );
     };
@@ -240,123 +187,167 @@ export default function ProductsIndex() {
 
     const totalProducts = products.total ?? products.data.length;
 
+    const handleImageSearch = () => fileInputRef.current?.click();
+
+    const handleImageUpload = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+        const file = e.target.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        setIsSearchingByImage(true);
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch(
+                route('tenant.product.search.by-image'),
+                {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': (
+                            document.querySelector(
+                                'meta[name="csrf-token"]',
+                            ) as HTMLMetaElement
+                        )?.content,
+                    },
+                },
+            );
+
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                const data = await response.json();
+
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else if (data.error) {
+                    toast.error(data.error);
+                }
+            }
+        } catch {
+            toast.error('Erreur lors de la recherche par image');
+        } finally {
+            setIsSearchingByImage(false);
+
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        }
+    };
+
     return (
         <MainLayout>
             <Head title="Tous les produits" />
 
             <div className="mx-auto max-w-7xl px-4 py-8">
-                {/* En-tête premium */}
-                <div className="mb-8 space-y-4">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <motion.div
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <h1 className="font-heading text-2xl font-bold text-foreground md:text-3xl">
-                                Tous les produits
-                                <motion.span
-                                    key={totalProducts}
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className="ml-3 inline-flex items-center rounded-full bg-muted px-3 py-1 text-base font-normal text-muted-foreground"
-                                >
-                                    {totalProducts} résultat
-                                    {totalProducts !== 1 ? 's' : ''}
-                                </motion.span>
-                            </h1>
-                        </motion.div>
+                {/* En-tête */}
+                <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <motion.div
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <h1 className="text-2xl font-bold text-slate-900 md:text-3xl dark:text-white">
+                            Tous les produits
+                            <motion.span
+                                key={totalProducts}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="ml-3 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-base font-normal text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                            >
+                                {totalProducts} résultat
+                                {totalProducts !== 1 ? 's' : ''}
+                            </motion.span>
+                        </h1>
+                    </motion.div>
 
-                        {/* Zone de recherche */}
-                        <motion.div
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="relative w-full sm:w-96"
-                        >
-                            <div className="group relative">
-                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
-                                <Input
-                                    placeholder="Rechercher un produit, une marque..."
-                                    value={searchInput}
-                                    onChange={(e) =>
-                                        handleSearchChange(e.target.value)
-                                    }
-                                    className="h-11 rounded-full pr-24 pl-9 text-sm transition-all"
-                                />
-                                {searchInput && (
-                                    <button
-                                        onClick={() => {
-                                            setSearchInput('');
-                                            applyFilters({ search: undefined });
-                                        }}
-                                        className="absolute top-1/2 right-20 -translate-y-1/2 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                                        aria-label="Effacer la recherche"
-                                    >
-                                        <X className="h-3.5 w-3.5" />
-                                    </button>
-                                )}
-                                <div className="absolute top-1/2 right-1 flex -translate-y-1/2 items-center gap-1">
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        onChange={handleImageUpload}
-                                        accept="image/*"
-                                        className="hidden"
-                                    />
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                                        aria-label="Recherche par image"
-                                        onClick={handleImageSearch}
-                                        disabled={isSearchingByImage}
-                                    >
-                                        {isSearchingByImage ? (
-                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                            <Camera className="h-20 w-20" />
-                                        )}
-                                    </Button>
-                                </div>
-                            </div>
-
-                            {/* Suggestions */}
+                    {/* Recherche */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="relative w-full sm:w-96"
+                    >
+                        <div className="relative">
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <Input
+                                placeholder="Rechercher un produit..."
+                                value={searchInput}
+                                onChange={(e) =>
+                                    handleSearchChange(e.target.value)
+                                }
+                                className="h-11 rounded-full border-slate-200 pr-24 pl-9 text-sm transition-all focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/10 dark:border-slate-700 dark:bg-slate-900/70"
+                            />
                             {searchInput && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -5 }}
-                                    className="absolute top-full right-0 left-0 z-20 mt-1 rounded-lg border bg-card p-2 shadow-lg"
+                                <button
+                                    onClick={() => {
+                                        setSearchInput('');
+                                        applyFilters({ search: undefined });
+                                    }}
+                                    className="absolute top-1/2 right-20 -translate-y-1/2 rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
+                                    aria-label="Effacer la recherche"
                                 >
-                                    <p className="px-2 py-1 text-xs font-medium text-muted-foreground">
-                                        Suggestions populaires
-                                    </p>
-                                    <div className="space-y-1">
-                                        {[
-                                            'Smartphone',
-                                            'Ordinateur portable',
-                                            'Écouteurs sans fil',
-                                        ].map((suggestion) => (
-                                            <button
-                                                key={suggestion}
-                                                onClick={() => {
-                                                    setSearchInput(suggestion);
-                                                    applyFilters({
-                                                        search: suggestion,
-                                                    });
-                                                }}
-                                                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-muted"
-                                            >
-                                                <Search className="h-3.5 w-3.5 text-muted-foreground" />
-                                                {suggestion}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </motion.div>
+                                    <X className="h-3.5 w-3.5" />
+                                </button>
                             )}
-                        </motion.div>
-                    </div>
+                            <div className="absolute top-1/2 right-1 flex -translate-y-1/2 items-center gap-1">
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleImageUpload}
+                                    accept="image/*"
+                                    className="hidden"
+                                />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-slate-400 hover:text-slate-600"
+                                    onClick={handleImageSearch}
+                                    disabled={isSearchingByImage}
+                                >
+                                    {isSearchingByImage ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Camera className="h-4 w-4" />
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+
+                        {searchInput && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="absolute top-full right-0 left-0 z-20 mt-1 rounded-lg border border-slate-200 bg-white p-2 shadow-lg dark:border-slate-700 dark:bg-slate-900"
+                            >
+                                <p className="px-2 py-1 text-xs font-medium text-slate-500">
+                                    Suggestions
+                                </p>
+                                {[
+                                    'Smartphone',
+                                    'Ordinateur portable',
+                                    'Écouteurs sans fil',
+                                ].map((s) => (
+                                    <button
+                                        key={s}
+                                        onClick={() => {
+                                            setSearchInput(s);
+                                            applyFilters({ search: s });
+                                        }}
+                                        className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"
+                                    >
+                                        <Search className="h-3.5 w-3.5 text-slate-400" />
+                                        {s}
+                                    </button>
+                                ))}
+                            </motion.div>
+                        )}
+                    </motion.div>
                 </div>
 
                 {/* Filtres actifs */}
@@ -366,7 +357,7 @@ export default function ProductsIndex() {
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-4 flex flex-wrap items-center gap-2"
                     >
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-sm text-slate-500 dark:text-slate-400">
                             Filtres actifs :
                         </span>
                         {activeFiltersArray.map(({ key, value }) => (
@@ -385,7 +376,7 @@ export default function ProductsIndex() {
                                     onClick={() =>
                                         removeFilter(key as keyof LocalFilters)
                                     }
-                                    className="ml-1 rounded-full p-0.5 hover:bg-muted"
+                                    className="ml-1 rounded-full p-0.5 hover:bg-slate-200 dark:hover:bg-slate-700"
                                 >
                                     <X className="h-3 w-3" />
                                 </button>
@@ -406,20 +397,18 @@ export default function ProductsIndex() {
                     <motion.div
                         initial={{ opacity: 0, y: -8 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border bg-muted/40 px-4 py-3 text-sm"
+                        className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-800/50"
                     >
                         <Badge variant="secondary">
                             {searchContext.mode === 'image'
                                 ? 'Recherche par image'
                                 : 'Recherche texte'}
                         </Badge>
-                        {searchContext.semantic && (
-                            <Badge>Classement intelligent</Badge>
-                        )}
-                        <span className="text-muted-foreground">
-                            Resultats pour
+                        {searchContext.semantic && <Badge>Intelligent</Badge>}
+                        <span className="text-slate-500 dark:text-slate-400">
+                            Résultats pour
                         </span>
-                        <span className="font-medium text-foreground">
+                        <span className="font-medium text-slate-900 dark:text-white">
                             {searchContext.query}
                         </span>
                     </motion.div>
@@ -427,7 +416,7 @@ export default function ProductsIndex() {
 
                 <div className="mt-6 lg:grid lg:grid-cols-4 lg:gap-8">
                     {/* Filtres desktop */}
-                    <div className="hidden lg:block">
+                    <aside className="hidden lg:block">
                         <div className="sticky top-20">
                             <FiltersPanel
                                 categories={categories}
@@ -442,9 +431,9 @@ export default function ProductsIndex() {
                                 maxPossiblePrice={serverPriceRange.max}
                             />
                         </div>
-                    </div>
+                    </aside>
 
-                    {/* Zone produits */}
+                    {/* Liste des produits */}
                     <div className="lg:col-span-3">
                         {/* Barre d'outils */}
                         <div className="mb-4 flex items-center justify-between">
@@ -507,14 +496,10 @@ export default function ProductsIndex() {
                                     <DropdownMenuTrigger asChild>
                                         <Button
                                             variant="outline"
-                                            size="sm"
-                                            className="hidden cursor-pointer md:flex"
+                                            size="icon"
+                                            className="hidden md:flex"
                                         >
-                                            {viewDensity === 'comfortable' ? (
-                                                <LayoutGrid className="h-5 w-5" />
-                                            ) : (
-                                                <Grid2X2 className="h-5 w-5" />
-                                            )}
+                                            <LayoutGrid className="h-4 w-4" />
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="start">
@@ -523,7 +508,7 @@ export default function ProductsIndex() {
                                                 setViewDensity('comfortable')
                                             }
                                         >
-                                            <LayoutGrid className="mr-2 h-4 w-4" />
+                                            <LayoutGrid className="mr-2 h-4 w-4" />{' '}
                                             Confortable
                                         </DropdownMenuItem>
                                         <DropdownMenuItem
@@ -531,7 +516,7 @@ export default function ProductsIndex() {
                                                 setViewDensity('compact')
                                             }
                                         >
-                                            <Grid2X2 className="mr-2 h-4 w-4" />
+                                            <LayoutGrid className="mr-2 h-4 w-4" />{' '}
                                             Compact
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
@@ -544,8 +529,8 @@ export default function ProductsIndex() {
                                     applyFilters({ sort: value })
                                 }
                             >
-                                <SelectTrigger className="w-40">
-                                    <SelectValue placeholder="Trier par" />
+                                <SelectTrigger className="w-40 border-slate-200 dark:border-slate-700 dark:bg-slate-900/70">
+                                    <SelectValue placeholder="Trier" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="newest">
@@ -564,102 +549,43 @@ export default function ProductsIndex() {
                             </Select>
                         </div>
 
+                        {/* Chargement */}
+                        {isLoading && (
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                {Array.from({ length: 6 }).map((_, i) => (
+                                    <Skeleton
+                                        key={i}
+                                        className="h-72 rounded-2xl"
+                                    />
+                                ))}
+                            </div>
+                        )}
+
                         {/* État vide */}
-                        {products.data.length === 0 ? (
+                        {!isLoading && products.data.length === 0 && (
                             <motion.div
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.4, ease: 'easeOut' }}
                                 className="flex flex-col items-center justify-center py-16 text-center"
                             >
-                                <div className="relative mb-8">
-                                    <motion.div
-                                        initial={{ scale: 0.9, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        transition={{
-                                            delay: 0.1,
-                                            duration: 0.4,
-                                        }}
-                                        className="text-muted-foreground/60"
-                                    >
-                                        {/* icône SVG conservée */}
-                                        <svg
-                                            width="160"
-                                            height="160"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="mx-auto"
-                                        >
-                                            <path
-                                                d="M21 16V8C20.9996 7.6493 20.9071 7.30481 20.7315 7.00117C20.556 6.69754 20.3037 6.44537 20 6.27L13 2.27C12.696 2.09446 12.3511 2.00205 12 2.00205C11.6489 2.00205 11.304 2.09446 11 2.27L4 6.27C3.69626 6.44537 3.44398 6.69754 3.26846 7.00117C3.09294 7.30481 3.00036 7.6493 3 8V16C3.00036 16.3507 3.09294 16.6952 3.26846 16.9988C3.44398 17.3025 3.69626 17.5546 4 17.73L11 21.73C11.304 21.9055 11.6489 21.9979 12 21.9979C12.3511 21.9979 12.696 21.9055 13 21.73L20 17.73C20.3037 17.5546 20.556 17.3025 20.7315 16.9988C20.9071 16.6952 20.9996 16.3507 21 16Z"
-                                                stroke="currentColor"
-                                                strokeWidth="1.5"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            />
-                                            <path
-                                                d="M12 11L12 16M12 7V8"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                            />
-                                            <circle
-                                                cx="12"
-                                                cy="18"
-                                                r="1"
-                                                fill="currentColor"
-                                            />
-                                        </svg>
-                                    </motion.div>
-                                    <motion.div
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        transition={{
-                                            delay: 0.3,
-                                            type: 'spring',
-                                            stiffness: 200,
-                                        }}
-                                        className="absolute -right-2 -bottom-2 rounded-full bg-primary/10 p-3 text-primary"
-                                    >
-                                        <Search className="h-6 w-6" />
-                                    </motion.div>
+                                <div className="mb-6 rounded-full bg-slate-100 p-6 dark:bg-slate-800">
+                                    <Search className="h-10 w-10 text-slate-400" />
                                 </div>
-
-                                <motion.h3
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.2 }}
-                                    className="mb-2 font-heading text-2xl font-semibold text-foreground"
-                                >
+                                <h3 className="mb-2 text-xl font-bold text-slate-900 dark:text-white">
                                     Aucun produit trouvé
-                                </motion.h3>
-
-                                <motion.p
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.3 }}
-                                    className="mb-6 max-w-md text-muted-foreground"
-                                >
-                                    Nous n'avons pas trouvé de produit
-                                    correspondant à vos critères. Essayez
-                                    d'ajuster vos filtres ou explorez nos
-                                    catégories.
-                                </motion.p>
-
-                                <motion.div
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.4 }}
-                                    className="flex flex-wrap items-center justify-center gap-3"
-                                >
+                                </h3>
+                                <p className="mb-6 max-w-md text-slate-500 dark:text-slate-400">
+                                    Essayez d'ajuster vos filtres ou explorez
+                                    nos catégories.
+                                </p>
+                                <div className="flex flex-wrap justify-center gap-3">
                                     <Button
                                         onClick={clearAllFilters}
                                         size="lg"
-                                        className="h-10 w-full cursor-pointer gap-2 rounded-full bg-primary/95 text-base font-semibold hover:bg-primary"
+                                        className="gap-2"
                                     >
-                                        <X className="h-4 w-4" />
-                                        Effacer tous les filtres
+                                        <X className="h-4 w-4" /> Effacer les
+                                        filtres
                                     </Button>
                                     <Button variant="outline" size="lg" asChild>
                                         <Link
@@ -671,40 +597,33 @@ export default function ProductsIndex() {
                                             <ChevronRight className="ml-2 h-4 w-4" />
                                         </Link>
                                     </Button>
-                                </motion.div>
-
-                                <motion.p
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.5 }}
-                                    className="mt-6 text-sm text-muted-foreground"
-                                >
-                                    Besoin d'aide ?{' '}
-                                    <Link
-                                        href={route('tenant.page.contact')}
-                                        className="font-medium text-primary hover:underline"
-                                    >
-                                        Contactez notre support
-                                    </Link>
-                                </motion.p>
+                                </div>
                             </motion.div>
-                        ) : (
+                        )}
+
+                        {/* Grille de produits */}
+                        {!isLoading && products.data.length > 0 && (
                             <>
                                 <motion.div
                                     layout
-                                    className={`grid gap-4 ${
-                                        viewDensity === 'comfortable'
-                                            ? 'grid-cols-2 sm:grid-cols-3'
-                                            : 'grid-cols-3 sm:grid-cols-4'
-                                    }`}
+                                    className={`grid gap-4 ${viewDensity === 'comfortable' ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-3 sm:grid-cols-4'}`}
                                 >
                                     <AnimatePresence mode="popLayout">
                                         {products.data.map((product) => (
                                             <motion.div
                                                 key={product.id}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -20 }}
+                                                initial={{
+                                                    opacity: 0,
+                                                    scale: 0.95,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    scale: 1,
+                                                }}
+                                                exit={{
+                                                    opacity: 0,
+                                                    scale: 0.95,
+                                                }}
                                                 transition={{ duration: 0.2 }}
                                                 layout
                                             >
@@ -719,7 +638,7 @@ export default function ProductsIndex() {
                                 {/* Pagination */}
                                 {products.last_page > 1 && (
                                     <div className="mt-10 flex justify-center">
-                                        <div className="flex items-center gap-1">
+                                        <nav className="flex items-center gap-1">
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -737,78 +656,28 @@ export default function ProductsIndex() {
                                             >
                                                 Précédent
                                             </Button>
-                                            <div className="flex gap-1">
-                                                {Array.from(
-                                                    {
-                                                        length: products.last_page,
-                                                    },
-                                                    (_, i) => i + 1,
-                                                )
-                                                    .filter(
-                                                        (p) =>
-                                                            p === 1 ||
-                                                            p ===
-                                                                products.last_page ||
-                                                            Math.abs(
-                                                                p -
-                                                                    products.current_page,
-                                                            ) <= 1,
-                                                    )
-                                                    .reduce(
-                                                        (acc, p, idx, arr) => {
-                                                            if (
-                                                                idx > 0 &&
-                                                                p -
-                                                                    arr[
-                                                                        idx - 1
-                                                                    ] >
-                                                                    1
-                                                            ) {
-                                                                acc.push('...');
-                                                            }
-
-                                                            acc.push(p);
-
-                                                            return acc;
-                                                        },
-                                                        [] as (
-                                                            | number
-                                                            | string
-                                                        )[],
-                                                    )
-                                                    .map((page, idx) =>
-                                                        page === '...' ? (
-                                                            <span
-                                                                key={`ellipsis-${idx}`}
-                                                                className="px-2"
-                                                            >
-                                                                ...
-                                                            </span>
-                                                        ) : (
-                                                            <Button
-                                                                key={page}
-                                                                variant={
-                                                                    page ===
-                                                                    products.current_page
-                                                                        ? 'default'
-                                                                        : 'outline'
-                                                                }
-                                                                size="sm"
-                                                                onClick={() =>
-                                                                    applyFilters(
-                                                                        {
-                                                                            page: String(
-                                                                                page,
-                                                                            ),
-                                                                        },
-                                                                    )
-                                                                }
-                                                            >
-                                                                {page}
-                                                            </Button>
-                                                        ),
-                                                    )}
-                                            </div>
+                                            {Array.from(
+                                                { length: products.last_page },
+                                                (_, i) => i + 1,
+                                            ).map((page) => (
+                                                <Button
+                                                    key={page}
+                                                    variant={
+                                                        page ===
+                                                        products.current_page
+                                                            ? 'default'
+                                                            : 'outline'
+                                                    }
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        applyFilters({
+                                                            page: String(page),
+                                                        })
+                                                    }
+                                                >
+                                                    {page}
+                                                </Button>
+                                            ))}
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -827,7 +696,7 @@ export default function ProductsIndex() {
                                             >
                                                 Suivant
                                             </Button>
-                                        </div>
+                                        </nav>
                                     </div>
                                 )}
                             </>

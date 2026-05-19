@@ -368,8 +368,18 @@ class ProduitForm
                                             ->keyLabel('Propriété')
                                             ->valueLabel('Valeur')
                                             ->addActionLabel('Ajouter un attribut')
-                                            ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_filter($state, fn ($key, $value) => $key !== '' && $value !== '', ARRAY_FILTER_USE_BOTH) : $state)
-                                            ->afterStateHydrated(fn ($state) => is_array($state) ? array_filter($state, fn ($key) => $key !== '', ARRAY_FILTER_USE_KEY) : $state)
+                                            ->dehydrateStateUsing(fn ($state) => is_array($state)
+                                                ? collect($state)
+                                                    ->filter(fn ($value, $key) => $key !== '' && $key !== null && $value !== '' && $value !== null)
+                                                    ->toArray()
+                                                : []
+                                            )
+                                            ->afterStateHydrated(fn ($state) => is_array($state)
+                                                ? collect($state)
+                                                    ->filter(fn ($value, $key) => $key !== '' && $key !== null)
+                                                    ->toArray()
+                                                : []
+                                            )
                                             ->columnSpanFull(),
                                     ])
                                     ->columns(1)
@@ -377,30 +387,47 @@ class ProduitForm
                                     ->defaultItems(0)
                                     ->collapsible(),
 
-                                KeyValue::make('attributes')
-                                    ->label('Attributs personnalisés')
-                                    ->keyLabel('Attribut')
-                                    ->valueLabel('Valeur')
-                                    ->addActionLabel('Ajouter un attribut')
-                                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_filter($state, fn ($key, $value) => $key !== '' && $value !== '', ARRAY_FILTER_USE_BOTH) : $state)
-                                    ->afterStateHydrated(fn ($state) => is_array($state) ? array_filter($state, fn ($key) => $key !== '', ARRAY_FILTER_USE_KEY) : $state)
-                                    ->helperText('Attributs supplémentaires du produit (ex: Matière: Coton, Garantie: 2 ans)'),
+                                // KeyValue::make('attributes')
+                                //     ->label('Attributs personnalisés')
+                                //     ->keyLabel('Attribut')
+                                //     ->valueLabel('Valeur')
+                                //     ->addActionLabel('Ajouter un attribut')
+                                //     ->dehydrateStateUsing(fn ($state) => is_array($state)
+                                //         ? collect($state)
+                                //             ->filter(fn ($value, $key) => $key !== '' && $key !== null && $value !== '' && $value !== null)
+                                //             ->toArray()
+                                //         : []
+                                //     )
+                                //     ->afterStateHydrated(fn ($state) => is_array($state)
+                                //         ? collect($state)
+                                //             ->filter(fn ($value, $key) => $key !== '' && $key !== null)
+                                //             ->toArray()
+                                //         : []
+                                //     )
+                                //     ->helperText('Attributs supplémentaires du produit (ex: Matière: Coton, Garantie: 2 ans)'),
                             ]),
                         Tab::make('Attributs supplémentaires')
                             ->icon('heroicon-o-cog-6-tooth')
                             ->columnSpanFull()
                             ->schema([
                                 KeyValue::make('metadata')
-                                    ->label('Attributs personnalisés')
-                                    ->keyLabel('Propriété')
+                                    ->label('Métadonnées personnalisées')
+                                    ->keyLabel('Clé')
                                     ->valueLabel('Valeur')
-                                    ->keyPlaceholder('Ex: Matière')
-                                    ->valuePlaceholder('Ex: Coton')
-                                    ->addActionLabel('Ajouter une propriété')
+                                    ->addActionLabel('Ajouter')
                                     ->reorderable()
-                                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_filter($state, fn ($key, $value) => $key !== '' && $value !== '', ARRAY_FILTER_USE_BOTH) : $state)
-                                    ->afterStateHydrated(fn ($state) => is_array($state) ? array_filter($state, fn ($key) => $key !== '', ARRAY_FILTER_USE_KEY) : $state)
-                                    ->helperText('Attributs supplémentaires pour cette variante'),
+                                    ->dehydrateStateUsing(fn ($state) => is_array($state)
+                                        ? collect($state)
+                                            ->filter(fn ($value, $key) => $key !== '' && $key !== null && $value !== '' && $value !== null)
+                                            ->toArray()
+                                        : []
+                                    )
+                                    ->afterStateHydrated(fn ($state) => is_array($state)
+                                        ? collect($state)
+                                            ->filter(fn ($value, $key) => $key !== '' && $key !== null)
+                                            ->toArray()
+                                        : []
+                                    ),
                             ]),
 
                         Tab::make('SEO et tags')
