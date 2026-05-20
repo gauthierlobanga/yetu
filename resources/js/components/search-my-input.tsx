@@ -586,7 +586,8 @@ function SearchModal({ onClose, config }: SearchModalProps) {
             setIsLoading(true);
 
             try {
-                const endpoint = config.searchEndpoint || route('tenant.api'); // '/search'
+                // Remplacement de `route()` par le endpoint (si route() n'est pas globalement défini)
+                const endpoint = config.searchEndpoint || '/search'; 
                 const response = await axios.get(endpoint, {
                     params: {
                         q: debouncedQuery.trim(),
