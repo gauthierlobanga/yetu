@@ -57,6 +57,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import MainLayout from '@/layouts/main-layout';
+import { handleImageFallback, resolveImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import type { Cart, Address, PageProps } from '@/types/ecommerce/products';
 
@@ -1062,12 +1063,12 @@ function ReviewStep({
                                         className="flex items-center gap-3 text-sm"
                                     >
                                         <img
-                                            src={
-                                                item.produit.image ||
-                                                '/images/Vue-Storefront.png'
-                                            }
+                                            src={resolveImageUrl(
+                                                item.produit.image,
+                                            )}
                                             alt=""
                                             className="h-10 w-10 rounded-md object-cover"
+                                            onError={handleImageFallback()}
                                         />
                                         <span className="flex-1 text-slate-700 dark:text-slate-300">
                                             {item.produit.nom}
@@ -1160,12 +1161,12 @@ function OrderSummary({
                             {cart.items.slice(0, 6).map((item: any) => (
                                 <div key={item.id} className="flex gap-3">
                                     <img
-                                        src={
-                                            item.produit.image ||
-                                            '/images/Vue-Storefront.png'
-                                        }
+                                        src={resolveImageUrl(
+                                            item.produit.image,
+                                        )}
                                         alt=""
                                         className="h-12 w-12 rounded-lg border border-slate-200 object-cover dark:border-slate-700"
+                                        onError={handleImageFallback()}
                                     />
                                     <div className="min-w-0 flex-1">
                                         <p className="truncate text-sm font-medium text-slate-800 dark:text-white">

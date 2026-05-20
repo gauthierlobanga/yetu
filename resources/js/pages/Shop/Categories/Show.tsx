@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/sheet';
 import { Slider } from '@/components/ui/slider';
 import MainLayout from '@/layouts/main-layout';
+import { handleImageFallback, resolveImageUrl } from '@/lib/media';
 import type { Category, Product } from '@/types/ecommerce/products';
 
 interface Props {
@@ -266,9 +267,10 @@ export default function CategoryShow({
                                     <div className="h-8 w-8 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
                                         {sub.image && (
                                             <img
-                                                src={sub.image}
+                                                src={resolveImageUrl(sub.image)}
                                                 alt={sub.nom}
                                                 className="h-full w-full object-cover"
+                                                onError={handleImageFallback()}
                                             />
                                         )}
                                     </div>

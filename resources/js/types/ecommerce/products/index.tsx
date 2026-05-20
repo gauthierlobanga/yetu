@@ -1,3 +1,4 @@
+// resources/js/types/ecommerce/products/index.ts
 import type { Key } from 'react';
 import type { PlatformStats } from './products';
 
@@ -8,7 +9,7 @@ export interface HeaderCategory {
     url: string;
     image: string | null;
 }
-// resources/js/types/ecommerce/products/index.ts
+
 export interface PaginatedProducts {
     data: Product[];
     current_page: number;
@@ -17,7 +18,6 @@ export interface PaginatedProducts {
 
 export interface PromoData {
     [key: string]: unknown;
-
     title: string;
     description: string;
     end_date: string;
@@ -49,9 +49,8 @@ export interface ProductReview {
 
 // Interface principale Product
 export interface Product {
-    [x: string]: number;
-    quantite_stock: number;
     id: number;
+    quantite_stock: number;
     nom: string;
     slug: string;
     prix_actuel: number;
@@ -82,21 +81,21 @@ export interface Product {
     variantes?: ProductVariant[];
     avis?: ProductReview[];
     stock_disponible?: number;
-    seller_name?: string; // Nom du vendeur
-    orders_this_week?: number; // Commandes cette semaine
-    old_price?: number; // Prix barré (si différent de prix_ttc)
+    seller_name?: string;
+    orders_this_week?: number;
+    old_price?: number;
 }
 
+// Déclaration UNIQUE et définitive de Category
 export interface Category {
-    // [x: string]: number;
     id: number;
     nom: string;
     slug: string;
     description?: string;
-    image: string | null;
+    image?: string | null;
     icon?: string | null;
     url: string;
-    products_count: number;
+    products_count?: number;
     children: Category[];
 }
 
@@ -117,17 +116,6 @@ export interface PageProps {
     dealOfTheDay: Product[];
     brands: Brand[];
     address: Address[];
-}
-
-export interface Category {
-    id: number;
-    nom: string;
-    slug: string;
-    description?: string;
-    image: string | null;
-    icon?: string | null;
-    url: string;
-    children: Category[];
 }
 
 export interface Brand {
@@ -165,6 +153,8 @@ export interface CartItem {
         image: string | null;
         brand?: { nom: string } | null;
         sold_count?: number;
+        est_en_promotion?: boolean;
+        reduction_pourcentage?: number | null;
     };
     quantite: number;
     prix_unitaire: number;
@@ -195,6 +185,6 @@ export interface Address {
     instructions?: string | null;
     est_defaut: boolean;
     type: 'facturation' | 'livraison';
-    adresse_complete?: string; // calculé côté backend
+    adresse_complete?: string;
     adresse_une_ligne?: string;
 }

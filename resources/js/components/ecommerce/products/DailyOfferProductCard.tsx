@@ -4,25 +4,12 @@ import { ShoppingCart, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/ecommerce/use-cart';
+import { handleImageFallback, resolveImageUrl } from '@/lib/media';
 import type { Product } from '@/types/ecommerce/products';
 
 interface DailyOfferProductCardProps {
     product: Product;
     showDiscountBadge?: boolean;
-}
-
-function getImageUrl(image: string | null | undefined): string {
-    if (!image) {
-        return '/storage/images/getting-business.jpg';
-    } // fallback
-
-    // Si l'image commence déjà par http ou /storage, on la garde telle quelle
-    if (image.startsWith('http') || image.startsWith('/storage')) {
-        return image;
-    }
-
-    // Sinon, on ajoute le préfixe storage
-    return `/storage/${image.replace(/^\//, '')}`;
 }
 
 // Utilisation
@@ -36,7 +23,7 @@ export default function DailyOfferProductCard({
     const soldCount = Number(product.sold_count) || 0;
     const { addToCart } = useCart();
 
-    const imageUrl = getImageUrl(product.image_principale);
+    const imageUrl = resolveImageUrl(product.image_principale);
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -52,10 +39,7 @@ export default function DailyOfferProductCard({
                         src={imageUrl}
                         alt={product.nom}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).src =
-                                '/storage/images/getting-business.jpg';
-                        }}
+                        onError={handleImageFallback()}
                     />
                     {showDiscountBadge && product.reduction_pourcentage && (
                         <Badge className="absolute top-2 left-2 bg-red-500 text-white">

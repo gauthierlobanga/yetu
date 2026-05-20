@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/hooks/ecommerce/use-cart';
+import { handleImageFallback, resolveImageUrl } from '@/lib/media';
 import { EmptyCartPreview } from './EmptyCartPreview';
 
 export default function CartPreview() {
@@ -43,9 +44,10 @@ export default function CartPreview() {
                         className="group flex gap-3 rounded-xl p-2 transition hover:bg-gray-50 dark:hover:bg-gray-800/50"
                     >
                         <img
-                            src={item.produit.image || undefined}
+                            src={resolveImageUrl(item.produit.image)}
                             alt={item.produit.nom}
                             className="h-14 w-14 rounded-lg border object-cover"
+                            onError={handleImageFallback()}
                         />
 
                         <div className="flex flex-1 flex-col justify-between">

@@ -59,17 +59,29 @@ class WishlistController extends Controller
     //         ]);
     //     }
 
-    //     $wishlist = $client->wishlists()->firstOrCreate(['nom' => 'Ma liste des souhaits']);
+    //     $wishlist = $client->wishlists()->firstOrCreate(['nom' => 'Ma liste']);
 
     //     if ($wishlist->items()->where('produit_id', $produit->id)->exists()) {
     //         $wishlist->removeProduct($produit);
     //         $message = 'Produit retiré de la wishlist';
+    //         $type = 'wishlist_remove';
     //     } else {
     //         $wishlist->addProduct($produit);
     //         $message = 'Produit ajouté à la wishlist';
+    //         $type = 'wishlist_add';
     //     }
 
-    //     // Réponse JSON systématique pour les appels API et Inertia
+    //     // Notification au tenant en temps réel
+    //     $tenant = tenant(); // fonction stancl/tenancy
+    //     if ($tenant) {
+    //         event(new WishlistActivity(
+    //             $tenant->id,
+    //             'Activité wishlist',
+    //             "Un client a {$message} : {$produit->nom}",
+    //             $type
+    //         ));
+    //     }
+
     //     return response()->json(['success' => true, 'message' => $message]);
     // }
 
@@ -99,7 +111,7 @@ class WishlistController extends Controller
         }
 
         // Notification au tenant en temps réel
-        $tenant = tenant(); // fonction stancl/tenancy
+        $tenant = tenant();
         if ($tenant) {
             event(new WishlistActivity(
                 $tenant->id,

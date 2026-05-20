@@ -812,6 +812,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { useCartItems } from '@/hooks/ecommerce/use-cart';
+import { handleImageFallback, resolveImageUrl } from '@/lib/media';
 import type { Product, CalculatedTotals } from '@/types/ecommerce/products';
 import { EmptyCart } from './EmptyCart';
 
@@ -1011,12 +1012,12 @@ export default function CartContent() {
                                             {/* Image produit */}
                                             <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
                                                 <img
-                                                    src={
-                                                        item.produit.image ||
-                                                        '/images/Vue-Storefront.png'
-                                                    }
+                                                    src={resolveImageUrl(
+                                                        item.produit.image,
+                                                    )}
                                                     alt={item.produit.nom}
                                                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    onError={handleImageFallback()}
                                                 />
                                                 {item.produit
                                                     .est_en_promotion && (

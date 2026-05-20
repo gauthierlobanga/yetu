@@ -10,13 +10,13 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class ProductCategoryPivot extends Pivot
 {
-    use HasUuids;
+    // use HasUuids;
 
     protected $table = 'produit_categorie_pivot';
 
-    protected $keyType = 'string';
+    // protected $keyType = 'string';
 
-    public $incrementing = false;
+    // public $incrementing = false;
 
     protected $fillable = [
         'produit_id',

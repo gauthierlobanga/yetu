@@ -8,28 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/ecommerce/use-cart';
 import { useWishlist } from '@/hooks/ecommerce/use-wishlist';
+import { handleImageFallback, resolveImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/types/ecommerce/products';
 
 interface ProductCardCompactProps {
     product: Product;
     showDiscountBadge?: boolean;
-}
-
-function getImageUrl(image?: string | null): string {
-    if (!image) {
-        return '/storage/images/getting-business.jpg';
-    }
-
-    if (
-        image.startsWith('http') ||
-        image.startsWith('/storage') ||
-        image.startsWith('/')
-    ) {
-        return image;
-    }
-
-    return `/storage/${image.replace(/^\//, '')}`;
 }
 
 function formatPrice(amount: number): string {
@@ -125,10 +110,11 @@ export default function ProductCardCompact({
                     <div className="relative">
                         <div className="aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
                             <img
-                                src={getImageUrl(product.image_principale)}
+                                src={resolveImageUrl(product.image_principale)}
                                 alt={product.nom}
                                 loading="lazy"
                                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                onError={handleImageFallback()}
                             />
                         </div>
 

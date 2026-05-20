@@ -31,24 +31,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useCart } from '@/hooks/ecommerce/use-cart';
 import { useWishlist } from '@/hooks/ecommerce/use-wishlist';
 import MainLayout from '@/layouts/main-layout';
+import {
+    DEFAULT_MEDIA_FALLBACK,
+    handleImageFallback,
+    resolveImageUrl,
+} from '@/lib/media';
 import type { Product } from '@/types/ecommerce/products';
 import { ReviewsSection } from './avis/avis-clients';
-
-// ─── Helpers ────────────────────────────────────────────
-const getImageUrl = (
-    img: string | null | undefined,
-    fallback = '/images/Vue-Storefront.png',
-) => {
-    if (!img) {
-        return fallback;
-    }
-
-    if (img.startsWith('http') || img.startsWith('/storage')) {
-        return img;
-    }
-
-    return `/storage/${img.replace(/^\//, '')}`;
-};
 
 const formatCurrency = (amount: number, currency = 'CDF') =>
     new Intl.NumberFormat('fr-CD', {
@@ -157,8 +146,8 @@ function ProductGallery({
         ? images
         : [
               {
-                  medium: imagePrincipale || '/images/Vue-Storefront.png',
-                  large: imagePrincipale || '/images/Vue-Storefront.png',
+                  medium: imagePrincipale || DEFAULT_MEDIA_FALLBACK,
+                  large: imagePrincipale || DEFAULT_MEDIA_FALLBACK,
                   alt: nom,
               },
           ];
@@ -168,9 +157,10 @@ function ProductGallery({
         <div className="space-y-3">
             <div className="relative aspect-square overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800">
                 <img
-                    src={getImageUrl(current.large)}
+                    src={resolveImageUrl(current.large)}
                     alt={nom}
                     className="h-full w-full object-cover"
+                    onError={handleImageFallback()}
                 />
                 <Dialog>
                     <DialogTrigger asChild>
@@ -180,9 +170,10 @@ function ProductGallery({
                     </DialogTrigger>
                     <DialogContent className="max-w-4xl border-0 bg-transparent p-0">
                         <img
-                            src={getImageUrl(current.large)}
+                            src={resolveImageUrl(current.large)}
                             alt={nom}
                             className="max-h-[90vh] w-full rounded-lg object-contain"
+                            onError={handleImageFallback()}
                         />
                     </DialogContent>
                 </Dialog>
@@ -228,9 +219,10 @@ function ProductGallery({
                             }`}
                         >
                             <img
-                                src={getImageUrl(img.thumb || img.medium)}
+                                src={resolveImageUrl(img.thumb || img.medium)}
                                 alt=""
                                 className="h-full w-full object-cover"
+                                onError={handleImageFallback()}
                             />
                         </button>
                     ))}

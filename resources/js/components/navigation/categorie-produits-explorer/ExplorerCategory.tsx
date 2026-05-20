@@ -17,20 +17,14 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
+import type { Product } from '@/types/ecommerce/products';
 
 /* -------------------------------------------------------------------------- */
 /*                                    Types                                   */
 /* -------------------------------------------------------------------------- */
 
-interface Product {
-    id: number;
-    nom: string;
-    prix: number;
-    image_url: string;
-    slug: string;
-}
-
 interface Category {
+    [x: string]: any;
     id: number;
     nom: string;
     slug: string;
@@ -164,7 +158,7 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="relative w-full overflow-hidden rounded-b-[2rem] border-x border-b border-slate-200/70 bg-white/95 shadow-[0_30px_80px_-20px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-slate-700/60 dark:bg-slate-900/95 dark:shadow-[0_30px_80px_-20px_rgba(0,0,0,0.65)]"
+            className="relative w-full overflow-hidden border-x border-b border-slate-200/70 bg-white/95 shadow-[0_30px_80px_-20px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-slate-700/60 dark:bg-slate-900/95 dark:shadow-[0_30px_80px_-20px_rgba(0,0,0,0.65)]"
         >
             {/* Glow décoratif */}
             <div className="pointer-events-none absolute -top-24 left-10 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
@@ -215,13 +209,21 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
                                     )}
                                     <div
                                         className={cn(
-                                            'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all',
+                                            'flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl transition-all',
                                             isSelected
                                                 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
                                                 : 'bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-emerald-500/10 dark:group-hover:text-emerald-400',
                                         )}
                                     >
-                                        <Icon className="h-5 w-5" />
+                                        {category.image ? (
+                                            <img
+                                                src={category.image}
+                                                alt={category.nom}
+                                                className="h-full w-full object-cover"
+                                            />
+                                        ) : (
+                                            <Icon className="h-5 w-5" />
+                                        )}
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -270,7 +272,7 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
 
                     {/* Sous-catégories – correction TS */}
                     {(selectedCat.sous_categories?.length ?? 0) > 0 && (
-                        <div className="mb-6 flex flex-wrap gap-2">
+                        <div className="mb-4 flex flex-wrap gap-2">
                             {selectedCat.sous_categories!.map((sub) => (
                                 <Link
                                     key={sub}
@@ -285,33 +287,30 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
 
                     {/* Produits */}
                     {hasProducts ? (
-                        <div className="grid max-h-80 grid-cols-2 gap-4 overflow-y-auto pr-1 xl:grid-cols-4">
+                        <div className="grid max-h-128 grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
                             {selectedCat.produits
                                 .slice(0, 12)
                                 .map((product) => (
                                     <Link
                                         key={product.id}
                                         href={`/product/${product.slug}`}
-                                        className="group rounded-2xl border border-slate-200/70 bg-white p-3 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-500/10 dark:border-slate-700 dark:bg-slate-800/70 dark:hover:border-emerald-800"
+                                        className="group flex flex-col overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-sm transition-all duration-200 hover:border-emerald-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/70 dark:hover:border-emerald-800"
                                     >
-                                        <div className="relative mb-3 aspect-square overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
+                                        <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
                                             <img
-                                                src={product.image_url}
+                                                src={
+                                                    product.image_principale ||
+                                                    '/storage/images/Vue-Storefront.png'
+                                                }
                                                 alt={product.nom}
                                                 loading="lazy"
-                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                             />
                                         </div>
-                                        <h4 className="line-clamp-2 min-h-10 text-sm font-medium text-slate-800 transition-colors group-hover:text-emerald-600 dark:text-slate-200 dark:group-hover:text-emerald-400">
-                                            {product.nom}
-                                        </h4>
-                                        <div className="mt-2 flex items-center justify-between">
-                                            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                                                {formatPrice(product.prix)}
-                                            </span>
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 opacity-0 transition-all duration-300 group-hover:opacity-100 dark:text-emerald-400">
-                                                <ShoppingCart className="h-4 w-4" />
-                                            </div>
+                                        <div className="flex flex-1 flex-col justify-between p-2.5">
+                                            <h4 className="line-clamp-2 text-xs leading-tight font-medium text-slate-800 dark:text-slate-200">
+                                                {product.nom}
+                                            </h4>
                                         </div>
                                     </Link>
                                 ))}
@@ -321,24 +320,22 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
                     )}
 
                     {/* CTA */}
-                    <div className="mt-6 rounded-3xl border border-emerald-200/60 bg-linear-to-r from-emerald-50 to-slate-50 p-5 dark:border-emerald-800/40 dark:from-emerald-950/30 dark:to-slate-900">
+                    <div className="mt-3 rounded-3xl border border-emerald-200/60 bg-linear-to-r from-emerald-50 to-slate-50 p-5 dark:border-emerald-800/40 dark:from-emerald-950/30 dark:to-slate-900">
                         <div className="flex items-start gap-4">
                             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">
                                 <Zap className="h-5 w-5" />
                             </div>
                             <div className="flex-1">
                                 <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                                    Lancez votre boutique en ligne
+                                    Explorez nos meilleures collections de
+                                    produits
                                 </p>
-                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                    Créez votre marketplace professionnelle et
-                                    commencez à vendre dès aujourd'hui.
-                                </p>
+
                                 <Link
-                                    href={route('vendor.register')}
+                                    href={route('tenant.product.index')}
                                     className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
                                 >
-                                    Créer ma boutique
+                                    Voir tout
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
                             </div>

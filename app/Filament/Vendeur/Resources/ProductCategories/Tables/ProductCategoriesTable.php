@@ -27,10 +27,31 @@ class ProductCategoriesTable
             ->columns([
 
                 // Icône ou image miniature
+                SpatieMediaLibraryImageColumn::make('image')
+                    ->label('Image')
+                    ->circular()
+                    ->collection('image')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->imageSize(32)
+                    ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name='.urlencode($record->nom).'&background='.ltrim($record->color ?? '#6B7280', '#').'&color=fff&size=32')
+                    ->toggleable(),
+
                 SpatieMediaLibraryImageColumn::make('icon')
                     ->label('Icône')
                     ->circular()
                     ->collection('icon')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->imageSize(32)
+                    ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name='.urlencode($record->nom).'&background='.ltrim($record->color ?? '#6B7280', '#').'&color=fff&size=32')
+                    ->toggleable(),
+                SpatieMediaLibraryImageColumn::make('banner')
+                    ->label('Banner')
+                    ->circular()
+                    ->collection('banner')
+                    ->disk('public')
+                    ->visibility('public')
                     ->imageSize(32)
                     ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name='.urlencode($record->nom).'&background='.ltrim($record->color ?? '#6B7280', '#').'&color=fff&size=32')
                     ->toggleable(),

@@ -21,7 +21,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation-app';
 import { cn } from '@/lib/utils';
 
-// Types (inchangés)
+// Types
 export interface SearchResult {
     id: number;
     title?: string;
@@ -34,7 +34,7 @@ export interface SearchResult {
     avatar_url?: string | null;
     categories?: Array<{ id: number; nom: string; slug: string }>;
     user?: { id: number; name: string; avatar_url?: string | null };
-    _type: 'post' | 'category' | 'user';
+    _type?: 'post' | 'category' | 'user'; // Rendu optionnel pour plus de flexibilité
     published_at?: string | null;
     views_count?: number;
     posts_count?: number;
@@ -51,7 +51,7 @@ export interface SearchConfig {
 }
 
 // ============================================================================
-// Search Button (modernisé avec thème Emerald/Slate)
+// Search Button
 // ============================================================================
 interface SearchButtonProps extends React.ComponentProps<typeof Button> {}
 
@@ -69,8 +69,9 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
             return;
         }
 
+        // CORRECTION: Assignation correcte du raccourci clavier selon l'OS
         setModifierLabel(
-            /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '' : '',
+            /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl',
         );
     }, []);
 
@@ -139,7 +140,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
 };
 
 // ============================================================================
-// Modal (adapté au thème Emerald/Slate)
+// Modal
 // ============================================================================
 interface ModalProps {
     isOpen: boolean;
@@ -180,7 +181,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="h-full w-full max-w-full overflow-hidden bg-white/95 shadow-2xl shadow-emerald-500/10 backdrop-blur-xl md:h-auto md:max-h-[80vh] md:w-[90%] md:max-w-2xl md:rounded-2xl dark:bg-slate-900/95 dark:shadow-emerald-900/20"
+                className="flex h-full w-full max-w-full flex-col overflow-hidden bg-white/95 shadow-2xl shadow-emerald-500/10 backdrop-blur-xl md:h-auto md:max-h-[80vh] md:w-[90%] md:max-w-2xl md:rounded-2xl dark:bg-slate-900/95 dark:shadow-emerald-900/20"
                 onClick={(e) => e.stopPropagation()}
             >
                 {children}
@@ -191,7 +192,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
 };
 
 // ============================================================================
-// Search Input (modernisé)
+// Search Input
 // ============================================================================
 interface SearchInputFieldProps {
     query: string;
@@ -275,7 +276,7 @@ const SearchInputField = memo(function SearchInputField({
 });
 
 // ============================================================================
-// Results Panel (modernisé avec thème Emerald/Slate)
+// Results Panel
 // ============================================================================
 interface ResultsPanelProps {
     results: SearchResult[];
@@ -335,7 +336,18 @@ const ResultsPanel = memo(function ResultsPanel({
     }, []);
 
     const renderResult = (result: SearchResult) => {
-        if (result._type === 'post') {
+        // CORRECTION : Déduction du type si le backend ne renvoie pas la propriété _type
+        const itemType =
+            result._type ||
+            (result.title
+                ? 'post'
+                : result.nom
+                  ? 'category'
+                  : result.name
+                    ? 'user'
+                    : 'unknown');
+
+        if (itemType === 'post') {
             return (
                 <div className="flex items-start gap-3">
                     {result.featured_image_thumb ? (
@@ -345,18 +357,18 @@ const ResultsPanel = memo(function ResultsPanel({
                             className="h-12 w-12 rounded-xl object-cover shadow-sm"
                         />
                     ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
                             <SearchIcon className="h-5 w-5 text-slate-400" />
                         </div>
                     )}
-                    <div className="flex-1">
-                        <p className="font-medium text-slate-800 dark:text-slate-200">
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-slate-800 dark:text-slate-200">
                             {result.title}
                         </p>
                         <p className="line-clamp-1 text-sm text-slate-500 dark:text-slate-400">
                             {result.excerpt || 'Aucun extrait'}
                         </p>
-                        <div className="mt-1 flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
                             <Badge
                                 variant="outline"
                                 className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
@@ -379,14 +391,14 @@ const ResultsPanel = memo(function ResultsPanel({
             );
         }
 
-        if (result._type === 'category') {
+        if (itemType === 'category') {
             return (
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
                         #
                     </div>
-                    <div className="flex-1">
-                        <p className="font-medium text-slate-800 dark:text-slate-200">
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-slate-800 dark:text-slate-200">
                             {result.nom}
                         </p>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -397,7 +409,7 @@ const ResultsPanel = memo(function ResultsPanel({
             );
         }
 
-        if (result._type === 'user') {
+        if (itemType === 'user') {
             return (
                 <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 ring-2 ring-slate-200 dark:ring-slate-700">
@@ -412,8 +424,8 @@ const ResultsPanel = memo(function ResultsPanel({
                             </AvatarFallback>
                         )}
                     </Avatar>
-                    <div className="flex-1">
-                        <p className="font-medium text-slate-800 dark:text-slate-200">
+                    <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-slate-800 dark:text-slate-200">
                             {result.name}
                         </p>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -424,13 +436,21 @@ const ResultsPanel = memo(function ResultsPanel({
             );
         }
 
-        return null;
+        // Fallback par défaut si aucun type ne correspond, pour éviter que le composant ne disparaisse silencieusement
+        return (
+            <div className="flex items-center gap-3">
+                <SearchIcon className="h-5 w-5 text-slate-400" />
+                <span className="truncate font-medium text-slate-800 dark:text-slate-200">
+                    {result.title || result.nom || result.name || 'Résultat'}
+                </span>
+            </div>
+        );
     };
 
     return (
         <div
             ref={containerRef}
-            className="flex h-[60vh] flex-col gap-1 overflow-y-auto bg-slate-50/80 p-2 md:h-[50vh] dark:bg-slate-800/30"
+            className="flex flex-1 flex-col gap-1 overflow-y-auto bg-slate-50/80 p-2 dark:bg-slate-800/30"
             role="listbox"
         >
             {results.map((result, idx) => {
@@ -438,7 +458,7 @@ const ResultsPanel = memo(function ResultsPanel({
 
                 return (
                     <div
-                        key={`${result._type}-${result.id}`}
+                        key={`result-${result.id || idx}`}
                         className={cn(
                             'cursor-pointer rounded-xl p-3 transition-all duration-150',
                             isSelected &&
@@ -464,7 +484,7 @@ const ResultsPanel = memo(function ResultsPanel({
 });
 
 // ============================================================================
-// No Results (modernisé)
+// No Results
 // ============================================================================
 const NoResults = memo(function NoResults({
     query,
@@ -474,7 +494,7 @@ const NoResults = memo(function NoResults({
     onClear: () => void;
 }) {
     return (
-        <div className="flex h-[60vh] flex-col items-center justify-center gap-4 bg-slate-50/80 p-8 text-center md:h-[50vh] dark:bg-slate-800/30">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-slate-50/80 p-8 text-center dark:bg-slate-800/30">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
                 <SearchIcon className="h-6 w-6 text-slate-500 dark:text-slate-400" />
             </div>
@@ -494,7 +514,7 @@ const NoResults = memo(function NoResults({
 });
 
 // ============================================================================
-// Footer (modernisé)
+// Footer
 // ============================================================================
 const Footer = memo(function Footer({
     resultsCount,
@@ -503,7 +523,7 @@ const Footer = memo(function Footer({
 }) {
     return (
         <div className="flex items-center justify-between border-t border-slate-200/80 bg-white/80 px-4 py-3 text-xs text-slate-500 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-400">
-            <div className="flex items-center gap-4">
+            <div className="flex hidden items-center gap-4 sm:flex">
                 <div className="flex items-center gap-1.5">
                     <kbd className="flex h-6 items-center justify-center rounded-md bg-slate-100 px-2 font-medium dark:bg-slate-800">
                         <CornerDownLeft size={14} />
@@ -526,7 +546,7 @@ const Footer = memo(function Footer({
                     <span>Fermer</span>
                 </div>
             </div>
-            <div className="text-right">
+            <div className="flex-1 text-right sm:flex-none">
                 {resultsCount} résultat{resultsCount !== 1 && 's'}
             </div>
         </div>
@@ -534,7 +554,7 @@ const Footer = memo(function Footer({
 });
 
 // ============================================================================
-// Search Modal Component (modernisé)
+// Search Modal Component
 // ============================================================================
 interface SearchModalProps {
     onClose: () => void;
@@ -548,6 +568,13 @@ function SearchModal({ onClose, config }: SearchModalProps) {
     const inputRef = useRef<HTMLInputElement>(null);
     const debouncedQuery = useDebounce(query, 300);
 
+    // CORRECTION : Vider immédiatement les résultats si la recherche est annulée
+    useEffect(() => {
+        if (query.trim().length < 2) {
+            setResults([]);
+        }
+    }, [query]);
+
     useEffect(() => {
         const fetchResults = async () => {
             if (!debouncedQuery.trim() || debouncedQuery.trim().length < 2) {
@@ -559,30 +586,38 @@ function SearchModal({ onClose, config }: SearchModalProps) {
             setIsLoading(true);
 
             try {
-                const response = await axios.get(
-                    config.searchEndpoint || route('tenant.api'),
-                    {
-                        params: {
-                            q: debouncedQuery.trim(),
-                            limit: config.hitsPerPage || 8,
-                        },
-                        headers: {
-                            Accept: 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest',
-                        },
+                const endpoint = config.searchEndpoint || route('tenant.api'); // '/search'
+                const response = await axios.get(endpoint, {
+                    params: {
+                        q: debouncedQuery.trim(),
+                        limit: config.hitsPerPage || 8,
                     },
-                );
-                setResults(response.data?.results || []);
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                // L’API renvoie { results: [...] }
+                const fetched = response.data?.results ?? [];
+
+                // Mapper le champ 'type' (envoyé par le contrôleur) en '_type' (attendu par l’UI)
+                const normalized: SearchResult[] = fetched.map((item: any) => ({
+                    ...item,
+                    _type: item.type ?? item._type, // priorité au champ 'type'
+                }));
+
+                setResults(normalized);
             } catch (error) {
-                console.error('Search error:', error);
+                console.error('Erreur de recherche :', error);
                 setResults([]);
             } finally {
                 setIsLoading(false);
             }
         };
+
         fetchResults();
     }, [debouncedQuery, config.hitsPerPage, config.searchEndpoint]);
-
     const { selectedIndex, moveDown, moveUp, hoverIndex } =
         useKeyboardNavigation<SearchResult>(
             results,
@@ -619,7 +654,7 @@ function SearchModal({ onClose, config }: SearchModalProps) {
     const noResults = !isLoading && results.length === 0 && query.length >= 2;
 
     return (
-        <div className="flex h-full flex-col">
+        <div className="flex h-full max-h-[80vh] flex-col">
             <SearchInputField
                 query={query}
                 setQuery={setQuery}
@@ -633,14 +668,14 @@ function SearchModal({ onClose, config }: SearchModalProps) {
             />
 
             {isLoading && (
-                <div className="space-y-3 p-4">
+                <div className="flex-1 space-y-3 p-4">
                     <Skeleton className="h-16 w-full rounded-xl" />
                     <Skeleton className="h-16 w-full rounded-xl" />
                     <Skeleton className="h-16 w-full rounded-xl" />
                 </div>
             )}
 
-            {showResults && (
+            {showResults && !isLoading && (
                 <ResultsPanel
                     results={results}
                     selectedIndex={selectedIndex}

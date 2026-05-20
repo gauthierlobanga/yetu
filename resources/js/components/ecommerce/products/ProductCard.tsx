@@ -239,24 +239,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/ecommerce/use-cart';
 import { useWishlist } from '@/hooks/ecommerce/use-wishlist';
+import { handleImageFallback, resolveImageUrl } from '@/lib/media';
 import type { Product } from '@/types/ecommerce/products';
 
 interface ProductCardProps {
     product: Product;
     viewMode?: 'grid' | 'list';
-}
-
-/** URL d’image valide ou placeholder */
-function getImageUrl(image: string | null | undefined): string {
-    if (!image) {
-        return '/images/Vue-Storefront.png';
-    }
-
-    if (image.startsWith('http') || image.startsWith('/storage')) {
-        return image;
-    }
-
-    return `/storage/${image.replace(/^\//, '')}`;
 }
 
 /** Format devise */
@@ -340,10 +328,11 @@ export default function ProductCard({
                 <Link href={product.url} className="block shrink-0 sm:w-48">
                     <div className="relative aspect-square overflow-hidden rounded-xl bg-slate-100 sm:aspect-auto sm:h-40 dark:bg-slate-800">
                         <img
-                            src={getImageUrl(product.image_principale)}
+                            src={resolveImageUrl(product.image_principale)}
                             alt={product.nom}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                             loading="lazy"
+                            onError={handleImageFallback()}
                         />
                         {outOfStock && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -435,10 +424,11 @@ export default function ProductCard({
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden rounded-t-2xl bg-slate-100 dark:bg-slate-800">
                     <img
-                        src={getImageUrl(product.image_principale)}
+                        src={resolveImageUrl(product.image_principale)}
                         alt={product.nom}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
+                        onError={handleImageFallback()}
                     />
 
                     {/* Badges flottants */}

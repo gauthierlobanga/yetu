@@ -167,8 +167,9 @@ class CartController extends Controller
                     'id' => $item->produit->id,
                     'nom' => $item->nom_produit,
                     'slug' => $item->produit->slug,
-                    'image' => $item->produit->getFirstMediaUrl('images', 'small')
-                        ?: Storage::url('images/getting-business.jpg'),                ],
+                    'image' => $item->produit->getImageUrl('small')
+                        ?: Storage::url('images/Vue-Storefront.png'),
+                ],
                 'quantite' => (int) $item->quantite,
                 'prix_unitaire' => (float) $item->prix_unitaire,
                 'prix_total' => (float) $item->prix_total,

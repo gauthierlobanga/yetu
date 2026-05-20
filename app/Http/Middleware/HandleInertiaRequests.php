@@ -100,6 +100,22 @@ class HandleInertiaRequests extends Middleware
             $sharedData = array_merge($sharedData, $this->getTenantNotifications($request));
         }
 
+        $sharedData['wishlistIds'] = [];
+        if ($isTenant && $user) {
+            $sharedData['wishlistIds'] = $tenant->run(function () use ($user) {
+                $client = $user->client;
+                if (! $client) {
+                    return [];
+                }
+                $wishlist = $client->wishlists()->first();
+                if (! $wishlist) {
+                    return [];
+                }
+
+                return $wishlist->items()->pluck('produit_id')->toArray();
+            });
+        }
+
         return $sharedData;
     }
 
@@ -400,7 +416,7 @@ class HandleInertiaRequests extends Middleware
         try {
             return ProductCategory::with([
                 'products' => function ($q) {
-                    $q->limit(10);
+                    $q->limit(20);
                 },
                 'children',
             ])
@@ -415,13 +431,14 @@ class HandleInertiaRequests extends Middleware
                         'slug' => $cat->slug,
                         'description' => $cat->description,
                         'icone' => $cat->icone ?? 'boutique',
+                        'image' => $cat->image,
                         'produits' => $cat->products->map(function ($prod) {
                             return [
                                 'id' => $prod->id,
                                 'nom' => $prod->nom,
                                 'prix' => $prod->prix_actuel,
                                 'slug' => $prod->slug,
-                                'image_url' => $prod->getImageUrl('thumb') ?? '/storage/images/Vue-Storefront.png',
+                                'image_principale' => $prod->getImageUrl('thumb') ?? '/storage/images/Vue-Storefront.png',
                             ];
                         })->values()->toArray(),
                         'sous_categories' => $cat->children->pluck('nom')->toArray(),

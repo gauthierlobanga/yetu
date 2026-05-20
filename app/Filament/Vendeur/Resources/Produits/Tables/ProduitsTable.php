@@ -13,7 +13,6 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -38,6 +37,7 @@ class ProduitsTable
                     ->label('Image')
                     ->square()
                     ->collection('image_principale')
+                    ->disk('public')
                     ->visibility('public')
                     ->imageHeight(40)
                     ->imageWidth(50)
@@ -50,6 +50,7 @@ class ProduitsTable
                     ->collection('images')
                     ->limit(3)
                     ->stacked()
+                    ->disk('public')
                     ->visibility('public')
                     ->imageSize(40)
                     ->defaultImageUrl(fn ($record) => 'https://placehold.co/400x400?text='.urlencode($record->nom))

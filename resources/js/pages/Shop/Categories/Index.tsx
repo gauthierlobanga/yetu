@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import MainLayout from '@/layouts/main-layout';
+import { handleImageFallback, resolveImageUrl } from '@/lib/media';
 import type { Category } from '@/types/ecommerce/products';
 
 interface PageProps extends Record<string, unknown> {
@@ -376,10 +377,11 @@ function CategoryCard({
                 className="group relative flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/80 dark:hover:border-emerald-700"
             >
                 <img
-                    src={category.image || '/images/Vue-Storefront.png'}
+                    src={resolveImageUrl(category.image)}
                     alt={category.nom}
                     className="h-10 w-10 rounded-lg object-cover"
                     loading="lazy"
+                    onError={handleImageFallback()}
                 />
                 <div className="min-w-0 flex-1">
                     <h3 className="truncate text-sm font-semibold text-slate-800 dark:text-white">
@@ -400,10 +402,11 @@ function CategoryCard({
         >
             <div className="relative aspect-square overflow-hidden">
                 <img
-                    src={category.image || '/images/Vue-Storefront.png'}
+                    src={resolveImageUrl(category.image)}
                     alt={category.nom}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
+                    onError={handleImageFallback()}
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute top-3 left-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-slate-800 backdrop-blur-sm dark:bg-slate-900/90 dark:text-white">

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/SaaSLanding/Home.tsx
 import { Head, Link } from '@inertiajs/react';
-import { AnimatePresence, motion, useInView } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -14,31 +13,19 @@ import {
     Shield,
     Store,
     CheckCircle,
+    Sparkles,
 } from 'lucide-react';
-import type { RefObject } from 'react';
-import {
-    JSXElementConstructor,
-    Key,
-    ReactElement,
-    ReactNode,
-    ReactPortal,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
-import CobeModern from '@/components/eldoraui/cobe-globe';
-import CobePremiumGSAP from '@/components/eldoraui/cobe-globe';
+import { useEffect, useRef, useState } from 'react';
 import { IntegrationProduct } from '@/components/eldoraui/IntegrationProduit';
-import { Integrations } from '@/components/eldoraui/integrations';
-import { PhotonBeam } from '@/components/eldoraui/photon-beam';
 import AnimatedCtaButton from '@/components/hero/AnimatedCtaButton';
-import ParallaxCardPage from '@/components/parallax-cards/parallax-cards-example';
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/layouts/main-layout';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// ----------------------------------------------------------------------
+// Types
+// ----------------------------------------------------------------------
 interface Plan {
     id: number;
     name: string;
@@ -102,99 +89,143 @@ const images: HeroImage[] = [
         alt: 'Jeune femme confiante',
     },
     { src: '/storage/images/green-t-shirt.jpg', alt: 'T‑shirt vert' },
-    {
-        src: '/storage/images/pretty-gold-necklace.jpg',
-        alt: 'Collier en or joli',
-        title: 'Shopping',
-        subtitle: 'Livraison rapide',
-    },
-    { src: '/storage/images/getting-business.jpg', alt: 'Getting business' },
-    { src: '/storage/images/gold-zipper.jpg', alt: 'Zipper en or' },
-    {
-        src: '/storage/images/mens-fashion-watch.jpg',
-        alt: 'Montre de mode masculine',
-    },
 ];
 
-/**
- * Grille d'images pour la section héro
- * @returns
- */
-export function HeroImageGrid() {
-    const containerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const container = containerRef.current;
-
-        if (!container) {
-            return;
-        }
-
-        const cards = container.querySelectorAll('.hero-card');
-
-        const ctx = gsap.context(() => {
-            gsap.fromTo(
-                cards,
-                { opacity: 0, y: 40, scale: 0.95 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    scale: 1,
-                    duration: 0.7,
-                    stagger: 0.08,
-                    ease: 'power3.out',
-                    scrollTrigger: {
-                        trigger: container,
-                        start: 'top bottom-=100',
-                        toggleActions: 'play none none none',
-                    },
-                },
-            );
-        }, container);
-
-        return () => ctx.revert();
-    }, []);
+// ----------------------------------------------------------------------
+// Grille d’images premium
+// ----------------------------------------------------------------------
+function HeroImageGridPremium() {
+    const imageVariants = {
+        hidden: { opacity: 0, y: 40, scale: 0.92 },
+        visible: (i: number) => ({
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: {
+                duration: 0.9,
+                delay: i * 0.06,
+                ease: [0.16, 1, 0.3, 1],
+            },
+        }),
+    };
 
     return (
-        <div
-            ref={containerRef}
-            className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-6"
-        >
-            {images.map((img, index) => (
-                <div
-                    key={index}
-                    className="hero-card group relative overflow-hidden rounded-2xl border border-border/50 bg-card transition-shadow hover:border-emerald-200 dark:hover:border-emerald-800"
-                >
-                    <div className="aspect-4/5 overflow-hidden">
-                        <img
-                            src={img.src}
-                            alt={img.alt}
-                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            loading="lazy"
-                        />
-                    </div>
-                    {img.title && (
-                        <div className="absolute right-0 bottom-0 left-0 bg-linear-to-t from-black/60 to-transparent p-4 pt-8">
-                            <p className="text-sm font-medium text-white">
-                                {img.title}
-                            </p>
-                            {img.subtitle && (
-                                <p className="mt-1 text-xs text-white/70">
-                                    {img.subtitle}
-                                </p>
-                            )}
-                        </div>
-                    )}
+        <div className="relative">
+            <div className="absolute inset-0 -z-10">
+                <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-emerald-500/20 blur-[120px]" />
+                <div className="absolute right-10 bottom-10 h-72 w-72 rounded-full bg-cyan-500/20 blur-[120px]" />
+            </div>
+
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/70 p-4 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70"
+            >
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/40 to-transparent dark:from-white/5" />
+
+                <div className="grid grid-cols-3 gap-3">
+                    {images.slice(0, 6).map((img, index) => (
+                        <motion.div
+                            key={index}
+                            custom={index}
+                            variants={imageVariants}
+                            initial="hidden"
+                            animate="visible"
+                            whileHover={{
+                                y: -6,
+                                scale: 1.03,
+                                transition: { duration: 0.3 },
+                            }}
+                            className={`group relative overflow-hidden rounded-2xl ${index === 0 ? 'col-span-2 row-span-2' : ''}`}
+                        >
+                            <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                            <img
+                                src={img.src}
+                                alt={img.alt}
+                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                loading="lazy"
+                            />
+                        </motion.div>
+                    ))}
                 </div>
-            ))}
+            </motion.div>
+
+            {/* Floating cards */}
+            <motion.div
+                initial={{ opacity: 0, x: -30, y: 20 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.8 }}
+                className="absolute bottom-8 -left-6 hidden w-56 rounded-2xl border border-white/20 bg-white/80 p-5 shadow-xl backdrop-blur-xl lg:block dark:bg-slate-900/80"
+            >
+                <motion.div
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{
+                        repeat: Infinity,
+                        duration: 3,
+                        ease: 'easeInOut',
+                    }}
+                >
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Revenus mensuels
+                        </p>
+                        <TrendingUp className="h-4 w-4 text-emerald-500" />
+                    </div>
+                    <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
+                        $24,580
+                    </p>
+                    <p className="text-sm font-medium text-emerald-600">
+                        +18.4% ce mois
+                    </p>
+                </motion.div>
+            </motion.div>
+
+            <motion.div
+                initial={{ opacity: 0, x: 30, y: -20 }}
+                animate={{ opacity: 1, x: 0, y: 0 }}
+                transition={{ delay: 1, duration: 0.8 }}
+                className="absolute -top-6 -right-6 hidden w-52 rounded-2xl border border-white/20 bg-white/80 p-5 shadow-xl backdrop-blur-xl lg:block dark:bg-slate-900/80"
+            >
+                <motion.div
+                    animate={{ y: [0, 8, 0] }}
+                    transition={{
+                        repeat: Infinity,
+                        duration: 4,
+                        ease: 'easeInOut',
+                    }}
+                >
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Commandes
+                    </p>
+                    <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
+                        1,248
+                    </p>
+                    <p className="text-sm font-medium text-emerald-600">
+                        +32% cette semaine
+                    </p>
+                </motion.div>
+            </motion.div>
+
+            <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.2, duration: 0.6 }}
+                className="absolute right-4 bottom-4 hidden rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 shadow-lg lg:flex dark:border-emerald-900 dark:bg-emerald-950/50"
+            >
+                <Sparkles className="mr-2 h-4 w-4 text-emerald-500" />
+                <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                    IA activée
+                </span>
+            </motion.div>
         </div>
     );
 }
 
-/**
- * Section de CTA finale avec animation d’apparition au scroll
- */
-const cards = [
+// ----------------------------------------------------------------------
+// Section « Pour Tous »
+// ----------------------------------------------------------------------
+const pourTousCards = [
     {
         title: 'Lancez-vous rapidement',
         desc: 'Jacki Prince a lancé **Guests on Earth** depuis chez elle. C’est aujourd’hui une entreprise de plus de 4 M$.',
@@ -212,133 +243,51 @@ const cards = [
     },
 ];
 
-/**
- * Section de CTA finale avec animation d’apparition au scroll
- * @returns
- */
-
 export function PourTousSection() {
-    const sectionRef = useRef<HTMLElement>(null);
-    const titleRef = useRef<HTMLHeadingElement>(null);
-    const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // Animation du titre
-            gsap.from(titleRef.current, {
-                scrollTrigger: {
-                    trigger: titleRef.current,
-                    start: 'top 80%',
-                    toggleActions: 'play none none none',
-                },
-                y: 40,
-                opacity: 0,
-                duration: 0.8,
-                ease: 'power3.out',
-            });
-
-            // Animation des cartes en stagger
-            gsap.from(cardsRef.current, {
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top 65%',
-                    toggleActions: 'play none none none',
-                },
-                y: 60,
-                opacity: 0,
-                scale: 0.92,
-                duration: 0.7,
-                stagger: 0.15,
-                ease: 'back.out(1.2)',
-                clearProps: 'transform',
-            });
-        }, sectionRef);
-
-        return () => ctx.revert(); // Nettoie les ScrollTriggers
-    }, []);
-
-    // Effet de survol 3D
-    const handleMouseMove = (
-        e: React.MouseEvent<HTMLDivElement>,
-        index: number,
-    ) => {
-        const card = cardsRef.current[index];
-
-        if (!card) {
-            return;
-        }
-
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const rotateX = ((y - centerY) / centerY) * -8;
-        const rotateY = ((x - centerX) / centerX) * 8;
-        gsap.to(card, {
-            rotateX,
-            rotateY,
-            transformPerspective: 800,
-            duration: 0.4,
-            ease: 'power2.out',
-        });
-    };
-
-    const handleMouseLeave = (index: number) => {
-        const card = cardsRef.current[index];
-
-        if (!card) {
-            return;
-        }
-
-        gsap.to(card, {
-            rotateX: 0,
-            rotateY: 0,
-            duration: 0.6,
-            ease: 'elastic.out(0.8)',
-        });
-    };
-
     return (
-        <section
-            ref={sectionRef}
-            className="relative overflow-hidden bg-linear-to-b from-emerald-50/60 to-slate-100/60 py-24 dark:from-slate-900 dark:to-emerald-950/60"
-        >
-            {/* Formes décoratives floues */}
+        <section className="relative overflow-hidden bg-gradient-to-b from-white via-emerald-50/40 to-slate-50 py-24 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+            {/* Décorations d’ambiance */}
             <div className="pointer-events-none absolute inset-0 -z-10">
-                <div className="absolute -top-32 left-1/4 h-72 w-72 rounded-full bg-emerald-200/20 blur-3xl dark:bg-emerald-700/10" />
-                <div className="absolute right-1/4 bottom-0 h-96 w-96 rounded-full bg-slate-300/20 blur-3xl dark:bg-slate-600/10" />
+                <div className="absolute -top-24 right-1/4 h-96 w-96 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-500/5" />
+                <div className="absolute bottom-0 left-1/4 h-80 w-80 rounded-full bg-slate-400/10 blur-3xl dark:bg-slate-600/5" />
             </div>
 
-            <div className="mx-auto max-w-7xl px-6 text-center">
-                <h2
-                    ref={titleRef}
-                    className="font-serif text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl lg:text-5xl dark:text-white"
+            <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+                <motion.h2
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, ease: 'easeOut' }}
+                    className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-white"
                 >
                     Pour tous, des entrepreneurs
                     <br />
-                    aux grandes entreprises
-                </h2>
+                    <span className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
+                        aux grandes entreprises
+                    </span>
+                </motion.h2>
 
-                <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                    {cards.map((card, idx) => {
+                <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {pourTousCards.map((card, idx) => {
                         const Icon = card.icon;
 
                         return (
-                            <div
+                            <motion.div
                                 key={idx}
-                                ref={(el) => {
-                                    cardsRef.current[idx] = el;
+                                initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                                viewport={{ once: true, margin: '-50px' }}
+                                transition={{
+                                    duration: 0.5,
+                                    delay: idx * 0.1,
+                                    ease: 'easeOut',
                                 }}
-                                onMouseMove={(e) => handleMouseMove(e, idx)}
-                                onMouseLeave={() => handleMouseLeave(idx)}
-                                className="group relative cursor-default rounded-2xl border border-white/40 bg-white/30 p-8 shadow-sm backdrop-blur-lg transition-shadow duration-300 hover:shadow-xl dark:border-slate-700/40 dark:bg-slate-800/30"
-                                style={{ transformStyle: 'preserve-3d' }}
+                                className="group relative cursor-default rounded-3xl border border-white/50 bg-white/50 p-8 shadow-xl shadow-slate-200/40 backdrop-blur-xl transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/5 dark:border-slate-700/40 dark:bg-slate-800/40 dark:shadow-slate-900/30"
                             >
-                                <div className="mb-5 inline-flex rounded-xl bg-emerald-100/80 p-3 text-emerald-700 shadow-inner dark:bg-emerald-900/50 dark:text-emerald-300">
+                                <div className="mb-5 inline-flex rounded-2xl bg-emerald-100/80 p-3 text-emerald-700 shadow-inner dark:bg-emerald-900/50 dark:text-emerald-300">
                                     <Icon className="h-6 w-6" />
                                 </div>
-                                <h3 className="text-xl font-semibold text-slate-800 dark:text-white">
+                                <h3 className="text-xl font-bold text-slate-800 dark:text-white">
                                     {card.title}
                                 </h3>
                                 <p className="mt-3 leading-relaxed text-slate-600 dark:text-slate-300">
@@ -355,8 +304,8 @@ export function PourTousSection() {
                                         ),
                                     )}
                                 </p>
-                                <div className="pointer-events-none absolute inset-0 rounded-2xl bg-linear-to-br from-emerald-500/0 to-slate-500/0 opacity-0 transition-opacity duration-500 group-hover:opacity-10 dark:from-emerald-400/0 dark:to-slate-400/0 dark:group-hover:opacity-15" />
-                            </div>
+                                <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-500/0 to-slate-500/0 opacity-0 transition-opacity duration-500 group-hover:opacity-5 dark:group-hover:opacity-10" />
+                            </motion.div>
                         );
                     })}
                 </div>
@@ -365,140 +314,82 @@ export function PourTousSection() {
     );
 }
 
-/**
- * Section de CTA finale avec animation d’apparition au scroll
- */
+// ----------------------------------------------------------------------
+// Section « Créez rapidement »
+// ----------------------------------------------------------------------
 const steps = [
     { step: '01', title: 'Ajoutez votre premier produit' },
     { step: '02', title: 'Personnalisez votre boutique' },
     { step: '03', title: 'Configurez les paiements' },
 ];
 
-/**
- * Section de CTA finale avec animation d’apparition au scroll
- * @returns
- */
 export function CreerRapidementSection() {
-    const sectionRef = useRef<HTMLElement>(null);
-    const titleRef = useRef<HTMLHeadingElement>(null);
-    const stepsRef = useRef<(HTMLDivElement | null)[]>([]);
-    const buttonRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // Titre
-            gsap.from(titleRef.current, {
-                scrollTrigger: {
-                    trigger: titleRef.current,
-                    start: 'top 80%',
-                    toggleActions: 'play none none none',
-                },
-                y: 40,
-                opacity: 0,
-                duration: 0.8,
-                ease: 'power3.out',
-            });
-
-            // Étapes en cascade
-            gsap.from(stepsRef.current, {
-                scrollTrigger: {
-                    trigger: sectionRef.current,
-                    start: 'top 65%',
-                    toggleActions: 'play none none none',
-                },
-                y: 60,
-                opacity: 0,
-                scale: 0.9,
-                duration: 0.6,
-                stagger: 0.15,
-                ease: 'back.out(1.2)',
-                clearProps: 'transform',
-            });
-
-            // Bouton CTA
-            gsap.from(buttonRef.current, {
-                scrollTrigger: {
-                    trigger: buttonRef.current,
-                    start: 'top 85%',
-                    toggleActions: 'play none none none',
-                },
-                y: 30,
-                opacity: 0,
-                scale: 0.95,
-                duration: 0.6,
-                ease: 'power2.out',
-                delay: 0.3,
-            });
-        }, sectionRef);
-
-        return () => ctx.revert();
-    }, []);
-
     return (
-        <section
-            ref={sectionRef}
-            className="relative overflow-hidden bg-linear-to-b from-primary/10 via-background to-primary/5 py-24"
-        >
-            {/* Décors d'arrière-plan */}
-            <div className="pointer-events-none absolute inset-0 -z-10">
-                <div className="absolute -top-40 right-1/3 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-                <div className="absolute bottom-10 left-1/4 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
-            </div>
-
-            <div className="mx-auto max-w-7xl px-6 text-center">
-                <h2
-                    ref={titleRef}
-                    className="font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
+        <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white py-24 dark:from-slate-900 dark:to-slate-950">
+            <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+                <motion.h2
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, ease: 'easeOut' }}
+                    className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white"
                 >
                     Créez rapidement sur Yetu
-                </h2>
+                </motion.h2>
 
-                <div className="mt-16 grid gap-8 sm:grid-cols-3">
+                <div className="mt-14 grid gap-6 sm:grid-cols-3">
                     {steps.map((item, idx) => (
-                        <div
+                        <motion.div
                             key={idx}
-                            ref={(el) => {
-                                stepsRef.current[idx] = el;
+                            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                            viewport={{ once: true, margin: '-50px' }}
+                            transition={{
+                                duration: 0.5,
+                                delay: idx * 0.1,
+                                ease: 'easeOut',
                             }}
-                            className="group relative rounded-2xl border border-border bg-card/50 p-8 backdrop-blur-lg transition-all duration-300"
+                            className="group relative rounded-3xl border border-white/40 bg-white/50 p-8 backdrop-blur-lg transition-all hover:shadow-xl hover:shadow-emerald-500/5 dark:border-slate-700/30 dark:bg-slate-800/30"
                         >
-                            <span className="text-5xl font-extrabold tracking-tight text-primary drop-shadow-sm">
+                            <span className="text-6xl font-black text-emerald-600/20 dark:text-emerald-400/20">
                                 {item.step}
                             </span>
-                            <h3 className="mt-4 text-xl font-semibold text-foreground">
+                            <h3 className="mt-2 text-xl font-bold text-slate-800 dark:text-white">
                                 {item.title}
                             </h3>
-                            <div className="pointer-events-none absolute inset-0 rounded-xl bg-linear-to-br from-primary/0 to-primary/0 opacity-0 transition-opacity duration-500 group-hover:opacity-10" />
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
 
-                <div ref={buttonRef} className="mt-14">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="mt-12"
+                >
                     <Button
                         size="lg"
                         asChild
-                        className="group rounded-full bg-primary px-10 py-6 text-lg font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30"
+                        className="rounded-full bg-emerald-600 px-10 py-6 text-lg font-semibold text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-700"
                     >
                         <Link href={route('vendor.register')}>
                             Essayez maintenant
-                            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                            <ArrowRight className="ml-2 h-5 w-5" />
                         </Link>
                     </Button>
-                </div>
+                </motion.div>
             </div>
         </section>
     );
 }
 
-/**
- * Section de CTA finale avec animation d’apparition au scroll
- * @returns
- */
-
+// ----------------------------------------------------------------------
+// Section CTA Finale
+// ----------------------------------------------------------------------
 export function CtaFinalSection() {
     const sectionRef = useRef<HTMLElement>(null);
     const cardRef = useRef<HTMLDivElement>(null);
-    const titleRef = useRef<HTMLHeadingElement>(null);
     const textRef = useRef<HTMLParagraphElement>(null);
     const buttonRef = useRef<HTMLDivElement>(null);
 
@@ -513,20 +404,15 @@ export function CtaFinalSection() {
             });
 
             tl.from(cardRef.current, {
-                y: 60,
+                y: 40,
                 opacity: 0,
                 scale: 0.95,
-                duration: 0.7,
+                duration: 0.6,
                 ease: 'power3.out',
             })
                 .from(
-                    titleRef.current,
-                    { y: 30, opacity: 0, duration: 0.5, ease: 'power2.out' },
-                    '-=0.3',
-                )
-                .from(
                     textRef.current,
-                    { y: 20, opacity: 0, duration: 0.5, ease: 'power2.out' },
+                    { y: 20, opacity: 0, duration: 0.4, ease: 'power2.out' },
                     '-=0.2',
                 )
                 .from(
@@ -535,7 +421,7 @@ export function CtaFinalSection() {
                         y: 20,
                         opacity: 0,
                         scale: 0.9,
-                        duration: 0.5,
+                        duration: 0.4,
                         ease: 'back.out(1.4)',
                     },
                     '-=0.1',
@@ -548,77 +434,32 @@ export function CtaFinalSection() {
     return (
         <section
             ref={sectionRef}
-            className="relative overflow-hidden bg-linear-to-b from-emerald-50/60 via-slate-100/60 to-emerald-100/40 py-24 dark:from-slate-900 dark:via-emerald-950/60 dark:to-slate-900"
+            className="relative overflow-hidden bg-linear-to-b from-emerald-50/70 via-white to-slate-50/70 py-24 dark:from-slate-950 dark:via-emerald-950/10 dark:to-slate-950"
         >
-            {/* Motif de quadrillage discret */}
-            <div
-                className="pointer-events-none absolute inset-0 -z-10 opacity-[0.03] dark:opacity-[0.05]"
-                style={{
-                    backgroundImage:
-                        'radial-linear(circle, #0f766e 1px, transparent 1px)',
-                    backgroundSize: '24px 24px',
-                }}
-            />
-
-            {/* Formes décoratives floues */}
-            <div className="pointer-events-none absolute inset-0 -z-10">
-                <div className="absolute -top-32 left-1/4 h-72 w-72 rounded-full bg-emerald-300/20 blur-3xl dark:bg-emerald-700/10" />
-                <div className="absolute right-1/4 -bottom-20 h-96 w-96 rounded-full bg-slate-400/10 blur-3xl dark:bg-slate-600/10" />
-            </div>
-
-            {/* Vague décorative en bas */}
-            <div className="pointer-events-none absolute right-0 bottom-0 left-0 -z-10 text-emerald-100/60 dark:text-emerald-900/40">
-                <svg
-                    viewBox="0 0 1440 120"
-                    fill="currentColor"
-                    preserveAspectRatio="none"
-                    className="h-16 w-full sm:h-24"
-                >
-                    <path d="M0,64L120,53.3C240,43,480,21,720,32C960,43,1200,85,1320,96L1440,107L1440,120L1320,120C1200,120,960,120,720,120C480,120,240,120,120,120L0,120Z" />
-                </svg>
-            </div>
-
-            <div className="mx-auto max-w-3xl px-6 text-center">
-                {/* Carte en verre dépoli */}
+            <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-500/50 to-transparent" />
+            <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
                 <div
                     ref={cardRef}
-                    className="relative rounded-3xl border border-white/40 bg-white/40 p-10 shadow-xl shadow-emerald-900/5 backdrop-blur-xl sm:p-14 dark:border-slate-700/30 dark:bg-slate-800/20 dark:shadow-emerald-900/10"
+                    className="rounded-3xl border border-white/40 bg-white/50 p-10 shadow-2xl shadow-emerald-500/5 backdrop-blur-2xl sm:p-14 dark:border-slate-700/30 dark:bg-slate-800/30 dark:shadow-emerald-500/5"
                 >
-                    {/* Ornement subtil */}
-                    <div className="mb-4 flex justify-center">
-                        <span className="inline-block h-1 w-12 rounded-full bg-emerald-500/70 dark:bg-emerald-400/70" />
-                    </div>
-
-                    {/* Titre - police identique au Hero (sans-serif, semibold, tracking tight) */}
-                    <h2
-                        ref={titleRef}
-                        className="text-3xl font-medium tracking-tight text-foreground sm:text-4xl lg:text-5xl"
-                    >
+                    <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
                         Prêt à vous lancer ?
                     </h2>
-
-                    {/* Texte - même style que le paragraphe du Hero */}
                     <p
                         ref={textRef}
-                        className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-muted-foreground"
+                        className="mx-auto mt-4 max-w-xl text-lg text-slate-600 dark:text-slate-300"
                     >
                         Créez votre boutique gratuitement et commencez à vendre.
                     </p>
-
-                    {/* Bouton */}
                     <div ref={buttonRef} className="mt-10">
                         <Button
                             size="lg"
                             asChild
-                            className="group relative overflow-hidden rounded-full bg-emerald-600 px-10 py-6 text-lg font-semibold text-white shadow shadow-emerald-500/20 transition-all hover:bg-emerald-700 hover:shadow-emerald-500/30 dark:bg-emerald-700 dark:hover:bg-emerald-600"
+                            className="rounded-full bg-emerald-600 px-10 py-6 text-lg font-semibold text-white shadow-xl shadow-emerald-500/20 hover:bg-emerald-700"
                         >
                             <Link href={route('vendor.register')}>
-                                <span className="relative z-10 inline-flex items-center">
-                                    Démarrer gratuitement
-                                    <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-                                </span>
-                                {/* Brillance au survol */}
-                                <span className="absolute inset-0 z-0 rounded-full bg-linear-to-r from-transparent via-emerald-300/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:via-emerald-400/20" />
+                                Démarrer gratuitement{' '}
+                                <ArrowRight className="ml-2 h-5 w-5" />
                             </Link>
                         </Button>
                     </div>
@@ -628,11 +469,9 @@ export function CtaFinalSection() {
     );
 }
 
-/**
- * Composant de section avec animation d’apparition au scroll
- * @param param0
- * @returns
- */
+// ----------------------------------------------------------------------
+// Composant FadeInSection (utilitaire)
+// ----------------------------------------------------------------------
 function FadeInSection({
     children,
     className,
@@ -656,66 +495,120 @@ function FadeInSection({
     );
 }
 
+// ----------------------------------------------------------------------
+// Page principale
+// ----------------------------------------------------------------------
 export default function SaaSLanding({ plans, stats, testimonials }: Props) {
     return (
         <MainLayout>
-            <Head title="Yedu: Créez votre boutique en ligne" />
+            <Head title="Yetu – Créez votre boutique en ligne" />
+
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-linear-to-br from-primary/30 via-background to-primary/20 text-foreground">
-                <div className="absolute inset-0 bg-[radial-linear(ellipse_at_top_right,var(--color-primary)/.15,transparent_50%)]" />
-                <div className="relative z-10 mx-auto max-w-7xl px-6 py-16 text-center lg:flex lg:items-center lg:py-24 lg:text-left">
-                    {/* <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 text-center lg:flex lg:items-center lg:py-32 lg:text-left"> */}
-                    <FadeInSection className="lg:w-1/2">
-                        <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                            Devenez l’entrepreneur
-                            <br />
-                            <span className="bg-linear-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-600">
-                                que vous rêvez d’être
-                            </span>
-                        </h1>
-                        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-                            Rêvez en grand et créez rapidement sur Yetu. La
-                            meilleure plateforme de commerce en RDC.
-                        </p>
-                        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                            <AnimatedCtaButton href={route('vendor.register')}>
-                                Démarrer gratuitement
-                            </AnimatedCtaButton>
-
-                            <Button
-                                size="lg"
-                                variant="outline"
-                                asChild
-                                className="rounded-full border-emerald-200 px-8 py-6 text-lg font-medium text-emerald-700 transition-all hover:border-emerald-400 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/50"
+            <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-slate-50 py-12 lg:py-20 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20">
+                <div className="absolute inset-0 -z-10">
+                    <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-400/5" />
+                    <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-slate-400/10 blur-3xl dark:bg-slate-500/5" />
+                </div>
+                <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="grid items-center gap-12 lg:grid-cols-2">
+                        <div>
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6 }}
+                                className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
                             >
-                                <a href="#pourquoi">
-                                    Pourquoi nous avons créé Yetu
-                                </a>
-                            </Button>
-                        </div>
-                    </FadeInSection>
+                                <Sparkles className="h-4 w-4" />
+                                IA intégrée • Multi‑vendeurs • Paiements
+                                sécurisés
+                            </motion.div>
 
-                    {/* Colonne de droite : illustration avec orbite */}
-                    <div className="mt-12 flex justify-center lg:mt-0 lg:w-1/2">
-                        <HeroImageGrid />
+                            <motion.h1
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1, duration: 0.8 }}
+                                className="mt-8 text-4xl font-medium tracking-tight text-slate-900 sm:text-6xl lg:text-6xl dark:text-white"
+                            >
+                                Lancez votre
+                                <span className="block bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
+                                    boutique e‑commerce
+                                </span>
+                                en quelques minutes.
+                            </motion.h1>
+
+                            <motion.p
+                                initial={{ opacity: 0, y: 24 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2, duration: 0.8 }}
+                                className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl dark:text-slate-300"
+                            >
+                                Créez une boutique professionnelle avec
+                                paiements, livraison, analytics, automatisation
+                                marketing et intelligence artificielle.
+                            </motion.p>
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 24 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3, duration: 0.8 }}
+                                className="mt-10 flex flex-col gap-4 sm:flex-row"
+                            >
+                                <AnimatedCtaButton
+                                    href={route('vendor.register')}
+                                >
+                                    Commencer gratuitement
+                                </AnimatedCtaButton>
+                                <Button
+                                    size="lg"
+                                    variant="outline"
+                                    asChild
+                                    className="rounded-full border-slate-300 bg-white/80 px-8 py-6 text-lg font-semibold text-slate-700 backdrop-blur hover:bg-white dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-900"
+                                >
+                                    <a href="#demo">
+                                        Voir la démo{' '}
+                                        <ArrowRight className="ml-2 h-5 w-5" />
+                                    </a>
+                                </Button>
+                            </motion.div>
+
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                                className="mt-10 flex flex-wrap items-center gap-6 text-sm text-slate-500 dark:text-slate-400"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Shield className="h-4 w-4 text-emerald-500" />{' '}
+                                    SSL sécurisé
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <CheckCircle className="h-4 w-4 text-emerald-500" />{' '}
+                                    Essai gratuit
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Globe className="h-4 w-4 text-emerald-500" />{' '}
+                                    Disponible dans 175+ pays
+                                </div>
+                            </motion.div>
+                        </div>
+
+                        <HeroImageGridPremium />
                     </div>
                 </div>
             </section>
 
-            {/* ========== VENDEZ PARTOUT ========== */}
-            <section className="bg-linear-to-b from-muted to-background py-20">
-                <div className="mx-auto max-w-7xl px-6">
-                    <FadeInSection className="grid items-center gap-12 lg:grid-cols-2">
+            {/* Vendez partout */}
+            <section className="py-20 lg:py-28">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="grid items-center gap-12 lg:grid-cols-2">
                         <div>
-                            <h2 className="font-serif text-5xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                                Vendez partout où vos clients
-                                <br />
-                                font leurs achats.
+                            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+                                Vendez partout où vos clients font leurs achats
                             </h2>
-                            <p className="mt-6 text-lg text-muted-foreground">
-                                En ligne et en personne. Grâce à l’IA et sur les
-                                réseaux sociaux. Localement et à
-                                l’international.
+                            <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">
+                                En ligne, en personne, sur les réseaux sociaux,
+                                à l'international. Yetu vous connecte à des
+                                millions d'acheteurs.
                             </p>
                             <ul className="mt-8 space-y-4">
                                 {[
@@ -726,330 +619,138 @@ export default function SaaSLanding({ plans, stats, testimonials }: Props) {
                                 ].map((item) => (
                                     <li
                                         key={item}
-                                        className="flex items-center gap-3 text-foreground"
+                                        className="flex items-center gap-3 text-slate-700 dark:text-slate-200"
                                     >
-                                        <CheckCircle className="h-5 w-5 text-primary" />
+                                        <CheckCircle className="h-5 w-5 text-emerald-500" />{' '}
                                         {item}
                                     </li>
                                 ))}
                             </ul>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="col-span-2 rounded-xl bg-card p-4">
-                                <p className="text-sm font-medium text-muted-foreground">
-                                    MVA 2 Collection
-                                </p>
-                                <div className="mt-2 grid grid-cols-4 gap-2">
-                                    {[
-                                        'Hoodies',
-                                        'Sports Bras',
-                                        'Leggings',
-                                        'Shirts',
-                                    ].map((cat) => (
-                                        <span
-                                            key={cat}
-                                            className="rounded-lg bg-muted px-3 py-1 text-xs text-foreground"
-                                        >
-                                            {cat}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="rounded-xl bg-card p-4">
-                                <p className="text-sm font-semibold text-foreground">
-                                    brooklinen
-                                </p>
-                                <p className="mt-1 text-xs text-muted-foreground">
-                                    Meet Brooklinen for Business
-                                </p>
-                            </div>
-                            <div className="rounded-xl bg-card p-4">
-                                <p className="text-sm font-semibold text-foreground">
-                                    Brooklinen for business
-                                </p>
-                            </div>
+                        <div className="rounded-3xl border border-white/40 bg-white/40 p-6 shadow-xl shadow-slate-200/30 backdrop-blur-xl dark:border-slate-700/30 dark:bg-slate-800/30 dark:shadow-slate-900/30">
+                            <img
+                                src="/storage/images/shopping-basket.jpg"
+                                alt="Shopping"
+                                className="w-full rounded-2xl object-cover shadow-md"
+                            />
                         </div>
-                    </FadeInSection>
+                    </div>
                 </div>
             </section>
 
-            {/* ========== POUR TOUS ========== */}
-            <section className="bg-background py-20">
-                <PourTousSection />
-            </section>
+            {/* Pour Tous */}
+            <PourTousSection />
 
-            {/* ========== FIABILITÉ & PAIEMENT ========== */}
-            <section className="bg-linear-to-br from-muted via-background to-primary/5 py-20">
-                <div className="mx-auto max-w-7xl px-6">
-                    <FadeInSection className="grid items-center gap-12 lg:grid-cols-2">
+            {/* Créez rapidement */}
+            <CreerRapidementSection />
+
+            {/* Fiabilité & Paiement */}
+            <section className="py-20 lg:py-28">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="grid items-center gap-12 lg:grid-cols-2">
                         <div>
-                            <h2 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
+                            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
                                 Très rapide et vraiment fiable
                             </h2>
-                            <p className="mt-6 text-lg text-muted-foreground">
+                            <p className="mt-4 text-lg text-slate-600 dark:text-slate-300">
                                 Le processus de paiement offrant le meilleur
-                                taux de conversion au monde
-                            </p>
-                            <div className="mt-10 space-y-8">
-                                <div className="flex items-start gap-4">
-                                    <TrendingUp className="mt-1 h-6 w-6 text-primary" />
-                                    <div>
-                                        <p className="text-2xl font-bold text-foreground">
-                                            +15 %
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            TAUX DE CONVERSION PLUS ÉLEVÉ
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <Globe className="mt-1 h-6 w-6 text-primary" />
-                                    <div>
-                                        <p className="text-2xl font-bold text-foreground">
-                                            250 M+
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            ACHETEURS À FORTE INTENTION
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <p className="mt-8 text-sm text-muted-foreground">
-                                Le checkout de Yetu convertit en moyenne 15 % de
-                                plus que les autres plateformes et présente
-                                votre marque à 250 millions d’acheteurs prêts.
-                            </p>
-                        </div>
-                        {/* Simulation de checkout */}
-                        <div className="rounded-2xl border border-border bg-card/80 p-6 shadow-lg backdrop-blur">
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="text-sm font-medium text-muted-foreground">
-                                        Contact
-                                    </label>
-                                    <input
-                                        disabled
-                                        value="jordan.chen@domain.com"
-                                        className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label className="text-sm font-medium text-muted-foreground">
-                                            Code promo
-                                        </label>
-                                        <input
-                                            disabled
-                                            value="$125.00"
-                                            className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-sm font-medium text-muted-foreground">
-                                            Livraison
-                                        </label>
-                                        <input
-                                            disabled
-                                            value="Free"
-                                            className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                        />
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium text-muted-foreground">
-                                        Taxes estimées
-                                    </label>
-                                    <input
-                                        disabled
-                                        value="$10.00"
-                                        className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                    />
-                                </div>
-                                <div className="border-t border-border pt-4">
-                                    <p className="text-sm font-semibold text-foreground">
-                                        Livraison
-                                    </p>
-                                    <div className="mt-2 space-y-2">
-                                        <input
-                                            disabled
-                                            value="United States"
-                                            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                        />
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <input
-                                                disabled
-                                                placeholder="Prénom"
-                                                value="Jordan"
-                                                className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                            />
-                                            <input
-                                                disabled
-                                                placeholder="Nom"
-                                                value="Chen"
-                                                className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                            />
-                                        </div>
-                                        <input
-                                            disabled
-                                            value="131 Greene St"
-                                            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                        />
-                                        <div className="grid grid-cols-3 gap-2">
-                                            <input
-                                                disabled
-                                                value="New York"
-                                                className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                            />
-                                            <input
-                                                disabled
-                                                value="New York"
-                                                className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                            />
-                                            <input
-                                                disabled
-                                                value="10012"
-                                                className="rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </FadeInSection>
-                </div>
-            </section>
-
-            {/* ========== STABILITÉ & PERFORMANCE ========== */}
-            <section className="bg-background py-20">
-                <div className="mx-auto max-w-7xl px-6 text-center">
-                    <FadeInSection>
-                        <h2 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
-                            Une stabilité à
-                            <br />
-                            toute épreuve. Une
-                            <br />
-                            rapidité fulgurante.
-                        </h2>
-                        <div className="mt-12 flex flex-col items-center gap-8 sm:flex-row sm:justify-center">
-                            <div className="flex items-center gap-4">
-                                <Globe className="h-8 w-8 text-primary" />
-                                <div className="text-left">
-                                    <p className="text-3xl font-bold text-foreground">
-                                        175
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                        PAYS DANS LESQUELS DES
-                                        <br />
-                                        MARCHANDS VENDENT SUR YETU
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <Shield className="h-8 w-8 text-primary" />
-                                <div className="text-left">
-                                    <p className="text-3xl font-bold text-foreground">
-                                        99.99%
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                        DISPONIBILITÉ GARANTIE
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <p className="mx-auto mt-10 max-w-2xl text-muted-foreground">
-                            Votre boutique reste performante, même lors de vos
-                            ventes exceptionnelles les plus intenses.
-                        </p>
-                    </FadeInSection>
-                </div>
-            </section>
-
-            {/* ========== YETU CAPITAL ========== */}
-            <section className="bg-linear-to-tl from-muted to-background py-20">
-                <div className="mx-auto max-w-7xl px-6">
-                    <FadeInSection className="grid items-center gap-12 lg:grid-cols-2">
-                        <div>
-                            <h2 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">
-                                Yetu s’occupe de vous
-                            </h2>
-                            <p className="mt-4 text-lg text-muted-foreground">
-                                Si votre entreprise a besoin d’un coup de pouce,{' '}
-                                <strong>Yetu Capital</strong> est là pour vous
-                                accompagner.
+                                taux de conversion au monde.
                             </p>
                             <div className="mt-10 space-y-6">
                                 <div className="flex items-start gap-4">
-                                    <DollarSign className="mt-1 h-6 w-6 text-primary" />
+                                    <TrendingUp className="mt-1 h-6 w-6 text-emerald-500" />
                                     <div>
-                                        <p className="text-2xl font-bold text-foreground">
-                                            5 milliards de $ US
+                                        <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                                            +15 %
                                         </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            prêtés à ce jour, investis auprès de
-                                            marchands Yetu
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                                            Taux de conversion plus élevé
                                         </p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-4">
-                                    <DollarSign className="mt-1 h-6 w-6 text-primary" />
+                                    <Globe className="mt-1 h-6 w-6 text-emerald-500" />
                                     <div>
-                                        <p className="text-2xl font-bold text-foreground">
-                                            Jusqu’à 5 M$ US
+                                        <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                                            250 M+
                                         </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            Des montants adaptés pour répondre à
-                                            vos besoins
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-4">
-                                    <Shield className="mt-1 h-6 w-6 text-primary" />
-                                    <div>
-                                        <p className="text-2xl font-bold text-foreground">
-                                            0 %
-                                        </p>
-                                        <p className="text-sm text-muted-foreground">
-                                            de fonds propres – aucune prise de
-                                            participation, jamais
+                                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                                            Acheteurs à forte intention
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div className="rounded-2xl border border-border bg-card p-8">
-                            <p className="text-lg text-foreground italic">
-                                “Yetu Capital nous a donné les fonds dont nous
-                                avions besoin pour maximiser nos stocks et nous
-                                développer rapidement.”
+                        <div className="rounded-3xl border border-white/40 bg-white/50 p-8 shadow-2xl shadow-emerald-500/5 backdrop-blur-xl dark:border-slate-700/30 dark:bg-slate-800/30 dark:shadow-emerald-500/5">
+                            <p className="text-sm font-semibold text-slate-500">
+                                Simulation de checkout
                             </p>
-                            <div className="mt-6 flex items-center gap-4">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 font-bold text-primary">
-                                    JW
+                            <div className="mt-4 space-y-3">
+                                <input
+                                    disabled
+                                    value="jordan.chen@domain.com"
+                                    className="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                                />
+                                <div className="grid grid-cols-2 gap-3">
+                                    <input
+                                        disabled
+                                        value="$125.00"
+                                        className="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                                    />
+                                    <input
+                                        disabled
+                                        value="Free"
+                                        className="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                                    />
                                 </div>
-                                <div>
-                                    <p className="font-semibold text-foreground">
-                                        Jessica Wise
-                                    </p>
-                                    <p className="text-sm text-muted-foreground">
-                                        CEO, Hell Babies
-                                    </p>
-                                </div>
+                                <input
+                                    disabled
+                                    value="$10.00 taxes"
+                                    className="rounded-xl border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                                />
                             </div>
                         </div>
-                    </FadeInSection>
+                    </div>
                 </div>
             </section>
 
-            {/* ========== CRÉEZ RAPIDEMENT ========== */}
-            <CreerRapidementSection />
+            {/* Stabilité & Performance */}
+            <section className="bg-linear-to-b from-white to-slate-50 py-20 lg:py-28 dark:from-slate-950 dark:to-slate-900">
+                <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
+                    <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+                        Une stabilité à toute épreuve
+                    </h2>
+                    <div className="mt-12 flex flex-wrap justify-center gap-8">
+                        <div className="flex items-center gap-4">
+                            <Globe className="h-8 w-8 text-emerald-500" />
+                            <div className="text-left">
+                                <p className="text-3xl font-bold text-slate-900 dark:text-white">
+                                    175
+                                </p>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    Pays desservis
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <Shield className="h-8 w-8 text-emerald-500" />
+                            <div className="text-left">
+                                <p className="text-3xl font-bold text-slate-900 dark:text-white">
+                                    99.99%
+                                </p>
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    Disponibilité
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-            {/* ========== CTA FINAL ========== */}
+            {/* CTA Finale */}
             <CtaFinalSection />
 
-            {/* ========== CTA FINAL ========== */}
             <IntegrationProduct />
-
-            {/* ========== CTA ========== */}
         </MainLayout>
     );
 }

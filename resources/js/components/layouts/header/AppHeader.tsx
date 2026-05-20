@@ -134,7 +134,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     {/* Actions à droite */}
                     <div className="flex items-center gap-2 sm:gap-3">
                         {/* Recherche mobile (tenant) */}
-                        {isTenant && (
+                        {/* {isTenant && (
                             <Sheet>
                                 <SheetTrigger asChild>
                                     <Button
@@ -153,7 +153,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     />
                                 </SheetContent>
                             </Sheet>
-                        )}
+                        )} */}
 
                         {!isTenant ? (
                             <>
