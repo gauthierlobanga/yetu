@@ -81,7 +81,8 @@ class VendorSettingsController extends Controller
         $tenant->setConfiguration('tiktok_url', $validated['tiktok_url']);
 
         if ($request->hasFile('logo')) {
-            $tenant->addMediaFromRequest('logo')->toMediaCollection('tenant_avatar');
+            $tenant->addMediaFromRequest('logo')
+                ->toMediaCollection('tenant_avatar');
         }
 
         $tenant->save();

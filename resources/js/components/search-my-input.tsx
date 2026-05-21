@@ -523,7 +523,7 @@ const Footer = memo(function Footer({
 }) {
     return (
         <div className="flex items-center justify-between border-t border-slate-200/80 bg-white/80 px-4 py-3 text-xs text-slate-500 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-400">
-            <div className="flex hidden items-center gap-4 sm:flex">
+            <div className="hidden items-center gap-4 sm:flex">
                 <div className="flex items-center gap-1.5">
                     <kbd className="flex h-6 items-center justify-center rounded-md bg-slate-100 px-2 font-medium dark:bg-slate-800">
                         <CornerDownLeft size={14} />
@@ -587,7 +587,7 @@ function SearchModal({ onClose, config }: SearchModalProps) {
 
             try {
                 // Remplacement de `route()` par le endpoint (si route() n'est pas globalement défini)
-                const endpoint = config.searchEndpoint || '/search'; 
+                const endpoint = config.searchEndpoint || '/search';
                 const response = await axios.get(endpoint, {
                     params: {
                         q: debouncedQuery.trim(),

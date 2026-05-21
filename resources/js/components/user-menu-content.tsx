@@ -23,7 +23,7 @@ import { CanRole } from '@/core/permissions/Can';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
-import { edit } from '@/routes/profile';
+import { edit } from '@/routes/tenant/profile';
 import type { User } from '@/types';
 
 type Props = {

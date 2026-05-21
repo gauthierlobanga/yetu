@@ -20,7 +20,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 
 import AuthLayout from '@/layouts/auth-layout';
-import { login } from '@/routes';
+import { login } from '@/routes/central';
 import { store } from '@/routes/register';
 
 export default function Register() {
@@ -164,7 +164,7 @@ export default function Register() {
                             </div>
 
                             {/* Security Notice */}
-                            <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/10 bg-emerald-500/[0.04] px-4 py-3 dark:border-emerald-400/10 dark:bg-emerald-400/[0.04]">
+                            <div className="flex items-center gap-3 rounded-2xl border border-emerald-500/10 bg-emerald-500/4 px-4 py-3 dark:border-emerald-400/10 dark:bg-emerald-400/4">
                                 <ShieldCheck className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
                                 <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
                                     Vos données sont protégées par un

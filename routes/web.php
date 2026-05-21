@@ -124,15 +124,3 @@ Route::get('/entreprise', [EntrepriseController::class, 'entrepriseIndex'])
 Route::get('/plans', [VendorRegistrationController::class, 'vendeurIndex'])
     ->middleware('auth')
     ->name('plan.index');
-
-// Route::prefix('central')->name('central.')->middleware('guest')->group(function () {
-
-//     Route::get('/login', fn (Request $request) => Inertia::render('auth/login', [
-//         'canResetPassword' => Features::enabled(Features::resetPasswords()),
-//         'canRegister' => Features::enabled(Features::registration()),
-//         'status' => $request->session()->get('status'),
-//     ]))->name('central.login');
-
-//     Route::get('/register', fn () => Inertia::render('auth/register'))
-//         ->name('central.register');
-// });

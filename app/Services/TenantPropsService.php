@@ -37,11 +37,7 @@ class TenantPropsService
      */
     protected function getLogoUrl(Tenant $tenant): ?string
     {
-        if (method_exists($tenant, 'getFirstMediaUrl')) {
-            return $tenant->getFirstMediaUrl('tenant_avatar', 'medium') ?: null;
-        }
-
-        return null;
+        return $tenant->logo_url;
     }
 
     /**

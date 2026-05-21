@@ -32,7 +32,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import { edit } from '@/routes/profile';
+import { edit } from '@/routes/tenant/profile';
 import vendor from '@/routes/vendor';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';

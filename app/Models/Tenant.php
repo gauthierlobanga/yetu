@@ -309,10 +309,15 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
      */
     public function registerMediaConversions(?Media $media = null): void
     {
-        $this
-            ->addMediaConversion('tenant_thumb')
+        $this->addMediaConversion('tenant_thumb')
             ->width(100)
             ->height(100)
+            ->sharpen(10)
+            ->nonQueued();
+
+        $this->addMediaConversion('medium')
+            ->width(300)
+            ->height(300)
             ->sharpen(10)
             ->nonQueued();
     }
@@ -640,6 +645,16 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
 
         $start = $this->date_activation ?? $this->created_at;
 
-        return \Illuminate\Support\Carbon::parse($start)->addDays($this->plan->trial_days);
+        return Carbon::parse($start)->addDays($this->plan->trial_days);
+    }
+
+    /**
+     * Accesseur pour obtenir l'URL du logo.
+     */
+    public function getLogoUrlAttribute(): ?string
+    {
+        $media = $this->getFirstMedia('tenant_avatar');
+
+        return $media ? $media->getUrl() : null;
     }
 }

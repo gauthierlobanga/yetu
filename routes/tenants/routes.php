@@ -12,8 +12,6 @@ use App\Http\Controllers\Home\HomeController;
 use App\Http\Controllers\Main\LocationController;
 use App\Http\Controllers\Pages\PageController;
 use App\Http\Controllers\SearchController;
-use App\Http\Controllers\Settings\ProfileController;
-use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Shop\AccountDashboardController;
 use App\Http\Controllers\Shop\AddressController;
 use App\Http\Controllers\Shop\BrandController;
@@ -29,6 +27,8 @@ use App\Http\Controllers\Shop\PromotionController;
 use App\Http\Controllers\Shop\ReturnController;
 use App\Http\Controllers\Shop\ReviewController;
 use App\Http\Controllers\Shop\WishlistController;
+use App\Http\Controllers\Vendor\Settings\ParametresController;
+use App\Http\Controllers\Vendor\Settings\ParametresSecurityController;
 use App\Http\Controllers\vendor\TenantAiController;
 use App\Http\Controllers\Vendor\TenantDashboardNotificationController;
 use App\Http\Controllers\Vendor\TenantOrderController;
@@ -120,10 +120,6 @@ Route::middleware([
                 ->name('mark-all-as-read');
         });
 
-        Route::redirect('settings', '/settings/profile');
-
-        Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
     });
 
     /*
@@ -131,17 +127,23 @@ Route::middleware([
     | ROUTES PUBLICS TENANT
     |--------------------------------------------------------------------------
     */
+    Route::prefix('tenant')->middleware(['auth'])->group(function () {
+        Route::redirect('settings', 'Vendor/settings/profile');
+        Route::get('settings/profile', [ParametresController::class, 'edit'])->name('tenant.profile.edit');
+        Route::patch('settings/profile', [ParametresController::class, 'update'])->name('tenant.profile.update');
+    });
+
     Route::middleware(['auth', 'verified'])->group(function () {
-        Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::delete('tenant/settings/profile', [ParametresController::class, 'destroy'])->name('tenant.profile.destroy');
 
-        Route::get('settings/security', [SecurityController::class, 'edit'])->name('security.edit');
+        Route::get('tenant/settings/security', [ParametresSecurityController::class, 'edit'])->name('tenant.security.edit');
 
-        Route::put('settings/password', [SecurityController::class, 'update'])
+        Route::put('tenant/settings/password', [ParametresSecurityController::class, 'update'])
             ->middleware('throttle:6,1')
-            ->name('user-password.update');
+            ->name('tenant.user-password.update');
 
-        Route::inertia('settings/appearance', 'settings/appearance')
-            ->name('appearance.edit');
+        Route::inertia('tenant/settings/appearance', 'Vendor/settings/appearance')
+            ->name('tenant.appearance.edit');
 
         Route::get('/parametres', [VendorSettingsController::class, 'edit'])
             ->name('vendor.settings');

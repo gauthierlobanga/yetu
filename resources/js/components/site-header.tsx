@@ -1,18 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 // import { motion, AnimatePresence } from 'framer-motion';
-import {
-    // AlertTriangle,
-    // Bell,
-    // BellRing,
-    // CheckCircle,
-    LogOut,
-    Menu,
-    Settings,
-    ShieldCheck,
-    User,
-} from 'lucide-react';
-// import { useEffect, useMemo, useState } from 'react';
-// import { toast } from 'sonner';
+import { LogOut, Menu, Settings, ShieldCheck, User } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -141,7 +129,9 @@ export function SiteHeader() {
                                 </DropdownMenuLabel>
                                 <DropdownMenuGroup>
                                     <DropdownMenuItem asChild>
-                                        <Link href={route('profile.edit')}>
+                                        <Link
+                                            href={route('tenant.profile.edit')}
+                                        >
                                             <User className="mr-2 h-4 w-4" />
                                             Profil
                                         </Link>
