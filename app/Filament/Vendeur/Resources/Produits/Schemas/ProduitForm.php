@@ -150,34 +150,21 @@ class ProduitForm
                                             ->schema([
                                                 ToggleButtons::make('is_featured')
                                                     ->label('Produit à la une')
-                                                    ->options([
-                                                        true => 'Oui',
-                                                        false => 'Non',
-                                                    ])
-                                                    ->colors([
-                                                        true => 'warning',
-                                                        false => 'gray',
-                                                    ])
-                                                    ->inline()
-                                                    ->default(false),
+                                                    ->boolean()
+                                                    ->default(false)
+                                                    ->inline(),
 
                                                 ToggleButtons::make('is_new')
                                                     ->label('Nouveauté')
-                                                    ->options([
-                                                        true => 'Oui',
-                                                        false => 'Non',
-                                                    ])
-                                                    ->inline()
-                                                    ->default(false),
+                                                    ->boolean()
+                                                    ->default(false)
+                                                    ->inline(),
 
                                                 ToggleButtons::make('is_bestseller')
                                                     ->label('Meilleure vente')
-                                                    ->options([
-                                                        true => 'Oui',
-                                                        false => 'Non',
-                                                    ])
-                                                    ->inline()
-                                                    ->default(false),
+                                                    ->boolean()
+                                                    ->default(false)
+                                                    ->inline(),
                                             ]),
                                     ]),
                             ]),
@@ -207,12 +194,27 @@ class ProduitForm
                                             ->prefix('€')
                                             ->step(0.01),
 
+                                        ToggleButtons::make('is_deal_of_the_day')
+                                            ->label('Deal du jour')
+                                            ->boolean()
+                                            ->default(false)
+                                            ->inline()
+                                            ->live(),
+
                                         TextInput::make('prix_promotion')
                                             ->label('Prix promotionnel')
                                             ->numeric()
                                             ->prefix('€')
                                             ->step(0.01)
-                                            ->helperText('Laissez vide si pas de promotion'),
+                                            ->required(fn (callable $get) => $get('is_deal_of_the_day') === true) // obligatoire si deal activé
+                                            ->helperText('Laissez vide si pas de promotion. Obligatoire pour un Deal du jour.'),
+
+                                        DateTimePicker::make('expires_at')
+                                            ->label('Expire le')
+                                            ->native(false)
+                                            ->displayFormat('d/m/Y H:i')
+                                            ->required(fn (callable $get) => $get('is_deal_of_the_day') === true)
+                                            ->helperText('Date de fin du Deal du jour.'),
 
                                         TextInput::make('quantite_stock')
                                             ->label('Quantité en stock')

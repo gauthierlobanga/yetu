@@ -177,7 +177,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             ->height(300)
             ->fit(Fit::Crop, 400, 300)
             ->optimize()
-            ->queued();
+            ->nonQueued();
 
         // Conversion pour les avatars (carrés)
         $this->addMediaConversion('thumb')

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/set-state-in-effect */
+
 'use client';
 
 import { Head, Link, router } from '@inertiajs/react';
@@ -263,6 +263,18 @@ const RichContentText = ({ content }: { content: string }) => {
     );
 };
 
+function getCsrfToken(): string {
+    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+
+    if (match) {
+        return decodeURIComponent(match[1]);
+    }
+
+    const meta = document.querySelector('meta[name="csrf-token"]');
+
+    return meta?.getAttribute('content') ?? '';
+}
+
 // Composant principal
 export default function Show({
     post,
@@ -271,9 +283,14 @@ export default function Show({
     relatedPosts,
 }: Props) {
     const getInitials = useInitials();
-    const [isLiked, setIsLiked] = useState(false);
-    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [isLiked, setIsLiked] = useState(post.data.is_liked ?? false);
+    const [isBookmarked, setIsBookmarked] = useState(
+        post.data.is_bookmarked ?? false,
+    );
     const [likesCount, setLikesCount] = useState(post.data.likes_count || 0);
+    const [bookmarksCount, setBookmarksCount] = useState(
+        post.data.bookmarks_count || 0,
+    );
     const [showMobileToc, setShowMobileToc] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
 
@@ -304,27 +321,72 @@ export default function Show({
     ];
 
     const handleLike = async () => {
+        if (!post?.data?.id) {
+            return;
+        }
+
         setIsLiked(!isLiked);
         setLikesCount((prev) => (isLiked ? prev - 1 : prev + 1));
 
         try {
-            router.post(
-                blog.like(post.data.id),
-                {},
-                {
-                    preserveScroll: true,
-
-                    onError: () => {
-                        setIsLiked(!isLiked);
-                        setLikesCount((prev) =>
-                            isLiked ? prev + 1 : prev - 1,
-                        );
-                        toast.error('Erreur lors du like');
-                    },
+            const response = await fetch(`/blog/${post.data.id}/like`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': getCsrfToken(),
                 },
-            );
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+
+            const data = await response.json();
+            setIsLiked(data.is_liked);
+            setLikesCount(data.likes_count);
+            toast.success(data.message);
         } catch (error) {
-            console.error('Error liking post:', error);
+            setIsLiked(!isLiked);
+            setLikesCount((prev) => (isLiked ? prev + 1 : prev - 1));
+            toast.error('Vous devez être connecté pour aimer.');
+        }
+    };
+
+    const handleBookmark = async () => {
+        if (!post?.data?.id) {
+            return;
+        }
+
+        setIsBookmarked(!isBookmarked);
+        setBookmarksCount((prev) => (isBookmarked ? prev - 1 : prev + 1));
+
+        try {
+            const response = await fetch(`/blog/${post.data.id}/bookmark`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                },
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+
+            const data = await response.json();
+            setIsBookmarked(data.is_bookmarked);
+            setBookmarksCount(data.bookmarks_count);
+            toast.success(data.message);
+        } catch (error) {
+            setIsBookmarked(!isBookmarked);
+            setBookmarksCount((prev) => (isBookmarked ? prev + 1 : prev - 1));
+            toast.error('Vous devez être connecté pour ajouter aux favoris.');
         }
     };
 
@@ -529,7 +591,7 @@ export default function Show({
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button
+                                                {/* <Button
                                                     variant="ghost"
                                                     size="sm"
                                                     className="h-8 px-2"
@@ -545,6 +607,19 @@ export default function Show({
                                                     <span className="ml-1 text-xs">
                                                         {likesCount}
                                                     </span>
+                                                </Button> */}
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 px-2"
+                                                    onClick={handleLike}
+                                                >
+                                                    <Heart
+                                                        className={`h-4 w-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`}
+                                                    />
+                                                    <span className="ml-1 text-xs">
+                                                        {likesCount}
+                                                    </span>
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>
@@ -554,7 +629,7 @@ export default function Show({
 
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button
+                                                {/* <Button
                                                     variant="ghost"
                                                     size="sm"
                                                     className="h-8 px-2"
@@ -571,6 +646,19 @@ export default function Show({
                                                                 : ''
                                                         }`}
                                                     />
+                                                </Button> */}
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 px-2"
+                                                    onClick={handleBookmark}
+                                                >
+                                                    <Bookmark
+                                                        className={`h-4 w-4 ${isBookmarked ? 'fill-amber-500 text-amber-500' : ''}`}
+                                                    />
+                                                    <span className="ml-1 text-xs">
+                                                        {bookmarksCount}
+                                                    </span>
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>

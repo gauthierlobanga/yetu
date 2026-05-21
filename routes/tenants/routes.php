@@ -73,29 +73,31 @@ Route::middleware([
       | ROUTES AUTHENTIFICATION TENANT (acheteurs)
       |--------------------------------------------------------------------------
       */
-    Route::middleware('guest')->name('tenant.')->group(function () {
-        Route::get('/login', function () {
-            return inertia('auth/login', [
-                'canResetPassword' => true,
-                'canRegister' => true,
-            ]);
-        })->name('login');
+    Route::middleware('guest')
+        ->group(function () {
 
-        Route::get('/register', function () {
-            return inertia('auth/register');
-        })->name('register');
+            Route::get('/login', function () {
+                return inertia('auth/login', [
+                    'canResetPassword' => true,
+                    'canRegister' => true,
+                ]);
+            })->name('tenant.login');
 
-        Route::get('/forgot-password', function () {
-            return inertia('auth/forgot-password');
-        })->name('password.request');
+            Route::get('/register', function () {
+                return inertia('auth/register');
+            })->name('tenant.register');
 
-        Route::get('/reset-password/{token}', function (Request $request, $token) {
-            return inertia('auth/reset-password', [
-                'email' => $request->email,
-                'token' => $token,
-            ]);
-        })->name('password.reset');
-    });
+            Route::get('/forgot-password', function () {
+                return inertia('auth/forgot-password');
+            })->name('tenant.password.request');
+
+            Route::get('/reset-password/{token}', function (Request $request, $token) {
+                return inertia('auth/reset-password', [
+                    'email' => $request->email,
+                    'token' => $token,
+                ]);
+            })->name('tenant.password.reset');
+        });
 
     /*
       |--------------------------------------------------------------------------
@@ -211,6 +213,7 @@ Route::middleware([
             Route::get('/{post:slug}', [BlogController::class, 'blogShow'])->name('blog.show');
             Route::post('/{post}/comment', [BlogController::class, 'blogComment'])->middleware('auth')->name('blog.comment');
             Route::post('/{post}/like', [BlogController::class, 'blogLike'])->middleware('auth')->name('blog.like');
+            Route::post('/{post}/bookmark', [BlogController::class, 'blogBookmark'])->middleware('auth')->name('blog.bookmark');
         });
 
         /*

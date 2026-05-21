@@ -180,6 +180,7 @@ class ProductController extends Controller
             'est_en_promotion' => $product->est_en_promotion,
             'reduction_pourcentage' => $product->reduction_pourcentage,
             'image_principale' => $primary['medium'] ?? null,
+            'is_deal_of_the_day' => (bool) $product->is_deal_of_the_day,
             'image_thumb' => $primary['thumb'] ?? null,
             'note_moyenne' => (float) $product->note_moyenne,
             'nombre_avis' => $product->nombre_avis,
@@ -190,6 +191,7 @@ class ProductController extends Controller
         if ($withDetails) {
             $data['description'] = $product->description_longue;
             $data['short_description'] = $product->short_description;
+            $data['updated_at'] = $product->updated_at->toIso8601String();
             $data['images'] = $product->images;
             $data['brand'] = $product->brand ? ['nom' => $product->brand->nom, 'slug' => $product->brand->slug] : null;
             $data['categories'] = $product->categories->map(fn ($c) => ['nom' => $c->nom, 'slug' => $c->slug]);

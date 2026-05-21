@@ -609,12 +609,51 @@ export default function ProductShow() {
                         </TabsTrigger>
                     </TabsList>
                     <TabsContent value="description" className="pt-6">
-                        <div
-                            className="prose max-w-none prose-slate dark:prose-invert"
-                            dangerouslySetInnerHTML={{
-                                __html: product.description,
-                            }}
-                        />
+                        <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-6 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
+                            {/* En-tête décoratif */}
+                            <div className="mb-6 flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                    <Sparkles className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-slate-800 dark:text-white">
+                                        Description du produit
+                                    </h3>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        Tout ce que vous devez savoir sur cet
+                                        article
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Contenu riche */}
+                            <div className="relative">
+                                {/* Effet de fondu en bas si le contenu est long (optionnel) */}
+                                <div
+                                    className="prose max-w-none prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:leading-relaxed prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-a:text-emerald-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-emerald-500 prose-blockquote:bg-emerald-50/50 prose-blockquote:px-4 prose-blockquote:py-2 prose-blockquote:italic dark:prose-blockquote:bg-emerald-950/20 prose-code:rounded-md prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm dark:prose-code:bg-slate-800 prose-pre:rounded-xl prose-pre:bg-slate-100 prose-pre:p-4 dark:prose-pre:bg-slate-800 prose-img:rounded-xl prose-img:shadow-md"
+                                    dangerouslySetInnerHTML={{
+                                        __html: product.description,
+                                    }}
+                                />
+                            </div>
+
+                            {/* Pied discret avec SKU / Catégorie (déjà présent en bas, mais on peut le rappeler) */}
+                            <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-slate-200 pt-4 text-xs text-slate-400 dark:border-slate-800">
+                                <span className="flex items-center gap-1">
+                                    <ShoppingCart className="h-3 w-3" />
+                                    SKU : {product.id}
+                                </span>
+                                {product.categories &&
+                                    product.categories.length > 0 && (
+                                        <span className="flex items-center gap-1">
+                                            <ChevronRight className="h-3 w-3" />
+                                            {product.categories
+                                                .map((c) => c.nom)
+                                                .join(', ')}
+                                        </span>
+                                    )}
+                            </div>
+                        </div>
                     </TabsContent>
                     <TabsContent value="reviews" className="pt-6">
                         <ReviewsSection

@@ -199,7 +199,7 @@ class ProductCategory extends Model implements HasMedia, Sitemapable
             ->format('webp')
             ->quality(90)
             ->withResponsiveImages()
-            ->queued()
+            ->nonQueued()   // ← changez ici
             ->performOnCollections('image', 'gallery', 'banner');
 
         // Grand format

@@ -12,11 +12,6 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 
-// use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
-// use Laravel\Fortify\Http\Controllers\NewPasswordController;
-// use Laravel\Fortify\Http\Controllers\PasswordResetLinkController;
-// use Laravel\Fortify\Http\Controllers\RegisteredUserController;
-
 /*
 |--------------------------------------------------------------------------
 | Routes authentifiées (dashboard général)
@@ -30,19 +25,20 @@ Route::middleware('guest')->group(function () {
         'canResetPassword' => Features::enabled(Features::resetPasswords()),
         'canRegister' => Features::enabled(Features::registration()),
         'status' => $request->session()->get('status'),
-    ]))->name('login');
+    ]))->name('central.login');
 
     Route::get('/register', fn () => Inertia::render('auth/register'))
-        ->name('register');
+        ->name('central.register');
 
     Route::get('/forgot-password', fn (Request $request) => Inertia::render('auth/forgot-password', [
         'status' => $request->session()->get('status'),
-    ]))->name('password.request');
+    ]))->name('central.password.request');
 
     Route::get('/reset-password/{token}', fn (Request $request, string $token) => Inertia::render('auth/reset-password', [
         'email' => $request->email,
         'token' => $token,
-    ]))->name('password.reset');
+    ]))->name('central.password.reset');
+
 });
 
 /*
@@ -126,4 +122,17 @@ Route::get('/entreprise', [EntrepriseController::class, 'entrepriseIndex'])
 |--------------------------------------------------------------------------
 */
 Route::get('/plans', [VendorRegistrationController::class, 'vendeurIndex'])
+    ->middleware('auth')
     ->name('plan.index');
+
+// Route::prefix('central')->name('central.')->middleware('guest')->group(function () {
+
+//     Route::get('/login', fn (Request $request) => Inertia::render('auth/login', [
+//         'canResetPassword' => Features::enabled(Features::resetPasswords()),
+//         'canRegister' => Features::enabled(Features::registration()),
+//         'status' => $request->session()->get('status'),
+//     ]))->name('central.login');
+
+//     Route::get('/register', fn () => Inertia::render('auth/register'))
+//         ->name('central.register');
+// });

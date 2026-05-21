@@ -8,6 +8,10 @@ import '../css/app.css';
 import { initializeTheme } from '@/hooks/use-appearance';
 import { configureEcho, echo } from '@laravel/echo-react';
 
+configureEcho({
+    broadcaster: 'reverb',
+});
+
 const reverbScheme =
     import.meta.env.VITE_REVERB_SCHEME ??
     (typeof window !== 'undefined' && window.location.protocol === 'https:'

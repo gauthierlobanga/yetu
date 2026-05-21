@@ -23,7 +23,6 @@ use Spatie\Tags\HasTags;
 
 class Produit extends Model implements HasMedia, Sitemapable
 {
-    // use BelongsToTenant;
     use HasComments, HasFactory, HasTags;
     use HasUuids, InteractsWithMedia, SoftDeletes;
 
@@ -80,6 +79,8 @@ class Produit extends Model implements HasMedia, Sitemapable
         'published_at',
         'scheduled_for',
         'expires_at',
+        'is_deal_of_the_day',   // ← ajout
+
         // 'search_document',
         // 'image_search_metadata',
         // 'search_embedding_synced_at',
@@ -108,6 +109,8 @@ class Produit extends Model implements HasMedia, Sitemapable
         'published_at' => 'datetime',
         'scheduled_for' => 'datetime',
         'expires_at' => 'datetime',
+        'is_deal_of_the_day' => 'boolean',
+
         // 'image_search_metadata' => 'array',
         // 'search_embedding_synced_at' => 'datetime',
     ];
@@ -116,6 +119,10 @@ class Produit extends Model implements HasMedia, Sitemapable
         'attributs' => [],
         'attributes' => [],
         'metadata' => [],
+        'is_new' => false,
+        'is_featured' => false,
+        'is_bestseller' => false,
+        'is_deal_of_the_day' => false,
     ];
 
     const STATUS_DRAFT = 'brouillon';
@@ -310,7 +317,7 @@ class Produit extends Model implements HasMedia, Sitemapable
             ->format('webp')
             ->quality(90)
             ->withResponsiveImages()
-            ->queued()
+            ->nonQueued()   // ← changez ici
             ->performOnCollections('images');
 
         // Grand format
@@ -702,6 +709,18 @@ class Produit extends Model implements HasMedia, Sitemapable
             ->setPriority(0.9);
     }
 
+    public function scopeDealOfTheDay($query)
+    {
+        return $query->where('is_deal_of_the_day', true)
+            ->where('statut', self::STATUS_PUBLISHED)
+            ->where('quantite_stock', '>', 0)
+            ->whereNotNull('prix_promotion')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
+    }
+
     // ========== BOOT ==========
 
     protected static function boot()
@@ -724,20 +743,20 @@ class Produit extends Model implements HasMedia, Sitemapable
             }
         });
 
-        // static::saved(function ($produit) {
-        //     $searchDocument = $produit->buildSearchDocument();
+        static::saved(function ($produit) {
+            // $searchDocument = $produit->buildSearchDocument();
 
-        //     if ($produit->search_document !== $searchDocument) {
-        //         $produit->forceFill([
-        //             'search_document' => $searchDocument,
-        //         ])->saveQuietly();
-        //     }
+            // if ($produit->search_document !== $searchDocument) {
+            //     $produit->forceFill([
+            //         'search_document' => $searchDocument,
+            //     ])->saveQuietly();
+            // }
 
-        //     $produit->clearCache();
-        // });
+            $produit->clearCache();
+        });
 
-        // static::deleted(function ($produit) {
-        //     $produit->clearCache();
-        // });
+        static::deleted(function ($produit) {
+            $produit->clearCache();
+        });
     }
 }

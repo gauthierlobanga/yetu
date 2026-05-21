@@ -100,6 +100,9 @@ export interface SimpleTag {
 
 
 export interface Post {
+    is_liked: boolean;
+    is_bookmarked: boolean;
+    bookmarks_count: number;
     id: number;
     user_id: number;
     title: string;

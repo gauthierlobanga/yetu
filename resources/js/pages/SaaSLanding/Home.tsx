@@ -67,28 +67,33 @@ interface HeroImage {
 
 const images: HeroImage[] = [
     {
-        src: '/storage/images/a-minimal-yet-cosy-workspace.jpg',
-        alt: 'Espace de travail cosy',
+        src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',
+        alt: 'Produit 1',
     },
     {
-        src: '/storage/images/female-yoga-fashion-with-yoga-mat.jpg',
-        alt: 'Mode yoga femme',
-    },
-    { src: '/storage/images/working-at-night.jpg', alt: 'Travail nocturne' },
-    { src: '/storage/images/wireless-headphones.jpg', alt: 'Casque sans fil' },
-    {
-        src: '/storage/images/simple-beige-mens-shirt.jpg',
-        alt: 'Chemise beige homme',
+        src: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
+        alt: 'Produit 2',
     },
     {
-        src: '/storage/images/mobile-phone-and-gimbal-in-hand.jpg',
-        alt: 'Téléphone et stabilisateur',
+        src: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
+        alt: 'Produit 3',
     },
     {
-        src: '/storage/images/confident-young-woman.jpg',
-        alt: 'Jeune femme confiante',
+        src: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400',
+        alt: 'Produit 4',
     },
-    { src: '/storage/images/green-t-shirt.jpg', alt: 'T‑shirt vert' },
+    {
+        src: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400',
+        alt: 'Produit 5',
+    },
+    {
+        src: 'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=400',
+        alt: 'Produit 6',
+    },
+    {
+        src: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400',
+        alt: 'Produit 8',
+    },
 ];
 
 // ----------------------------------------------------------------------
@@ -245,7 +250,7 @@ const pourTousCards = [
 
 export function PourTousSection() {
     return (
-        <section className="relative overflow-hidden bg-gradient-to-b from-white via-emerald-50/40 to-slate-50 py-24 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+        <section className="relative overflow-hidden bg-linear-to-b from-white via-emerald-50/40 to-slate-50 py-24 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
             {/* Décorations d’ambiance */}
             <div className="pointer-events-none absolute inset-0 -z-10">
                 <div className="absolute -top-24 right-1/4 h-96 w-96 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-500/5" />
@@ -262,7 +267,7 @@ export function PourTousSection() {
                 >
                     Pour tous, des entrepreneurs
                     <br />
-                    <span className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
+                    <span className="bg-linear-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
                         aux grandes entreprises
                     </span>
                 </motion.h2>
@@ -304,7 +309,7 @@ export function PourTousSection() {
                                         ),
                                     )}
                                 </p>
-                                <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-emerald-500/0 to-slate-500/0 opacity-0 transition-opacity duration-500 group-hover:opacity-5 dark:group-hover:opacity-10" />
+                                <div className="pointer-events-none absolute inset-0 rounded-3xl bg-linear-to-br from-emerald-500/0 to-slate-500/0 opacity-0 transition-opacity duration-500 group-hover:opacity-5 dark:group-hover:opacity-10" />
                             </motion.div>
                         );
                     })}
@@ -325,7 +330,7 @@ const steps = [
 
 export function CreerRapidementSection() {
     return (
-        <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-white py-24 dark:from-slate-900 dark:to-slate-950">
+        <section className="relative overflow-hidden bg-linear-to-b from-slate-50 to-white py-24 dark:from-slate-900 dark:to-slate-950">
             <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
                 <motion.h2
                     initial={{ opacity: 0, y: 30 }}
@@ -504,10 +509,10 @@ export default function SaaSLanding({ plans, stats, testimonials }: Props) {
             <Head title="Yetu – Créez votre boutique en ligne" />
 
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-slate-50 py-12 lg:py-20 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20">
+            <section className="relative overflow-hidden bg-linear-to-br from-emerald-50 via-white to-slate-50 py-12 lg:py-20 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20">
                 <div className="absolute inset-0 -z-10">
-                    <div className="absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-400/5" />
-                    <div className="absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-slate-400/10 blur-3xl dark:bg-slate-500/5" />
+                    <div className="absolute top-0 right-0 h-125 w-125 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-400/5" />
+                    <div className="absolute bottom-0 left-0 h-100 w-100 rounded-full bg-slate-400/10 blur-3xl dark:bg-slate-500/5" />
                 </div>
                 <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -530,7 +535,7 @@ export default function SaaSLanding({ plans, stats, testimonials }: Props) {
                                 className="mt-8 text-4xl font-medium tracking-tight text-slate-900 sm:text-6xl lg:text-6xl dark:text-white"
                             >
                                 Lancez votre
-                                <span className="block bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
+                                <span className="block bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
                                     boutique e‑commerce
                                 </span>
                                 en quelques minutes.

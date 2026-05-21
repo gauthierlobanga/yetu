@@ -502,10 +502,10 @@ class VendorRegistrationService
     /**
      * Obtenir l'URL du panneau vendeur.
      */
-    public function getVendeurUrl(Tenant $tenant): string
-    {
-        return $this->tenantBaseUrl($tenant).'/vendeur';
-    }
+    // public function getVendeurUrl(Tenant $tenant): string
+    // {
+    //     return $this->tenantBaseUrl($tenant).'/vendeur';
+    // }
 
     /**
      * Obtenir l'URL publique de la boutique.
@@ -523,6 +523,7 @@ class VendorRegistrationService
         $appUrl = config('app.url', 'http://localhost');
         $scheme = parse_url($appUrl, PHP_URL_SCHEME) ?: 'http';
         $port = parse_url($appUrl, PHP_URL_PORT);
+
         $portSuffix = app()->environment('local') && $port && ! str_contains($host, ':')
             ? ':'.$port
             : '';
@@ -611,5 +612,23 @@ class VendorRegistrationService
                 ]);
             }
         }
+    }
+
+    /**
+     * Obtenir l'URL du tableau de bord vendeur (tenant).
+     * En local : route de redirection sans sous‑domaine.
+     * En production : vrai sous‑domaine.
+     */
+    public function getVendeurDashboardUrl(Tenant $tenant): string
+    {
+        return $this->tenantBaseUrl($tenant).'/vendor/dashboard';
+    }
+
+    /**
+     * (Optionnel) Aligner l'ancienne méthode sur la nouvelle
+     */
+    public function getVendeurUrl(Tenant $tenant): string
+    {
+        return $this->getVendeurDashboardUrl($tenant);
     }
 }

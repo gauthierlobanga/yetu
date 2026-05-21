@@ -432,6 +432,7 @@ class HandleInertiaRequests extends Middleware
                         'description' => $cat->description,
                         'icone' => $cat->icone ?? 'boutique',
                         'image' => $cat->image,
+                        'updated_at' => $cat->updated_at->toIso8601String(), // ← ajout
                         'produits' => $cat->products->map(function ($prod) {
                             return [
                                 'id' => $prod->id,

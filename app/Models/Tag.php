@@ -37,11 +37,15 @@ class Tag extends SpatieTag
     protected $casts = [
         'is_active' => 'boolean',
         'order_column' => 'integer',
+        // 'name' => 'array',
+        // 'slug' => 'array',
     ];
 
     protected $attributes = [
         'is_active' => true,
         'order_column' => 0,
+        // 'name' => [],
+        // 'slug' => [],
     ];
 
     // Scope pour les tags actifs

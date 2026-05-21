@@ -74,4 +74,16 @@ class PromotionProduitResource extends Resource
     {
         return static::getModel()::count() > 10 ? 'success' : 'warning';
     }
+
+    public static function getTableQuery(): Builder
+    {
+        $query = parent::getTableQuery();
+
+        return $query->reorder()->orderBy('created_at', 'desc');
+    }
+
+    protected static function getTableRecordIdUsing(): ?\Closure
+    {
+        return fn ($record) => $record->promotion_id.'-'.$record->produit_id;
+    }
 }

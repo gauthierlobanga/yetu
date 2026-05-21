@@ -13,6 +13,7 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -180,6 +181,15 @@ class ProduitsTable
                     ->tooltip('Meilleure vente')
                     ->toggleable(),
 
+                IconColumn::make('is_deal_of_the_day')
+                    ->label('Deal du jour')
+                    ->boolean()
+                    ->trueIcon(Heroicon::Megaphone)
+                    ->falseIcon('heroicon-o-x-mark')
+                    ->trueColor('orange')
+                    ->tooltip('Offres exceptionnels')
+                    ->toggleable(),
+
                 // Statistiques
                 TextColumn::make('sold_count')
                     ->label('Vendus')
@@ -200,9 +210,6 @@ class ProduitsTable
                     ->numeric()
                     ->sortable()
                     ->alignCenter()
-    //                 ->formatStateUsing(fn ($state) => $state > 0
-    // ? \heroicon('heroicon-o-star', 'h-4 w-4 inline-block text-warning-400')->toHtml() . ' ' . number_format($state, 1)
-    // : '-')
                     ->color('warning'),
 
                 // Dimensions
@@ -320,6 +327,10 @@ class ProduitsTable
                     ->searchable()
                     ->preload()
                     ->label('Meilleure vente'),
+                TernaryFilter::make('is_deal_of_the_day')
+                    ->searchable()
+                    ->preload()
+                    ->label('Offres exceptionnels'),
 
                 Filter::make('created_at')
                     ->label('Date de création')

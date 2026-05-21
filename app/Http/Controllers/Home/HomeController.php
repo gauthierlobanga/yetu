@@ -126,28 +126,44 @@ class HomeController extends Controller
             : collect();
 
         // Deal du jour
-        $dealOfTheDay = $hasProducts && $hasPromotions
-            ? Produit::published()
-                ->inStock()
-                ->onSale()
-                ->whereHas('promotions', function ($q) {
-                    $q->where('type', 'pourcentage')
-                        ->where('est_active', true)
-                        ->where('valeur', '>=', 30)
-                        ->where('date_debut', '<=', now())
-                        ->where(function ($q2) {
-                            $q2->whereNull('date_fin')->orWhere('date_fin', '>=', now());
-                        });
-                })
-                ->with(['media', 'brand', 'promotions' => function ($q) {
-                    $q->where('est_active', true)->where('type', 'pourcentage');
-                }])
+        // $dealOfTheDay = $hasProducts && $hasPromotions
+        //     ? Produit::published()
+        //         ->inStock()
+        //         ->onSale()
+        //         ->whereHas('promotions', function ($q) {
+        //             $q->where('type', 'pourcentage')
+        //                 ->where('est_active', true)
+        //                 ->where('valeur', '>=', 30)
+        //                 ->where('date_debut', '<=', now())
+        //                 ->where(function ($q2) {
+        //                     $q2->whereNull('date_fin')->orWhere('date_fin', '>=', now());
+        //                 });
+        //         })
+        //         ->with(['media', 'brand', 'promotions' => function ($q) {
+        //             $q->where('est_active', true)->where('type', 'pourcentage');
+        //         }])
+        //         ->take(10)
+        //         ->get()
+        //         ->map(function ($product) {
+        //             $data = $this->formatProduct($product);
+        //             $maxDiscount = $product->promotions->max('valeur');
+        //             $data['discount_label'] = $maxDiscount ? "-{$maxDiscount}%" : null;
+
+        //             return $data;
+        //         })
+        //     : collect();
+        $dealOfTheDay = $hasProducts
+            ? Produit::dealOfTheDay()
+                ->latest('expires_at')
                 ->take(10)
                 ->get()
                 ->map(function ($product) {
                     $data = $this->formatProduct($product);
-                    $maxDiscount = $product->promotions->max('valeur');
-                    $data['discount_label'] = $maxDiscount ? "-{$maxDiscount}%" : null;
+                    // Le `discount_label` peut être calculé à partir de la réduction
+                    $data['discount_label'] = $product->reduction_pourcentage
+                        ? "-{$product->reduction_pourcentage}%"
+                        : null;
+                    $data['is_deal_of_the_day'] = true; // optionnel, pour un badge éventuel
 
                     return $data;
                 })

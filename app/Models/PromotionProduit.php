@@ -12,6 +12,8 @@ class PromotionProduit extends Pivot
 
     protected $table = 'promotion_produit';
 
+    protected $primaryKey = 'created_at';
+
     protected $fillable = [
         'promotion_id',
         'produit_id',

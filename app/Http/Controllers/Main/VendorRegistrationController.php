@@ -31,6 +31,10 @@ class VendorRegistrationController extends Controller
     {
         $user = Auth::user();
 
+        if (! $user) {
+            return redirect()->route('login');
+        }
+
         if ($tenant = $user->tenants()->wherePivot('is_owner', true)->first()) {
             return redirect()->away($this->vendorService->getVendeurUrl($tenant));
         }

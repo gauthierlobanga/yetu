@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -131,6 +132,21 @@ class Post extends Model implements HasMedia
             ->withPivot('id', 'is_primary', 'est_principale', 'ordre')
             ->withTimestamps()
             ->orderByPivot('ordre');
+    }
+
+    // Ajoutez dans la classe
+    public function likes(): HasMany
+    {
+        return $this->hasMany(PostLike::class);
+    }
+
+    public function isLikedBy(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        return $this->likes()->where('user_id', $user->id)->exists();
     }
 
     public function categoriePrincipale()
@@ -728,5 +744,20 @@ class Post extends Model implements HasMedia
         static::deleted(function ($post) {
             $post->clearMediaCache();
         });
+    }
+
+    public function bookmarkedBy(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'post_bookmarks', 'post_id', 'user_id')
+            ->withTimestamps();
+    }
+
+    public function isBookmarkedBy(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        return $this->bookmarkedBy()->where('user_id', $user->id)->exists();
     }
 }

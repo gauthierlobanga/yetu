@@ -30,24 +30,6 @@ class Promotion extends Model implements HasMedia
      */
     public $incrementing = false;
 
-    // protected $fillable = [
-    //     'nom',
-    //     'description',
-    //     'code',
-    //     'type',
-    //     'valeur',
-    //     'minimum_panier',
-    //     'date_debut',
-    //     'date_fin',
-    //     'utilisation_max',
-    //     'utilisation_courante',
-    //     'cumulable',
-    //     'est_active',
-    //     'produits_cibles',
-    //     'metadata',
-    //     'coupons',
-    // ];
-
     protected $guarded = ['id'];
 
     protected $casts = [
