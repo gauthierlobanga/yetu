@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/static-components */
+
 // resources/js/Pages/Vendor/Statistics/Partials/TopClientsChart.tsx
+
+import { Crown, TrendingUp, Users, ShoppingBag, Sparkles } from 'lucide-react';
 import {
     BarChart,
     Bar,
@@ -10,6 +14,8 @@ import {
     ResponsiveContainer,
     Cell,
 } from 'recharts';
+
+import { Badge } from '@/components/ui/badge';
 import {
     Card,
     CardContent,
@@ -38,12 +44,27 @@ const GRADIENT_COLORS = [
     ['#06b6d4', '#22d3ee'],
 ];
 
+const safeNumber = (v: any) => Number(v ?? 0) || 0;
+
+const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('fr-CD', {
+        style: 'currency',
+        currency: 'CDF',
+        maximumFractionDigits: 0,
+    }).format(value);
+
+const formatCompactCurrency = (value: number) =>
+    new Intl.NumberFormat('fr-CD', {
+        notation: 'compact',
+        maximumFractionDigits: 1,
+    }).format(value);
+
 export function TopClientsChart({ data }: Props) {
     if (!data || data.length === 0) {
         return (
-            <Card className="border-slate-200 dark:border-slate-800">
+            <Card className="rounded-lg border border-slate-200/60 bg-white/80 dark:border-slate-800/70 dark:bg-slate-900/70">
                 <CardHeader>
-                    <CardTitle className="text-slate-800 dark:text-white">
+                    <CardTitle className="text-slate-900 dark:text-white">
                         Meilleurs clients
                     </CardTitle>
                     <CardDescription className="text-slate-500 dark:text-slate-400">
@@ -55,11 +76,21 @@ export function TopClientsChart({ data }: Props) {
     }
 
     const sorted = [...data]
+        .map((c) => ({
+            ...c,
+            total_spent: safeNumber(c.total_spent),
+            orders_count: safeNumber(c.orders_count),
+        }))
         .sort((a, b) => b.total_spent - a.total_spent)
         .slice(0, 10);
+
     const chartData = sorted
         .map((client, idx) => ({
-            name: client.name,
+            name:
+                client.name.length > 16
+                    ? `${client.name.slice(0, 16)}...`
+                    : client.name,
+            fullName: client.name,
             value: client.total_spent,
             orders: client.orders_count,
             gradientId: `gradient-client-${idx}`,
@@ -69,49 +100,94 @@ export function TopClientsChart({ data }: Props) {
 
     const totalRevenue = sorted.reduce((sum, c) => sum + c.total_spent, 0);
 
-    const CustomTooltip = ({ active, payload }: any) => {
-        if (active && payload && payload.length) {
-            const d = payload[0].payload;
+    const totalOrders = sorted.reduce((sum, c) => sum + c.orders_count, 0);
 
-            return (
-                <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-900">
-                    <p className="font-medium text-slate-800 dark:text-white">
-                        {d.name}
-                    </p>
-                    <p className="text-emerald-600 dark:text-emerald-400">
-                        {new Intl.NumberFormat('fr-CD', {
-                            style: 'currency',
-                            currency: 'CDF',
-                        }).format(d.value)}
-                    </p>
-                    <p className="text-sm text-slate-500">
-                        {d.orders} commandes
-                    </p>
-                </div>
-            );
+    const bestClient = sorted[0];
+
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (!active || !payload?.length) {
+            return null;
         }
 
-        return null;
+        const d = payload[0].payload;
+
+        return (
+            <div className="min-w-50 rounded-lg border border-slate-200/70 bg-white/95 p-4 backdrop-blur-xl transition-colors dark:border-slate-700/70 dark:bg-slate-900/95">
+                <p className="font-semibold text-slate-900 dark:text-white">
+                    {d.fullName}
+                </p>
+
+                <p className="mt-1 text-emerald-600 dark:text-emerald-400">
+                    {formatCurrency(d.value)}
+                </p>
+
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                    {d.orders} commandes
+                </p>
+            </div>
+        );
     };
 
     return (
-        <Card className="border-slate-200 shadow-sm dark:border-slate-800">
-            <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-semibold text-slate-800 dark:text-white">
-                    Meilleurs clients
-                </CardTitle>
-                <CardDescription className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-                    <span>Top 10 par chiffre d'affaires</span>
-                    <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                        Total :{' '}
-                        {new Intl.NumberFormat('fr-CD', {
-                            style: 'currency',
-                            currency: 'CDF',
-                        }).format(totalRevenue)}
-                    </span>
-                </CardDescription>
+        <Card className="group relative overflow-hidden rounded-lg border border-slate-200/60 bg-white/80 backdrop-blur-xl transition-all duration-300 hover:border-emerald-300/40 dark:border-slate-800/70 dark:bg-slate-900/70">
+            {/* Header */}
+            <CardHeader className="space-y-4 border-b border-slate-200/60 dark:border-slate-800/60">
+                <div className="flex flex-col gap-4 xl:flex-row xl:justify-between">
+                    <div>
+                        <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            <Sparkles className="mr-1 h-3 w-3" />
+                            Top clients
+                        </Badge>
+
+                        <CardTitle className="mt-2 text-xl font-bold text-slate-900 dark:text-white">
+                            Meilleurs clients
+                        </CardTitle>
+
+                        <CardDescription className="text-slate-500 dark:text-slate-400">
+                            Classement des clients les plus rentables
+                        </CardDescription>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="rounded-xl border border-slate-200/60 bg-white/70 p-3 transition-colors hover:bg-emerald-500/5 dark:border-slate-800/60 dark:bg-slate-950/40">
+                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                                Revenus
+                            </div>
+
+                            <div className="text-lg font-bold text-slate-900 dark:text-white">
+                                {formatCompactCurrency(totalRevenue)}
+                            </div>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200/60 bg-white/70 p-3 transition-colors hover:bg-cyan-500/5 dark:border-slate-800/60 dark:bg-slate-950/40">
+                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                                Commandes
+                            </div>
+
+                            <div className="text-lg font-bold text-slate-900 dark:text-white">
+                                {totalOrders}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Best client */}
+                <div className="flex items-center gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3">
+                    <Crown className="h-5 w-5 text-amber-500" />
+                    <div>
+                        <div className="text-sm font-semibold text-slate-900 dark:text-white">
+                            {bestClient?.name}
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                            Meilleur client
+                        </div>
+                    </div>
+                </div>
             </CardHeader>
-            <CardContent className="h-96">
+
+            {/* Chart */}
+            <CardContent className="h-80 px-2 py-4 sm:px-6">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={chartData}
@@ -131,35 +207,48 @@ export function TopClientsChart({ data }: Props) {
                                     <stop
                                         offset="0%"
                                         stopColor={entry.gradientColors[0]}
-                                        stopOpacity={0.8}
+                                        stopOpacity={0.9}
                                     />
                                     <stop
                                         offset="100%"
                                         stopColor={entry.gradientColors[1]}
-                                        stopOpacity={0.9}
+                                        stopOpacity={1}
                                     />
                                 </linearGradient>
                             ))}
                         </defs>
+
                         <CartesianGrid
-                            strokeDasharray="3 3"
-                            stroke="#e2e8f0"
                             horizontal={false}
+                            stroke="rgba(148,163,184,0.15)"
                         />
+
                         <XAxis
                             type="number"
-                            tick={{ fontSize: 12, fill: '#64748b' }}
+                            tick={{
+                                fill: 'currentColor',
+                                fontSize: 11,
+                            }}
+                            tickFormatter={formatCompactCurrency}
                         />
+
                         <YAxis
                             dataKey="name"
                             type="category"
-                            tick={{ fontSize: 12, fill: '#475569' }}
                             width={120}
-                            axisLine={false}
-                            tickLine={false}
+                            tick={{
+                                fill: 'currentColor',
+                                fontSize: 12,
+                            }}
                         />
+
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar dataKey="value" barSize={22} radius={[0, 6, 6, 0]}>
+
+                        <Bar
+                            dataKey="value"
+                            barSize={22}
+                            radius={[0, 10, 10, 0]}
+                        >
                             {chartData.map((entry, idx) => (
                                 <Cell
                                     key={idx}

@@ -125,7 +125,7 @@ export function SectionCards({ summary }: { summary: Summary | null }) {
     ];
 
     return (
-        <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @3xl/main:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {cards.map((card, index) => (
                 <motion.div
                     key={card.title}
