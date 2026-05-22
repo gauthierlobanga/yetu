@@ -34,10 +34,7 @@ export function ChartWeeklyActivity({ data }: { data: WeeklyActivity[] }) {
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer
-                    config={chartConfig}
-                    className="h-[300px] w-full"
-                >
+                <ChartContainer config={chartConfig} className="h-75 w-full">
                     <BarChart data={data}>
                         <CartesianGrid vertical={false} />
                         <XAxis

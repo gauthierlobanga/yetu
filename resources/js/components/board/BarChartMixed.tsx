@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
+import { usePage } from '@inertiajs/react';
 import { TrendingUp } from 'lucide-react';
 import { Bar, BarChart, XAxis, YAxis } from 'recharts';
-import { usePage } from '@inertiajs/react';
 
 import {
     Card,
@@ -16,8 +17,8 @@ import {
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
-    type ChartConfig,
 } from '@/components/ui/chart';
+import type { ChartConfig } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface CategoryStats {
@@ -38,7 +39,7 @@ export function ChartBarMixed({
     // Récupérer les données depuis les props Inertia
     const { props } = usePage<{ categoriesStats?: CategoryStats[] }>();
     const categoriesStats = props.categoriesStats;
-    
+
     // Utiliser directement les données des props
     const chartData = propCategoriesData || categoriesStats || [];
 
@@ -76,6 +77,7 @@ export function ChartBarMixed({
                 label: category.nom,
                 color: category.color || colors[index % colors.length],
             };
+
             return config;
         },
         {
@@ -127,6 +129,7 @@ export function ChartBarMixed({
                                     chartConfig[
                                         value as keyof typeof chartConfig
                                     ];
+
                                 return config?.label || value;
                             }}
                         />

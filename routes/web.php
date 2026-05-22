@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\VisitorStatsController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Central\HeroCentralController;
 use App\Http\Controllers\ContactController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\Main\PaymentController as MainPaymentController;
 use App\Http\Controllers\Main\VendorRegistrationController;
 use App\Http\Controllers\Pages\EntrepriseController;
 use App\Http\Controllers\Pages\PageController;
+use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -124,3 +126,19 @@ Route::get('/entreprise', [EntrepriseController::class, 'entrepriseIndex'])
 Route::get('/plans', [VendorRegistrationController::class, 'vendeurIndex'])
     ->middleware('auth')
     ->name('plan.index');
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/stats/visitors', [VisitorStatsController::class, 'index'])->name('admin.stats.visitors');
+});
+
+Route::post('/track-duration', function (Request $request) {
+    $sessionId = session()->getId();
+    $lastVisit = Visit::where('session_id', $sessionId)
+        ->orderBy('visited_at', 'desc')
+        ->first();
+    if ($lastVisit && $lastVisit->duration == 0) {
+        $lastVisit->update(['duration' => $request->input('duration')]);
+    }
+
+    return response()->noContent();
+})->name('track.duration')->middleware('web');

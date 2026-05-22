@@ -2,31 +2,28 @@
 
 namespace Database\Factories;
 
+use App\Models\Plan;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<Tenant>
- */
 class TenantFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Tenant::class;
+
+    public function definition()
     {
-
-        $raison_sociale = fake()->company();
-
         return [
-            'id' => $raison_sociale,
-            'raison_sociale' => $raison_sociale,
-            'slug' => Str::slug($raison_sociale),
+            'id' => (string) Str::orderedUuid(),
+            'raison_sociale' => $this->faker->company,
+            'slug' => $this->faker->unique()->slug,
+            'email' => $this->faker->unique()->companyEmail,
+            'password' => bcrypt('password'),
+            'telephone' => $this->faker->phoneNumber,
+            'is_active' => true,
             'statut' => Tenant::STATUT_ACTIF,
-            'data' => null,
+            'plan_id' => Plan::factory(),
+            'date_activation' => now(),
         ];
     }
 }

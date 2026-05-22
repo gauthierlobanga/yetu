@@ -1,6 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
+import { usePage } from '@inertiajs/react';
 import { TrendingUp, Eye, Heart, MessageCircle } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
 import {
     Bar,
     BarChart,
@@ -9,9 +12,8 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
-import { usePage } from '@inertiajs/react';
-import { useState, useMemo, useEffect } from 'react';
 
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     Card,
     CardContent,
@@ -24,11 +26,10 @@ import {
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
-    type ChartConfig,
 } from '@/components/ui/chart';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import type { ChartConfig } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface TopPost {
     id: number;
@@ -81,13 +82,16 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
             setLoading(false);
         } else {
             const timer = setTimeout(() => setLoading(false), 1000);
+
             return () => clearTimeout(timer);
         }
     }, [topPosts]);
 
     // Préparer les données pour le graphique
     const chartData = useMemo(() => {
-        if (!topPosts || topPosts.length === 0) return [];
+        if (!topPosts || topPosts.length === 0) {
+            return [];
+        }
 
         return topPosts.slice(0, 10).map((post) => ({
             title:
@@ -112,17 +116,24 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
 
     // CORRECTION: Type assertion pour garantir que c'est un nombre
     const totalMetric = useMemo(() => {
-        if (!topPosts) return 0;
+        if (!topPosts) {
+            return 0;
+        }
+
         return topPosts.reduce((sum, post) => {
             const value = post[metricKeys[activeMetric]];
             // S'assurer que value est un nombre
             const numericValue = typeof value === 'number' ? value : 0;
+
             return sum + numericValue;
         }, 0);
     }, [topPosts, activeMetric]);
 
     const averageMetric = useMemo(() => {
-        if (!topPosts || topPosts.length === 0) return 0;
+        if (!topPosts || topPosts.length === 0) {
+            return 0;
+        }
+
         return Math.round(totalMetric / topPosts.length);
     }, [totalMetric, topPosts]);
 
@@ -134,7 +145,7 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                     <Skeleton className="h-4 w-64" />
                 </CardHeader>
                 <CardContent>
-                    <div className="flex h-[400px] items-center justify-center">
+                    <div className="flex h-100 items-center justify-center">
                         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
                     </div>
                 </CardContent>
@@ -150,7 +161,7 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                     <CardDescription>Aucun article trouvé</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex h-[400px] items-center justify-center text-muted-foreground">
+                    <div className="flex h-100 items-center justify-center text-muted-foreground">
                         Aucune donnée disponible
                     </div>
                 </CardContent>
@@ -208,10 +219,7 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                 </div>
             </CardHeader>
             <CardContent>
-                <ChartContainer
-                    config={chartConfig}
-                    className="h-[500px] w-full"
-                >
+                <ChartContainer config={chartConfig} className="h-125 w-full">
                     <BarChart
                         accessibilityLayer
                         data={chartData}
@@ -248,6 +256,7 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                                 <ChartTooltipContent
                                     labelFormatter={(label, payload) => {
                                         const data = payload[0]?.payload;
+
                                         return (
                                             <div className="space-y-1">
                                                 <p className="font-medium">
@@ -282,6 +291,7 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                                             typeof value === 'number'
                                                 ? value
                                                 : 0;
+
                                         return [
                                             `${numericValue.toLocaleString()} ${metricLabels[activeMetric].toLowerCase()}`,
                                             '',
@@ -305,6 +315,7 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                                 formatter={(value) => {
                                     const numValue =
                                         typeof value === 'number' ? value : 0;
+
                                     return numValue.toLocaleString();
                                 }}
                             />

@@ -1,6 +1,9 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
+import { usePage } from '@inertiajs/react';
 import { TrendingUp, Hash } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
 import {
     Bar,
     BarChart,
@@ -9,8 +12,6 @@ import {
     XAxis,
     YAxis,
 } from 'recharts';
-import { usePage } from '@inertiajs/react';
-import { useState, useMemo, useEffect } from 'react';
 
 import {
     Card,
@@ -24,8 +25,8 @@ import {
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
-    type ChartConfig,
 } from '@/components/ui/chart';
+import type { ChartConfig } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
@@ -51,13 +52,16 @@ export function ChartTopTags({ topTags: propTopTags }: ChartTopTagsProps) {
             setLoading(false);
         } else {
             const timer = setTimeout(() => setLoading(false), 1000);
+
             return () => clearTimeout(timer);
         }
     }, [topTags]);
 
     // Préparer les données pour le graphique
     const chartData = useMemo(() => {
-        if (!topTags || topTags.length === 0) return [];
+        if (!topTags || topTags.length === 0) {
+            return [];
+        }
 
         const sortedTags = [...topTags].sort((a, b) => {
             if (sortBy === 'count') {
@@ -86,12 +90,18 @@ export function ChartTopTags({ topTags: propTopTags }: ChartTopTagsProps) {
     } satisfies ChartConfig;
 
     const totalTags = useMemo(() => {
-        if (!topTags) return 0;
+        if (!topTags) {
+            return 0;
+        }
+
         return topTags.reduce((sum, tag) => sum + tag.posts_count, 0);
     }, [topTags]);
 
     const averageTags = useMemo(() => {
-        if (!topTags || topTags.length === 0) return 0;
+        if (!topTags || topTags.length === 0) {
+            return 0;
+        }
+
         return Math.round(totalTags / topTags.length);
     }, [totalTags, topTags]);
 
@@ -197,6 +207,7 @@ export function ChartTopTags({ topTags: propTopTags }: ChartTopTagsProps) {
                                 <ChartTooltipContent
                                     labelFormatter={(label, payload) => {
                                         const data = payload[0]?.payload;
+
                                         return (
                                             <div className="space-y-1">
                                                 <p className="font-medium">
@@ -213,6 +224,7 @@ export function ChartTopTags({ topTags: propTopTags }: ChartTopTagsProps) {
                                             typeof value === 'number'
                                                 ? value
                                                 : 0;
+
                                         return [
                                             `${numericValue.toLocaleString()} article${numericValue > 1 ? 's' : ''}`,
                                             '',
@@ -238,6 +250,7 @@ export function ChartTopTags({ topTags: propTopTags }: ChartTopTagsProps) {
                                     const { x, y, width, value } = props;
                                     const numericValue =
                                         typeof value === 'number' ? value : 0;
+
                                     return (
                                         <text
                                             x={Number(x) + Number(width) + 8}

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/incompatible-library */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/components/data-table-post.tsx
 import {

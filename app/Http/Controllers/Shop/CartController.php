@@ -9,9 +9,11 @@ use App\Models\ItemPanier;
 use App\Models\Panier;
 use App\Models\Produit;
 use App\Models\VarianteProduit;
+use App\Models\VisitorEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -38,6 +40,14 @@ class CartController extends Controller
 
         $cart->ajouterItem($produit, $validated['quantite'] ?? 1, $variante);
 
+        VisitorEvent::create([
+            'session_id' => Session::getId(),
+            'visitor_id' => $request->cookie('y_visitor'),
+            'event_type' => 'add_to_cart',
+            'product_id' => $produit->id,
+            'occurred_at' => now(),
+        ]);
+
         if ($request->wantsJson()) {
             return response()->json(['success' => true, 'cart' => $this->formatCart($cart)]);
         }
@@ -55,7 +65,6 @@ class CartController extends Controller
 
         $item->panier->recalculerTotaux();
 
-        // Réponse pour les requêtes AJAX (utilisée par le hook useCart)
         if ($request->wantsJson()) {
             return response()->json([
                 'cart' => $this->formatCart($item->panier),
@@ -150,7 +159,6 @@ class CartController extends Controller
 
     public function formatCart(Panier $cart): array
     {
-        // Charger les relations nécessaires pour éviter les requêtes N+1
         $cart->load(['items', 'promotions']);
 
         return [
@@ -213,7 +221,6 @@ class CartController extends Controller
         $cart = $this->getOrCreateCart($request);
         $selectedIds = $request->input('item_ids', []);
 
-        // sécurisation anti-422
         $validIds = $cart->items()
             ->whereIn('id', $selectedIds)
             ->pluck('id')

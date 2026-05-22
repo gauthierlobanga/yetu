@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { dashboard } from '@/routes';
 import tenant from '@/routes/tenant';
 
 interface DashboardFiltersProps {

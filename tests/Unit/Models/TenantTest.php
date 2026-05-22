@@ -1,11 +1,18 @@
 <?php
 
-use App\Models\Tenant;
+use App\Models\Client;
+use App\Models\Commande;
+use App\Models\Panier;
 use App\Models\Plan;
+use App\Models\Produit;
+use App\Models\Tenant;
 use App\Models\TypeDocumentLegal;
 use App\Models\User;
 use App\Models\VendorRequest;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+
 use function Pest\Laravel\assertModelExists;
 use function Pest\Laravel\assertModelMissing;
 use function Pest\Laravel\assertSoftDeleted;
@@ -30,7 +37,7 @@ it('can create a tenant', function () {
 
 it('uses UUID as primary key', function () {
     $tenant = Tenant::factory()->create();
-    
+
     expect($tenant->id)->toBeString();
     expect(Str::isUuid($tenant->id))->toBeTrue();
     expect($tenant->incrementing)->toBeFalse();
@@ -98,8 +105,8 @@ it('casts attributes correctly', function () {
     expect($tenant->configuration)->toBeArray();
     expect($tenant->configuration)->toBe(['key' => 'value']);
     expect($tenant->metadata)->toBeArray();
-    expect($tenant->date_activation)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
-    expect($tenant->date_expiration)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+    expect($tenant->date_activation)->toBeInstanceOf(Carbon::class);
+    expect($tenant->date_expiration)->toBeInstanceOf(Carbon::class);
 });
 
 it('returns correct statuts list', function () {
@@ -129,11 +136,11 @@ it('hashes password on set', function () {
     ]);
 
     expect($tenant->password)->not->toBe('plain_password');
-    expect(\Illuminate\Support\Facades\Hash::check('plain_password', $tenant->password))->toBeTrue();
+    expect(Hash::check('plain_password', $tenant->password))->toBeTrue();
 });
 
 it('does not rehash already hashed password', function () {
-    $hashed = \Illuminate\Support\Facades\Hash::make('password');
+    $hashed = Hash::make('password');
     $tenant = Tenant::factory()->create([
         'password' => $hashed,
     ]);
@@ -160,10 +167,11 @@ it('has many users', function () {
 
 it('has many produits', function () {
     $tenant = Tenant::factory()->create();
-    
+
     $count = $tenant->run(function () {
-        \App\Models\Produit::factory()->count(3)->create();
-        return \App\Models\Produit::count();
+        Produit::factory()->count(3)->create();
+
+        return Produit::count();
     });
 
     expect($count)->toBe(3);
@@ -171,10 +179,11 @@ it('has many produits', function () {
 
 it('has many commandes', function () {
     $tenant = Tenant::factory()->create();
-    
+
     $count = $tenant->run(function () {
-        \App\Models\Commande::factory()->count(5)->create();
-        return \App\Models\Commande::count();
+        Commande::factory()->count(5)->create();
+
+        return Commande::count();
     });
 
     expect($count)->toBe(5);
@@ -182,10 +191,11 @@ it('has many commandes', function () {
 
 it('has many clients', function () {
     $tenant = Tenant::factory()->create();
-    
+
     $count = $tenant->run(function () {
-        \App\Models\Client::factory()->count(10)->create();
-        return \App\Models\Client::count();
+        Client::factory()->count(10)->create();
+
+        return Client::count();
     });
 
     expect($count)->toBe(10);
@@ -193,10 +203,11 @@ it('has many clients', function () {
 
 it('has many paniers', function () {
     $tenant = Tenant::factory()->create();
-    
+
     $count = $tenant->run(function () {
-        \App\Models\Panier::factory()->count(7)->create();
-        return \App\Models\Panier::count();
+        Panier::factory()->count(7)->create();
+
+        return Panier::count();
     });
 
     expect($count)->toBe(7);
@@ -323,15 +334,15 @@ it('returns trial ends at attribute', function () {
     ]);
 
     $trialEndsAt = $tenant->getTrialEndsAtAttribute();
-    
-    expect($trialEndsAt)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+
+    expect($trialEndsAt)->toBeInstanceOf(Carbon::class);
     expect($trialEndsAt->diffInDays(now()))->toBe(30);
 });
 
 it('has many documents legaux', function () {
     $tenant = Tenant::factory()->create();
     $typeDocument = TypeDocumentLegal::factory()->create();
-    
+
     $tenant->documentsLegaux()->attach($typeDocument->id, [
         'numero_document' => '123456',
         'date_delivrance' => now(),
@@ -343,7 +354,7 @@ it('has many documents legaux', function () {
 it('gets rccm attribute', function () {
     $tenant = Tenant::factory()->create();
     $rccm = TypeDocumentLegal::factory()->create(['code' => 'RCCM']);
-    
+
     $tenant->documentsLegaux()->attach($rccm->id, [
         'numero_document' => 'RCCM-12345',
     ]);
@@ -354,7 +365,7 @@ it('gets rccm attribute', function () {
 it('gets patente attribute', function () {
     $tenant = Tenant::factory()->create();
     $patente = TypeDocumentLegal::factory()->create(['code' => 'PATENTE']);
-    
+
     $tenant->documentsLegaux()->attach($patente->id, [
         'numero_document' => 'PAT-67890',
     ]);
@@ -365,7 +376,7 @@ it('gets patente attribute', function () {
 it('gets ifu attribute', function () {
     $tenant = Tenant::factory()->create();
     $ifu = TypeDocumentLegal::factory()->create(['code' => 'IFU']);
-    
+
     $tenant->documentsLegaux()->attach($ifu->id, [
         'numero_document' => 'IFU-99999',
     ]);
@@ -375,11 +386,10 @@ it('gets ifu attribute', function () {
 
 it('checks if documents obligatoires are complets', function () {
     $tenant = Tenant::factory()->create();
-    
-    // Create required documents
+
     $type1 = TypeDocumentLegal::factory()->create(['code' => 'RCCM', 'est_obligatoire' => true]);
     $type2 = TypeDocumentLegal::factory()->create(['code' => 'PATENTE', 'est_obligatoire' => true]);
-    
+
     $tenant->documentsLegaux()->attach($type1->id, ['numero_document' => '123']);
     $tenant->documentsLegaux()->attach($type2->id, ['numero_document' => '456']);
 
@@ -388,10 +398,10 @@ it('checks if documents obligatoires are complets', function () {
 
 it('calculates pourcentage verification', function () {
     $tenant = Tenant::factory()->create();
-    
+
     $type1 = TypeDocumentLegal::factory()->create();
     $type2 = TypeDocumentLegal::factory()->create();
-    
+
     $tenant->documentsLegaux()->attach($type1->id, ['est_verifie' => true]);
     $tenant->documentsLegaux()->attach($type2->id, ['est_verifie' => false]);
 
@@ -400,10 +410,10 @@ it('calculates pourcentage verification', function () {
 
 it('gets documents manquants', function () {
     $tenant = Tenant::factory()->create();
-    
+
     $type1 = TypeDocumentLegal::factory()->create(['code' => 'RCCM', 'est_obligatoire' => true]);
     $type2 = TypeDocumentLegal::factory()->create(['code' => 'PATENTE', 'est_obligatoire' => true]);
-    
+
     $tenant->documentsLegaux()->attach($type1->id, ['numero_document' => '123']);
 
     $manquants = $tenant->documents_manquants;

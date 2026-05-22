@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('post_likes', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
-        });
+        if (! Schema::hasColumn('settings', 'created_at') && ! Schema::hasColumn('settings', 'updated_at')) {
+            // Schema::table('wishlist_items', function (Blueprint $table) {
+            //     $table->timestamps();
+            // });
+        }
     }
 
     /**
@@ -22,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('post_likes');
+        Schema::table('settings', function (Blueprint $table) {
+            //
+        });
     }
 };

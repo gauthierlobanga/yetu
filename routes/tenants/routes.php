@@ -27,6 +27,7 @@ use App\Http\Controllers\Shop\PromotionController;
 use App\Http\Controllers\Shop\ReturnController;
 use App\Http\Controllers\Shop\ReviewController;
 use App\Http\Controllers\Shop\WishlistController;
+use App\Http\Controllers\Vendor\AnalyticsController;
 use App\Http\Controllers\Vendor\Settings\ParametresController;
 use App\Http\Controllers\Vendor\Settings\ParametresSecurityController;
 use App\Http\Controllers\vendor\TenantAiController;
@@ -38,6 +39,9 @@ use App\Http\Controllers\Vendor\VendorDashboardController;
 use App\Http\Controllers\vendor\VendorSettingsController;
 use App\Http\Controllers\Vendor\VendorStatisticsController;
 use App\Http\Controllers\Vendor\VendorThemeController;
+use App\Http\Controllers\Vendor\VisitorAnalyticsController;
+use App\Http\Controllers\Vendor\VisitorStatsController;
+use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
@@ -162,6 +166,16 @@ Route::middleware([
 
         Route::get('/products', [TenantProductController::class, 'index'])->name('dashboard.products.index');
 
+        Route::get('/vendor/stats/visitors', [VisitorStatsController::class, 'index'])->name('vendor.stats.visitors');
+    });
+
+    Route::middleware(['auth', 'verified'])->prefix('analytics')->name('tenant.analytics.')->group(function () {
+        Route::get('/', [VisitorAnalyticsController::class, 'dashboard'])->name('dashboard');
+        Route::get('/visitors', [VisitorAnalyticsController::class, 'visitorsList'])->name('visitors');
+        Route::get('/visitor/{id}', [VisitorAnalyticsController::class, 'visitorDetail'])->name('visitor.show');
+        Route::get('/events/recent', [VisitorAnalyticsController::class, 'recentEvents'])->name('events.recent');
+        Route::get('/vendor/stats/visitors', [VisitorStatsController::class, 'index'])->name('vendor.stats.visitors');
+        Route::get('/vendor/analytics', [AnalyticsController::class, 'index'])->name('avance');
     });
 
     Route::middleware(['auth', 'verified'])->prefix('ai')->name('ai.')->group(function () {
@@ -383,5 +397,17 @@ Route::middleware([
 
         return response()->noContent();
     })->name('flash.clear');
+
+    Route::post('/track-duration', function (Request $request) {
+        $sessionId = session()->getId();
+        $lastVisit = Visit::where('session_id', $sessionId)
+            ->orderBy('visited_at', 'desc')
+            ->first();
+        if ($lastVisit && $lastVisit->duration == 0) {
+            $lastVisit->update(['duration' => $request->input('duration')]);
+        }
+
+        return response()->noContent();
+    })->name('track.duration')->middleware('web');
 
 });

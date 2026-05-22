@@ -13,6 +13,7 @@
 @source '../views';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../../../vendor/l3aro/rating-star-for-filament/resources/**/*.blade.php';
 
 @custom-variant dark (&:is(.dark *));
 

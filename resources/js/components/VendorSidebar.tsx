@@ -184,6 +184,16 @@ export function VendorSidebar({ tenant }: { tenant: Tenant }) {
             href: route('vendor.statistics'),
         },
         {
+            title: 'Visiteurs',
+            icon: BarChart3,
+            href: route('vendor.stats.visitors'),
+        },
+        {
+            title: 'Visiteurs Avancé',
+            icon: BarChart3,
+            href: route('tenant.analytics.avance'),
+        },
+        {
             title: 'Paramètres',
             icon: Settings,
             href: route('vendor.settings'),

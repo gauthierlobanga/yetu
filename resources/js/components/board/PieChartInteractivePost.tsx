@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
+import { usePage } from '@inertiajs/react';
 import * as React from 'react';
 import { Label, Pie, PieChart, Sector } from 'recharts';
 import type {
     PieSectorDataItem,
     PieSectorShapeProps,
 } from 'recharts/types/polar/Pie';
-import { usePage } from '@inertiajs/react';
 
 import {
     Card,
@@ -20,8 +22,8 @@ import {
     ChartStyle,
     ChartTooltip,
     ChartTooltipContent,
-    type ChartConfig,
 } from '@/components/ui/chart';
+import type { ChartConfig } from '@/components/ui/chart';
 import {
     Select,
     SelectContent,
@@ -67,7 +69,9 @@ export function ChartPieInteractive({
     const rawData = propPostsStats || props.postsStatusStats || [];
 
     const chartData = React.useMemo(() => {
-        if (rawData.length === 0) return [];
+        if (rawData.length === 0) {
+            return [];
+        }
 
         return rawData.map((item) => ({
             ...item,
@@ -119,6 +123,7 @@ export function ChartPieInteractive({
                     </g>
                 );
             }
+
             return <Sector {...props} outerRadius={outerRadius} />;
         },
         [activeIndex],
@@ -155,7 +160,7 @@ export function ChartPieInteractive({
                 </div>
                 <Select value={activeStatus} onValueChange={setActiveStatus}>
                     <SelectTrigger
-                        className="ml-auto h-7 w-[130px] rounded-lg pl-2.5"
+                        className="ml-auto h-7 w-32.5 rounded-lg pl-2.5"
                         aria-label="Sélectionner un statut"
                     >
                         <SelectValue placeholder="Sélectionner" />
@@ -183,7 +188,7 @@ export function ChartPieInteractive({
                 <ChartContainer
                     id={id}
                     config={chartConfig}
-                    className="mx-auto aspect-square w-full max-w-[300px]"
+                    className="mx-auto aspect-square w-full max-w-75"
                 >
                     <PieChart>
                         <ChartTooltip

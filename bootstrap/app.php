@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Middleware\EnsurePaymentSession;
+use App\Http\Middleware\EnsureUserIsSuperAdmin;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\RedirectIfAuthenticatedWithTenant;
+use App\Http\Middleware\TrackVisitor;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -38,11 +40,13 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            TrackVisitor::class,
         ]);
 
         $middleware->alias([
             'payment.session' => EnsurePaymentSession::class,
             'guest.tenant' => RedirectIfAuthenticatedWithTenant::class,
+            'admin' => EnsureUserIsSuperAdmin::class,
 
         ]);
     })

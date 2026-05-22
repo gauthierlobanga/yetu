@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Shop;
 
 use App\Http\Controllers\Controller;
 use App\Models\Commande;
-// Optionnel : service dédié
+use App\Models\VisitorEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
 
 class CheckoutController extends Controller
@@ -68,6 +69,14 @@ class CheckoutController extends Controller
                 'name' => 'Paiement à la livraison',
             ],
         ];
+
+        // Enregistrement de l'événement début du checkout
+        VisitorEvent::create([
+            'session_id' => Session::getId(),
+            'visitor_id' => request()->cookie('y_visitor'),
+            'event_type' => 'begin_checkout',
+            'occurred_at' => now(),
+        ]);
 
         return Inertia::render('Shop/Checkout/Index', [
             'cart' => $this->cartController->formatCart($cart),
@@ -146,6 +155,16 @@ class CheckoutController extends Controller
         if ($commande->client_id !== optional(Auth::user()->client)->id) {
             abort(403);
         }
+
+        // Enregistrement de l'événement d'achat réussi (purchase)
+        VisitorEvent::create([
+            'session_id' => Session::getId(),
+            'visitor_id' => request()->cookie('y_visitor'),
+            'event_type' => 'purchase',
+            'order_id' => $commande->id,
+            'value' => $commande->total,
+            'occurred_at' => now(),
+        ]);
 
         return Inertia::render('Shop/Checkout/Success', [
             'commande' => $commande->load('lignes.produit'),

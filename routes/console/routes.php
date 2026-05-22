@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('wishlist:send-reminders --days=0')->everyTenSeconds();
+Schedule::command('visits:clean')->daily();

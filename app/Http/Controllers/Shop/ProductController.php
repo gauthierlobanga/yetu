@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Shop;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\ProductCategory;
+use App\Models\ProductView;
 use App\Models\Produit;
 use App\Support\Search\ProductIntelligentSearch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
@@ -156,6 +158,14 @@ class ProductController extends Controller
         $produit->incrementerVues();
 
         $related = $produit->getRelatedProducts(24)->map(fn ($p) => $this->formatProduct($p));
+
+        ProductView::create([
+            'product_id' => $produit->id,
+            'session_id' => Session::getId(),
+            'visitor_id' => request()->cookie('y_visitor'),
+            'url' => request()->fullUrl(),
+            'viewed_at' => now(),
+        ]);
 
         return Inertia::render('Shop/Products/Show', [
             'product' => $this->formatProduct($produit, true),

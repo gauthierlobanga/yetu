@@ -1,5 +1,6 @@
 'use client';
 
+import { Eye, Heart, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import {
@@ -13,10 +14,9 @@ import {
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
-    type ChartConfig,
 } from '@/components/ui/chart';
+import type { ChartConfig } from '@/components/ui/chart';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Eye, Heart, MessageCircle } from 'lucide-react';
 
 interface CategoryPerf {
     nom: string;
@@ -129,6 +129,7 @@ export function ChartCategoryPerformance({ data }: { data: CategoryPerf[] }) {
                                 <ChartTooltipContent
                                     labelFormatter={(label, payload) => {
                                         const data = payload[0]?.payload;
+
                                         return (
                                             <div className="space-y-1">
                                                 <p className="font-medium">
@@ -146,6 +147,7 @@ export function ChartCategoryPerformance({ data }: { data: CategoryPerf[] }) {
                                             typeof value === 'number'
                                                 ? value
                                                 : 0;
+
                                         return [
                                             `${numericValue.toLocaleString()} ${metricLabels[activeMetric].toLowerCase()}`,
                                             '',
