@@ -439,27 +439,27 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
     });
 
     return (
-        <Card className="overflow-hidden rounded-[2rem] border border-slate-800 bg-slate-950/70 shadow-[0_10px_50px_-12px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+        <Card className="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/80 shadow-[0_10px_50px_-12px_rgba(15,23,42,0.10)] backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-950/70 dark:shadow-[0_10px_50px_-12px_rgba(0,0,0,0.6)]">
             {/* HEADER */}
-            <CardHeader className="border-b border-slate-800 bg-linear-to-r from-slate-900 to-slate-950">
+            <CardHeader className="border-b border-slate-200/70 bg-linear-to-r from-white to-slate-50 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/10 bg-emerald-500/10 text-emerald-600 dark:border-emerald-500/20 dark:text-emerald-400">
                             <PackageCheck className="h-6 w-6" />
                         </div>
 
                         <div>
-                            <CardTitle className="text-xl text-white">
+                            <CardTitle className="text-xl text-slate-900 dark:text-white">
                                 Dernières commandes
                             </CardTitle>
 
-                            <CardDescription className="mt-1 text-slate-400">
+                            <CardDescription className="mt-1 text-slate-500 dark:text-slate-400">
                                 Historique récent des commandes clients
                             </CardDescription>
                         </div>
                     </div>
 
-                    <Badge className="border-emerald-500/20 bg-emerald-500/10 px-4 py-1.5 text-emerald-400">
+                    <Badge className="border border-emerald-500/20 bg-emerald-500/10 px-4 py-1.5 text-emerald-700 dark:text-emerald-400">
                         {initialCommandes.total} commandes
                     </Badge>
                 </div>
@@ -467,9 +467,9 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
 
             <CardContent className="p-0">
                 {/* TOOLBAR */}
-                <div className="flex flex-col gap-4 border-b border-slate-800 bg-slate-900/40 p-6 lg:flex-row lg:items-center">
+                <div className="flex flex-col gap-4 border-b border-slate-200/70 bg-slate-50/60 p-6 lg:flex-row lg:items-center dark:border-slate-800 dark:bg-slate-900/40">
                     <div className="relative flex-1">
-                        <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                        <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
 
                         <Input
                             placeholder="Rechercher une commande..."
@@ -482,7 +482,7 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
                                     .getColumn('client')
                                     ?.setFilterValue(e.target.value)
                             }
-                            className="h-11 rounded-2xl border-slate-700 bg-slate-900/70 pl-11 text-slate-200 placeholder:text-slate-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                            className="h-11 rounded-2xl border-slate-200 bg-white pl-11 text-slate-700 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200 dark:placeholder:text-slate-500"
                         />
                     </div>
 
@@ -497,13 +497,13 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
                                 ?.setFilterValue(value === 'all' ? '' : value)
                         }
                     >
-                        <SelectTrigger className="h-11 w-full rounded-2xl border-slate-700 bg-slate-900/70 text-slate-200 lg:w-56">
-                            <Filter className="mr-2 h-4 w-4 text-slate-500" />
+                        <SelectTrigger className="h-11 w-full rounded-2xl border-slate-200 bg-white text-slate-700 lg:w-56 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-200">
+                            <Filter className="mr-2 h-4 w-4 text-slate-400 dark:text-slate-500" />
 
                             <SelectValue placeholder="Tous les statuts" />
                         </SelectTrigger>
 
-                        <SelectContent className="rounded-2xl border-slate-800 bg-slate-950 text-slate-200">
+                        <SelectContent className="rounded-2xl border-slate-200 bg-white text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
                             <SelectItem value="all">
                                 Tous les statuts
                             </SelectItem>
@@ -520,7 +520,7 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
                         </SelectContent>
                     </Select>
 
-                    <div className="text-sm text-slate-500">
+                    <div className="text-sm text-slate-500 dark:text-slate-400">
                         {table.getFilteredRowModel().rows.length} résultat(s)
                     </div>
                 </div>
@@ -532,12 +532,12 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <TableRow
                                     key={headerGroup.id}
-                                    className="border-slate-800 bg-slate-900/40 hover:bg-slate-900/40"
+                                    className="border-slate-200/70 bg-slate-50/70 hover:bg-slate-50/70 dark:border-slate-800 dark:bg-slate-900/40 dark:hover:bg-slate-900/40"
                                 >
                                     {headerGroup.headers.map((header) => (
                                         <TableHead
                                             key={header.id}
-                                            className="h-14 text-xs font-semibold tracking-wide text-slate-400 uppercase"
+                                            className="h-14 text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400"
                                         >
                                             {header.isPlaceholder
                                                 ? null
@@ -560,12 +560,12 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
                                         data-state={
                                             row.getIsSelected() && 'selected'
                                         }
-                                        className="border-slate-800/80 transition-all hover:bg-slate-900/60 data-[state=selected]:bg-emerald-500/10"
+                                        className="border-slate-200/60 transition-all hover:bg-slate-50/80 data-[state=selected]:bg-emerald-500/10 dark:border-slate-800/80 dark:hover:bg-slate-900/60"
                                     >
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell
                                                 key={cell.id}
-                                                className="py-4 text-slate-300"
+                                                className="py-4 text-slate-700 dark:text-slate-300"
                                             >
                                                 {flexRender(
                                                     cell.column.columnDef.cell,
@@ -579,7 +579,7 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
                                 <TableRow>
                                     <TableCell
                                         colSpan={columns.length}
-                                        className="h-40 text-center text-slate-500"
+                                        className="h-40 text-center text-slate-500 dark:text-slate-400"
                                     >
                                         Aucune commande trouvée.
                                     </TableCell>
@@ -590,8 +590,8 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
                 </div>
 
                 {/* FOOTER */}
-                <div className="flex flex-col gap-4 border-t border-slate-800 bg-slate-900/40 px-6 py-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="text-sm text-slate-500">
+                <div className="flex flex-col gap-4 border-t border-slate-200/70 bg-slate-50/60 px-6 py-4 lg:flex-row lg:items-center lg:justify-between dark:border-slate-800 dark:bg-slate-900/40">
+                    <div className="text-sm text-slate-500 dark:text-slate-400">
                         {table.getFilteredSelectedRowModel().rows.length}{' '}
                         sélectionnée(s) sur{' '}
                         {table.getFilteredRowModel().rows.length}
@@ -603,12 +603,12 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
                             size="icon"
                             onClick={() => table.previousPage()}
                             disabled={!table.getCanPreviousPage()}
-                            className="h-10 w-10 rounded-xl border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800"
+                            className="h-10 w-10 rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                         >
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
 
-                        <div className="rounded-xl border border-slate-800 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-300">
+                        <div className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
                             Page {table.getState().pagination.pageIndex + 1} /{' '}
                             {table.getPageCount()}
                         </div>
@@ -618,7 +618,7 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
                             size="icon"
                             onClick={() => table.nextPage()}
                             disabled={!table.getCanNextPage()}
-                            className="h-10 w-10 rounded-xl border-slate-700 bg-slate-900 text-slate-300 hover:bg-slate-800"
+                            className="h-10 w-10 rounded-xl border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
                         >
                             <ChevronRight className="h-4 w-4" />
                         </Button>

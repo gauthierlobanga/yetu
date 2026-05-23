@@ -43,6 +43,38 @@ class VisitorTrackingService
             'utm_content' => $request->query('utm_content'),
         ]);
 
+        // === Correction des valeurs d'appareil, navigateur, plateforme ===
+        $rawDevice = $this->agent->device();
+        $rawBrowser = $this->agent->browser();
+        $rawPlatform = $this->agent->platform();
+
+        // Appareil
+        if (empty($rawDevice) || $rawDevice === 'WebKit' || $rawDevice === '0') {
+            if ($this->agent->isMobile()) {
+                $device = 'Mobile';
+            } elseif ($this->agent->isTablet()) {
+                $device = 'Tablet';
+            } else {
+                $device = 'Desktop';
+            }
+        } else {
+            $device = $rawDevice;
+        }
+
+        // Navigateur
+        if (empty($rawBrowser) || $rawBrowser === '0') {
+            $browser = 'Autre';
+        } else {
+            $browser = $rawBrowser;
+        }
+
+        // Plateforme (OS)
+        if (empty($rawPlatform) || $rawPlatform === '0') {
+            $platform = 'Inconnu';
+        } else {
+            $platform = $rawPlatform;
+        }
+
         $visit = new Visit([
             'visitor_id' => $visitorId,
             'session_id' => $sessionId,
@@ -51,9 +83,9 @@ class VisitorTrackingService
             'method' => $request->method(),
             'referrer' => $request->headers->get('referer'),
             'ip' => $request->ip(),
-            'device' => $this->agent->device(),
-            'platform' => $this->agent->platform(),
-            'browser' => $this->agent->browser(),
+            'device' => $device,
+            'platform' => $platform,
+            'browser' => $browser,
             'language' => $request->getPreferredLanguage(),
             'utm_params' => $utmParams,
             'visited_at' => now(),

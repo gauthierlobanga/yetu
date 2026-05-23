@@ -207,6 +207,12 @@ class AnalyticsService
         if (empty($referrer)) {
             return 'Direct';
         }
+
+        // Ignorer les referrers internes (développement local)
+        if (str_contains($referrer, 'localhost') || str_contains($referrer, '127.0.0.1')) {
+            return 'Direct';
+        }
+
         if (str_contains($referrer, 'facebook')) {
             return 'Facebook';
         }

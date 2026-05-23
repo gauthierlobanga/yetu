@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 // resources/js/Pages/Vendor/Statistics/Partials/FreightChart.tsx
 import { Truck } from 'lucide-react';
 import {
@@ -8,7 +9,6 @@ import {
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
-    Cell,
 } from 'recharts';
 
 import {
@@ -25,6 +25,42 @@ interface Props {
 
 export function FreightChart({ data }: Props) {
     const total = data.reduce((sum, item) => sum + item.count, 0);
+    // Ajoute ce CustomTooltip avant le return principal du composant
+
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (!active || !payload?.length) {
+            return null;
+        }
+
+        const d = payload[0]?.payload;
+
+        return (
+            <div className="min-w-52 rounded-2xl border border-slate-200/70 bg-white/95 p-4 shadow-2xl backdrop-blur-xl transition-colors dark:border-slate-700/70 dark:bg-slate-900/95">
+                <div className="mb-3 flex items-center gap-2">
+                    <div
+                        className="h-3 w-3 rounded-full shadow-sm"
+                        style={{
+                            backgroundColor: d?.fill,
+                        }}
+                    />
+
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        {d?.name}
+                    </p>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                        Volume
+                    </span>
+
+                    <span className="text-sm font-bold text-slate-900 dark:text-white">
+                        {d?.count ?? 0} commandes
+                    </span>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <Card className="overflow-hidden border border-slate-200/70 bg-white/90 backdrop-blur-xl transition-all dark:border-slate-800/80 dark:bg-slate-950/60">
@@ -96,7 +132,7 @@ export function FreightChart({ data }: Props) {
                                 tickMargin={12}
                                 tick={{
                                     fontSize: 12,
-                                    fill: '#64748b',
+                                    fill: '#94a3b8',
                                 }}
                             />
 
@@ -106,7 +142,7 @@ export function FreightChart({ data }: Props) {
                                 tickMargin={10}
                                 tick={{
                                     fontSize: 12,
-                                    fill: '#64748b',
+                                    fill: '#94a3b8',
                                 }}
                             />
 
@@ -115,34 +151,33 @@ export function FreightChart({ data }: Props) {
                                     fill: 'rgba(148,163,184,0.08)',
                                     radius: 12,
                                 }}
-                                contentStyle={{
-                                    borderRadius: '18px',
-                                    border: '1px solid rgba(148,163,184,0.15)',
-                                    background: 'rgba(15,23,42,0.92)',
-                                    backdropFilter: 'blur(14px)',
-                                    boxShadow: '0 10px 40px rgba(0,0,0,0.35)',
-                                    color: '#fff',
-                                }}
-                                labelStyle={{
-                                    color: '#e2e8f0',
-                                    fontWeight: 600,
-                                    marginBottom: 6,
-                                }}
-                                formatter={(value: any) => [
-                                    `${value ?? 0} commandes`,
-                                    'Volume',
-                                ]}
+                                content={<CustomTooltip />}
                             />
 
                             <Bar
                                 dataKey="count"
                                 radius={[12, 12, 0, 0]}
                                 barSize={44}
-                            >
-                                {data.map((entry, index) => (
-                                    <Cell key={index} fill={entry.fill} />
-                                ))}
-                            </Bar>
+                                shape={(props: any) => {
+                                    const { x, y, width, height, payload } =
+                                        props;
+
+                                    return (
+                                        <g>
+                                            <rect
+                                                x={x}
+                                                y={y}
+                                                width={width}
+                                                height={height}
+                                                rx={12}
+                                                ry={12}
+                                                fill={payload.fill}
+                                                className="transition-opacity duration-300 hover:opacity-80"
+                                            />
+                                        </g>
+                                    );
+                                }}
+                            />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

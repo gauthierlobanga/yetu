@@ -69,7 +69,7 @@ export function StockChart({ data }: Props) {
     };
 
     return (
-        <Card className="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-[0_10px_40px_-15px_rgba(15,23,42,0.15)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_rgba(15,23,42,0.28)] dark:border-slate-800/80 dark:bg-slate-950/70">
+        <Card className="group relative overflow-hidden rounded-lg border border-slate-200/70 bg-white/80 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/70">
             {/* Glow */}
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_35%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
