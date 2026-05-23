@@ -27,7 +27,7 @@ return new class extends Migration
 
         // Table product_views (vues produits)
         Schema::create('product_views', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->uuid('product_id');
             $table->string('session_id')->nullable();
             $table->string('visitor_id')->nullable();
@@ -56,9 +56,8 @@ return new class extends Migration
         // Table analytics_snapshots (agrégations quotidiennes)
         Schema::create('analytics_snapshots', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            // Pas de tenant_id car chaque tenant a sa propre base
             $table->date('date');
-            $table->json('metrics'); // total_visits, revenue, conversion_rate, etc.
+            $table->jsonb('metrics'); // total_visits, revenue, conversion_rate, etc.
             $table->timestamps();
 
             $table->unique('date');

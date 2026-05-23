@@ -329,6 +329,16 @@ export default function VendorStatistics({
                                 >
                                     <ChartOrderStatuses data={orderStatuses} />
                                 </motion.div>
+
+                                <motion.div
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    variants={cardVariants}
+                                    transition={{ delay: 0.3 }}
+                                >
+                                    <TopProductsChart data={topProducts} />
+                                </motion.div>
                             </div>
 
                             {/* Clients + Products */}
@@ -342,16 +352,48 @@ export default function VendorStatistics({
                                 >
                                     <TopClientsChart data={topClients} />
                                 </motion.div>
-
-                                <motion.div
-                                    initial="hidden"
-                                    whileInView="visible"
-                                    viewport={{ once: true }}
-                                    variants={cardVariants}
-                                    transition={{ delay: 0.3 }}
-                                >
-                                    <TopProductsChart data={topProducts} />
-                                </motion.div>
+                                {freightData && freightData.length > 0 && (
+                                    <motion.div
+                                        initial={{
+                                            opacity: 0,
+                                            y: 20,
+                                        }}
+                                        animate={{
+                                            opacity: 1,
+                                            y: 0,
+                                        }}
+                                        exit={{
+                                            opacity: 0,
+                                            y: 20,
+                                        }}
+                                        transition={{
+                                            duration: 0.5,
+                                            delay: 0.2,
+                                        }}
+                                    >
+                                        {stockData && stockData.length > 0 && (
+                                            <motion.div
+                                                initial={{
+                                                    opacity: 0,
+                                                    y: 20,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    y: 0,
+                                                }}
+                                                exit={{
+                                                    opacity: 0,
+                                                    y: 20,
+                                                }}
+                                                transition={{
+                                                    duration: 0.5,
+                                                }}
+                                            >
+                                                <StockChart data={stockData} />
+                                            </motion.div>
+                                        )}
+                                    </motion.div>
+                                )}
                             </div>
 
                             {/* Advanced cards */}
@@ -388,127 +430,10 @@ export default function VendorStatistics({
                                                 />
                                             </motion.div>
                                         )}
-
-                                    {freightData && freightData.length > 0 && (
-                                        <motion.div
-                                            initial={{
-                                                opacity: 0,
-                                                y: 20,
-                                            }}
-                                            animate={{
-                                                opacity: 1,
-                                                y: 0,
-                                            }}
-                                            exit={{
-                                                opacity: 0,
-                                                y: 20,
-                                            }}
-                                            transition={{
-                                                duration: 0.5,
-                                                delay: 0.2,
-                                            }}
-                                        >
-                                            {stockData &&
-                                                stockData.length > 0 && (
-                                                    <motion.div
-                                                        initial={{
-                                                            opacity: 0,
-                                                            y: 20,
-                                                        }}
-                                                        animate={{
-                                                            opacity: 1,
-                                                            y: 0,
-                                                        }}
-                                                        exit={{
-                                                            opacity: 0,
-                                                            y: 20,
-                                                        }}
-                                                        transition={{
-                                                            duration: 0.5,
-                                                        }}
-                                                    >
-                                                        <StockChart
-                                                            data={stockData}
-                                                        />
-                                                    </motion.div>
-                                                )}
-                                        </motion.div>
-                                    )}
-
-                                    {freightData && freightData.length > 0 && (
-                                        <motion.div
-                                            initial={{
-                                                opacity: 0,
-                                                y: 20,
-                                            }}
-                                            animate={{
-                                                opacity: 1,
-                                                y: 0,
-                                            }}
-                                            exit={{
-                                                opacity: 0,
-                                                y: 20,
-                                            }}
-                                            transition={{
-                                                duration: 0.5,
-                                                delay: 0.2,
-                                            }}
-                                        >
-                                            {stockData &&
-                                                stockData.length > 0 && (
-                                                    <motion.div
-                                                        initial={{
-                                                            opacity: 0,
-                                                            y: 20,
-                                                        }}
-                                                        animate={{
-                                                            opacity: 1,
-                                                            y: 0,
-                                                        }}
-                                                        exit={{
-                                                            opacity: 0,
-                                                            y: 20,
-                                                        }}
-                                                        transition={{
-                                                            duration: 0.5,
-                                                        }}
-                                                    >
-                                                        <StockChart
-                                                            data={stockData}
-                                                        />
-                                                    </motion.div>
-                                                )}
-                                        </motion.div>
-                                    )}
                                 </AnimatePresence>
                             </div>
                         </div>
 
-                        {/* FOOTER */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 1 }}
-                            className="mt-20 border-t border-slate-200/60 pt-8 dark:border-slate-800/60"
-                        >
-                            <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
-                                <div>
-                                    <h3 className="font-semibold text-slate-800 dark:text-white">
-                                        {tenant.raison_sociale}
-                                    </h3>
-
-                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                        Tableau analytique intelligent &
-                                        monitoring temps réel.
-                                    </p>
-                                </div>
-
-                                <div className="rounded-2xl border border-slate-200/60 bg-white/60 px-5 py-3 text-sm text-slate-500 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
-                                    © {new Date().getFullYear()} — Tous droits
-                                    réservés.
-                                </div>
-                            </div>
-                        </motion.div>
                         {/* TABLES ANALYTIQUES PREMIUM */}
                         <motion.section
                             initial="hidden"
@@ -641,6 +566,31 @@ export default function VendorStatistics({
                                 </motion.div>
                             </div>
                         </motion.section>
+                        {/* FOOTER */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1 }}
+                            className="mt-20 border-t border-slate-200/60 pt-8 dark:border-slate-800/60"
+                        >
+                            <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
+                                <div>
+                                    <h3 className="font-semibold text-slate-800 dark:text-white">
+                                        {tenant.raison_sociale}
+                                    </h3>
+
+                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        Tableau analytique intelligent &
+                                        monitoring temps réel.
+                                    </p>
+                                </div>
+
+                                <div className="rounded-2xl border border-slate-200/60 bg-white/60 px-5 py-3 text-sm text-slate-500 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
+                                    © {new Date().getFullYear()} — Tous droits
+                                    réservés.
+                                </div>
+                            </div>
+                        </motion.div>
                     </div>
                 </div>
             </SidebarInset>
