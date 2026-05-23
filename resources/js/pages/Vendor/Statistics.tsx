@@ -177,17 +177,6 @@ export default function VendorStatistics({
                 >
                     <Head title={`Statistiques - ${tenant.raison_sociale}`} />
 
-                    {/* Background premium */}
-                    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                        <div className="absolute top-0 left-1/3 h-125 w-125 rounded-full bg-emerald-500/10 blur-3xl" />
-
-                        <div className="absolute right-0 bottom-0 h-112.5 w-112.5 rounded-full bg-cyan-500/10 blur-3xl" />
-
-                        <div className="absolute top-1/2 left-1/2 h-225 w-225 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/3 blur-3xl" />
-
-                        <div className="absolute inset-0 [background-image:url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.02]" />
-                    </div>
-
                     <div className="relative z-10 mx-auto max-w-425 px-4 py-8 sm:px-6 lg:px-8">
                         {/* HERO */}
                         <motion.div
@@ -208,7 +197,7 @@ export default function VendorStatistics({
                                     <div className="flex flex-wrap items-center gap-3">
                                         <Badge className="border-emerald-200 bg-emerald-50 px-4 py-1 text-emerald-700 dark:border-emerald-800/30 dark:bg-emerald-950/40 dark:text-emerald-300">
                                             <Sparkles className="mr-2 h-3.5 w-3.5" />
-                                            Dashboard Premium
+                                            Dashboard
                                         </Badge>
                                         <Badge
                                             variant="outline"
@@ -219,11 +208,11 @@ export default function VendorStatistics({
                                         </Badge>
                                     </div>
 
-                                    <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 md:text-5xl dark:text-white">
+                                    <h1 className="text-4xl font-semibold tracking-tight text-slate-900 md:text-4xl dark:text-white">
                                         Tableau de bord analytique
                                     </h1>
 
-                                    <p className="max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg dark:text-slate-400">
+                                    <p className="max-w-2xl text-base leading-normal text-slate-600 md:text-lg dark:text-slate-400">
                                         Analysez les performances de votre
                                         boutique, surveillez les ventes,
                                         optimisez votre croissance et obtenez
