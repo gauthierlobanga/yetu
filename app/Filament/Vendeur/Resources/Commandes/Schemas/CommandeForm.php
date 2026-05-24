@@ -3,6 +3,7 @@
 namespace App\Filament\Vendeur\Resources\Commandes\Schemas;
 
 use App\Models\Client;
+use App\Models\Panier;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -45,6 +46,23 @@ class CommandeForm
                                         }
                                     })
                                     ->helperText('Sélectionnez le client associé à cette commande'),
+
+                                Select::make('panier_id')
+                                    ->label('Panier')
+                                    ->relationship('panier', 'id', fn ($query) => $query->select('id', 'total_general'))
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, callable $set) {
+                                        if ($state) {
+                                            $panier = Panier::find($state);
+                                            if ($panier) {
+                                                $set('valeur_panier', $panier->total_general);
+                                                $set('date_creation', $panier->created_at);
+                                            }
+                                        }
+                                    }),
 
                                 TextInput::make('numero_commande')
                                     ->label('Numéro de commande')

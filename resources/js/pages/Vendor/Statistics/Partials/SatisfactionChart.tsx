@@ -120,11 +120,11 @@ export function SatisfactionChart({
                 {/* Score */}
                 <div className="mt-5 flex items-end gap-3 rounded-lg border border-slate-200/70 bg-slate-50/70 p-4 dark:border-slate-800/70 dark:bg-slate-900/50">
                     <div className="flex items-end gap-1">
-                        <span className="text-5xl font-black tracking-tight text-slate-900 dark:text-white">
+                        <span className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
                             {averageRating.toFixed(1)}
                         </span>
 
-                        <span className="mb-1 text-lg font-medium text-slate-500 dark:text-slate-400">
+                        <span className="mb-1 text-sm font-medium text-slate-500 dark:text-slate-400">
                             /5
                         </span>
                     </div>
@@ -152,7 +152,7 @@ export function SatisfactionChart({
 
                     {/* Center Content */}
                     <div className="pointer-events-none absolute top-1/2 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center">
-                        <span className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+                        <span className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
                             {averageRating.toFixed(1)}
                         </span>
 
@@ -170,11 +170,11 @@ export function SatisfactionChart({
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={105}
-                                innerRadius={68}
+                                innerRadius={70}
                                 paddingAngle={4}
-                                cornerRadius={10}
                                 stroke="transparent"
-                                strokeWidth={4}
+                                strokeWidth={2}
+                                labelLine={false}
                             >
                                 {data.map((entry, index) => (
                                     <Cell
@@ -201,7 +201,7 @@ export function SatisfactionChart({
                         return (
                             <div
                                 key={index}
-                                className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-slate-50/70 px-4 py-3 transition-all duration-300 hover:border-amber-500/20 hover:bg-white dark:border-slate-800/70 dark:bg-slate-900/60 dark:hover:bg-slate-900"
+                                className="flex items-center justify-between rounded-lg border border-slate-200/70 bg-slate-50/70 px-4 py-3 transition-all duration-300 hover:border-amber-500/20 hover:bg-white dark:border-slate-800/70 dark:bg-slate-900/60 dark:hover:bg-slate-900"
                             >
                                 <div className="flex items-center gap-3">
                                     <span

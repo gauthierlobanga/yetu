@@ -39,7 +39,6 @@ class CommandesTable
                     ->copyMessage('Numéro de commande copié')
                     ->toggleable(),
 
-                // Client
                 TextColumn::make('client.nom')
                     ->label('Client')
                     ->searchable()

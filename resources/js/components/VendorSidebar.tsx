@@ -210,8 +210,8 @@ export function VendorSidebar({ tenant }: { tenant: Tenant }) {
                 'bg-white/92 backdrop-blur-3xl supports-backdrop-filter:bg-white/88',
                 'dark:border-slate-800/80',
                 'dark:bg-slate-950/94 dark:supports-backdrop-filter:bg-slate-950/88',
-                'shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.04)]',
-                'dark:shadow-[0_1px_2px_rgba(0,0,0,0.35),0_20px_40px_rgba(0,0,0,0.25)]',
+                // 'shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.04)]',
+                // 'dark:shadow-[0_1px_2px_rgba(0,0,0,0.35),0_20px_40px_rgba(0,0,0,0.25)]',
             )}
         >
             {/* Halo décoratif */}

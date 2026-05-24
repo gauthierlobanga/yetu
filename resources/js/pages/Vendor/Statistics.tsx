@@ -159,6 +159,7 @@ export default function VendorStatistics({
 
     return (
         <SidebarProvider
+            className="dark:bg-slate-950/94"
             style={
                 {
                     '--sidebar-width': 'calc(var(--spacing) * 72)',
@@ -593,7 +594,7 @@ export default function VendorStatistics({
                                         </Badge>
                                     </div>
 
-                                    <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+                                    <h2 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
                                         Activités récentes
                                     </h2>
 

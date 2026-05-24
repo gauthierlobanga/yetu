@@ -278,7 +278,7 @@ class VendorStatisticsController extends Controller
         return Produit::withSum('ligneCommandes', 'prix_total')
             ->withCount('ligneCommandes as quantity')
             ->orderByDesc('ligne_commandes_sum_prix_total')
-            ->take(8)
+            ->take(10)
             ->get()
             ->map(fn ($p) => [
                 'id' => $p->id,

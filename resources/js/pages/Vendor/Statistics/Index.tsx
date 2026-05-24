@@ -22,10 +22,6 @@ import {
     ShoppingCart,
     Package,
     MapPin,
-    Facebook,
-    Instagram,
-    Twitter,
-    Youtube,
     Link as LinkIcon,
     Loader2,
     RefreshCw,
@@ -1654,10 +1650,10 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                         </Card>
 
                         {/* Graphique évolution des visites */}
-                        <Card className="mb-8 overflow-hidden rounded-[32px] border border-white/20 bg-white/70 backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/70">
-                            <div className="border-b border-slate-200/50 p-6 dark:border-slate-800">
+                        <Card className="mb-8 overflow-hidden rounded-lg border border-white/20 bg-white/70 backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/70">
+                            <div className="border-b border-slate-200/50 p-4 dark:border-slate-800">
                                 <div className="flex items-center gap-3">
-                                    <div className="rounded-2xl bg-emerald-500/10 p-3 text-emerald-500">
+                                    <div className="rounded-lg bg-emerald-500/10 p-3 text-emerald-500">
                                         <BarChart3 className="h-5 w-5" />
                                     </div>
                                     <div>
@@ -1670,8 +1666,8 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                     </div>
                                 </div>
                             </div>
-                            <CardContent className="p-6">
-                                <ResponsiveContainer width="100%" height={400}>
+                            <CardContent>
+                                <ResponsiveContainer width="100%" height={300}>
                                     <AreaChart data={daily}>
                                         <defs>
                                             <linearGradient
@@ -1687,7 +1683,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                     stopOpacity={0.4}
                                                 />
                                                 <stop
-                                                    offset="95%"
+                                                    offset="98%"
                                                     stopColor="#10b981"
                                                     stopOpacity={0}
                                                 />
@@ -1711,7 +1707,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                             type="monotone"
                                             dataKey="visits"
                                             stroke="#10b981"
-                                            strokeWidth={4}
+                                            strokeWidth={1}
                                             fill="url(#colorVisits)"
                                         />
                                     </AreaChart>
@@ -1904,7 +1900,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                                             .payload;
 
                                                                     return (
-                                                                        <div className="rounded-xl border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95">
+                                                                        <div className="rounded-lg border border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95">
                                                                             <p className="font-medium text-slate-800 dark:text-white">
                                                                                 {
                                                                                     data.device

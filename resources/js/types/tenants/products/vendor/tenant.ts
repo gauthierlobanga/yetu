@@ -1,11 +1,11 @@
 export interface Tenant {
+    id: string;
     ai_enabled: boolean;
     facebook_url: string;
     instagram_url: string;
     twitter_url: string;
     youtube_url: string;
     tiktok_url: string;
-    id: string;
     raison_sociale: string;
     slug: string;
     description: string | null;
