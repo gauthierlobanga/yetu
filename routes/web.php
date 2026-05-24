@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\VisitorStatsController;
+use App\Http\Controllers\Auth\TenantSsoLoginController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Central\HeroCentralController;
 use App\Http\Controllers\ContactController;
@@ -22,7 +23,7 @@ use Laravel\Fortify\Features;
 
 Route::get('/', [HeroCentralController::class, 'Index'])->name('home');
 
-Route::middleware('guest')->group(function () {
+Route::middleware('guest.tenant')->group(function () {
     Route::get('/login', fn (Request $request) => Inertia::render('auth/login', [
         'canResetPassword' => Features::enabled(Features::resetPasswords()),
         'canRegister' => Features::enabled(Features::registration()),
@@ -42,6 +43,9 @@ Route::middleware('guest')->group(function () {
     ]))->name('central.password.reset');
 
 });
+
+Route::get('/auth/tenant-sso', [TenantSsoLoginController::class, '__invoke'])
+    ->name('tenant.sso.central');
 
 /*
 |--------------------------------------------------------------------------

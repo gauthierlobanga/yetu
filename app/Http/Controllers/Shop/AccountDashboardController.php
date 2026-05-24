@@ -32,7 +32,7 @@ class AccountDashboardController extends Controller
             ])
             ->count();
 
-        return Inertia::render('Shop/Dashboard/Index', [
+        return Inertia::render('Shop/Acheteur/Dashboard/Index', [
             'stats' => [
                 'orders_count' => $client->commandes()->count(),
                 'completed_orders' => $client->commandes()->where('statut', 'termine')->count(),

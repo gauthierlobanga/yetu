@@ -2,9 +2,13 @@
 
 namespace App\Actions\Fortify;
 
+use App\Models\Client;
 use App\Models\Tenant;
 use App\Services\VendorRegistrationService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 use Laravel\Fortify\Contracts\LoginResponse;
 
 class CustomLoginResponse implements LoginResponse
@@ -12,12 +16,16 @@ class CustomLoginResponse implements LoginResponse
     public function toResponse($request)
     {
         $user = $request->user();
+        dd('toResponse atteint', $user?->email);
 
+        // Domaine central
         if ($this->isCentralDomain($request->getHost())) {
             if ($user && $tenant = $this->getUserTenant($user)) {
-                return redirect()->away(app(VendorRegistrationService::class)->getVendeurUrl($tenant));
-            }
+                $url = app(VendorRegistrationService::class)->getTenantSsoLoginUrl($tenant, $user);
+                Log::info('Redirection SSO', ['url' => $url]);
 
+                return redirect()->away($url); // ← HTTP redirect, pas Inertia::location
+            }
             if ($user?->hasRole('super_admin') && Route::has('filament.admin.pages.dashboard')) {
                 return redirect()->intended(route('filament.admin.pages.dashboard'));
             }
@@ -25,16 +33,19 @@ class CustomLoginResponse implements LoginResponse
             return redirect()->intended(route('vendor.register'));
         }
 
+        // Domaine tenant (ne change rien)
         if ($user && $this->canUseTenantDashboard($user)) {
-            return redirect()->intended('/vendeur');
+            return redirect()->intended('/vendor/dashboard');
         }
+        $this->ensureTenantClient($user);
 
-        return redirect()->intended('/account');
+        return redirect()->intended(route('acheteur.dashboard'));
     }
 
     private function isCentralDomain(string $host): bool
     {
         return in_array($host, config('tenancy.central_domains', []), true);
+
     }
 
     private function getUserTenant($user): ?Tenant
@@ -48,7 +59,7 @@ class CustomLoginResponse implements LoginResponse
 
     private function canUseTenantDashboard($user): bool
     {
-        if ($user->hasRole(['super_admin', 'Manager', 'owner', 'manager'])) {
+        if ($user->hasRole(['super_admin', 'owner', 'manager'])) {
             return true;
         }
 
@@ -56,10 +67,33 @@ class CustomLoginResponse implements LoginResponse
             return false;
         }
 
-        try {
-            return $user->canAccessTenant(tenant());
-        } catch (\Throwable) {
-            return false;
+        return DB::connection($this->centralConnection())
+            ->table('user_tenant')
+            ->where('user_id', $user->id)
+            ->where('tenant_id', tenant()->id)
+            ->where('is_owner', true)
+            ->exists();
+    }
+
+    private function ensureTenantClient($user): void
+    {
+        if (! $user || ! function_exists('tenancy') || ! tenancy()->initialized) {
+            return;
         }
+
+        Client::firstOrCreate(
+            ['user_id' => $user->id],
+            [
+                'nom' => $user->name,
+                'email' => $user->email,
+                'statut' => Client::STATUT_ACTIF,
+                'source' => 'connexion',
+            ]
+        );
+    }
+
+    private function centralConnection(): string
+    {
+        return config('tenancy.database.central_connection', config('database.default'));
     }
 }

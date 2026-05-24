@@ -19,15 +19,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 
+import { useTenant } from '@/hooks/useTenant';
 import AuthLayout from '@/layouts/auth-layout';
-import { login } from '@/routes/central';
+import { login as centralLogin } from '@/routes/central';
 import { store } from '@/routes/register';
+import { login as tenantLogin } from '@/routes/tenant';
 
 export default function Register() {
+    const { isTenant } = useTenant();
+    const loginLink = isTenant ? tenantLogin() : centralLogin();
+
     return (
         <AuthLayout
-            title="Créer votre compte"
-            description="Rejoignez notre plateforme et lancez votre activité en quelques minutes."
+            title={isTenant ? 'Créer mon compte client' : 'Créer votre compte'}
+            description={
+                isTenant
+                    ? 'Inscrivez-vous dans cette boutique pour acheter plus vite et suivre vos commandes.'
+                    : 'Rejoignez notre plateforme et lancez votre activité en quelques minutes.'
+            }
         >
             <Head title="Inscription" />
 
@@ -218,7 +227,7 @@ export default function Register() {
                         <div className="text-center text-sm text-muted-foreground">
                             Vous avez déjà un compte ?{' '}
                             <TextLink
-                                href={login()}
+                                href={loginLink}
                                 tabIndex={6}
                                 className="font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
                             >

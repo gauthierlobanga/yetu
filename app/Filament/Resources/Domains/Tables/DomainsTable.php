@@ -1,7 +1,5 @@
 <?php
 
-// app/Filament/Resources/Domains/Tables/DomainsTable.php
-
 namespace App\Filament\Resources\Domains\Tables;
 
 use Filament\Actions\Action;
@@ -43,9 +41,9 @@ class DomainsTable
                     ->label('Boutique')
                     ->searchable()
                     ->sortable()
-                    // ->url(fn ($record) => $record->tenant
-                    //     ? route('filament.admin.resources.vendeurs.edit', $record->tenant)
-                    //     : null)
+                    ->url(fn ($record) => $record->tenant
+                        ? route('filament.admin.resources.vendeurs.edit', $record->tenant)
+                        : null)
                     ->icon('heroicon-o-building-storefront')
                     ->iconColor('amber'),
 

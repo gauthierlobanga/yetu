@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tenant;
 use App\Services\TenantPropsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Throwable;
 
 class VendorSettingsController extends Controller
 {
@@ -18,11 +21,10 @@ class VendorSettingsController extends Controller
     public function edit(TenantPropsService $tenantProps)
     {
         $user = Auth::user();
-        $tenant = $user->tenants()->wherePivot('is_owner', true)->first();
+        $tenant = $this->resolveOwnedTenant($user);
 
         if (! $tenant) {
-            return redirect()->route('vendor.register')
-                ->with('error', 'Vous nʼavez pas encore de boutique.');
+            abort(403);
         }
 
         return Inertia::render('Vendor/Settings', [
@@ -36,7 +38,11 @@ class VendorSettingsController extends Controller
     public function update(Request $request)
     {
         $user = Auth::user();
-        $tenant = $user->tenants()->wherePivot('is_owner', true)->firstOrFail();
+        $tenant = $this->resolveOwnedTenant($user);
+
+        if (! $tenant) {
+            abort(403);
+        }
 
         // Connexion vers la base centrale (ici 'pgsql', mais on peut la récupérer dynamiquement)
         $centralConnection = config('tenancy.database.central_connection', config('database.default'));
@@ -67,26 +73,83 @@ class VendorSettingsController extends Controller
             'twitter_url' => ['nullable', 'url', 'max:255'],
             'youtube_url' => ['nullable', 'url', 'max:255'],
             'tiktok_url' => ['nullable', 'url', 'max:255'],
+            'remove_logo' => ['nullable', 'boolean'],
         ]);
 
         $tenant->raison_sociale = $validated['raison_sociale'];
-        $tenant->description = $validated['description'];
+        $tenant->description = $validated['description'] ?? null;
         $tenant->email = $validated['email'];
-        $tenant->telephone = $validated['telephone'];
+        $tenant->telephone = $validated['telephone'] ?? null;
 
-        $tenant->setConfiguration('facebook_url', $validated['facebook_url']);
-        $tenant->setConfiguration('instagram_url', $validated['instagram_url']);
-        $tenant->setConfiguration('twitter_url', $validated['twitter_url']);
-        $tenant->setConfiguration('youtube_url', $validated['youtube_url']);
-        $tenant->setConfiguration('tiktok_url', $validated['tiktok_url']);
-
-        if ($request->hasFile('logo')) {
-            $tenant->addMediaFromRequest('logo')
-                ->toMediaCollection('tenant_avatar');
-        }
+        $tenant->setConfiguration('facebook_url', $validated['facebook_url'] ?? null);
+        $tenant->setConfiguration('instagram_url', $validated['instagram_url'] ?? null);
+        $tenant->setConfiguration('twitter_url', $validated['twitter_url'] ?? null);
+        $tenant->setConfiguration('youtube_url', $validated['youtube_url'] ?? null);
+        $tenant->setConfiguration('tiktok_url', $validated['tiktok_url'] ?? null);
 
         $tenant->save();
 
+        if ($request->hasFile('logo') || $request->boolean('remove_logo')) {
+            $this->replaceLogo($tenant, $request);
+        }
+
         return Redirect::route('vendor.settings')->with('success', 'Paramètres mis à jour avec succès.');
+    }
+
+    private function resolveOwnedTenant($user): ?Tenant
+    {
+        $tenant = function_exists('tenant') ? tenant() : null;
+
+        if (! $tenant || ! $user) {
+            return null;
+        }
+
+        $ownsTenant = DB::connection($this->centralConnection())
+            ->table('user_tenant')
+            ->where('tenant_id', $tenant->id)
+            ->where('user_id', $user->id)
+            ->where('is_owner', true)
+            ->exists();
+
+        return $ownsTenant ? $tenant : null;
+    }
+
+    private function replaceLogo(Tenant $tenant, Request $request): void
+    {
+        $this->clearTenantScopedLogoArtifacts($tenant);
+
+        tenancy()->central(function () use ($tenant, $request) {
+            $centralTenant = Tenant::query()->findOrFail($tenant->id);
+            $centralTenant->clearMediaCollection('tenant_avatar');
+
+            if (! $request->hasFile('logo')) {
+                return;
+            }
+
+            $file = $request->file('logo');
+
+            $centralTenant
+                ->addMedia($file)
+                ->usingFileName('logo-'.$centralTenant->id.'-'.Str::uuid().'.'.$file->getClientOriginalExtension())
+                ->toMediaCollection('tenant_avatar', 'public');
+        });
+    }
+
+    private function clearTenantScopedLogoArtifacts(Tenant $tenant): void
+    {
+        if (! function_exists('tenancy') || ! tenancy()->initialized) {
+            return;
+        }
+
+        try {
+            $tenant->clearMediaCollection('tenant_avatar');
+        } catch (Throwable) {
+            //
+        }
+    }
+
+    private function centralConnection(): string
+    {
+        return config('tenancy.database.central_connection', config('database.default'));
     }
 }

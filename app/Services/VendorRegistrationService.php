@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\VendorRequest;
 use App\Notifications\VendorApproved;
 use App\Notifications\VendorRejected;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -625,10 +626,100 @@ class VendorRegistrationService
     }
 
     /**
-     * (Optionnel) Aligner l'ancienne méthode sur la nouvelle
+     * URL du panneau Filament vendeur.
      */
     public function getVendeurUrl(Tenant $tenant): string
     {
-        return $this->getVendeurDashboardUrl($tenant);
+        return $this->tenantBaseUrl($tenant).'/vendeur';
+    }
+
+    /**
+     * URL de connexion automatique depuis le central vers le dashboard tenant.
+     */
+    public function getTenantSsoLoginUrl(Tenant $tenant, User $user): string
+    {
+        $payload = [
+            'user_id' => $user->id,
+            'tenant_id' => $tenant->id,
+            'expires_at' => now()->addMinutes(5)->timestamp,
+        ];
+        $token = Crypt::encryptString(json_encode($payload));
+
+        // Si les sous-domaines sont activés (production ou environnement compatible)
+        if (env('APP_SUBDOMAINS_ENABLED', false)) {
+            $domain = $tenant->domains->first()->domain ?? $tenant->slug.'.'.config('app.domain');
+            $scheme = app()->environment('production') ? 'https' : 'http';
+
+            return $scheme.'://'.$domain.'/tenant-sso-login?token='.urlencode($token);
+        }
+
+        // Sinon, développement local sans sous-domaine (php artisan serve)
+        return route('tenant.sso.central', ['token' => $token, 'tenant_id' => $tenant->id]);
+    }
+
+    /**
+     * Vérifie et connecte un utilisateur via SSO (utilisé par TenantSsoLoginController)
+     */
+    public function handleSsoLogin(string $token, Tenant $tenant): ?User
+    {
+        try {
+            $payload = json_decode(Crypt::decryptString($token), true);
+        } catch (\Exception $e) {
+            return null;
+        }
+
+        if (! isset($payload['user_id'], $payload['tenant_id'], $payload['expires_at'])) {
+            return null;
+        }
+
+        if ($payload['tenant_id'] !== $tenant->id) {
+            return null;
+        }
+
+        if (now()->timestamp > $payload['expires_at']) {
+            return null;
+        }
+
+        // ✅ Utiliser la connexion centrale pour vérifier la propriété
+        $centralConnection = $this->centralConnection();
+
+        $isOwner = DB::connection($centralConnection)
+            ->table('user_tenant')
+            ->where('user_id', $payload['user_id'])
+            ->where('tenant_id', $tenant->id)
+            ->where('is_owner', true)
+            ->exists();
+
+        if (! $isOwner) {
+            return null;
+        }
+
+        // Récupérer l’utilisateur central
+        $centralUser = DB::connection($centralConnection)
+            ->table('users')
+            ->where('id', $payload['user_id'])
+            ->first();
+
+        if (! $centralUser) {
+            return null;
+        }
+
+        // Créer ou mettre à jour l’utilisateur dans le tenant
+        $user = User::updateOrCreate(
+            ['id' => $centralUser->id],
+            [
+                'name' => $centralUser->name,
+                'email' => $centralUser->email,
+                'password' => $centralUser->password,
+                'email_verified_at' => $centralUser->email_verified_at,
+            ]
+        );
+
+        return $user;
+    }
+
+    private function centralConnection(): string
+    {
+        return config('tenancy.database.central_connection', config('database.default'));
     }
 }

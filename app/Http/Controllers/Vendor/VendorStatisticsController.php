@@ -12,6 +12,7 @@ use App\Models\Panier;
 use App\Models\ProductCategory;
 use App\Models\Produit;
 use App\Models\Promotion;
+use App\Models\User;
 use App\Services\TenantPropsService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,12 @@ class VendorStatisticsController extends Controller
     public function index(TenantPropsService $tenantProps): Response
     {
         $user = Auth::user();
-        $tenant = $user->tenants()->wherePivot('is_owner', true)->firstOrFail();
+        $tenant = $this->resolveOwnedTenant($user);
+
+        if (! $tenant) {
+            abort(403);
+        }
+
         $planAllowsAdvanced = $tenant->plan && $tenant->plan->price > 0;
 
         $stats = $tenant->run(function () use ($planAllowsAdvanced) {
@@ -785,5 +791,23 @@ class VendorStatisticsController extends Controller
     private function getAverageRating(): float
     {
         return round(AvisClient::where('approuve', true)->avg('note') ?? 0, 1);
+    }
+
+    private function resolveOwnedTenant(?User $user)
+    {
+        $tenant = function_exists('tenant') ? tenant() : null;
+
+        if (! $tenant || ! $user) {
+            return null;
+        }
+
+        $ownsTenant = DB::connection(config('tenancy.database.central_connection', config('database.default')))
+            ->table('user_tenant')
+            ->where('tenant_id', $tenant->id)
+            ->where('user_id', $user->id)
+            ->where('is_owner', true)
+            ->exists();
+
+        return $ownsTenant ? $tenant : null;
     }
 }

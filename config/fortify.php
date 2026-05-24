@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\InitializeTenancyForTenantDomains;
 use Laravel\Fortify\Features;
 
 return [
@@ -78,6 +79,7 @@ return [
         if (function_exists('tenancy') && tenancy()->initialized) {
             return '/';
         }
+
         // Sinon, rediriger vers le dashboard central
         return '/dashboard';
     },
@@ -112,7 +114,7 @@ return [
     |
     */
 
-    'middleware' => ['web'],
+    'middleware' => ['web', InitializeTenancyForTenantDomains::class],
 
     /*
     |--------------------------------------------------------------------------

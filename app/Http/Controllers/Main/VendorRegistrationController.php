@@ -36,7 +36,7 @@ class VendorRegistrationController extends Controller
         }
 
         if ($tenant = $user->tenants()->wherePivot('is_owner', true)->first()) {
-            return redirect()->away($this->vendorService->getVendeurUrl($tenant));
+            return redirect()->away($this->vendorService->getTenantSsoLoginUrl($tenant, $user));
         }
 
         $plans = Plan::active()->ordered()->get()->map(fn ($plan) => [

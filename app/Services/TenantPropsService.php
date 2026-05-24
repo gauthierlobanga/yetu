@@ -37,7 +37,23 @@ class TenantPropsService
      */
     protected function getLogoUrl(Tenant $tenant): ?string
     {
-        return $tenant->logo_url;
+        $resolveLogo = function () use ($tenant): ?string {
+            $centralTenant = Tenant::query()->find($tenant->id);
+
+            if (! $centralTenant) {
+                return null;
+            }
+
+            $url = $centralTenant->getFirstMediaUrl('tenant_avatar');
+
+            return $url !== '' ? $url : null;
+        };
+
+        if (function_exists('tenancy') && tenancy()->initialized) {
+            return tenancy()->central($resolveLogo);
+        }
+
+        return $resolveLogo();
     }
 
     /**

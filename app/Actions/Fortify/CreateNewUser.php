@@ -4,10 +4,10 @@ namespace App\Actions\Fortify;
 
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
+use App\Models\Client;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
-use Stancl\Tenancy\Facades\Tenancy;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -32,10 +32,17 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $input['password'],
         ]);
 
-        // Si on est dans un contexte de tenancy, associer l'utilisateur au tenant actuel
+        // En contexte tenant, un nouvel inscrit est un acheteur de la boutique.
         if (function_exists('tenancy') && tenancy()->initialized) {
-            $tenant = tenancy()->getTenant();
-            $user->tenants()->attach($tenant->id);
+            Client::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'nom' => $user->name,
+                    'email' => $user->email,
+                    'statut' => Client::STATUT_ACTIF,
+                    'source' => 'inscription',
+                ],
+            );
         }
 
         return $user;

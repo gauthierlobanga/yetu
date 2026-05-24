@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\RedirectVendorAfterLogin;
 use App\Models\Client;
 use App\Models\Commande;
 use App\Models\ItemPanier;
@@ -11,17 +12,20 @@ use App\Models\Panier;
 use App\Models\Produit;
 use App\Models\Promotion;
 use App\Models\Retour;
-use App\Models\VendorRequest;
+use App\Models\User;
 use App\Observers\TenantRealtimeActivityObserver;
+use App\Observers\UserObserver;
+use App\Services\VendorRegistrationService;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Stancl\Tenancy\Events\TenancyInitialized;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,22 +43,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureAuthenticationRedirects();
         $this->registerTenantRealtimeObservers();
         View::addNamespace('layouts', resource_path('views/layouts'));
 
-        // Event::listen(TenancyInitialized::class, function ($event) {
-        //     $tenant = $event->tenancy->tenant;
-        //     Log::info('TenancyInitialized', [
-        //         'tenant_id' => optional($tenant)->id,
-        //         'slug' => optional($tenant)->slug,
-        //         'is_active' => optional($tenant)->is_active,
-        //         'statut' => optional($tenant)->statut,
-        //         'vendor_approved' => optional($tenant)->vendorRequest()?->where('status', VendorRequest::STATUS_APPROVED)->exists(),
-        //     ]);
-        //     if ($tenant && ! $tenant->isAccessible()) {
-        //         abort(404);
-        //     }
-        // });
+        if (! app()->runningInConsole() && ! tenancy()->initialized) {
+            User::observe(UserObserver::class);
+        }
+
+        Event::listen(Login::class, RedirectVendorAfterLogin::class);
 
     }
 
@@ -93,5 +90,42 @@ class AppServiceProvider extends ServiceProvider
         ItemPanier::observe($observer);
         Retour::observe($observer);
         MouvementStock::observe($observer);
+    }
+
+    protected function configureAuthenticationRedirects(): void
+    {
+        RedirectIfAuthenticated::redirectUsing(function (Request $request): string {
+            $user = $request->user();
+
+            if (function_exists('tenancy') && tenancy()->initialized) {
+                if ($user && $this->userOwnsCurrentTenant($user->id)) {
+                    return '/vendor/dashboard';
+                }
+
+                return route('acheteur.dashboard');
+            }
+
+            if ($user && $tenant = $user->tenants()->wherePivot('is_owner', true)->first()) {
+                return app(VendorRegistrationService::class)->getTenantSsoLoginUrl($tenant, $user);
+            }
+
+            return route('plan.index');
+        });
+    }
+
+    protected function userOwnsCurrentTenant(string $userId): bool
+    {
+        $tenant = tenant();
+
+        if (! $tenant) {
+            return false;
+        }
+
+        return DB::connection(config('tenancy.database.central_connection', config('database.default')))
+            ->table('user_tenant')
+            ->where('tenant_id', $tenant->id)
+            ->where('user_id', $userId)
+            ->where('is_owner', true)
+            ->exists();
     }
 }

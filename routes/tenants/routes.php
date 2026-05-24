@@ -3,11 +3,12 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\SocialiteController;
+use App\Http\Controllers\Auth\TenantSsoLoginController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\Home\HomeController;
 use App\Http\Controllers\Main\LocationController;
 use App\Http\Controllers\Pages\PageController;
@@ -44,6 +45,7 @@ use App\Http\Controllers\Vendor\VisitorStatsController;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -71,6 +73,13 @@ Route::middleware([
       |--------------------------------------------------------------------------
       */
     Route::get('/', [HomeController::class, 'homeIndex'])->name('tenant.home');
+
+    Route::get('/tenant-sso-login', [TenantSsoLoginController::class, '__invoke'])
+        ->name('tenant.sso.login');
+
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->middleware('auth')
+        ->name('logout');
 
     /*
       |--------------------------------------------------------------------------
@@ -108,10 +117,14 @@ Route::middleware([
       | ROUTES PUBLICS TENANT
       |--------------------------------------------------------------------------
       */
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::prefix('admin')->group(function () {
             Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('dashboard');
+        });
+
+        Route::prefix('acheteur')->group(function () {
+            Route::get('/account', [AccountDashboardController::class, 'AccountDashboardIndex'])->name('acheteur.dashboard');
         });
 
         Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])
@@ -320,8 +333,6 @@ Route::middleware([
         |--------------------------------------------------------------------------
         */
         Route::middleware(['auth', 'verified'])->group(function () {
-
-            Route::get('/account', [AccountDashboardController::class, 'AccountDashboardIndex'])->name('account.dashboard.index');
 
             // Checkout et commandes
             Route::prefix('checkout')->group(function () {

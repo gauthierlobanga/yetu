@@ -301,7 +301,7 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
                 'image/gif',
                 'image/svg+xml',
             ])
-            ->useDisk(config('filesystems.default', 'public'));
+            ->useDisk('public');
     }
 
     /**
@@ -336,11 +336,7 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
 
     public function getFilamentAvatarUrl(): ?string
     {
-        if ($this->hasMedia('tenant_avatar')) {
-            return $this->getFirstMediaUrl('tenant_avatar', 'tenant_thumb');
-        }
-
-        return $this->avatar_url;
+        return $this->logo_url;
     }
 
     /**
@@ -653,6 +649,14 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
      */
     public function getLogoUrlAttribute(): ?string
     {
+        if (function_exists('tenancy') && tenancy()->initialized) {
+            return tenancy()->central(function () {
+                $tenant = static::query()->find($this->getKey());
+
+                return $tenant?->logo_url;
+            });
+        }
+
         $media = $this->getFirstMedia('tenant_avatar');
 
         return $media ? $media->getUrl() : null;

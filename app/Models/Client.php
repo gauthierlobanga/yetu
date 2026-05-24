@@ -187,6 +187,11 @@ class Client extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function adresses(): MorphMany
+    {
+        return $this->morphMany(Adresse::class, 'addressable');
+    }
+
     /**
      * Relations avec les autres entités
      *

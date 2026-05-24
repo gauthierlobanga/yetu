@@ -90,6 +90,7 @@ export default function VendorSettings({ tenant }: Props) {
         twitter_url: tenant.twitter_url ?? '',
         youtube_url: tenant.youtube_url ?? '',
         tiktok_url: tenant.tiktok_url ?? '',
+        remove_logo: false,
         _method: 'PUT',
     });
 
@@ -211,6 +212,7 @@ export default function VendorSettings({ tenant }: Props) {
         const preview = URL.createObjectURL(file);
 
         setData('logo', file);
+        setData('remove_logo', false);
         setLogoPreview(preview);
     };
 
@@ -236,6 +238,7 @@ export default function VendorSettings({ tenant }: Props) {
 
     const removeLogo = () => {
         setData('logo', null);
+        setData('remove_logo', true);
         setLogoPreview(null);
 
         if (fileInputRef.current) {
@@ -249,7 +252,17 @@ export default function VendorSettings({ tenant }: Props) {
         post(route('vendor.settings.update'), {
             forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => {
+            onSuccess: (page) => {
+                const updatedTenant = (page.props.tenant ?? tenant) as Tenant;
+
+                setData('logo', null);
+                setData('remove_logo', false);
+                setLogoPreview(updatedTenant.logo_url ?? null);
+
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+
                 toast.success(
                     'Les paramètres ont été enregistrés avec succès.',
                     {
@@ -855,6 +868,10 @@ export default function VendorSettings({ tenant }: Props) {
                                                     variant="outline"
                                                     onClick={() => {
                                                         reset();
+                                                        setData(
+                                                            'remove_logo',
+                                                            false,
+                                                        );
                                                         setLogoPreview(
                                                             tenant.logo_url ??
                                                                 null,

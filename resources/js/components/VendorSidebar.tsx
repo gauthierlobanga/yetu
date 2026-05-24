@@ -187,7 +187,7 @@ export function VendorSidebar({ tenant }: { tenant: Tenant }) {
         {
             title: 'Profil',
             icon: Settings,
-            href: route('tenant.profile.destroy'),
+            href: route('tenant.profile.edit'),
         },
     ];
 

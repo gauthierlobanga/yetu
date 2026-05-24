@@ -23,7 +23,7 @@ class RedirectIfAuthenticatedWithTenant
 
                 return redirect()->away(
                     app(VendorRegistrationService::class)
-                        ->getVendeurDashboardUrl($tenant)
+                        ->getTenantSsoLoginUrl($tenant, $user)
                 );
             }
 

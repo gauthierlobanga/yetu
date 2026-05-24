@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\TenantPropsService;
 use App\Services\VendorRegistrationService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class VendorDashboardController extends Controller
@@ -19,10 +20,10 @@ class VendorDashboardController extends Controller
     public function index(TenantPropsService $tenantProps)
     {
         $user = Auth::user();
-        $tenant = $user->tenants()->wherePivot('is_owner', true)->first();
+        $tenant = $this->resolveOwnedTenant($user);
 
         if (! $tenant) {
-            return redirect()->route('vendor.register')->with('error', 'Vous n\'avez pas encore de boutique.');
+            abort(403);
         }
 
         $plan = $tenant->plan;
@@ -174,5 +175,23 @@ class VendorDashboardController extends Controller
             'Programme de fidélité',
             'Support prioritaire',
         ];
+    }
+
+    private function resolveOwnedTenant(?User $user)
+    {
+        $tenant = function_exists('tenant') ? tenant() : null;
+
+        if (! $tenant || ! $user) {
+            return null;
+        }
+
+        $ownsTenant = DB::connection(config('tenancy.database.central_connection', config('database.default')))
+            ->table('user_tenant')
+            ->where('tenant_id', $tenant->id)
+            ->where('user_id', $user->id)
+            ->where('is_owner', true)
+            ->exists();
+
+        return $ownsTenant ? $tenant : null;
     }
 }
