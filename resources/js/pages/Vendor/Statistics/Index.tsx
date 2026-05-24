@@ -493,12 +493,12 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 <div>
                                     <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                                         <Sparkles className="h-3.5 w-3.5" />
-                                        Analytics Advanced
+                                        Analytics
                                     </div>
-                                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                                    <h1 className="text-xl font-medium tracking-tight text-slate-900 dark:text-white">
                                         Tableau de bord analytique
                                     </h1>
-                                    <p className="mt-4 max-w-2xl text-sm leading-none text-slate-600 dark:text-slate-400">
+                                    <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-400">
                                         Mesures avancées du trafic, conversions,
                                         revenus et insights IA pour optimiser
                                         votre boutique.
@@ -510,7 +510,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                         size="icon"
                                         onClick={refreshData}
                                         disabled={loading}
-                                        className="rounded-xl border-slate-200/70 bg-white/50 backdrop-blur-sm"
+                                        className="cursor-pointer rounded-xl border-slate-200/70 bg-white/50 backdrop-blur-sm"
                                     >
                                         {loading ? (
                                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -564,11 +564,11 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                         <Activity className="relative h-5 w-5 text-emerald-500" />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-medium tracking-wider text-slate-400 uppercase dark:text-slate-500">
-                                            EN LIGNE
+                                        <p className="text-xs font-medium tracking-wider text-slate-400 dark:text-slate-500">
+                                            En ligne
                                         </p>
                                         <div className="flex items-baseline gap-2">
-                                            <span className="text-2xl font-semibold text-emerald-600 dark:text-emerald-400">
+                                            <span className="text-xl font-semibold text-emerald-600 dark:text-emerald-400">
                                                 {realTime.active_visitors}
                                             </span>
                                             <span className="text-sm text-slate-500 dark:text-slate-400">
@@ -666,16 +666,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 className="flex" // ← important
                             >
                                 <Card className="group relative flex w-full flex-col overflow-hidden rounded-lg border border-slate-200/70 bg-white/80 dark:border-slate-800/70 dark:bg-slate-900/70">
-                                    <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-cyan-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                                    <div className="absolute -top-10 right-0 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
-                                    <CardContent className="relative flex flex-1 flex-col p-6">
+                                    <CardContent className="relative flex flex-1 flex-col px-4 py-2">
                                         <div className="flex flex-1 flex-col justify-between">
-                                            <div className="flex items-start justify-between gap-4">
+                                            <div className="flex items-start justify-between gap-3">
                                                 <div>
                                                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
                                                         Revenus aujourd'hui
                                                     </p>
-                                                    <h3 className="mt-3 text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                                                    <h3 className="mt-3 text-xl font-medium tracking-tight text-slate-900 dark:text-white">
                                                         <CountUp
                                                             end={safeNumber(
                                                                 revenueStats?.today_revenue,
@@ -690,8 +688,8 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                         aujourd'hui
                                                     </p>
                                                 </div>
-                                                <div className="rounded-lg bg-linear-to-br from-emerald-500 to-teal-500 p-4 text-white">
-                                                    <DollarSign className="h-7 w-7" />
+                                                <div className="rounded bg-linear-to-br from-emerald-500 to-teal-500 p-2.5 text-white">
+                                                    <DollarSign className="h-5 w-5" />
                                                 </div>
                                             </div>
                                             <div className="mt-6 flex items-center gap-3">
@@ -740,14 +738,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 className="flex"
                             >
                                 <Card className="group relative flex w-full flex-col overflow-hidden rounded-lg border border-slate-200/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-                                    <CardContent className="relative flex flex-1 flex-col p-6">
+                                    <CardContent className="relative flex flex-1 flex-col px-4 py-3">
                                         <div className="flex flex-1 flex-col justify-between">
                                             <div className="flex items-start justify-between">
                                                 <div>
-                                                    <p className="text-sm text-slate-500">
+                                                    <p className="text-sm font-medium text-slate-500">
                                                         Panier moyen
                                                     </p>
-                                                    <h3 className="mt-3 text-2xl font-semibold text-slate-900 dark:text-white">
+                                                    <h3 className="mt-3 text-xl font-medium text-slate-900 dark:text-white">
                                                         <CountUp
                                                             end={safeNumber(
                                                                 revenueStats?.average_order_value,
@@ -761,8 +759,8 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                         commande
                                                     </p>
                                                 </div>
-                                                <div className="rounded-lg bg-linear-to-br from-cyan-500 to-blue-500 p-3 text-white">
-                                                    <ShoppingCart className="h-6 w-6" />
+                                                <div className="rounded bg-linear-to-br from-cyan-500 to-blue-500 p-2.5 text-white">
+                                                    <ShoppingCart className="h-5 w-5" />
                                                 </div>
                                             </div>
                                             {/* Tendance du panier moyen */}
@@ -814,15 +812,15 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 transition={{ delay: 0.15 }}
                                 className="flex"
                             >
-                                <Card className="group relative flex w-full flex-col overflow-hidden rounded-lg border border-slate-200/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-                                    <CardContent className="relative flex flex-1 flex-col p-6">
+                                <Card className="group relative flex w-full flex-col overflow-hidden rounded-lg border border-slate-200/90 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
+                                    <CardContent className="relative flex flex-1 flex-col px-4 py-3">
                                         <div className="flex flex-1 flex-col justify-between">
                                             <div className="flex items-start justify-between">
                                                 <div>
-                                                    <p className="text-sm text-slate-500">
+                                                    <p className="text-sm font-medium text-slate-500">
                                                         Conversion globale
                                                     </p>
-                                                    <h3 className="mt-3 text-2xl font-semibold text-slate-900 dark:text-white">
+                                                    <h3 className="mt-3 text-xl font-medium text-slate-900 dark:text-white">
                                                         {conversionFunnel.visitors >
                                                         0
                                                             ? (
@@ -838,8 +836,8 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                         finalisé
                                                     </p>
                                                 </div>
-                                                <div className="rounded-lg bg-linear-to-br from-purple-500 to-pink-500 p-3 text-white shadow-lg">
-                                                    <Percent className="h-6 w-6" />
+                                                <div className="rounded bg-linear-to-br from-purple-500 to-pink-500 p-2.5 text-white">
+                                                    <Percent className="h-5 w-5" />
                                                 </div>
                                             </div>
                                             {/* Tendance de la conversion (simulée ou réelle) */}
@@ -874,7 +872,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                         <Badge
                                                             variant="outline"
                                                             className={cn(
-                                                                'rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-xl',
+                                                                'rounded-full border px-3 py-1 text-xs font-medium',
                                                                 convChange >= 0
                                                                     ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                                                                     : 'border-red-500/20 bg-red-500/10 text-red-600 dark:text-red-400',
@@ -913,14 +911,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 className="flex"
                             >
                                 <Card className="group relative flex w-full flex-col overflow-hidden rounded-lg border border-slate-200/70 bg-white/80 dark:border-slate-800 dark:bg-slate-900/70">
-                                    <CardContent className="relative flex flex-1 flex-col p-6">
+                                    <CardContent className="relative flex flex-1 flex-col px-4 py-3">
                                         <div className="flex flex-1 flex-col justify-between">
                                             <div className="flex items-start justify-between">
                                                 <div>
                                                     <p className="text-sm text-slate-500">
                                                         Visiteurs uniques
                                                     </p>
-                                                    <h3 className="mt-3 text-2xl font-semibold text-slate-900 dark:text-white">
+                                                    <h3 className="mt-3 text-xl font-medium text-slate-900 dark:text-white">
                                                         <CountUp
                                                             end={
                                                                 visitorStats.unique_visitors
@@ -932,8 +930,8 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                         Derniers 30 jours
                                                     </p>
                                                 </div>
-                                                <div className="rounded-lg bg-linear-to-br from-emerald-500 to-teal-500 p-3 text-white">
-                                                    <Users className="h-6 w-6" />
+                                                <div className="rounded bg-linear-to-br from-emerald-500 to-teal-500 p-2.5 text-white">
+                                                    <Users className="h-5 w-5" />
                                                 </div>
                                             </div>
                                             {/* Tendance des visiteurs uniques */}
@@ -943,7 +941,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                     <Badge
                                                         variant="outline"
                                                         className={cn(
-                                                            'rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-xl',
+                                                            'rounded-full border px-3 py-1 text-xs font-medium',
                                                             safeNumber(
                                                                 visitorStats.unique_visitors_change,
                                                             ) >= 0
@@ -980,7 +978,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                         </div>
 
                         {/* MINI STATS */}
-                        <div className="mb-8 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                        <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                             {/* Trafic Growth */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -988,15 +986,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 transition={{ delay: 0.05 }}
                             >
                                 <Card className="group relative overflow-hidden rounded-lg border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/80">
-                                    <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-cyan-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                                    <CardContent className="p-5">
+                                    <CardContent className="px-3.5 py-2.5">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                                                <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
                                                     Croissance trafic
                                                 </p>
                                                 <div className="mt-2 flex items-baseline gap-2">
-                                                    <span className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                                                    <span className="text-xl font-normal tracking-tight text-slate-900 dark:text-white">
                                                         +{trafficGrowth}%
                                                     </span>
                                                 </div>
@@ -1004,8 +1001,8 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                     Évolution visiteurs
                                                 </p>
                                             </div>
-                                            <div className="rounded-xl bg-emerald-500/10 p-2.5 text-emerald-500 dark:bg-emerald-500/15">
-                                                <TrendingUp className="h-6 w-6" />
+                                            <div className="rounded-lg bg-emerald-500/10 p-2.5 text-emerald-500 dark:bg-emerald-500/15">
+                                                <TrendingUp className="h-5 w-5" />
                                             </div>
                                         </div>
                                     </CardContent>
@@ -1019,11 +1016,10 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 transition={{ delay: 0.1 }}
                             >
                                 <Card className="group relative overflow-hidden rounded-lg border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/80">
-                                    <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-cyan-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                                    <CardContent className="p-5">
+                                    <CardContent className="px-3.5 py-2.5">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                                                <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
                                                     Utilisateurs actifs
                                                 </p>
                                                 <div className="mt-2 flex items-baseline gap-2">
@@ -1037,8 +1033,8 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                     Sessions actives
                                                 </p>
                                             </div>
-                                            <div className="rounded-xl bg-emerald-500/10 p-2.5 text-emerald-500 dark:bg-emerald-500/15">
-                                                <Activity className="h-6 w-6" />
+                                            <div className="rounded-lg bg-emerald-500/10 p-2.5 text-emerald-500 dark:bg-emerald-500/15">
+                                                <Activity className="h-5 w-5" />
                                             </div>
                                         </div>
                                     </CardContent>
@@ -1052,15 +1048,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 transition={{ delay: 0.15 }}
                             >
                                 <Card className="group relative overflow-hidden rounded-lg border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/80">
-                                    <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-cyan-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                                    <CardContent className="p-5">
+                                    <CardContent className="px-3.5 py-2.5">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                                                <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
                                                     Conversion estimée
                                                 </p>
                                                 <div className="mt-2 flex items-baseline gap-2">
-                                                    <span className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                                                    <span className="text-xl font-normal tracking-tight text-slate-900 dark:text-white">
                                                         {estimatedConversion}%
                                                     </span>
                                                 </div>
@@ -1068,8 +1063,8 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                     Basé sur le rebond
                                                 </p>
                                             </div>
-                                            <div className="rounded-xl bg-yellow-500/10 p-2.5 text-yellow-500 dark:bg-yellow-500/15">
-                                                <Zap className="h-6 w-6" />
+                                            <div className="rounded-lg bg-yellow-500/10 p-2.5 text-yellow-500 dark:bg-yellow-500/15">
+                                                <Zap className="h-5 w-5" />
                                             </div>
                                         </div>
                                     </CardContent>
@@ -1083,15 +1078,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 transition={{ delay: 0.2 }}
                             >
                                 <Card className="group relative overflow-hidden rounded-lg border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/80">
-                                    <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-cyan-500/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                                    <CardContent className="p-5">
+                                    <CardContent className="px-3.5 py-2.5">
                                         <div className="flex items-center justify-between">
                                             <div>
-                                                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                                                <p className="text-sm font-normal text-slate-500 dark:text-slate-400">
                                                     Taux de rebond
                                                 </p>
                                                 <div className="mt-2 flex items-baseline gap-2">
-                                                    <span className="text-xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                                                    <span className="text-xl font-normal tracking-tight text-slate-900 dark:text-white">
                                                         {bounceRate.toFixed(1)}%
                                                     </span>
                                                 </div>
@@ -1099,8 +1093,8 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                     Sessions une seule page
                                                 </p>
                                             </div>
-                                            <div className="rounded-xl bg-orange-500/10 p-2.5 text-orange-500 dark:bg-orange-500/15">
-                                                <TrendingDown className="h-6 w-6" />
+                                            <div className="rounded-lg bg-orange-500/10 p-2.5 text-orange-500 dark:bg-orange-500/15">
+                                                <TrendingDown className="h-5 w-5" />
                                             </div>
                                         </div>
                                     </CardContent>
@@ -1109,14 +1103,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                         </div>
 
                         {/* Graphique revenus */}
-                        <Card className="mb-8 overflow-hidden rounded-[32px] border border-white/20 bg-white/70 backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/70">
-                            <div className="border-b border-slate-200/50 p-6 dark:border-slate-800">
+                        <Card className="mb-4 overflow-hidden rounded-lg border border-white/20 bg-white/70 dark:border-slate-800 dark:bg-slate-900/70">
+                            <div className="border-b border-slate-200/50 p-4 dark:border-slate-800">
                                 <div className="flex items-center gap-3">
-                                    <div className="rounded-2xl bg-emerald-500/10 p-3 text-emerald-500">
+                                    <div className="rounded bg-emerald-500/10 p-2.5 text-emerald-500">
                                         <DollarSign className="h-5 w-5" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                        <h3 className="text-base font-normal text-slate-900 dark:text-white">
                                             Évolution des revenus
                                         </h3>
                                         <p className="text-sm text-slate-500">
@@ -1125,7 +1119,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                     </div>
                                 </div>
                             </div>
-                            <CardContent className="p-6">
+                            <CardContent className="px-3.5 py-4">
                                 <ResponsiveContainer width="100%" height={350}>
                                     <AreaChart
                                         data={revenueStats.revenue_chart}
@@ -1187,16 +1181,16 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                         </Card>
 
                         {/* Funnel de conversion & Sources de trafic - Layout responsive */}
-                        <div className="mb-8 grid gap-6 lg:grid-cols-2">
+                        <div className="mb-8 grid gap-4 lg:grid-cols-2">
                             {/* Carte Tunnel de conversion */}
-                            <Card className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:shadow-md dark:border-slate-800/60 dark:bg-slate-900/80">
+                            <Card className="overflow-hidden rounded-lg border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/80">
                                 <CardHeader className="border-b border-slate-100/50 pb-4 dark:border-slate-800/50">
                                     <div className="flex items-center gap-2">
-                                        <div className="rounded-lg bg-emerald-500/10 p-2 text-emerald-500">
+                                        <div className="rounded bg-emerald-500/10 p-2 text-emerald-500">
                                             <TrendingUp className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <CardTitle className="text-lg font-semibold">
+                                            <CardTitle className="text-base font-normal">
                                                 Tunnel de conversion
                                             </CardTitle>
                                             <CardDescription className="text-sm text-slate-500 dark:text-slate-400">
@@ -1205,14 +1199,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-6">
+                                <CardContent className="px-3.5 py-4">
                                     {/* Indicateurs synthétiques */}
                                     <div className="mb-6 grid grid-cols-2 gap-3">
                                         <div className="rounded-xl bg-linear-to-br from-emerald-50 to-white p-4 shadow-sm dark:from-emerald-950/20 dark:to-slate-900">
                                             <p className="text-xs text-slate-500">
                                                 Conversion globale
                                             </p>
-                                            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                                            <p className="text-base font-medium text-emerald-600 dark:text-emerald-400">
                                                 {conversionFunnel.visitors > 0
                                                     ? (
                                                           (conversionFunnel.purchases /
@@ -1226,11 +1220,11 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                 visiteurs → achats
                                             </p>
                                         </div>
-                                        <div className="rounded-xl bg-linear-to-br from-slate-50 to-white p-4 shadow-sm dark:from-slate-800/50 dark:to-slate-900">
+                                        <div className="rounded-lg bg-linear-to-br from-slate-50 to-white p-4 shadow-sm dark:from-slate-800/50 dark:to-slate-900">
                                             <p className="text-xs text-slate-500">
                                                 Achats finalisés
                                             </p>
-                                            <p className="text-2xl font-bold text-slate-800 dark:text-white">
+                                            <p className="text-base font-medium text-slate-800 dark:text-white">
                                                 {conversionFunnel.purchases}
                                             </p>
                                             <p className="mt-1 text-xs text-slate-400">
@@ -1297,7 +1291,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                     <div className="mb-1 flex items-center justify-between">
                                                         <div className="flex items-center gap-2">
                                                             <div
-                                                                className={`rounded-full p-1 ${colorMap[step.color]} bg-opacity-10`}
+                                                                className={`rounded p-1 ${colorMap[step.color]} bg-opacity-10`}
                                                             >
                                                                 {step.icon ===
                                                                     'Users' && (
@@ -1320,12 +1314,12 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                                     <CheckCircle className="h-4 w-4 text-emerald-500" />
                                                                 )}
                                                             </div>
-                                                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                            <span className="text-sm font-normal text-slate-700 dark:text-slate-300">
                                                                 {step.label}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                                                            <span className="text-sm font-normal text-slate-900 dark:text-white">
                                                                 {step.value.toLocaleString()}
                                                             </span>
                                                             <span className="text-xs text-slate-400">
@@ -1337,7 +1331,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                             </span>
                                                         </div>
                                                     </div>
-                                                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                                    <div className="relative h-2 w-full overflow-hidden rounded bg-slate-100 dark:bg-slate-800">
                                                         <motion.div
                                                             initial={{
                                                                 width: 0,
@@ -1349,7 +1343,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                                 duration: 0.8,
                                                                 ease: 'easeOut',
                                                             }}
-                                                            className={`absolute inset-y-0 left-0 rounded-full ${colorMap[step.color]}`}
+                                                            className={`absolute inset-y-0 left-0 rounded ${colorMap[step.color]}`}
                                                         />
                                                     </div>
                                                     {idx < 4 && (
@@ -1365,7 +1359,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                             </span>
                                                             {lossValues[idx] >
                                                                 50 && (
-                                                                <AlertTriangle className="h-3 w-3 text-amber-500" />
+                                                                <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
                                                             )}
                                                         </div>
                                                     )}
@@ -1377,14 +1371,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                             </Card>
 
                             {/* Carte Sources de trafic */}
-                            <Card className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:shadow-md dark:border-slate-800/60 dark:bg-slate-900/80">
+                            <Card className="overflow-hidden rounded-lg border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/80">
                                 <CardHeader className="border-b border-slate-100/50 pb-4 dark:border-slate-800/50">
                                     <div className="flex items-center gap-2">
                                         <div className="rounded-lg bg-emerald-500/10 p-2 text-emerald-500">
                                             <Globe className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <CardTitle className="text-lg font-semibold">
+                                            <CardTitle className="text-base font-medium">
                                                 Sources de trafic
                                             </CardTitle>
                                             <CardDescription className="text-sm text-slate-500 dark:text-slate-400">
@@ -1407,7 +1401,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                     ) : (
                                         <>
                                             <div className="mb-4 flex justify-end">
-                                                <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                                                <div className="rounded bg-slate-100 px-3 py-1 text-xs font-normal text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                                                     Total :{' '}
                                                     {trafficSources
                                                         .reduce(
@@ -1447,14 +1441,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                                         {getSourceIcon(
                                                                             source.source,
                                                                         )}
-                                                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                                        <span className="text-sm font-normal text-slate-700 dark:text-slate-300">
                                                                             {
                                                                                 source.source
                                                                             }
                                                                         </span>
                                                                     </div>
                                                                     <div className="flex items-center gap-2">
-                                                                        <span className="text-sm font-semibold text-slate-800 dark:text-white">
+                                                                        <span className="text-sm font-medium text-slate-800 dark:text-white">
                                                                             {source.visits.toLocaleString()}
                                                                         </span>
                                                                         <span className="text-xs text-slate-400">
@@ -1466,7 +1460,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                                         </span>
                                                                     </div>
                                                                 </div>
-                                                                <div className="relative h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                                                <div className="relative h-2 w-full overflow-hidden rounded bg-slate-100 dark:bg-slate-800">
                                                                     <motion.div
                                                                         initial={{
                                                                             width: 0,
@@ -1478,7 +1472,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                                             duration: 0.5,
                                                                             ease: 'easeOut',
                                                                         }}
-                                                                        className="absolute inset-y-0 left-0 rounded-full bg-linear-to-r from-emerald-500 to-teal-500"
+                                                                        className="absolute inset-y-0 left-0 rounded bg-linear-to-r from-emerald-500 to-teal-500"
                                                                     />
                                                                 </div>
                                                             </div>
@@ -1494,9 +1488,9 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
 
                         {/* Top produits et géographie */}
                         <div className="mb-8 grid gap-6 lg:grid-cols-2">
-                            <Card className="rounded-[32px] border border-white/20 bg-white/70 backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/70">
+                            <Card className="rounded-lg border border-white/20 bg-white/70 dark:border-slate-800 dark:bg-slate-900/70">
                                 <CardHeader>
-                                    <CardTitle className="text-lg font-semibold">
+                                    <CardTitle className="text-lg font-medium">
                                         Produits les plus vendus
                                     </CardTitle>
                                 </CardHeader>
@@ -1515,7 +1509,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                             8,
                                                         )}
                                                     </span>
-                                                    <span className="font-semibold text-emerald-600">
+                                                    <span className="font-medium text-emerald-600">
                                                         {product.sold} vendus
                                                     </span>
                                                 </div>
@@ -1525,9 +1519,9 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 </CardContent>
                             </Card>
 
-                            <Card className="rounded-[32px] border border-white/20 bg-white/70 backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/70">
+                            <Card className="rounded-lg border border-white/20 bg-white/70 backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/70">
                                 <CardHeader>
-                                    <CardTitle className="text-lg font-semibold">
+                                    <CardTitle className="text-base font-medium">
                                         Géolocalisation
                                     </CardTitle>
                                 </CardHeader>
@@ -1545,7 +1539,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                             {country.country}
                                                         </span>
                                                     </div>
-                                                    <span className="text-sm font-semibold">
+                                                    <span className="text-sm font-medium">
                                                         {country.visits} visites
                                                     </span>
                                                 </div>
@@ -1557,7 +1551,7 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                         </div>
 
                         {/* AI Insights */}
-                        <Card className="mb-8 overflow-hidden rounded-lg border border-amber-200/50 bg-amber-50/50 backdrop-blur-2xl transition-all hover:shadow-lg dark:border-amber-900/30 dark:bg-amber-950/20">
+                        <Card className="mb-8 overflow-hidden rounded-lg border border-amber-200/50 bg-amber-50/50 dark:border-amber-900/30 dark:bg-amber-950/20">
                             <CardHeader className="pb-3">
                                 <CardTitle className="flex items-center justify-between gap-2 text-amber-700 dark:text-amber-300">
                                     <div className="flex items-center gap-2">
@@ -1650,14 +1644,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                         </Card>
 
                         {/* Graphique évolution des visites */}
-                        <Card className="mb-8 overflow-hidden rounded-lg border border-white/20 bg-white/70 backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/70">
+                        <Card className="mb-8 overflow-hidden rounded-lg border border-white/20 bg-white/70 dark:border-slate-800 dark:bg-slate-900/70">
                             <div className="border-b border-slate-200/50 p-4 dark:border-slate-800">
                                 <div className="flex items-center gap-3">
                                     <div className="rounded-lg bg-emerald-500/10 p-3 text-emerald-500">
                                         <BarChart3 className="h-5 w-5" />
                                     </div>
                                     <div>
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                        <h3 className="text-base font-medium text-slate-900 dark:text-white">
                                             Évolution des visites
                                         </h3>
                                         <p className="text-sm text-slate-500">
@@ -1716,13 +1710,13 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                         </Card>
 
                         {/* Top pages et appareils */}
-                        <div className="grid gap-8 lg:grid-cols-2">
+                        <div className="grid gap-5 lg:grid-cols-2">
                             {/* TOP PAGES */}
-                            <Card className="rounded-[32px] border border-white/20 bg-white/70 backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/70">
-                                <CardContent className="p-6">
+                            <Card className="rounded-lg border border-white/20 bg-white/70 dark:border-slate-800 dark:bg-slate-900/70">
+                                <CardContent className="px-3 py-4">
                                     <div className="mb-6 flex items-center justify-between">
                                         <div>
-                                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                            <h3 className="text-base font-medium text-slate-900 dark:text-white">
                                                 Pages populaires
                                             </h3>
                                             <p className="text-sm text-slate-500">
@@ -1736,14 +1730,14 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                             .map((page, idx) => (
                                                 <div
                                                     key={idx}
-                                                    className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/70 p-4 transition-all hover:bg-slate-100/70 dark:border-slate-800 dark:bg-slate-800/40"
+                                                    className="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/70 p-2.5 transition-all hover:bg-slate-100/70 dark:border-slate-800 dark:bg-slate-800/40"
                                                 >
                                                     <div>
-                                                        <p className="font-medium text-slate-900 dark:text-white">
+                                                        <p className="font-normal text-slate-900 dark:text-white">
                                                             {page.path}
                                                         </p>
                                                     </div>
-                                                    <div className="rounded-xl bg-emerald-500/10 px-3 py-1 text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                                    <div className="rounded-lg bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-600 dark:text-emerald-400">
                                                         {page.views}
                                                     </div>
                                                 </div>
@@ -1753,10 +1747,10 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                             </Card>
 
                             {/* DEVICES */}
-                            <Card className="rounded-[32px] border border-slate-200/60 bg-white/80 shadow-xl backdrop-blur-2xl transition-all hover:shadow-2xl dark:border-slate-800/60 dark:bg-slate-900/80">
-                                <CardContent className="p-6">
+                            <Card className="rounded-lg border border-slate-200/60 bg-white/80 transition-all hover:shadow-2xl dark:border-slate-800/60 dark:bg-slate-900/80">
+                                <CardContent className="px-3 py-4">
                                     <div className="mb-6">
-                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                        <h3 className="text-base font-medium text-slate-900 dark:text-white">
                                             Répartition appareils
                                         </h3>
                                         <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -2021,11 +2015,11 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                         </div>
 
                         {/* BROWSERS */}
-                        <Card className="mt-8 rounded-[32px] border border-white/20 bg-white/70 backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/70">
-                            <CardContent className="p-6">
+                        <Card className="mt-8 rounded border border-white/20 bg-white/70 dark:border-slate-800 dark:bg-slate-900/70">
+                            <CardContent className="px-3 py-4">
                                 <div className="mb-6 flex items-center justify-between">
                                     <div>
-                                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                        <h3 className="text-base font-medium text-slate-900 dark:text-white">
                                             Navigateurs utilisés
                                         </h3>
                                         <p className="text-sm text-slate-500">
@@ -2084,16 +2078,16 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                                                         }
                                                                     </span>
                                                                 </div>
-                                                                <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                                                                <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
                                                                     {
                                                                         browser.count
                                                                     }{' '}
                                                                     visites
                                                                 </span>
                                                             </div>
-                                                            <div className="h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                                                            <div className="h-3 overflow-hidden rounded bg-slate-100 dark:bg-slate-800">
                                                                 <div
-                                                                    className="h-full rounded-full bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500"
+                                                                    className="h-full bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500"
                                                                     style={{
                                                                         width: `${percent}%`,
                                                                     }}
