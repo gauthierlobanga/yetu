@@ -69,7 +69,6 @@ class Brand extends Model implements HasMedia, Sitemapable
 
     protected $attributes = [
         'is_active' => true,
-        'social_links' => '[]',
         'is_featured' => false,
         'sort_order' => 0,
     ];

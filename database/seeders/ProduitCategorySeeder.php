@@ -54,8 +54,8 @@ class ProduitCategorySeeder extends Seeder
                     'color' => $faker->hexColor(),
                     'seo_title' => $catData['nom'].' - Achetez en ligne',
                     'seo_description' => 'Découvrez notre sélection de '.strtolower($catData['nom']).'. Livraison rapide et gratuite.',
-                    'seo_keywords' => json_encode(explode(' ', strtolower($catData['nom']))),
-                    'metadata' => json_encode(['niveau' => 1, 'type' => 'racine']),
+                    'seo_keywords' => explode(' ', strtolower($catData['nom'])),
+                    'metadata' => ['niveau' => 1, 'type' => 'racine'],
                 ]
             );
 
@@ -192,8 +192,8 @@ class ProduitCategorySeeder extends Seeder
                             'color' => $faker->hexColor(),
                             'seo_title' => $nomGroupe.' '.$racineNom.' - Achetez en ligne',
                             'seo_description' => 'Large choix de '.strtolower($nomGroupe).'. '.$faker->sentence(10),
-                            'seo_keywords' => json_encode([strtolower($nomGroupe), strtolower($racineNom)]),
-                            'metadata' => json_encode(['niveau' => 2, 'parent' => $racineNom]),
+                            'seo_keywords' => [strtolower($nomGroupe), strtolower($racineNom)],
+                            'metadata' => ['niveau' => 2, 'parent' => $racineNom],
                         ]
                     );
 
@@ -217,8 +217,8 @@ class ProduitCategorySeeder extends Seeder
                             'color' => $faker->hexColor(),
                             'seo_title' => $nomNiveau3.' '.$nomGroupe.' - Meilleurs prix',
                             'seo_description' => $faker->text(150),
-                            'seo_keywords' => json_encode([strtolower($nomNiveau3)]),
-                            'metadata' => json_encode(['niveau' => 3]),
+                            'seo_keywords' => [strtolower($nomNiveau3)],
+                            'metadata' => ['niveau' => 3],
                         ]);
                     }
                 } else {
@@ -240,8 +240,8 @@ class ProduitCategorySeeder extends Seeder
                             'color' => $faker->hexColor(),
                             'seo_title' => $nom.' '.$racineNom.' - Achetez en ligne',
                             'seo_description' => $faker->text(150),
-                            'seo_keywords' => json_encode([strtolower($nom), strtolower($racineNom)]),
-                            'metadata' => json_encode(['niveau' => 2, 'parent' => $racineNom]),
+                            'seo_keywords' => [strtolower($nom), strtolower($racineNom)],
+                            'metadata' => ['niveau' => 2, 'parent' => $racineNom],
                         ]
                     );
                 }

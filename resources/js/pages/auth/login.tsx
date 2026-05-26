@@ -230,7 +230,7 @@ export default function Login({
                                     href={
                                         isTenant
                                             ? '/register'
-                                            : '/devenir-vendeur'
+                                            : '/register'
                                     }
                                     tabIndex={5}
                                     className="inline-flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"

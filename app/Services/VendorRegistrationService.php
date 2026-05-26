@@ -744,15 +744,30 @@ class VendorRegistrationService
         ];
         $token = Crypt::encryptString(json_encode($payload));
 
-        // Si les sous-domaines sont activés (production ou environnement compatible)
-        if (env('APP_SUBDOMAINS_ENABLED', false)) {
-            $domain = $tenant->domains->first()->domain ?? $tenant->slug.'.'.config('app.domain');
-            $scheme = app()->environment('production') ? 'https' : 'http';
+        // Tenter d'utiliser le domaine du tenant s'il existe
+        $domain = $tenant->domains->first();
+        if ($domain) {
+            $appUrl = config('app.url', 'http://localhost');
+            $scheme = parse_url($appUrl, PHP_URL_SCHEME) ?: 'http';
+            $port = parse_url($appUrl, PHP_URL_PORT);
+            $host = $domain->domain;
 
-            return $scheme.'://'.$domain.'/tenant-sso-login?token='.urlencode($token);
+            $portSuffix = app()->environment('local') && $port && ! str_contains($host, ':')
+                ? ':'.$port
+                : '';
+
+            return $scheme.'://'.$host.$portSuffix.'/tenant-sso-login?token='.urlencode($token);
         }
 
-        // Sinon, développement local sans sous-domaine (php artisan serve)
+        // Si les sous-domaines sont activés (fallback pour production)
+        if (env('APP_SUBDOMAINS_ENABLED', false)) {
+            $domainName = $tenant->slug.'.'.config('app.domain');
+            $scheme = app()->environment('production') ? 'https' : 'http';
+
+            return $scheme.'://'.$domainName.'/tenant-sso-login?token='.urlencode($token);
+        }
+
+        // Sinon, développement local sans sous-domaine (fallback central)
         return route('tenant.sso.central', ['token' => $token, 'tenant_id' => $tenant->id]);
     }
 

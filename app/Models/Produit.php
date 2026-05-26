@@ -116,9 +116,6 @@ class Produit extends Model implements HasMedia, Sitemapable
     ];
 
     protected $attributes = [
-        'attributs' => [],
-        'attributes' => [],
-        'metadata' => [],
         'is_new' => false,
         'is_featured' => false,
         'is_bestseller' => false,

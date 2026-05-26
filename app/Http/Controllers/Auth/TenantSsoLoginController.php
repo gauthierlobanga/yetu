@@ -31,6 +31,6 @@ class TenantSsoLoginController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->intended('/vendor/dashboard');
+        return redirect()->to($service->getVendeurDashboardUrl($tenant));
     }
 }

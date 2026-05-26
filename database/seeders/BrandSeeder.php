@@ -421,11 +421,6 @@ class BrandSeeder extends Seeder
         ];
 
         foreach ($brands as $brandData) {
-            // Gestion des champs JSON (cast automatique par Eloquent si défini dans le modèle)
-            $brandData['seo'] = json_encode($brandData['seo']);
-            $brandData['social_links'] = json_encode($brandData['social_links']);
-            $brandData['metadata'] = json_encode($brandData['metadata']);
-
             // Utiliser firstOrCreate pour éviter les duplications
             Brand::firstOrCreate(
                 ['slug' => $brandData['slug']],

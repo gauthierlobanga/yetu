@@ -277,7 +277,7 @@ class ProductSeeder extends Seeder
                 'seo_description' => 'Enceinte Bluetooth à recharge solaire. Étanche et robuste.',
                 'metadata' => ['batterie' => '5000mAh', 'etancheite' => 'IPX7'],
                 'attributes' => [],
-                'categories' => [array_slice($categoryIds, 4, 1)[0] ?? $categoryIds[0]],
+                'categories' => [$categoryIds[4] ?? $categoryIds[0]],
                 'tags' => ['audio', 'bluetooth', 'outdoor'],
                 'variantes' => [],
             ],
@@ -402,16 +402,6 @@ class ProductSeeder extends Seeder
         $variantes = $data['variantes'] ?? [];
 
         unset($data['categories'], $data['tags'], $data['variantes']);
-
-        // Conversion des champs JSON en chaînes JSON valides pour PostgreSQL
-        $jsonFields = ['seo_keywords', 'metadata', 'attributes'];
-        foreach ($jsonFields as $field) {
-            if (isset($data[$field]) && is_array($data[$field])) {
-                $data[$field] = json_encode($data[$field]);
-            } elseif (! isset($data[$field])) {
-                $data[$field] = json_encode([]);
-            }
-        }
 
         // Valeurs par défaut
         $data['vues'] = 0;
