@@ -43,6 +43,7 @@ export default function Login({
         ? tenantPasswordRequest()
         : centralPasswordRequest();
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const registerLink = (isTenant ? tenantRegister() : centralRegister()).url;
 
     return (

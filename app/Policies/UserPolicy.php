@@ -9,6 +9,18 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
+    /**
+     * Perform pre-authorization checks.
+     */
+    public function before(AuthUser $user, string $ability): ?bool
+    {
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        return null;
+    }
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny User');

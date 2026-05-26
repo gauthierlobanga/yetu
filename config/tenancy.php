@@ -138,7 +138,9 @@ return [
          * Disks whose URLs should be overridden.
          */
         'url_override' => [
-            'public' => '/storage',
+            'public' => function (Tenant $tenant) {
+                return '/storage/tenant-'.$tenant->slug;
+            },
             'tenant' => function (Tenant $tenant) {
                 return '/storage/tenant-'.$tenant->slug;
             },

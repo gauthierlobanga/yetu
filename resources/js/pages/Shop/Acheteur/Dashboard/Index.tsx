@@ -36,7 +36,7 @@ interface Props extends Record<string, unknown> {
     } | null;
 }
 
-export default function ShopDashboardPage() {
+export default function CustomerDashboard() {
     const { stats, recentOrders, wishlist, loyalty } = usePage<Props>().props;
 
     return (

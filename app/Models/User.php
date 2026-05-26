@@ -157,7 +157,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             'tenant_id',
         )
             ->using(UserTenantPivot::class)
-            ->withPivot('tenant_id', 'user_id', 'is_owner')
+            ->withPivot('is_owner')
             ->withTimestamps();
     }
 
@@ -208,7 +208,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
 
         $this->addMediaCollection('avatar')
             ->singleFile()
-            // ->useDisk('tenant')
             ->useDisk('public')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
     }

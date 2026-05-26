@@ -132,17 +132,6 @@ export function VendorSidebar({ tenant }: { tenant: Tenant }) {
                 },
             ],
         },
-        // {
-        //     title: 'Blog',
-        //     icon: BookOpen,
-        //     children: [
-        //         { title: 'Posts', href: `${tenant.admin_url}/posts/posts` },
-        //         {
-        //             title: 'Catégories',
-        //             href: `${tenant.admin_url}/posts/categories`,
-        //         },
-        //     ],
-        // },
         {
             title: 'Inventaire',
             icon: Warehouse,
