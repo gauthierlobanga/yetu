@@ -16,7 +16,7 @@ class TenantDatabaseSeeder extends Seeder
             // PostSeeder::class,
             ProduitCategorySeeder::class,
             BrandSeeder::class,
-            ProductSeeder::class,
+            // ProductSeeder::class,
         ]);
     }
 }

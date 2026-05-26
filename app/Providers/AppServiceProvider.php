@@ -18,6 +18,7 @@ use App\Observers\UserObserver;
 use App\Services\VendorRegistrationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
@@ -53,6 +54,11 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(Login::class, RedirectVendorAfterLogin::class);
 
+        Authenticate::redirectUsing(function ($request) {
+            if (! $request->expectsJson()) {
+                return route('central.login');
+            }
+        });
     }
 
     /**
@@ -94,6 +100,14 @@ class AppServiceProvider extends ServiceProvider
 
     protected function configureAuthenticationRedirects(): void
     {
+        // Redirection quand l'utilisateur N'EST PAS connecté
+        Authenticate::redirectUsing(function ($request) {
+            if (! $request->expectsJson()) {
+                return route('central.login');
+            }
+        });
+
+        // Redirection quand l'utilisateur EST DÉJÀ connecté
         RedirectIfAuthenticated::redirectUsing(function (Request $request): string {
             $user = $request->user();
 

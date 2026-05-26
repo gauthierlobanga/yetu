@@ -33,7 +33,7 @@ class UserForm
                                             ->label('Nom complet')
                                             ->required()
                                             ->maxLength(255)
-                                            ->placeholder('Jean Dupont')
+                                            ->placeholder('Gauthier Lobanga')
                                             ->autofocus(),
 
                                         TextInput::make('email')
@@ -42,23 +42,25 @@ class UserForm
                                             ->required()
                                             ->maxLength(255)
                                             ->unique(ignoreRecord: true)
-                                            ->placeholder('jean@exemple.com')
+                                            ->placeholder('gauthier@exemple.com')
                                             ->suffixIcon('heroicon-m-envelope'),
                                     ]),
 
                                 Grid::make(2)
                                     ->components([
-                                        TextInput::make('prenom')
+
+                                        TextInput::make('first_name')
+                                            ->label('Nom')
+                                            ->required()
+                                            ->maxLength(255)
+                                            ->placeholder('Lobanga')
+                                            ->autofocus(),
+
+                                        TextInput::make('last_name')
                                             ->label('Prénom')
                                             ->maxLength(100)
-                                            ->placeholder('Jean'),
+                                            ->placeholder('Gauthier'),
 
-                                        TextInput::make('telephone')
-                                            ->label('Téléphone')
-                                            ->tel()
-                                            ->maxLength(20)
-                                            ->placeholder('+243 123 456 789')
-                                            ->suffixIcon('heroicon-m-phone'),
                                     ]),
                             ]),
 
@@ -67,11 +69,10 @@ class UserForm
                             ->components([
                                 SpatieMediaLibraryFileUpload::make('avatar')
                                     ->label('Photo de profil')
+                                    ->collection('avatar')
                                     ->avatar()
-                                    ->image()
                                     ->imageEditor()
                                     ->circleCropper()
-                                    ->collection('avatar')
                                     ->disk('public')
                                     ->maxSize(2048)
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])

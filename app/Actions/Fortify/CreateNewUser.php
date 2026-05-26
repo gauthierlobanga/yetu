@@ -6,6 +6,7 @@ use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\Client;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
@@ -25,26 +26,28 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        // Créer l'utilisateur
-        $user = User::create([
-            'name' => $input['name'],
-            'email' => $input['email'],
-            'password' => $input['password'],
-        ]);
+        return DB::transaction(function () use ($input) {
 
-        // En contexte tenant, un nouvel inscrit est un acheteur de la boutique.
-        if (function_exists('tenancy') && tenancy()->initialized) {
-            Client::firstOrCreate(
-                ['user_id' => $user->id],
-                [
-                    'nom' => $user->name,
-                    'email' => $user->email,
-                    'statut' => Client::STATUT_ACTIF,
-                    'source' => 'inscription',
-                ],
-            );
-        }
+            $user = User::create([
+                'name' => $input['name'],
+                'email' => $input['email'],
+                'password' => $input['password'],
+            ]);
 
-        return $user;
+            if (tenancy()->initialized) {
+
+                Client::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'nom' => $user->name,
+                        'email' => $user->email,
+                        'statut' => Client::STATUT_ACTIF,
+                        'source' => 'inscription',
+                    ],
+                );
+            }
+
+            return $user;
+        });
     }
 }

@@ -135,7 +135,7 @@ export default function VendorSuccess({ tenant }: Props) {
                                 <div className="absolute inset-0 bg-linear-to-r from-emerald-500/3 via-transparent to-teal-500/3" />
 
                                 <div className="relative flex flex-col items-center text-center">
-                                    {/* Success Icon */}
+                                    {/* Success Icon / Logo */}
                                     <motion.div
                                         initial={{ scale: 0.7, opacity: 0 }}
                                         animate={{ scale: 1, opacity: 1 }}
@@ -147,31 +147,38 @@ export default function VendorSuccess({ tenant }: Props) {
                                         }}
                                         className="relative mb-8"
                                     >
-                                        {/* Outer ring */}
                                         <div className="absolute inset-0 scale-125 rounded-full bg-emerald-500/10 blur-xl" />
-
-                                        <div className="relative flex h-28 w-28 items-center justify-center rounded-[2rem] bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-600 shadow-[0_20px_60px_-10px_rgba(16,185,129,0.45)]">
-                                            <Rocket className="h-12 w-12 text-white" />
-
-                                            <div className="absolute -right-2 -bottom-2 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white bg-white shadow-lg dark:border-slate-900 dark:bg-slate-900">
-                                                <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                        {tenant.logo_url ? (
+                                            <div className="relative flex h-28 w-28 items-center justify-center rounded-[2rem] bg-white/30 backdrop-blur-md">
+                                                <img
+                                                    src={tenant.logo_url}
+                                                    alt={tenant.raison_sociale}
+                                                    className="h-full w-full rounded-2xl object-cover"
+                                                />
                                             </div>
+                                        ) : (
+                                            <div className="relative flex h-28 w-28 items-center justify-center rounded-[2rem] bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-600 shadow-[0_20px_60px_-10px_rgba(16,185,129,0.45)]">
+                                                <Rocket className="h-12 w-12 text-white" />
+                                            </div>
+                                        )}
+                                        <div className="absolute -right-2 -bottom-2 flex h-10 w-10 items-center justify-center rounded-2xl border-4 border-white bg-white shadow-lg dark:border-slate-900 dark:bg-slate-900">
+                                            <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                         </div>
                                     </motion.div>
 
                                     {/* Badge */}
-                                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50 px-4 py-1.5 text-xs font-semibold tracking-wide text-emerald-700 uppercase dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                    <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50 px-4 py-1.5 text-xs font-medium tracking-wide text-emerald-700 uppercase dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
                                         <PartyPopper className="h-3.5 w-3.5" />
                                         Configuration terminée
                                     </div>
 
                                     {/* Title */}
-                                    <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl dark:text-white">
+                                    <h1 className="max-w-3xl text-2xl font-medium tracking-tight text-slate-900 sm:text-2xl dark:text-white">
                                         Votre boutique est prête à vendre
                                     </h1>
 
                                     {/* Subtitle */}
-                                    <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg dark:text-slate-300">
+                                    <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600 sm:text-base dark:text-slate-300">
                                         <span className="font-semibold text-slate-900 dark:text-white">
                                             {tenant.raison_sociale}
                                         </span>{' '}
@@ -239,7 +246,7 @@ export default function VendorSuccess({ tenant }: Props) {
                                         href={tenant.admin_url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="group inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-4 text-base font-semibold text-white shadow-[0_15px_40px_-10px_rgba(16,185,129,0.45)] transition-all duration-300 hover:-translate-y-0.5 hover:from-emerald-700 hover:to-teal-700 hover:shadow-[0_20px_50px_-10px_rgba(16,185,129,0.55)]"
+                                        className="group inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-4 text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:from-emerald-700 hover:to-teal-700"
                                     >
                                         <Rocket className="h-5 w-5 transition-transform group-hover:-rotate-12" />
                                         Accéder au panneau d'administration
@@ -250,7 +257,7 @@ export default function VendorSuccess({ tenant }: Props) {
                                     <div className="grid gap-3 sm:grid-cols-2">
                                         <a
                                             href={`${tenant.url}/vendor/dashboard`}
-                                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-emerald-200 hover:text-emerald-700 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-all hover:border-emerald-200 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
                                         >
                                             <LayoutDashboard className="h-4 w-4" />
                                             Tableau de bord
@@ -260,7 +267,7 @@ export default function VendorSuccess({ tenant }: Props) {
                                             href={`${tenant.admin_url}/products/produits`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:border-emerald-200 hover:text-emerald-700 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                                            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow transition-all hover:border-emerald-200 hover:text-emerald-700 hover:shadow dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
                                         >
                                             <ShoppingBag className="h-4 w-4" />
                                             Ajouter un produit

@@ -21,6 +21,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
@@ -28,10 +29,13 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 
+// use Stancl\Tenancy\Contracts\SyncMaster;
+// use Stancl\Tenancy\Database\Concerns\ResourceSyncing;
+
 /**
  * @mixin HasRoles
  */
-class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, HasName, HasTenants // , MustVerifyEmail
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, HasName, HasTenants // , SyncMaster , MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
@@ -39,6 +43,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
     use HasRoles, InteractsWithMedia;
     use HasUserPreferences;
     use HasUuids, SoftDeletes;
+    // use ResourceSyncing;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -71,6 +76,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
         'is_active',
         'dernier_connexion',
         'preferences',
+        'global_id',
     ];
 
     /**
@@ -144,9 +150,47 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
 
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class, 'user_tenant')
+        return $this->belongsToMany(
+            Tenant::class,
+            'user_tenant',
+            'user_id',
+            'tenant_id',
+        )
+            ->using(UserTenantPivot::class)
+            ->withPivot('tenant_id', 'user_id', 'is_owner')
             ->withTimestamps();
     }
+
+    // public function getTenantModelName(): string
+    // {
+    //     return TenantUser::class; // Le modèle utilisateur dans le tenant
+    // }
+
+    // public function getGlobalIdentifierKey()
+    // {
+    //     return $this->getAttribute($this->getGlobalIdentifierKeyName());
+    // }
+
+    // public function getGlobalIdentifierKeyName(): string
+    // {
+    //     return 'global_id';
+    // }
+
+    // public function getCentralModelName(): string
+    // {
+    //     return static::class;
+    // }
+
+    // public function getSyncedAttributeNames(): array
+    // {
+    //     return [
+    //         'id',
+    //         'name',
+    //         'email',
+    //         'password',
+    //         'global_id',
+    //     ];
+    // }
 
     /**
      * Relations avec les autres modèles
@@ -164,7 +208,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
 
         $this->addMediaCollection('avatar')
             ->singleFile()
-            ->useDisk('tenant')
+            // ->useDisk('tenant')
+            ->useDisk('public')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
     }
 
@@ -240,28 +285,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
         return 'https://ui-avatars.com/api/?name='.urlencode($initials)
             .'&background=F59E0B&color=FFFFFF&size=128&bold=true';
     }
-
-    // public function getAvatarUrlAttribute(): string
-    // {
-    //     $media = $this->getFirstMedia('avatar');
-
-    //     if ($media) {
-    //         return tenant_asset($media->getPathRelativeToRoot());
-    //     }
-
-    //     $name = trim($this->name ?? $this->email);
-
-    //     $parts = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY);
-
-    //     $initials = collect($parts)
-    //         ->map(fn ($part) => strtoupper(mb_substr($part, 0, 1)))
-    //         ->take(2)
-    //         ->implode('');
-
-    //     return 'https://ui-avatars.com/api/?name='
-    //         .urlencode($initials)
-    //         .'&background=F59E0B&color=FFFFFF&size=128&bold=true';
-    // }
 
     public function getFullNameAttribute(): string
     {
@@ -404,22 +427,25 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             if (empty($user->is_active)) {
                 $user->is_active = true;
             }
-        });
 
+            if (empty($user->global_id)) {
+                $user->global_id = (string) Str::orderedUuid();
+            }
+        });
     }
 
     /**
      * Get the database connection name for the model.
      * Returns 'tenant' when tenancy is initialized, otherwise returns the default connection.
      */
-    public function getConnectionName(): string
-    {
-        if (function_exists('tenancy') && tenancy()->initialized) {
-            return 'tenant';
-        }
+    // public function getConnectionName(): string
+    // {
+    //     if (function_exists('tenancy') && tenancy()->initialized) {
+    //         return 'tenant';
+    //     }
 
-        return parent::getConnectionName() ?? config('database.default');
-    }
+    //     return parent::getConnectionName() ?? config('database.default');
+    // }
 
     public function receivesBroadcastNotificationsOn($notification = null): string
     {
@@ -449,7 +475,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
      */
     public function canImpersonate(): bool
     {
-        // Seuls les super admins peuvent impersonner
         return $this->hasRole('super_admin') && $this->is_active;
     }
 
@@ -458,13 +483,11 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
      */
     public function canBeImpersonated(): bool
     {
-        // Empêcher l'impersonation du super admin principal ou de soi-même
-        if ($this->id === 1 || $this->id === Auth::id()) {
+        if ($this->hasRole('super_admin')) {
             return false;
         }
 
-        // Optionnel : empêcher l'impersonation de certains emails
-        if (str_ends_with($this->email, '@gmail.com')) {
+        if ($this->id === Auth::id()) {
             return false;
         }
 
@@ -505,7 +528,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
     {
         if ($this->hasRole('super_admin')) {
             return Tenant::query()
-                ->orderByDesc('raison_sociale')
+                ->orderBy('raison_sociale')
                 ->get();
         }
 

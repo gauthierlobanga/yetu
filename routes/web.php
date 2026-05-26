@@ -10,6 +10,7 @@ use App\Http\Controllers\Main\VendorRegistrationController;
 use App\Http\Controllers\Pages\EntrepriseController;
 use App\Http\Controllers\Pages\PageController;
 use App\Models\Visit;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,7 +24,7 @@ use Laravel\Fortify\Features;
 
 Route::get('/', [HeroCentralController::class, 'Index'])->name('home');
 
-Route::middleware('guest.tenant')->group(function () {
+Route::middleware('guest')->group(function () {
     Route::get('/login', fn (Request $request) => Inertia::render('auth/login', [
         'canResetPassword' => Features::enabled(Features::resetPasswords()),
         'canRegister' => Features::enabled(Features::registration()),
@@ -41,6 +42,18 @@ Route::middleware('guest.tenant')->group(function () {
         'email' => $request->email,
         'token' => $token,
     ]))->name('central.password.reset');
+
+    Route::get('/email/verify', function () {
+        return Inertia::render('auth/verify-email', [
+            'status' => session('status'),
+        ]);
+    })->middleware('auth')->name('central.verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+
+        return redirect()->intended(route('plan.index'));
+    })->middleware(['auth', 'signed'])->name('central.verification.verify');
 
 });
 

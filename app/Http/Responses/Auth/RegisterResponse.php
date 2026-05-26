@@ -21,5 +21,12 @@ class RegisterResponse implements RegisterResponseContract
 
         // Contexte central : rediriger vers l'inscription vendeur (choix du plan)
         return Inertia::location(route('vendor.register'));
+        // Contexte tenant
+        // if (function_exists('tenancy') && tenancy()->initialized) {
+        //     return Inertia::location(route('acheteur.dashboard'));
+        // }
+
+        // // Contexte central : rediriger vers la page des plans (pas de vérification requise)
+        // return Inertia::location(route('plan.index'));
     }
 }

@@ -14,13 +14,14 @@ class UserTenantPivot extends Pivot
 
     protected $keyType = 'string';
 
-    protected $primaryKey = 'id';
-
     protected $table = 'user_tenant';
 
     protected $fillable = [
         'tenant_id',
         'user_id',
+        'is_owner',
+        'created_at',
+        'updated_at',
     ];
 
     protected function casts(): array
@@ -28,11 +29,17 @@ class UserTenantPivot extends Pivot
         return [
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'is_owner' => 'boolean',
         ];
     }
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'global_id');
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
     }
 }

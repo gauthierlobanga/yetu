@@ -95,14 +95,115 @@ class VendorRegistrationService
     /**
      * Approuver une demande de vendeur et créer le tenant.
      */
+    // public function approve(VendorRequest $vendorRequest): Tenant
+    // {
+    //     $plan = $vendorRequest->plan;
+    //     $user = $vendorRequest->user;
+
+    //     // Récupère le mot de passe en clair stocké en session, ou utilise 'password' par défaut
+    //     $password = session('temp_password') ?? 'password';
+
+    //     $tenant = DB::transaction(function () use ($vendorRequest, $plan, $user, $password) {
+    //         $tenantId = (string) Str::orderedUuid();
+    //         $tenant = Tenant::withoutEvents(function () use ($vendorRequest, $plan, $password, $tenantId, $user) {
+    //             return Tenant::create([
+    //                 'id' => $tenantId,
+    //                 'raison_sociale' => $vendorRequest->shop_name,
+    //                 'slug' => $vendorRequest->shop_slug,
+    //                 'description' => $vendorRequest->shop_description,
+    //                 'email' => $vendorRequest->contact_email,
+    //                 'password' => $password,                // mot de passe en clair
+    //                 'telephone' => $vendorRequest->contact_phone,
+    //                 'plan_id' => $plan->id,
+    //                 'statut' => Tenant::STATUT_ACTIF,
+    //                 'is_active' => true,
+    //                 'user_id' => $user->id, // Stocker l'ID de l'utilisateur central
+    //             ]);
+    //         });
+
+    //         $tenant->domains()->create([
+    //             'domain' => str_replace('_', '-', $vendorRequest->shop_slug).'.localhost',
+    //         ]);
+
+    //         // Sécurité : s'assurer que le global_id est défini et existe en base
+    //         if (empty($user->global_id) || ! User::where('global_id', $user->global_id)->exists()) {
+    //             $user->global_id = (string) Str::orderedUuid();
+    //             $user->save();
+    //         }
+
+    //         $user->tenants()->attach($tenant->id, ['is_owner' => true]);
+
+    //         if ($plan->trial_days > 0) {
+    //             $tenant->update([
+    //                 'date_activation' => now(),
+    //                 'date_expiration' => now()->addDays($plan->trial_days),
+    //             ]);
+    //         } else {
+    //             $tenant->update(['date_activation' => now()]);
+    //         }
+
+    //         $this->transferDocumentsToTenant($vendorRequest, $tenant);
+
+    //         // Créer le symlink pour le storage du tenant
+    //         $this->createTenantStorageSymlink($tenant);
+
+    //         $vendorRequest->update([
+    //             'status' => VendorRequest::STATUS_APPROVED,
+    //             'approved_at' => now(),
+    //             'tenant_id' => $tenant->id,
+    //         ]);
+
+    //         return $tenant;
+    //     });
+
+    //     // Déclencher manuellement l'événement TenantCreated pour exécuter les jobs
+    //     event(new TenantCreated($tenant));
+
+    //     // Nettoyage de la session
+    //     session()->forget('temp_password');
+
+    //     // Rôles / permissions (contexte central)
+    //     try {
+    //         setPermissionsTeamId($tenant->id);
+
+    //         if (! $user->hasRole('owner')) {
+    //             $user->assignRole('owner');
+    //         }
+
+    //         $this->seedDefaultTenantRoles($tenant);
+    //     } catch (\Exception $e) {
+    //         Log::warning('Failed to set up permissions for tenant', [
+    //             'tenant_id' => $tenant->id,
+    //             'error' => $e->getMessage(),
+    //         ]);
+    //     }
+
+    //     Log::info('Vendor approved', [
+    //         'vendor_request_id' => $vendorRequest->id,
+    //         'user_id' => $user->id,
+    //         'tenant_id' => $tenant->id,
+    //         'plan' => $plan->name,
+    //     ]);
+
+    //     try {
+    //         $user->notify(new VendorApproved($tenant));
+    //     } catch (\Exception $e) {
+    //         Log::error('Failed to send vendor approval notification', [
+    //             'error' => $e->getMessage(),
+    //             'user_id' => $user->id,
+    //         ]);
+    //     }
+
+    //     return $tenant;
+    // }
+
     public function approve(VendorRequest $vendorRequest): Tenant
     {
         $plan = $vendorRequest->plan;
         $user = $vendorRequest->user;
-
-        // Récupère le mot de passe en clair stocké en session, ou utilise 'password' par défaut
         $password = session('temp_password') ?? 'password';
 
+        // 1ère phase : créer le tenant (sans événements) et le domaine
         $tenant = DB::transaction(function () use ($vendorRequest, $plan, $user, $password) {
             $tenantId = (string) Str::orderedUuid();
             $tenant = Tenant::withoutEvents(function () use ($vendorRequest, $plan, $password, $tenantId, $user) {
@@ -112,34 +213,18 @@ class VendorRegistrationService
                     'slug' => $vendorRequest->shop_slug,
                     'description' => $vendorRequest->shop_description,
                     'email' => $vendorRequest->contact_email,
-                    'password' => $password,                // mot de passe en clair
+                    'password' => $password,
                     'telephone' => $vendorRequest->contact_phone,
                     'plan_id' => $plan->id,
                     'statut' => Tenant::STATUT_ACTIF,
                     'is_active' => true,
-                    'user_id' => $user->id, // Stocker l'ID de l'utilisateur central
+                    'user_id' => $user->id,
                 ]);
             });
 
             $tenant->domains()->create([
                 'domain' => str_replace('_', '-', $vendorRequest->shop_slug).'.localhost',
             ]);
-
-            $user->tenants()->attach($tenant->id, ['is_owner' => true]);
-
-            if ($plan->trial_days > 0) {
-                $tenant->update([
-                    'date_activation' => now(),
-                    'date_expiration' => now()->addDays($plan->trial_days),
-                ]);
-            } else {
-                $tenant->update(['date_activation' => now()]);
-            }
-
-            $this->transferDocumentsToTenant($vendorRequest, $tenant);
-
-            // Créer le symlink pour le storage du tenant
-            $this->createTenantStorageSymlink($tenant);
 
             $vendorRequest->update([
                 'status' => VendorRequest::STATUS_APPROVED,
@@ -150,20 +235,31 @@ class VendorRegistrationService
             return $tenant;
         });
 
-        // Déclencher manuellement l'événement TenantCreated pour exécuter les jobs
+        // 2ème phase : créer la base de données du tenant
         event(new TenantCreated($tenant));
 
-        // Nettoyage de la session
-        session()->forget('temp_password');
+        // 3ème phase : attacher l'utilisateur et le reste (maintenant la base existe)
+        $user = $vendorRequest->user; // rafraîchir si besoin
+        $user->tenants()->attach($tenant->id, ['is_owner' => true]);
+
+        if ($plan->trial_days > 0) {
+            $tenant->update([
+                'date_activation' => now(),
+                'date_expiration' => now()->addDays($plan->trial_days),
+            ]);
+        } else {
+            $tenant->update(['date_activation' => now()]);
+        }
+
+        $this->transferDocumentsToTenant($vendorRequest, $tenant);
+        $this->createTenantStorageSymlink($tenant);
 
         // Rôles / permissions (contexte central)
         try {
             setPermissionsTeamId($tenant->id);
-
             if (! $user->hasRole('owner')) {
                 $user->assignRole('owner');
             }
-
             $this->seedDefaultTenantRoles($tenant);
         } catch (\Exception $e) {
             Log::warning('Failed to set up permissions for tenant', [
@@ -171,6 +267,9 @@ class VendorRegistrationService
                 'error' => $e->getMessage(),
             ]);
         }
+
+        // Nettoyage de la session
+        session()->forget('temp_password');
 
         Log::info('Vendor approved', [
             'vendor_request_id' => $vendorRequest->id,

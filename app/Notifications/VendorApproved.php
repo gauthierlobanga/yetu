@@ -23,7 +23,7 @@ class VendorApproved extends Notification
         $shopUrl = 'http://'.$this->tenant->slug.'.'.config('app.domain').'/vendeur';
 
         return (new MailMessage)
-            ->subject('🎉 Votre boutique est prête !')
+            ->subject('Votre boutique est prête !')
             ->greeting('Félicitations '.$notifiable->name.' !')
             ->line('Votre boutique "'.$this->tenant->raison_sociale.'" a été créée avec succès.')
             ->line('Vous pouvez maintenant commencer à configurer votre boutique et ajouter vos produits.')

@@ -29,12 +29,12 @@ class UsersTable
     {
         return $table
             ->columns([
-                SpatieMediaLibraryImageColumn::make('avatar_url')
+                SpatieMediaLibraryImageColumn::make('avatar')
                     ->label('Avatar')
                     ->collection('avatar')
-                    ->conversion('thumbnail')
+                    ->conversion('thumb')
                     ->visibility('public')
-                    ->disk('tenant')
+                    ->disk('public')
                     ->circular()
                     ->imageSize(50)
                     ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name='.urlencode($record->name).'&color=7F9CF5&background=EBF4FF&size=128&bold=true'),

@@ -280,9 +280,9 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'user_tenant')
+        return $this->belongsToMany(User::class, 'user_tenant', 'user_id', 'tenant_id')
             ->using(UserTenantPivot::class)
-            ->withPivot('tenant_id', 'user_id')
+            ->withPivot('tenant_id', 'user_id', 'is_owner')
             ->withTimestamps();
     }
 
@@ -587,24 +587,32 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         return 'Organisation';
     }
 
-    protected static function boot()
+    protected static function booted(): void
     {
-        parent::boot();
+        static::creating(function (Tenant $tenant) {
 
-        static::creating(function ($tenant) {
-            if (empty($tenant->slug)) {
-                $tenant->slug = Str::slug($tenant->raison_sociale);
+            if (blank($tenant->id)) {
+                $tenant->id = (string) Str::orderedUuid();
             }
 
-            if (empty($tenant->id)) {
-                $tenant->id = (string) Str::orderedUuid();
+            if (blank($tenant->slug)) {
+
+                $baseSlug = Str::slug($tenant->raison_sociale);
+                $slug = $baseSlug;
+                $count = 1;
+
+                while (static::where('slug', $slug)->exists()) {
+                    $slug = "{$baseSlug}-{$count}";
+                    $count++;
+                }
+
+                $tenant->slug = $slug;
             }
         });
 
-        static::updating(function ($tenant) {
-            if (empty($tenant->slug)) {
-                $tenant->slug = Str::slug($tenant->raison_sociale);
-            }
+        static::deleting(function ($tenant) {
+            // Détache tous les utilisateurs liés avant de supprimer le tenant
+            $tenant->users()->detach();
         });
     }
 
@@ -647,18 +655,28 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
     /**
      * Accesseur pour obtenir l'URL du logo.
      */
+    // public function getLogoUrlAttribute(): ?string
+    // {
+    //     if (function_exists('tenancy') && tenancy()->initialized) {
+    //         return tenancy()->central(function () {
+    //             $tenant = static::query()->find($this->getKey());
+
+    //             return $tenant?->logo_url;
+    //         });
+    //     }
+
+    //     $media = $this->getFirstMedia('tenant_avatar');
+
+    //     return $media ? $media->getUrl() : null;
+    // }
+
     public function getLogoUrlAttribute(): ?string
     {
-        if (function_exists('tenancy') && tenancy()->initialized) {
-            return tenancy()->central(function () {
-                $tenant = static::query()->find($this->getKey());
+        return tenancy()->central(function () {
 
-                return $tenant?->logo_url;
-            });
-        }
+            $media = $this->getFirstMedia('tenant_avatar');
 
-        $media = $this->getFirstMedia('tenant_avatar');
-
-        return $media ? $media->getUrl() : null;
+            return $media?->getUrl();
+        });
     }
 }

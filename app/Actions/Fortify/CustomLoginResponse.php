@@ -4,11 +4,8 @@ namespace App\Actions\Fortify;
 
 use App\Models\Client;
 use App\Models\Tenant;
-use App\Services\VendorRegistrationService;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 use Laravel\Fortify\Contracts\LoginResponse;
 
 class CustomLoginResponse implements LoginResponse
@@ -16,16 +13,16 @@ class CustomLoginResponse implements LoginResponse
     public function toResponse($request)
     {
         $user = $request->user();
-        dd('toResponse atteint', $user?->email);
+        // dd('toResponse atteint', $user?->email);
 
         // Domaine central
         if ($this->isCentralDomain($request->getHost())) {
             if ($user && $tenant = $this->getUserTenant($user)) {
-                $url = app(VendorRegistrationService::class)->getTenantSsoLoginUrl($tenant, $user);
-                Log::info('Redirection SSO', ['url' => $url]);
+                $domain = $tenant->domains->first()->domain;
 
-                return redirect()->away($url); // ← HTTP redirect, pas Inertia::location
+                return redirect(tenant_route($domain, 'vendor.dashboard'));
             }
+
             if ($user?->hasRole('super_admin') && Route::has('filament.admin.pages.dashboard')) {
                 return redirect()->intended(route('filament.admin.pages.dashboard'));
             }

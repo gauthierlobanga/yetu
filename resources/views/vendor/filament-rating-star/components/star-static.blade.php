@@ -3,7 +3,7 @@
     $color = $getColor();
     $colorClass = match ($color) {
         'gray' => 'text-gray-500 dark:text-gray-400',
-        default => "text-custom-500",
+        default => 'text-custom-500',
     };
     $size = $getIconSize();
     $sizeClass = match ($size) {
@@ -24,41 +24,33 @@
 
 <div class="flex">
     @if ($shouldAllowZero())
-        <div
-            @class([
-                "text-slate-300" => $state !== 0,
-                "text-danger-500" => $state === 0,
-            ])
-        >
+        <div @class([
+            'text-slate-300' => $state !== 0,
+            'text-danger-500' => $state === 0,
+        ])>
             <x-icon name="heroicon-c-no-symbol" class="{{ $sizeClass }}" />
         </div>
     @endif
 
     @foreach ($getStarArray() as $value)
-        <div
-            @class([
-                "shrink-0 relative {$halfSizeClass} overflow-hidden",
-                "text-slate-300" => $state < ($value - 0.5),
-                $colorClass => $state >= ($value - 0.5),
-            ])
-            @style([
-                \Filament\Support\get_color_css_variables($color, [500]) => $color !== 'gray',
-            ])
-        >
-            <x-icon name="heroicon-s-star" class="absolute start-0 {{ $sizeClass }}" />
+        <div @class([
+            "shrink-0 relative {$halfSizeClass} overflow-hidden",
+            'text-slate-300' => $state < $value - 0.5,
+            $colorClass => $state >= $value - 0.5,
+        ]) @style([
+            \Filament\Support\get_color_css_variables($color, [500]) => $color !== 'gray',
+        ])>
+            <x-icon name="heroicon-s-star" class="absolute inset-s-0 {{ $sizeClass }}" />
         </div>
 
-        <div
-            @class([
-                "shrink-0 relative {$halfSizeClass} overflow-hidden",
-                "text-slate-300" => $state < $value,
-                $colorClass => $state >= $value,
-            ])
-            @style([
-                \Filament\Support\get_color_css_variables($color, [500]) => $color !== 'gray',
-            ])
-        >
-            <x-icon name="heroicon-s-star" class="absolute end-0 {{ $sizeClass }}" />
+        <div @class([
+            "shrink-0 relative {$halfSizeClass} overflow-hidden",
+            'text-slate-300' => $state < $value,
+            $colorClass => $state >= $value,
+        ]) @style([
+            \Filament\Support\get_color_css_variables($color, [500]) => $color !== 'gray',
+        ])>
+            <x-icon name="heroicon-s-star" class="absolute inset-e-0 {{ $sizeClass }}" />
         </div>
     @endforeach
 </div>

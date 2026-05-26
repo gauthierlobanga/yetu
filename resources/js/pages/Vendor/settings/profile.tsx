@@ -48,78 +48,82 @@ export default function Profile({
                             className="space-y-6"
                             preserveScroll
                         >
-                            {({ processing, recentlySuccessful, errors }) => (
-                                <>
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="name">
-                                            Nom complet
-                                        </Label>
-                                        <Input
-                                            id="name"
-                                            name="name"
-                                            defaultValue={auth.user?.name}
-                                            required
-                                            autoComplete="name"
-                                            placeholder="Votre nom"
-                                        />
-                                        <InputError message={errors.name} />
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="email">Email</Label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            name="email"
-                                            defaultValue={auth.user?.email}
-                                            required
-                                            autoComplete="email"
-                                            placeholder="exemple@email.com"
-                                        />
-                                        <InputError message={errors.email} />
-                                    </div>
-                                    {mustVerifyEmail &&
-                                        !auth.user?.email_verified_at && (
-                                            <div className="text-sm text-amber-600">
-                                                Votre adresse email n'est pas
-                                                vérifiée.{' '}
-                                                <Link
-                                                    href={route(
-                                                        'verification.send',
+                            {({ processing, recentlySuccessful, errors }) => {
+                                return (
+                                    <>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="name">
+                                                Nom complet
+                                            </Label>
+                                            <Input
+                                                id="name"
+                                                name="name"
+                                                defaultValue={auth.user?.name}
+                                                required
+                                                autoComplete="name"
+                                                placeholder="Votre nom"
+                                            />
+                                            <InputError message={errors.name} />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label htmlFor="email">Email</Label>
+                                            <Input
+                                                id="email"
+                                                type="email"
+                                                name="email"
+                                                defaultValue={auth.user?.email}
+                                                required
+                                                autoComplete="email"
+                                                placeholder="exemple@email.com"
+                                            />
+                                            <InputError
+                                                message={errors.email}
+                                            />
+                                        </div>
+                                        {mustVerifyEmail &&
+                                            !auth.user?.email_verified_at && (
+                                                <div className="text-sm text-amber-600">
+                                                    Votre adresse email n'est
+                                                    pas vérifiée.{' '}
+                                                    <Link
+                                                        href={route(
+                                                            'verification.send',
+                                                        )}
+                                                        method="post"
+                                                        as="button"
+                                                        className="underline"
+                                                    >
+                                                        Renvoyer le lien de
+                                                        vérification
+                                                    </Link>
+                                                    {status ===
+                                                        'verification-link-sent' && (
+                                                        <span className="ml-2 text-green-600">
+                                                            Un nouveau lien a
+                                                            été envoyé.
+                                                        </span>
                                                     )}
-                                                    method="post"
-                                                    as="button"
-                                                    className="underline"
-                                                >
-                                                    Renvoyer le lien de
-                                                    vérification
-                                                </Link>
-                                                {status ===
-                                                    'verification-link-sent' && (
-                                                    <span className="ml-2 text-green-600">
-                                                        Un nouveau lien a été
-                                                        envoyé.
-                                                    </span>
-                                                )}
-                                            </div>
-                                        )}
-                                    <div className="flex items-center gap-4">
-                                        <Button disabled={processing}>
-                                            Enregistrer
-                                        </Button>
-                                        <Transition
-                                            show={recentlySuccessful}
-                                            enter="transition ease-in-out"
-                                            enterFrom="opacity-0"
-                                            leave="transition ease-in-out"
-                                            leaveTo="opacity-0"
-                                        >
-                                            <p className="text-sm text-emerald-600">
-                                                Sauvegardé
-                                            </p>
-                                        </Transition>
-                                    </div>
-                                </>
-                            )}
+                                                </div>
+                                            )}
+                                        <div className="flex items-center gap-4">
+                                            <Button disabled={processing}>
+                                                Enregistrer
+                                            </Button>
+                                            <Transition
+                                                show={recentlySuccessful}
+                                                enter="transition ease-in-out"
+                                                enterFrom="opacity-0"
+                                                leave="transition ease-in-out"
+                                                leaveTo="opacity-0"
+                                            >
+                                                <p className="text-sm text-emerald-600">
+                                                    Sauvegardé
+                                                </p>
+                                            </Transition>
+                                        </div>
+                                    </>
+                                );
+                            }}
                         </Form>
                     </div>
                 </SettingsLayout>

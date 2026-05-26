@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
     Mail,
@@ -42,7 +42,8 @@ export default function Login({
     const passwordRequest = isTenant
         ? tenantPasswordRequest()
         : centralPasswordRequest();
-    const registerLink = isTenant ? tenantRegister() : centralRegister();
+
+    const registerLink = (isTenant ? tenantRegister() : centralRegister()).url;
 
     return (
         <AuthLayout
@@ -224,8 +225,12 @@ export default function Login({
                                 className="text-center text-sm text-muted-foreground"
                             >
                                 Vous n'avez pas encore de compte ?{' '}
-                                <TextLink
-                                    href={registerLink}
+                                <Link
+                                    href={
+                                        isTenant
+                                            ? '/register'
+                                            : '/devenir-vendeur'
+                                    }
                                     tabIndex={5}
                                     className="inline-flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
                                 >
@@ -233,7 +238,7 @@ export default function Login({
                                         ? 'Créer mon compte'
                                         : 'Créer ma boutique'}
                                     <Sparkles className="h-3.5 w-3.5" />
-                                </TextLink>
+                                </Link>
                             </motion.div>
                         )}
                     </>

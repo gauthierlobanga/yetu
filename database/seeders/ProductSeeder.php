@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Brand;
 use App\Models\ProductCategory;
 use App\Models\Produit;
+use App\Models\VarianteProduit;
 use Faker\Factory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -26,19 +27,19 @@ class ProductSeeder extends Seeder
             return;
         }
 
-        $brandUuids = Brand::orderBy('created_at')->pluck('id')->toArray();
-        if (count($brandUuids) < 5) {
+        $brands = Brand::orderBy('created_at')->get();
+        if ($brands->count() < 5) {
             $this->command->error('Il faut au moins 5 marques pour ce seeder.');
 
             return;
         }
 
         $brandIds = [
-            1 => $brandUuids[0],
-            2 => $brandUuids[1],
-            3 => $brandUuids[2],
-            4 => $brandUuids[3],
-            5 => $brandUuids[4],
+            1 => $brands[0]->id,
+            2 => $brands[1]->id,
+            3 => $brands[2]->id,
+            4 => $brands[3]->id,
+            5 => $brands[4]->id,
         ];
 
         $categoryIds = ProductCategory::pluck('id')->toArray();
@@ -66,7 +67,6 @@ class ProductSeeder extends Seeder
                 'is_featured' => true,
                 'is_new' => true,
                 'is_bestseller' => false,
-                'devise_id' => null,
                 'prix_ht' => 79.99,
                 'prix_ttc' => 96.00,
                 'prix_promotion' => null,
@@ -114,7 +114,6 @@ class ProductSeeder extends Seeder
                 'is_featured' => true,
                 'is_new' => false,
                 'is_bestseller' => true,
-                'devise_id' => null,
                 'prix_ht' => 49.00,
                 'prix_ttc' => 58.80,
                 'prix_promotion' => 45.00,
@@ -154,7 +153,6 @@ class ProductSeeder extends Seeder
                 'is_featured' => true,
                 'is_new' => true,
                 'is_bestseller' => false,
-                'devise_id' => null,
                 'prix_ht' => 199.99,
                 'prix_ttc' => 240.00,
                 'prix_promotion' => null,
@@ -190,7 +188,6 @@ class ProductSeeder extends Seeder
                 'is_featured' => true,
                 'is_new' => false,
                 'is_bestseller' => true,
-                'devise_id' => null,
                 'prix_ht' => 490.00,
                 'prix_ttc' => 588.00,
                 'prix_promotion' => null,
@@ -226,7 +223,6 @@ class ProductSeeder extends Seeder
                 'is_featured' => false,
                 'is_new' => true,
                 'is_bestseller' => false,
-                'devise_id' => null,
                 'prix_ht' => 11.90,
                 'prix_ttc' => 14.28,
                 'prix_promotion' => null,
@@ -250,7 +246,6 @@ class ProductSeeder extends Seeder
                     ['nom' => 'Mouture', 'valeur' => 'Filtre', 'supplement_prix' => 0, 'stock' => 20, 'sku_variante' => 'ECUME-ETH-250G-FIL'],
                 ],
             ],
-
             [
                 'nom' => 'Enceinte Bluetooth Portable Solaris',
                 'slug' => 'enceinte-bluetooth-portable-solaris',
@@ -267,7 +262,6 @@ class ProductSeeder extends Seeder
                 'is_featured' => false,
                 'is_new' => false,
                 'is_bestseller' => false,
-                'devise_id' => null,
                 'prix_ht' => 89.99,
                 'prix_ttc' => 107.99,
                 'prix_promotion' => null,
@@ -303,7 +297,6 @@ class ProductSeeder extends Seeder
                 'is_featured' => false,
                 'is_new' => false,
                 'is_bestseller' => false,
-                'devise_id' => null,
                 'prix_ht' => 129.99,
                 'prix_ttc' => 155.99,
                 'prix_promotion' => null,
@@ -333,7 +326,6 @@ class ProductSeeder extends Seeder
         // Produits aléatoires
         // ==========================================
         $allBrandIds = Brand::pluck('id')->toArray();
-
         $nomsProduits = [
             'T-shirt', 'Pantalon', 'Veste', 'Pull', 'Chemise', 'Robe', 'Jupe', 'Short',
             'Manteau', 'Blouson', 'Sweat', 'Débardeur', 'Chaussures', 'Bottes', 'Sandales',
@@ -343,7 +335,6 @@ class ProductSeeder extends Seeder
             'Câble', 'Support', 'Housse', 'Valise', 'Tente', 'Sac de couchage', 'Gourde',
             'Bouteille', 'Mug', 'Assiette', 'Bol', 'Verre', 'Couvert', 'Plat',
         ];
-
         $adjectifs = ['Premium', 'Deluxe', 'Classic', 'Modern', 'Vintage', 'Eco', 'Pro', 'Light', 'Max', 'Mini'];
         $statutsValides = ['brouillon', 'publie', 'archive'];
         $poidsStatuts = [15, 80, 5];
@@ -372,7 +363,6 @@ class ProductSeeder extends Seeder
                 'is_featured' => $statut === 'publie' ? $faker->boolean(20) : false,
                 'is_new' => $statut === 'publie' ? $faker->boolean(30) : false,
                 'is_bestseller' => $statut === 'publie' ? $faker->boolean(10) : false,
-                'devise_id' => null,
                 'prix_ht' => $prixHt,
                 'prix_ttc' => round($prixHt * 1.20, 2),
                 'prix_promotion' => $faker->optional(0.2)->randomFloat(2, $prixHt * 0.6, $prixHt * 0.9),
@@ -404,78 +394,59 @@ class ProductSeeder extends Seeder
 
     /**
      * Crée un produit avec ses relations.
-     * Toute colonne castée en `array` ou `json` dans le modèle sera automatiquement
-     * convertie en chaîne JSON avant l'insertion, ce qui évite les erreurs de type.
      */
     private function createProduit(array $data): Produit
     {
-        // Relations à synchroniser après création
         $categories = $data['categories'] ?? [];
         $tags = $data['tags'] ?? [];
         $variantes = $data['variantes'] ?? [];
 
         unset($data['categories'], $data['tags'], $data['variantes']);
 
-        // Récupérer les colonnes qui doivent être encodées en JSON
-        $casts = (new Produit)->getCasts();
-        $jsonColumns = [];
-        foreach ($casts as $column => $cast) {
-            if (in_array($cast, ['array', 'json', 'object', 'collection'])) {
-                $jsonColumns[] = $column;
+        // Conversion des champs JSON en chaînes JSON valides pour PostgreSQL
+        $jsonFields = ['seo_keywords', 'metadata', 'attributes'];
+        foreach ($jsonFields as $field) {
+            if (isset($data[$field]) && is_array($data[$field])) {
+                $data[$field] = json_encode($data[$field]);
+            } elseif (! isset($data[$field])) {
+                $data[$field] = json_encode([]);
             }
         }
 
-        // Encoder toutes les colonnes JSON présentes dans $data
-        foreach ($jsonColumns as $col) {
-            if (array_key_exists($col, $data)) {
-                if (is_array($data[$col])) {
-                    $data[$col] = json_encode($data[$col]);
-                } elseif (is_null($data[$col])) {
-                    $data[$col] = json_encode([]);
-                }
-                // Si c'est déjà une chaîne, on la laisse
-            }
-        }
-
-        // Valeurs par défaut pour les colonnes JSON qui ne sont pas encore définies
-        foreach (['seo_keywords', 'metadata', 'attributes'] as $col) {
-            if (! array_key_exists($col, $data)) {
-                $data[$col] = json_encode([]);
-            }
-        }
-
+        // Valeurs par défaut
         $data['vues'] = 0;
         $data['views_count'] = 0;
         $data['sold_count'] = 0;
         $data['average_rating'] = 0;
         $data['reviews_count'] = 0;
 
-        // Création ou récupération du produit (évite les doublons de slug)
+        // Création du produit
         $produit = Produit::firstOrCreate(
             ['slug' => $data['slug']],
             $data
         );
 
-        // Attacher les catégories
-        foreach ($categories as $index => $categorieId) {
-            if (ProductCategory::where('id', $categorieId)->exists()) {
-                $existing = DB::table('produit_categorie_pivot')
-                    ->where('produit_id', $produit->id)
-                    ->where('category_id', $categorieId)
-                    ->first();
-
-                if (! $existing) {
-                    DB::table('produit_categorie_pivot')->insert([
+        // Attacher les catégories via la table pivot
+        if (! empty($categories)) {
+            $pivotData = [];
+            foreach ($categories as $index => $categoryId) {
+                if (ProductCategory::where('id', $categoryId)->exists()) {
+                    $pivotData[] = [
                         'produit_id' => $produit->id,
-                        'category_id' => $categorieId,
-                        'is_primary' => ($index === 0),
+                        'category_id' => $categoryId,
+                        'is_primary' => $index === 0,
                         'order' => $index,
-                    ]);
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
                 }
+            }
+            if (! empty($pivotData)) {
+                DB::table('produit_categorie_pivot')->insertOrIgnore($pivotData);
             }
         }
 
-        // Attacher les tags (nécessite le package spatie/laravel-tags)
+        // Attacher les tags (si le modèle utilise Spatie\Tags\HasTags)
         if (! empty($tags) && method_exists($produit, 'attachTags')) {
             $produit->attachTags($tags);
         }
@@ -483,7 +454,8 @@ class ProductSeeder extends Seeder
         // Créer les variantes
         if (! empty($variantes) && method_exists($produit, 'variantes')) {
             foreach ($variantes as $varianteData) {
-                $produit->variantes()->firstOrCreate(
+                $varianteData['produit_id'] = $produit->id;
+                VarianteProduit::firstOrCreate(
                     ['sku_variante' => $varianteData['sku_variante']],
                     $varianteData
                 );
@@ -493,14 +465,10 @@ class ProductSeeder extends Seeder
         return $produit;
     }
 
-    /**
-     * Retourne un élément aléatoire basé sur des poids.
-     */
     private function getRandomWeightedElement(array $elements, array $weights): mixed
     {
         $totalWeight = array_sum($weights);
         $rand = mt_rand(1, $totalWeight);
-
         $cumulativeWeight = 0;
         foreach ($elements as $index => $element) {
             $cumulativeWeight += $weights[$index];

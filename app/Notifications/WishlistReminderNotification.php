@@ -15,7 +15,7 @@ class WishlistReminderNotification extends Notification
 
     public function via($notifiable): array
     {
-        return ['database', 'broadcast'];
+        return ['mail', 'database', 'broadcast'];
     }
 
     public function toArray($notifiable): array

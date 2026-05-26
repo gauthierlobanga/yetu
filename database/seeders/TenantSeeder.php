@@ -11,7 +11,7 @@ class TenantSeeder extends Seeder
         $this->call([
             ProduitCategorySeeder::class,
             BrandSeeder::class,
-            ProductSeeder::class,
+            // ProductSeeder::class,
         ]);
     }
 }
