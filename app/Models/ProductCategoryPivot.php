@@ -10,13 +10,15 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class ProductCategoryPivot extends Pivot
 {
-    // use HasUuids;
+    use HasUuids;
 
     protected $table = 'produit_categorie_pivot';
 
-    // protected $keyType = 'string';
+    protected $keyType = 'string';
 
-    // public $incrementing = false;
+    public $incrementing = false;
+
+    protected $primaryKey = null;
 
     protected $fillable = [
         'produit_id',
@@ -48,7 +50,7 @@ class ProductCategoryPivot extends Pivot
     // Accessors
     public function getEstPrincipaleLabelAttribute(): string
     {
-        return $this->est_principale ? 'Oui' : 'Non';
+        return $this->is_primary ? 'Oui' : 'Non';
     }
 
     // Méthodes métier
@@ -58,7 +60,7 @@ class ProductCategoryPivot extends Pivot
         self::where('produit_id', $this->produit_id)
             ->update(['is_primary' => false]);
 
-        $this->est_principale = true;
+        $this->is_primary = true;
         $this->save();
     }
 

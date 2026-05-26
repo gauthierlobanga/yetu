@@ -68,6 +68,7 @@ class Post extends Model implements HasMedia
             // 'embedding' => 'array',
             'content' => 'array',
             'excerpt' => 'array',
+            'metadata' => 'array',
             'meta_keywords' => 'array',
             'is_pinned' => 'boolean',
             'views_count' => 'integer',
@@ -124,12 +125,13 @@ class Post extends Model implements HasMedia
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(
-            PostCategory::class,          // Modèle lié
-            'posts_categories_pivot',     // Table pivot
-            'post_id',                    // Clé étrangère de CE modèle (Post)
-            'category_id'                 // Clé étrangère du modèle PostCategory
+            PostCategory::class,
+            'posts_categories_pivot',
+            'post_id',
+            'category_id'
         )
-            ->withPivot('id', 'is_primary', 'est_principale', 'ordre')
+            ->using(PostCategoryPivot::class)
+            ->withPivot('est_principale', 'ordre')
             ->withTimestamps()
             ->orderByPivot('ordre');
     }
@@ -149,17 +151,10 @@ class Post extends Model implements HasMedia
         return $this->likes()->where('user_id', $user->id)->exists();
     }
 
-    public function categoriePrincipale()
-    {
-        return $this->belongsToMany(PostCategory::class, 'posts_categories_pivot')
-            ->wherePivot('est_principale', true)
-            ->first();
-    }
-
     public function primaryCategory()
     {
         return $this->belongsToMany(PostCategory::class, 'posts_categories_pivot')
-            ->wherePivot('is_primary', true)
+            ->wherePivot('est_principale', true)
             ->first();
     }
 
@@ -454,14 +449,18 @@ class Post extends Model implements HasMedia
         }
     }
 
-    // ========== ACCESSORS EXISTANTS AMÉLIORÉS ==========
-
     public function getReadingTimeAttribute(): int
     {
         if ($this->reading_time_minutes) {
             return $this->reading_time_minutes;
         }
-        $words = str_word_count(strip_tags($this->content ?? ''));
+
+        $content = $this->content;
+        if (is_array($content)) {
+            $content = $content['body'] ?? $content['text'] ?? json_encode($content);
+        }
+
+        $words = str_word_count(strip_tags((string) ($content ?? '')));
 
         return (int) ceil($words / 200);
     }
@@ -519,25 +518,48 @@ class Post extends Model implements HasMedia
 
     public function getMetaDescriptionAttribute($value): string
     {
-        return $value ?? $this->excerpt;
+        return $value ?? ($this->excerpt['text'] ?? '');
     }
 
-    public function getExcerptAttribute()
-    {
-        $content = is_array($this->content)
-            ? json_encode($this->content)
-            : $this->content;
+    /**
+     * Get the excerpt attribute.
+     * Ensures a valid Tiptap document structure is always returned.
+     */
+    // public function getExcerptAttribute($value): array
+    // {
+    //     if (is_string($value)) {
+    //         $decoded = json_decode($value, true);
+    //     } else {
+    //         $decoded = $value;
+    //     }
 
-        return Str::limit(strip_tags($content), 120);
+    //     if (! is_array($decoded) || ! isset($decoded['type'])) {
+    //         return [
+    //             'type' => 'doc',
+    //             'content' => [],
+    //         ];
+    //     }
+
+    //     return $decoded;
+    // }
+
+    public function setContentAttribute($value): void
+    {
+        if (is_array($value)) {
+            $this->attributes['content'] = json_encode($value);
+        } else {
+            $this->attributes['content'] = $value;
+        }
     }
 
-    public function getContentTextAttribute()
+    public function getContentPlainTextAttribute()
     {
-        $content = is_array($this->content)
-            ? json_encode($this->content)
-            : $this->content;
+        $content = $this->content;
+        if (is_array($content)) {
+            $content = $content['body'] ?? $content['text'] ?? json_encode($content);
+        }
 
-        return Str::limit(strip_tags($content), 120);
+        return Str::limit(strip_tags((string) ($content ?? '')), 120);
     }
 
     public function getRouteKeyName()
@@ -730,7 +752,17 @@ class Post extends Model implements HasMedia
                 $post->reading_time_minutes = $post->reading_time;
             }
             if (empty($post->excerpt)) {
-                $post->excerpt = Str::limit(strip_tags($post->content ?? ''), 150);
+                $post->excerpt = [
+                    'type' => 'doc',
+                    'content' => [
+                        [
+                            'type' => 'paragraph',
+                            'content' => [
+                                ['type' => 'text', 'text' => $post->getPlainTextContent(150)],
+                            ],
+                        ],
+                    ],
+                ];
             }
         });
 
@@ -759,5 +791,63 @@ class Post extends Model implements HasMedia
         }
 
         return $this->bookmarkedBy()->where('user_id', $user->id)->exists();
+    }
+
+    /**
+     * Get the content attribute.
+     * Ensures a valid Tiptap document structure is always returned.
+     */
+    // public function getContentAttribute($value): array
+    // {
+    //     if (is_string($value)) {
+    //         $decoded = json_decode($value, true);
+    //     } else {
+    //         $decoded = $value;
+    //     }
+
+    //     // Si la valeur est null, vide, ou n'a pas la structure attendue
+    //     if (! is_array($decoded) || ! isset($decoded['type'])) {
+    //         return [
+    //             'type' => 'doc',
+    //             'content' => [],
+    //         ];
+    //     }
+
+    //     return $decoded;
+    // }
+
+    public function getPlainTextContent(?int $limit = null): string
+    {
+        $content = $this->content; // déjà un tableau grâce à l'accesseur
+
+        if (isset($content['type']) && $content['type'] === 'doc') {
+            $text = $this->extractTextFromTiptap($content);
+        } elseif (is_array($content)) {
+            $text = $content['body'] ?? $content['text'] ?? json_encode($content);
+        } else {
+            $text = (string) ($content ?? '');
+        }
+
+        $plainText = strip_tags($text);
+
+        return $limit ? Str::limit($plainText, $limit) : $plainText;
+    }
+
+    /**
+     * Extrait récursivement le texte d'un document Tiptap.
+     */
+    private function extractTextFromTiptap(array $node): string
+    {
+        $text = '';
+        if (isset($node['text'])) {
+            $text .= $node['text'];
+        }
+        if (isset($node['content'])) {
+            foreach ($node['content'] as $child) {
+                $text .= $this->extractTextFromTiptap($child);
+            }
+        }
+
+        return $text;
     }
 }

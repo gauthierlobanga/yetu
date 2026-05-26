@@ -2,11 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Post;
+use App\Models\PostCategory;
 use App\Models\User;
 use Faker\Factory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PostSeeder extends Seeder
@@ -23,7 +24,7 @@ class PostSeeder extends Seeder
             return;
         }
 
-        $categoriesExistantes = DB::table('posts_categories')->count();
+        $categoriesExistantes = PostCategory::count();
         if ($categoriesExistantes === 0) {
             $this->command->error('Aucune catégorie trouvée. Veuillez d\'abord exécuter BlogCategorySeeder.');
 
@@ -32,14 +33,12 @@ class PostSeeder extends Seeder
 
         $faker = Factory::create('fr_FR');
         $userIds = User::pluck('id')->toArray();
-        $categoryIds = DB::table('posts_categories')->pluck('id')->toArray();
+        $categoryIds = PostCategory::pluck('id')->toArray();
 
         $this->command->info('IDs des catégories disponibles : '.implode(', ', array_slice($categoryIds, 0, 10)).'...');
 
         $statuts = ['draft', 'published', 'archived'];
         $poidsStatuts = [15, 75, 10];
-
-        // ID du tenant
 
         $getCategorySlice = function ($start, $length) use ($categoryIds) {
             return array_slice($categoryIds, $start, $length);
@@ -205,8 +204,8 @@ class PostSeeder extends Seeder
         $postsDetail = [];
         $themeKeys = array_keys($themes);
 
-        // Créer 20 posts détaillés avec des titres uniques
-        for ($i = 0; $i < 20; $i++) {
+        // Créer 10 posts détaillés avec des titres uniques
+        for ($i = 0; $i < 10; $i++) {
             $themeKey = $themeKeys[$i % count($themeKeys)];
             $theme = $themes[$themeKey];
 
@@ -232,8 +231,8 @@ class PostSeeder extends Seeder
 
             $postsDetail[] = [
                 'title' => $title,
-                'excerpt' => $this->generateUniqueExcerpt($faker, $title),
-                'content' => $this->generateLongContent($faker),
+                'excerpt' => ['text' => $this->generateUniqueExcerpt($faker, $title)],
+                'content' => ['body' => $this->generateLongContent($faker)],
                 'tags' => $theme['tags'],
                 'categories' => $getCategorySlice($i % 7, 2 + ($i % 2)),
             ];
@@ -242,15 +241,15 @@ class PostSeeder extends Seeder
         $postsCrees = 0;
 
         foreach ($postsDetail as $index => $postData) {
-            $this->createPost($postData, $userIds, $faker, $categoryIds, $index < 5);
+            $this->createPost($postData, $userIds, $faker, $categoryIds, $index < 2);
             $postsCrees++;
         }
 
         // ==========================================
-        // CRÉATION DES POSTS RESTANTS (jusqu'à 100)
+        // CRÉATION DES POSTS RESTANTS (jusqu'à 30)
         // ==========================================
 
-        $postsRestants = 100 - $postsCrees;
+        $postsRestants = 30 - $postsCrees;
 
         $prefixes = [
             'Comment', 'Pourquoi', 'Guide', 'Les meilleurs', 'Top 10', 'Découvrez',
@@ -296,8 +295,8 @@ class PostSeeder extends Seeder
 
             $postData = [
                 'title' => $title,
-                'excerpt' => $this->generateUniqueExcerpt($faker, $title),
-                'content' => $this->generateRandomContent($faker),
+                'excerpt' => ['text' => $this->generateUniqueExcerpt($faker, $title)],
+                'content' => ['body' => $this->generateRandomContent($faker)],
                 'tags' => $faker->words(rand(3, 6)),
                 'categories' => $categories,
             ];
@@ -306,12 +305,12 @@ class PostSeeder extends Seeder
             $postsCrees++;
         }
 
-        $this->command->info("✅ {$postsCrees} articles de blog créés avec succès !");
+        $this->command->info("✅ {$postsCrees} articles de blog créées avec succès !");
         $this->command->info('   - Titres uniques : '.count($this->usedTitles));
 
-        $publies = DB::table('posts')->where('status', 'published')->count();
-        $brouillons = DB::table('posts')->where('status', 'draft')->count();
-        $archives = DB::table('posts')->where('status', 'archived')->count();
+        $publies = Post::where('status', 'published')->count();
+        $brouillons = Post::where('status', 'draft')->count();
+        $archives = Post::where('status', 'archived')->count();
 
         $this->command->info("   - Articles publiés : {$publies}");
         $this->command->info("   - Articles en brouillon : {$brouillons}");
@@ -393,82 +392,53 @@ class PostSeeder extends Seeder
             $expiresAt = Carbon::now()->subMonths($faker->numberBetween(1, 3));
         }
 
-        $wordCount = str_word_count(strip_tags($data['content']));
-        $readingTime = max(1, ceil($wordCount / 200));
-
-        $viewsCount = $status === 'published' ? $faker->numberBetween(50, 50000) : 0;
-        $likesCount = $status === 'published' ? $faker->numberBetween(5, max(5, (int) floor($viewsCount * 0.05))) : 0;
-        $commentsCount = $status === 'published' ? $faker->numberBetween(0, max(0, (int) floor($viewsCount * 0.02))) : 0;
-
-        $featuredImage = 'posts/featured/'.Str::random(10).'.jpg';
-
-        $excerptJson = json_encode($data['excerpt']);
-        $contentJson = json_encode($data['content']);
-
-        $imagesArray = [
-            'posts/gallery/'.Str::random(10).'.jpg',
-            'posts/gallery/'.Str::random(10).'.jpg',
-        ];
-        $imagesJson = json_encode($imagesArray);
-
-        $metadataArray = [
-            'tags' => is_array($data['tags']) ? $data['tags'] : [],
-            'author_bio' => $faker->sentence(10),
-            'reading_time' => $readingTime.' min',
-            'difficulty' => $faker->randomElement(['Débutant', 'Intermédiaire', 'Avancé']),
-        ];
-        $metadataJson = json_encode($metadataArray);
-
-        $metaKeywordsArray = is_array($data['tags']) ? $data['tags'] : $faker->words(5);
-        $metaKeywordsJson = json_encode($metaKeywordsArray);
-
         // Générer un slug unique
         do {
             $slug = Str::slug($data['title']);
             if (in_array($slug, $this->usedSlugs)) {
                 $slug .= '-'.$faker->randomNumber(3);
             }
-        } while (in_array($slug, $this->usedSlugs) || DB::table('posts')->where('slug', $slug)->exists());
+        } while (in_array($slug, $this->usedSlugs) || Post::where('slug', $slug)->exists());
         $this->usedSlugs[] = $slug;
 
-        $postId = DB::table('posts')->insertGetId([
-            'id' => Str::uuid(),
-            'user_id' => $userId,
-            'title' => $data['title'],
-            'slug' => $slug,
-            'excerpt' => $excerptJson,
-            'content' => $contentJson,
-            'metadata' => $metadataJson,
-            'status' => $status,
-            'is_pinned' => $isPinned,
-            'views_count' => $viewsCount,
-            'likes_count' => $likesCount,
-            'comments_count' => $commentsCount,
-            'reading_time_minutes' => $readingTime,
-            'meta_title' => $data['title'].' | Blog',
-            'meta_description' => Str::limit($data['excerpt'], 160),
-            'meta_keywords' => $metaKeywordsJson,
-            'published_at' => $publishedAt,
-            'scheduled_for' => $scheduledFor,
-            'expires_at' => $expiresAt,
-            'created_at' => $publishedAt ?? Carbon::now()->subDays($faker->numberBetween(1, 180)),
-            'updated_at' => Carbon::now(),
-            'deleted_at' => $status === 'archived' ? $expiresAt : null,
-        ]);
+        $post = Post::firstOrCreate(
+            ['slug' => $slug],
+            [
+                'user_id' => $userId,
+                'title' => $data['title'],
+                'excerpt' => $data['excerpt'],
+                'content' => $data['content'],
+                'metadata' => [
+                    'author_bio' => $faker->sentence(10),
+                    'difficulty' => $faker->randomElement(['Débutant', 'Intermédiaire', 'Avancé']),
+                ],
+                'status' => $status,
+                'is_pinned' => $isPinned,
+                'views_count' => $status === 'published' ? $faker->numberBetween(50, 50000) : 0,
+                'likes_count' => $status === 'published' ? $faker->numberBetween(5, 200) : 0,
+                'comments_count' => $status === 'published' ? $faker->numberBetween(0, 50) : 0,
+                'meta_title' => $data['title'].' | Blog',
+                'meta_description' => Str::limit($data['excerpt']['text'] ?? '', 160),
+                'meta_keywords' => $data['tags'],
+                'published_at' => $publishedAt,
+                'scheduled_for' => $scheduledFor,
+                'expires_at' => $expiresAt,
+            ]
+        );
+
+        if (! empty($data['tags'])) {
+            $post->attachTags($data['tags']);
+        }
 
         if (! empty($data['categories'])) {
+            $syncData = [];
             foreach ($data['categories'] as $index => $categoryId) {
-                if (in_array($categoryId, $categoryIds)) {
-                    DB::table('posts_categories_pivot')->insert([
-                        'category_id' => $categoryId,
-                        'post_id' => $postId,
-                        'is_primary' => ($index === 0),
-                        'order' => $index,
-                        'created_at' => Carbon::now(),
-                        'updated_at' => Carbon::now(),
-                    ]);
-                }
+                $syncData[$categoryId] = [
+                    'est_principale' => ($index === 0),
+                    'ordre' => $index,
+                ];
             }
+            $post->categories()->sync($syncData);
         }
     }
 

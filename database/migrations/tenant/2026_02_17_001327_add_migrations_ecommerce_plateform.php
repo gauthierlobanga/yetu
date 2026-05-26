@@ -635,8 +635,7 @@ return new class extends Migration
         Schema::create('compte_fidelites', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('client_id')->references('id')->on('clients')->onDelete('cascade');
-            $table->foreignUuid('programme_fidelite_id')->references('id')->on('programme_fidelites')
-                ->onDelete('cascade');
+            $table->foreignUuid('programme_fidelite_id')->nullable()->constrained('programme_fidelites')->nullOnDelete();
             $table->integer('points')->default(0);
             $table->integer('points_cumules')->default(0);
             $table->string('niveau')->nullable();

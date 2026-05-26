@@ -76,11 +76,12 @@ class PostCategory extends Model
     public function posts(): BelongsToMany
     {
         return $this->belongsToMany(
-            Post::class,                  // Modèle lié
-            'posts_categories_pivot',     // Table pivot
-            'category_id',                // Clé étrangère de CE modèle (PostCategory)
-            'post_id'                     // Clé étrangère du modèle Post
+            Post::class,
+            'posts_categories_pivot',
+            'category_id',
+            'post_id'
         )
+            ->using(PostCategoryPivot::class)
             ->withPivot('is_primary', 'order')
             ->withTimestamps();
     }
@@ -148,69 +149,9 @@ class PostCategory extends Model
         return null;
     }
 
-    // Accessors pour les colonnes JSON
-    public function getMetadataAttribute($value)
-    {
-        if (is_null($value)) {
-            return [];
-        }
-
-        if (is_array($value)) {
-            return $value;
-        }
-
-        $decoded = json_decode($value, true);
-
-        return json_last_error() === JSON_ERROR_NONE ? $decoded : [];
-    }
-
-    public function getMetaKeywordsAttribute($value)
-    {
-        if (is_null($value)) {
-            return [];
-        }
-
-        if (is_array($value)) {
-            return $value;
-        }
-
-        $decoded = json_decode($value, true);
-
-        return json_last_error() === JSON_ERROR_NONE ? $decoded : [];
-    }
-
     /**
      * Scope pour trier par nom (compatible PostgreSQL)
      */
-    public function scopeOrderByName($query, $direction = 'asc')
-    {
-        return $query->orderBy('nom', $direction);
-    }
-
-    /**
-     * Scope pour rechercher par nom (compatible PostgreSQL)
-     */
-    public function scopeSearchByName($query, string $search)
-    {
-        return $query->where('nom', 'like', "%{$search}%");
-    }
-
-    // Mutateurs pour les colonnes JSON
-    public function setMetadataAttribute($value)
-    {
-        $this->attributes['metadata'] = is_array($value) ? json_encode($value) : $value;
-    }
-
-    public function setMetaKeywordsAttribute($value)
-    {
-        $this->attributes['meta_keywords'] = is_array($value) ? json_encode($value) : $value;
-    }
-
-    // Scope pour trier par nom (compatible PostgreSQL)
-    public function scopeOrderByNom($query, $direction = 'asc')
-    {
-        return $query->orderBy('nom', $direction);
-    }
 
     // Scopes
     public function scopeActifs($query)
