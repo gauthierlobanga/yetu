@@ -91,6 +91,7 @@ export function AppSidebar() {
                     title: 'Tableau de bord',
                     href: dashboard(),
                     icon: LayoutGrid,
+                    badge: undefined,
                 },
             ]),
         },
@@ -101,34 +102,49 @@ export function AppSidebar() {
                     title: 'Mes commandes',
                     href: orders.index().url,
                     icon: ShoppingBag,
+                    badge: undefined,
                 },
                 {
                     title: 'Liste de souhaits',
                     href: wishlist.index().url,
                     icon: Heart,
+                    badge: undefined,
                 },
                 {
                     title: 'Programme fidélité',
                     href: loyalty.index().url,
                     icon: Gift,
+                    badge: undefined,
                 },
                 {
                     title: 'Adresses',
                     href: addresses.index().url,
                     icon: MapPin,
+                    badge: undefined,
                 },
                 {
                     title: 'Retours & SAV',
                     href: tenant.return.index().url,
                     icon: RotateCcw,
+                    badge: undefined,
                 },
             ]),
         },
         {
             title: 'Compte',
             items: enhanceItems([
-                { title: 'Paramètres', href: edit(), icon: IconSettings },
-                { title: 'Centre d’aide', href: help().url, icon: CircleHelp },
+                {
+                    title: 'Paramètres',
+                    href: edit(),
+                    icon: IconSettings,
+                    badge: undefined,
+                },
+                {
+                    title: 'Centre d’aide',
+                    href: help().url,
+                    icon: CircleHelp,
+                    badge: undefined,
+                },
             ]),
         },
     ];
@@ -141,6 +157,7 @@ export function AppSidebar() {
                       title: 'Ma boutique',
                       href: vendor.dashboard().url,
                       icon: Store,
+                      badge: undefined,
                   },
               ]),
           }

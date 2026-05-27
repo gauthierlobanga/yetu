@@ -106,7 +106,7 @@ export default function ShopLoyaltyPage() {
                     <div className="flex flex-1 flex-col gap-8 p-4 md:p-8">
                         {/* En-tête épuré */}
                         <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/70">
-                            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent dark:from-amber-500/10" />
+                            <div className="absolute inset-0 bg-linear-to-br from-amber-500/5 to-transparent dark:from-amber-500/10" />
                             <div className="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
@@ -164,7 +164,7 @@ export default function ShopLoyaltyPage() {
                                     <div className="mt-3">
                                         <Progress
                                             value={progress}
-                                            className="h-2 bg-slate-100 dark:bg-slate-800 [&>div]:bg-gradient-to-r [&>div]:from-amber-400 [&>div]:to-amber-600"
+                                            className="h-2 bg-slate-100 dark:bg-slate-800 [&>div]:bg-linear-to-r [&>div]:from-amber-400 [&>div]:to-amber-600"
                                         />
                                         <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
                                             {maxPoints} points pour le niveau
@@ -212,7 +212,7 @@ export default function ShopLoyaltyPage() {
                                         onClick={() =>
                                             form.post(route('loyalty.redeem'))
                                         }
-                                        className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20 hover:from-amber-600 hover:to-orange-600"
+                                        className="w-full rounded-xl bg-linear-to-r from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20 hover:from-amber-600 hover:to-orange-600"
                                     >
                                         <Sparkles className="mr-2 h-4 w-4" />
                                         Échanger mes points
