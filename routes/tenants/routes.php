@@ -77,9 +77,7 @@ Route::middleware([
     Route::get('/tenant-sso-login', [TenantSsoLoginController::class, '__invoke'])
         ->name('tenant.sso.login');
 
-    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->middleware('auth')
-        ->name('logout');
+
 
     /*
       |--------------------------------------------------------------------------

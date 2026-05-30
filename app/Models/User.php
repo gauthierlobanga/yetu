@@ -157,7 +157,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             'tenant_id',
         )
             ->using(UserTenantPivot::class)
-            ->withPivot('is_owner')
+            ->withPivot('tenant_id', 'user_id', 'is_owner')
             ->withTimestamps();
     }
 
@@ -427,9 +427,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
                 $user->is_active = true;
             }
 
-            if (empty($user->global_id)) {
-                $user->global_id = (string) Str::orderedUuid();
-            }
+            // if (empty($user->global_id)) {
+            //     $user->global_id = (string) Str::orderedUuid();
+            // }
         });
     }
 

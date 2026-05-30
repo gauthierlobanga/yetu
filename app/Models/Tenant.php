@@ -184,192 +184,6 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         }
     }
 
-    public function documentsLegaux()
-    {
-        return $this->belongsToMany(
-            TypeDocumentLegal::class,
-            'tenant_documents_legaux',
-            'tenant_id',
-            'type_document_id'
-        )
-            ->withPivot([
-                'id',
-                'numero_document',
-                'date_delivrance',
-                'date_expiration',
-                'lieu_delivrance',
-                'autorite_delivrance',
-                'metadata',
-                'est_verifie',
-                'verifie_le',
-                'verifie_par',
-                'created_at',
-                'updated_at',
-            ])
-            ->withTimestamps();
-    }
-
-    // Accesseurs pour les documents courants
-    public function getRccmAttribute()
-    {
-        return $this->documentsLegaux()
-            ->where('code', 'RCCM')
-            ->first()?->pivot->numero_document;
-    }
-
-    public function getPatenteAttribute()
-    {
-        return $this->documentsLegaux()
-            ->where('code', 'PATENTE')
-            ->first()?->pivot->numero_document;
-    }
-
-    public function getIfuAttribute()
-    {
-        return $this->documentsLegaux()
-            ->where('code', 'IFU')
-            ->first()?->pivot->numero_document;
-    }
-
-    public function getNumeroImpotAttribute()
-    {
-        return $this->ifu;
-    }
-
-    public function documentsObligatoiresComplets(): bool
-    {
-        $obligatoires = TypeDocumentLegal::obligatoires()->count();
-        $fournis = $this->documentsLegaux()
-            ->where('est_obligatoire', true)
-            ->whereNotNull('tenant_documents_legaux.numero_document')
-            ->count();
-
-        return $obligatoires === $fournis;
-    }
-
-    public function getPourcentageVerificationAttribute(): float
-    {
-        $total = TypeDocumentLegal::count();
-        if ($total === 0) {
-            return 0;
-        }
-        $verifies = $this->documentsLegaux()
-            ->where('tenant_documents_legaux.est_verifie', true)
-            ->count();
-
-        return round(($verifies / $total) * 100, 1);
-    }
-
-    public function getDocumentsManquantsAttribute(): array
-    {
-        $obligatoires = TypeDocumentLegal::obligatoires()->pluck('code');
-        $fournis = $this->documentsLegaux()
-            ->whereNotNull('tenant_documents_legaux.numero_document')
-            ->pluck('code')
-            ->toArray();
-
-        return $obligatoires->diff($fournis)->values()->toArray();
-    }
-
-    // Relations existantes
-
-    public function getFilamentName(): string
-    {
-        return "{$this->raison_sociale}";
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'user_tenant', 'user_id', 'tenant_id')
-            ->using(UserTenantPivot::class)
-            ->withPivot('tenant_id', 'user_id', 'is_owner')
-            ->withTimestamps();
-    }
-
-    /**
-     * Register media collections.
-     */
-    public function registerMediaCollections(): void
-    {
-        $this
-            ->addMediaCollection('tenant_avatar')
-            ->singleFile()
-            ->acceptsMimeTypes([
-                'image/jpeg',
-                'image/png',
-                'image/webp',
-                'image/gif',
-                'image/svg+xml',
-            ])
-            ->useDisk('public');
-    }
-
-    /**
-     * Register media conversions.
-     */
-    public function registerMediaConversions(?Media $media = null): void
-    {
-        $this->addMediaConversion('tenant_thumb')
-            ->width(100)
-            ->height(100)
-            ->sharpen(10)
-            ->nonQueued();
-
-        $this->addMediaConversion('medium')
-            ->width(300)
-            ->height(300)
-            ->sharpen(10)
-            ->nonQueued();
-    }
-
-    public function isAccessible(): bool
-    {
-        return $this->vendorRequest()
-            ->where('status', VendorRequest::STATUS_APPROVED)
-            ->exists() && $this->estActif();
-    }
-
-    public function vendorRequest(): HasOne
-    {
-        return $this->hasOne(VendorRequest::class, 'tenant_id');
-    }
-
-    public function getFilamentAvatarUrl(): ?string
-    {
-        return $this->logo_url;
-    }
-
-    /**
-     * Méthode utilisée par Filament pour obtenir le nom du tenant
-     */
-    public function getTenantName(): string
-    {
-        return $this->raison_sociale
-            ?? $this->slug
-            ?? "Vendeur #{$this->getKey()}";
-    }
-
-    public function getProduitsCountAttribute(): int
-    {
-        return once(function () {
-            try {
-                return $this->run(function () {
-                    return Produit::count();
-                });
-            } catch (\Exception $e) {
-                return 0;
-            }
-        });
-    }
-
-    /**
-     * Route key name pour Filament
-     */
-    public function getRouteKeyName()
-    {
-        return 'slug';
-    }
-
     /** @return HasMany<AbandonPanier, self> */
     public function abandonPaniers(): HasMany
     {
@@ -543,6 +357,192 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         return $this->hasMany(AvisClient::class);
     }
 
+    public function documentsLegaux()
+    {
+        return $this->belongsToMany(
+            TypeDocumentLegal::class,
+            'tenant_documents_legaux',
+            'tenant_id',
+            'type_document_id'
+        )
+            ->withPivot([
+                'id',
+                'numero_document',
+                'date_delivrance',
+                'date_expiration',
+                'lieu_delivrance',
+                'autorite_delivrance',
+                'metadata',
+                'est_verifie',
+                'verifie_le',
+                'verifie_par',
+                'created_at',
+                'updated_at',
+            ])
+            ->withTimestamps();
+    }
+
+    // Accesseurs pour les documents courants
+    public function getRccmAttribute()
+    {
+        return $this->documentsLegaux()
+            ->where('code', 'RCCM')
+            ->first()?->pivot->numero_document;
+    }
+
+    public function getPatenteAttribute()
+    {
+        return $this->documentsLegaux()
+            ->where('code', 'PATENTE')
+            ->first()?->pivot->numero_document;
+    }
+
+    public function getIfuAttribute()
+    {
+        return $this->documentsLegaux()
+            ->where('code', 'IFU')
+            ->first()?->pivot->numero_document;
+    }
+
+    public function getNumeroImpotAttribute()
+    {
+        return $this->ifu;
+    }
+
+    public function documentsObligatoiresComplets(): bool
+    {
+        $obligatoires = TypeDocumentLegal::obligatoires()->count();
+        $fournis = $this->documentsLegaux()
+            ->where('est_obligatoire', true)
+            ->whereNotNull('tenant_documents_legaux.numero_document')
+            ->count();
+
+        return $obligatoires === $fournis;
+    }
+
+    public function getPourcentageVerificationAttribute(): float
+    {
+        $total = TypeDocumentLegal::count();
+        if ($total === 0) {
+            return 0;
+        }
+        $verifies = $this->documentsLegaux()
+            ->where('tenant_documents_legaux.est_verifie', true)
+            ->count();
+
+        return round(($verifies / $total) * 100, 1);
+    }
+
+    public function getDocumentsManquantsAttribute(): array
+    {
+        $obligatoires = TypeDocumentLegal::obligatoires()->pluck('code');
+        $fournis = $this->documentsLegaux()
+            ->whereNotNull('tenant_documents_legaux.numero_document')
+            ->pluck('code')
+            ->toArray();
+
+        return $obligatoires->diff($fournis)->values()->toArray();
+    }
+
+    // Relations existantes
+
+    public function getFilamentName(): string
+    {
+        return "{$this->raison_sociale}";
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_tenant', 'tenant_id', 'user_id')
+            ->using(UserTenantPivot::class)
+            ->withPivot('user_id', 'tenant_id', 'is_owner')
+            ->withTimestamps();
+    }
+
+    /**
+     * Register media collections.
+     */
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('tenant_avatar')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+                'image/gif',
+                'image/svg+xml',
+            ])
+            ->useDisk('public');
+    }
+
+    /**
+     * Register media conversions.
+     */
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('tenant_thumb')
+            ->width(100)
+            ->height(100)
+            ->sharpen(10)
+            ->nonQueued();
+
+        $this->addMediaConversion('medium')
+            ->width(300)
+            ->height(300)
+            ->sharpen(10)
+            ->nonQueued();
+    }
+
+    public function isAccessible(): bool
+    {
+        return $this->vendorRequest()
+            ->where('status', VendorRequest::STATUS_APPROVED)
+            ->exists() && $this->estActif();
+    }
+
+    public function vendorRequest(): HasOne
+    {
+        return $this->hasOne(VendorRequest::class, 'tenant_id');
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->logo_url;
+    }
+
+    /**
+     * Méthode utilisée par Filament pour obtenir le nom du tenant
+     */
+    public function getTenantName(): string
+    {
+        return $this->raison_sociale
+            ?? $this->slug
+            ?? "Vendeur #{$this->getKey()}";
+    }
+
+    public function getProduitsCountAttribute(): int
+    {
+        return once(function () {
+            try {
+                return $this->run(function () {
+                    return Produit::count();
+                });
+            } catch (\Exception $e) {
+                return 0;
+            }
+        });
+    }
+
+    /**
+     * Route key name pour Filament
+     */
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
     // URLs
     public function getUrlAttribute(): string
     {
@@ -611,7 +611,6 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         });
 
         static::deleting(function ($tenant) {
-            // Détache tous les utilisateurs liés avant de supprimer le tenant
             $tenant->users()->detach();
         });
     }

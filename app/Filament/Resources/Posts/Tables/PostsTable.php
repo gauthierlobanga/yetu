@@ -25,7 +25,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 
 class PostsTable
 {
@@ -42,7 +41,7 @@ class PostsTable
                     ->sortable()
                     ->weight('bold')
                     ->size('md')
-                    ->description(fn ($record): string => Str::limit(strip_tags($record->content), 40))
+                    ->description(fn ($record): string => $record->getPlainTextContent(40))
                     ->tooltip(fn ($record): string => $record->title),
 
                 SpatieMediaLibraryImageColumn::make('featured')

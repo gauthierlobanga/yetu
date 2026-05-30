@@ -13,7 +13,12 @@ return new class extends Migration
     // Exemple de migration
     public function up(): void
     {
+        Schema::table('users', function (Blueprint $table) {
+            $table->uuid('global_id')->nullable()->unique()->after('id');
+        });
+
         DB::statement('UPDATE users SET global_id = id WHERE global_id IS NULL');
+
         Schema::table('users', function (Blueprint $table) {
             $table->uuid('global_id')->nullable(false)->change();
         });

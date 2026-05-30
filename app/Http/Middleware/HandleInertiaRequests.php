@@ -307,8 +307,12 @@ class HandleInertiaRequests extends Middleware
     /**
      * Détermine si les données commerciales doivent être partagées.
      */
-    private function shouldShareCommerceData(Request $request): bool
+    protected function shouldShareCommerceData(Request $request): bool
     {
+        if (function_exists('tenant') && ! tenant()) {
+            return false;
+        }
+
         // On exclut les routes d'administration, API, etc.
         return ! $request->is('admin*', 'horizon*', 'api*', 'livewire*', 'filament*');
     }

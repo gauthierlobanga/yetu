@@ -39,20 +39,20 @@ class EditVendeur extends EditRecord
     protected function syncTenantUser(Tenant $tenant, ?string $newPassword = null): void
     {
         $tenant->run(function () use ($tenant, $newPassword) {
-            $user = User::where('email', $tenant->email)->first();
+            $userData = [
+                'name'  => $tenant->raison_sociale,
+                'email' => $tenant->email,
+            ];
 
-            if ($user) {
-                $userData = [
-                    'name' => $tenant->raison_sociale,
-                    'email' => $tenant->email,
-                ];
-
-                if ($newPassword) {
-                    $userData['password'] = $newPassword; // le mutateur du modèle User le hachera
-                }
-
-                $user->update($userData);
+            if ($newPassword) {
+                $userData['password'] = $newPassword; // le mutateur hachera automatiquement
             }
+
+            // Crée l'utilisateur s'il n'existe pas encore dans le tenant
+            User::updateOrCreate(
+                ['email' => $tenant->email],
+                $userData
+            );
         });
     }
 

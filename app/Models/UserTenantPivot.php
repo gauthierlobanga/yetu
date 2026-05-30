@@ -35,7 +35,7 @@ class UserTenantPivot extends Pivot
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'global_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function tenant(): BelongsTo

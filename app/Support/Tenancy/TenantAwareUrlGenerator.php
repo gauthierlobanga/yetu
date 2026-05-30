@@ -11,11 +11,11 @@ class TenantAwareUrlGenerator extends DefaultUrlGenerator
     {
         $diskName = $this->getDiskName();
 
-        // Si c'est un disk public dans le contexte tenant, utiliser l'URL avec le slug
-        if ($diskName === 'public' && function_exists('tenancy') && tenancy()->initialized && ! $this->isCentralTenantMedia()) {
-            $tenant = tenancy()->tenant;
-            $path = $this->getPathRelativeToRoot();
-            $url = '/storage/tenant-'.$tenant->slug.'/'.$path;
+        if ($this->shouldUseTenantStorageUrl($diskName)) {
+            $path = $this->tenantPathRelativeToRoot();
+            $url = TenantStorage::tenantPublicUrlForPath(tenancy()->tenant, $path);
+        } elseif ($this->shouldUseCentralStorageUrl($diskName)) {
+            $url = TenantStorage::centralPublicUrlForPath($this->getPathRelativeToRoot());
         } else {
             $url = $this->getDisk()->url($this->getUrlEncodedPathRelativeToRoot());
         }
@@ -29,16 +29,53 @@ class TenantAwareUrlGenerator extends DefaultUrlGenerator
     {
         $diskName = $this->getDiskName();
 
-        // Si c'est un disk public dans le contexte tenant, utiliser l'URL avec le slug
-        if ($diskName === 'public' && function_exists('tenancy') && tenancy()->initialized && ! $this->isCentralTenantMedia()) {
-            $tenant = tenancy()->tenant;
+        if ($this->shouldUseTenantStorageUrl($diskName)) {
+            $path = $this->tenantResponsiveImagesDirectoryRelativeToRoot();
+            $url = TenantStorage::tenantPublicUrlForPath(tenancy()->tenant, $path).'/';
+        } elseif ($this->shouldUseCentralStorageUrl($diskName)) {
             $path = $this->pathGenerator->getPathForResponsiveImages($this->media);
-            $url = '/storage/tenant-'.$tenant->slug.'/'.$path;
+            $url = TenantStorage::centralPublicUrlForPath($path).'/';
         } else {
             $url = parent::getResponsiveImagesDirectoryUrl();
         }
 
         return $url;
+    }
+
+    private function shouldUseTenantStorageUrl(string $diskName): bool
+    {
+        return in_array($diskName, ['public', 'tenant'], true)
+            && function_exists('tenancy')
+            && tenancy()->initialized
+            && ! $this->isCentralTenantMedia();
+    }
+
+    private function shouldUseCentralStorageUrl(string $diskName): bool
+    {
+        return $diskName === 'public'
+            && function_exists('tenancy')
+            && tenancy()->initialized
+            && $this->isCentralTenantMedia();
+    }
+
+    private function tenantPathRelativeToRoot(): string
+    {
+        $path = $this->getPathRelativeToRoot();
+        $legacyPath = 'tenant-'.tenant('id').'/'.$path;
+
+        return $this->getDisk()->exists($path) || ! $this->getDisk()->exists($legacyPath)
+            ? $path
+            : $legacyPath;
+    }
+
+    private function tenantResponsiveImagesDirectoryRelativeToRoot(): string
+    {
+        $path = $this->pathGenerator->getPathForResponsiveImages($this->media);
+        $legacyPath = 'tenant-'.tenant('id').'/'.$path;
+
+        return $this->getDisk()->exists($path) || ! $this->getDisk()->exists($legacyPath)
+            ? $path
+            : $legacyPath;
     }
 
     private function isCentralTenantMedia(): bool
