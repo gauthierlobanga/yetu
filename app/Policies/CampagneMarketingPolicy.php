@@ -17,7 +17,7 @@ class CampagneMarketingPolicy
      */
     public function before(AuthUser $user, string $ability): ?bool
     {
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('super_admin') || $user->hasRole('vendeur')) {
             return true;
         }
 

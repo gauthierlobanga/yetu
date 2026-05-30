@@ -7,7 +7,6 @@ export type BreadcrumbItem = {
 };
 
 export type NavItem = {
-    badge: import("react/jsx-runtime").JSX.Element;
     content?: React.ReactNode;  // pour les méga‑menus
     title: string;
     href: NonNullable<InertiaLinkProps['href']>;

@@ -9,6 +9,7 @@ use App\Models\ProductCategory;
 use App\Models\Produit;
 use App\Models\User;
 use App\Services\TenantPropsService;
+use App\Settings\SettingApp;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -70,9 +71,11 @@ class HandleInertiaRequests extends Middleware
         $user = $this->resolveUser($request);
         $shouldShareCommerceData = $this->shouldShareCommerceData($request);
 
+        // Paramètres centralisés
+        $settings = app(SettingApp::class);
+
         $sharedData = [
             ...parent::share($request),
-            'name' => config('app.name'),
             'auth' => $this->getAuthData($user),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => $this->getFlashData($request),
@@ -96,6 +99,7 @@ class HandleInertiaRequests extends Middleware
                 ];
             },
         ];
+
         if ($this->shouldLoadTenantNotifications($request)) {
             $sharedData = array_merge($sharedData, $this->getTenantNotifications($request));
         }
@@ -114,6 +118,15 @@ class HandleInertiaRequests extends Middleware
 
                 return $wishlist->items()->pluck('produit_id')->toArray();
             });
+        }
+
+        if (! $isTenant) {
+            $appSettings = app(SettingApp::class);
+
+            $sharedData['name'] = $appSettings->name;
+            $sharedData['app_logo'] = $appSettings->logo_url;
+        } else {
+            $sharedData['name'] = config('app.name');
         }
 
         return $sharedData;

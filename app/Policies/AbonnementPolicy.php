@@ -18,7 +18,7 @@ class AbonnementPolicy
      */
     public function before(User $user, string $ability): ?bool
     {
-        if ($user->hasRole('super_admin')) {
+        if ($user->hasRole('super_admin') || $user->hasRole('vendeur')) {
             return true;
         }
 

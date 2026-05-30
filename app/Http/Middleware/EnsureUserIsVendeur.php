@@ -24,7 +24,7 @@ class EnsureUserIsVendeur
         }
 
         if (
-            ! $user->hasRole(['super_admin', 'Manager', 'owner', 'manager'])
+            ! $user->hasRole('super_admin')
             && ! $this->canAccessCurrentTenant($user)
         ) {
             Log::info('Accès refusé au panel admin.', [

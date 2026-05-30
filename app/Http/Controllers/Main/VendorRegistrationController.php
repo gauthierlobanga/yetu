@@ -227,60 +227,6 @@ class VendorRegistrationController extends Controller
         return array_unique($variants);
     }
 
-    // public function vendeurStore(VendorRegistrationRequest $request)
-    // {
-    //     $user = Auth::user();
-    //     $plan = Plan::findOrFail($request->plan_id);
-
-    //     if (! $this->vendorService->canBecomeVendor($user)) {
-    //         return back()->with('error', 'Vous avez déjà une demande en cours.');
-    //     }
-
-    //     if (! $this->vendorService->isShopSlugAvailable($request->shop_slug)) {
-    //         return back()->withErrors(['shop_slug' => 'Ce sous-domaine est déjà utilisé.']);
-    //     }
-
-    //     $vendorRequest = $this->vendorService->initiateRegistration($user, $request->validated());
-    //     session()->forget('selected_plan_id');
-
-    //     // Stocker le mot de passe en session pour l'utiliser lors de l'approbation
-    //     session(['temp_password' => $request->password]);
-
-    //     // Sauvegarder temporairement le logo s'il existe
-    //     if ($request->hasFile('logo')) {
-    //         session(['temp_logo_path' => $request->file('logo')->store('temp')]);
-    //     }
-
-    //     // Paiement
-    //     if ($plan->price > 0) {
-    //         session(['vendor_request_id' => $vendorRequest->id]);
-
-    //         return redirect()->route('vendor.payment');
-    //     }
-
-    //     // Approbation immédiate (plan gratuit)
-    //     $tenant = $this->vendorService->approve($vendorRequest);
-
-    //     // Attacher le logo au tenant
-    //     if ($logoPath = session('temp_logo_path')) {
-    //         try {
-    //             $tenant->addMedia(storage_path('app/'.$logoPath))
-    //                 ->usingFileName('logo-'.$tenant->id.'.png')
-    //                 ->toMediaCollection('tenant_avatar');
-    //             // Supprimer le fichier temporaire
-    //             Storage::delete($logoPath);
-    //             session()->forget('temp_logo_path');
-    //         } catch (\Exception $e) {
-    //             Log::error('Erreur sauvegarde logo', [
-    //                 'error' => $e->getMessage(),
-    //                 'tenant_id' => $tenant->id,
-    //             ]);
-    //         }
-    //     }
-
-    //     return redirect()->route('vendor.success', ['tenant' => $tenant->slug]);
-    // }
-
     public function vendeurStore(VendorRegistrationRequest $request)
     {
         $user = Auth::user();

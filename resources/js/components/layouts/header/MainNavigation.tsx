@@ -75,7 +75,7 @@ export function MainNavigation({ items }: Props) {
                                             className="fixed top-16 left-0 w-full border-b border-border/40 bg-background shadow-xs backdrop-blur-md"
                                             onMouseEnter={clearTimer}
                                         >
-                                            <div className="mx-auto max-w-7xl">
+                                            <div className="mx-auto">
                                                 {item.content}
                                             </div>
                                         </motion.div>

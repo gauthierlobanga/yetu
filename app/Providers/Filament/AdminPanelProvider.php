@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\ManageAppSettings;
 use App\Http\Middleware\EnsureCentralDomain;
 use App\Http\Middleware\EnsureUserIsSuperAdmin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -52,6 +53,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->pages([
                 Dashboard::class,
+                ManageAppSettings::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([

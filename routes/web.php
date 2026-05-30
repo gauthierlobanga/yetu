@@ -9,6 +9,7 @@ use App\Http\Controllers\Main\PaymentController as MainPaymentController;
 use App\Http\Controllers\Main\VendorRegistrationController;
 use App\Http\Controllers\Pages\EntrepriseController;
 use App\Http\Controllers\Pages\PageController;
+use App\Http\Controllers\PublicStorageController;
 use App\Models\Visit;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -159,3 +160,7 @@ Route::post('/track-duration', function (Request $request) {
 
     return response()->noContent();
 })->name('track.duration')->middleware('web');
+
+// Route::get('/storage/{path?}', [PublicStorageController::class, 'show'])
+//     ->where('path', '.*')          // autorise les sous-dossiers
+//     ->name('public.storage');
