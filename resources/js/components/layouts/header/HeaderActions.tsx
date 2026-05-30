@@ -1,7 +1,6 @@
 import { usePage } from '@inertiajs/react';
 import { useState } from 'react';
-// import AppearanceToggle from '@/components/appearance-toogle';
-import AppearanceToggle from '@/components/appearance-toogle';
+import { ThemeToggle } from '@/components/appearance-toogle';
 import SearchExperience from '@/components/search-my-input';
 import { CartButton } from './CartButton';
 import { NotificationsDropdown } from './NotificationsDropdown';
@@ -25,7 +24,7 @@ export function HeaderActions() {
             <RegionSelectorForm />
 
             {/* Theme Toggle */}
-            <AppearanceToggle />
+            <ThemeToggle />
 
             {/* Cart - Visible pour tous */}
             {!isCartPage && <CartButton />}

@@ -1,10 +1,10 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+
 import { Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, List, Menu, Sun, Moon } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { ArrowRight, List, Menu,  } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
+import { ThemeToggle } from '@/components/appearance-toogle';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ProductCategoryMenuContent } from '@/components/navigation/categorie-produits-explorer/ProductsMenuContent';
 import { CentreAcheteurs } from '@/components/navigation/CentreAcheteurs';
@@ -30,51 +30,6 @@ import { UserNavigation } from './UserNavigation';
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
 };
-
-// --- Nouveau composant ThemeToggle ---
-function ThemeToggle() {
-    const [isDark, setIsDark] = useState(false);
-
-    useEffect(() => {
-        // Initialisation : localStorage ou préférence système
-        const stored = localStorage.getItem('theme');
-
-        if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            setIsDark(true);
-            document.documentElement.classList.add('dark');
-        } else {
-            setIsDark(false);
-            document.documentElement.classList.remove('dark');
-        }
-    }, []);
-
-    const toggle = () => {
-        setIsDark(prev => {
-            const next = !prev;
-
-            if (next) {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            }
-
-            return next;
-        });
-    };
-
-    return (
-        <motion.button
-            onClick={toggle}
-            className="rounded-full p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
-            whileTap={{ scale: 0.9 }}
-            aria-label={isDark ? 'Activer le mode clair' : 'Activer le mode sombre'}
-        >
-            {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </motion.button>
-    );
-}
 
 export function AppHeader({ breadcrumbs = [] }: Props) {
     const { isTenant } = useTenant();
