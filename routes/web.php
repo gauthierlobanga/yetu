@@ -64,7 +64,7 @@ Route::get('/auth/tenant-sso', [TenantSsoLoginController::class, '__invoke'])
 
 Route::middleware('auth')->prefix('selection-compte')->name('central.account-selection.')->group(function () {
     Route::get('/', [TenantAccountController::class, 'index'])->name('index');
-    Route::post('/ajouter', [TenantAccountController::class, 'addAccount'])->name('add-account');
+    Route::get('/ajouter', [TenantAccountController::class, 'addAccount'])->name('add-account');
     Route::get('/{tenant:slug}/continuer', [TenantAccountController::class, 'select'])->name('select');
 });
 

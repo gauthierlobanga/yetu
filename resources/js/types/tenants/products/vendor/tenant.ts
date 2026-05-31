@@ -1,5 +1,6 @@
 export interface Tenant {
     id: string;
+    name: string;
     ai_enabled: boolean;
     facebook_url: string;
     instagram_url: string;
@@ -23,6 +24,7 @@ export interface Tenant {
         features: string[];
     } | null;
     logo_url?: string | null;
+    sso_login_url: string;
 
 }
 

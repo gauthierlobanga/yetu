@@ -17,15 +17,11 @@ class TenantAccountController extends Controller
         private readonly VendorRegistrationService $vendorService,
     ) {}
 
-    public function index(Request $request): Response|RedirectResponse
+    public function index(Request $request): Response
     {
         $user = $request->user();
 
         $tenants = $this->ownedActiveTenants($user);
-
-        if ($tenants->isEmpty()) {
-            return redirect()->route('vendor.register');
-        }
 
         return Inertia::render('auth/account-selection', [
             'account' => [
@@ -39,7 +35,7 @@ class TenantAccountController extends Controller
                 'name' => $tenant->raison_sociale,
                 'email' => $tenant->email,
                 'logo_url' => $tenant->logo_url,
-                'dashboard_url' => $this->vendorService->getVendeurDashboardUrl($tenant),
+                'sso_login_url' => $this->vendorService->getTenantSsoLoginUrl($tenant, $user),
             ])->values(),
         ]);
     }
@@ -58,14 +54,9 @@ class TenantAccountController extends Controller
         );
     }
 
-    public function addAccount(Request $request): RedirectResponse
+    public function addAccount(): RedirectResponse
     {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect()->route('central.register');
+        return redirect()->route('vendor.register');
     }
 
     private function ownedActiveTenants($user)

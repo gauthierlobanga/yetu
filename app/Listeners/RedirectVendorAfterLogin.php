@@ -16,14 +16,7 @@ class RedirectVendorAfterLogin
             return;
         }
 
-        // Vérifier si l'utilisateur a un tenant (est vendeur)
-        $tenant = $user->tenants()->wherePivot('is_owner', true)->first();
-
-        if ($tenant) {
-            Session::put('url.intended', route('central.account-selection.index'));
-        } else {
-            // Pas de boutique → rediriger vers le choix du plan
-            Session::put('url.intended', route('plan.index'));
-        }
+        // Toujours rediriger vers la page de sélection de compte
+        Session::put('url.intended', route('central.account-selection.index'));
     }
 }

@@ -105,7 +105,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                 <div className="flex h-full flex-col justify-between">
                                     <MobileNavigation items={mainNavItems} />
                                     <div className="border-t border-slate-200 p-5 dark:border-slate-700">
-                                        {!auth.user && isTenant && (
+                                        {!isTenant && !auth.user && (
                                             <Button
                                                 asChild
                                                 className="w-full"
@@ -113,6 +113,17 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                             >
                                                 <Link href={login()}>
                                                     Se connecter
+                                                </Link>
+                                            </Button>
+                                        )}
+                                        {!isTenant && auth.user && (
+                                            <Button
+                                                asChild
+                                                className="w-full"
+                                                size="lg"
+                                            >
+                                                <Link href={route('central.account-selection.index')}>
+                                                    Accéder aux boutiques
                                                 </Link>
                                             </Button>
                                         )}
@@ -141,32 +152,51 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
                     {/* Actions à droite */}
                     <div className="flex items-center gap-2 sm:gap-3">
-                        {/* Toggle Dark/Light – toujours visible */}
 
                         {!isTenant ? (
                             <>
+                            {/* Toggle Dark/Light – toujours visible */}
                             <AppearanceToogle />
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    asChild
-                                    className="hidden text-sm font-medium text-slate-700 hover:text-slate-900 sm:inline-flex dark:text-slate-300 dark:hover:text-white"
-                                >
-                                    <Link href={login()}>Se connecter</Link>
-                                </Button>
-                                <Button
-                                    size="lg"
-                                    className="group relative overflow-hidden rounded-full bg-linear-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 transition-all hover:shadow-lg hover:shadow-emerald-300 dark:shadow-emerald-900/30 dark:hover:shadow-emerald-800/40"
-                                    asChild
-                                >
-                                    <Link href={route('vendor.register')}>
-                                        <span className="relative z-10 flex items-center">
-                                            Démarrer gratuitement
-                                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                        </span>
-                                        <span className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
-                                    </Link>
-                                </Button>
+                                {/* Si user authentifié sur page centrale, redirection vers sélection compte */}
+                                {auth.user ? (
+                                    <Button
+                                        size="lg"
+                                        className="group relative overflow-hidden rounded-full bg-linear-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 transition-all hover:shadow-lg hover:shadow-emerald-300 dark:shadow-emerald-900/30 dark:hover:shadow-emerald-800/40"
+                                        asChild
+                                    >
+                                        <Link href={route('central.account-selection.index')}>
+                                            <span className="relative z-10 flex items-center">
+                                                Accéder aux boutiques
+                                                <ArrowRight className="ml-2 h-5 w-4 transition-transform group-hover:translate-x-1" />
+                                            </span>
+                                            <span className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+                                        </Link>
+                                    </Button>
+                                ) : (
+                                    <>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            asChild
+                                            className="hidden text-sm font-medium text-slate-700 hover:text-slate-900 sm:inline-flex dark:text-slate-300 dark:hover:text-white"
+                                        >
+                                            <Link href={login()}>Se connecter</Link>
+                                        </Button>
+                                        <Button
+                                            size="lg"
+                                            className="group relative overflow-hidden rounded-full bg-linear-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 transition-all hover:shadow-lg hover:shadow-emerald-300 dark:shadow-emerald-900/30 dark:hover:shadow-emerald-800/40"
+                                            asChild
+                                        >
+                                            <Link href={route('vendor.register')}>
+                                                <span className="relative z-10 flex items-center">
+                                                    Démarrer gratuitement
+                                                    <ArrowRight className="ml-2 h-5 w-4 transition-transform group-hover:translate-x-1" />
+                                                </span>
+                                                <span className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+                                            </Link>
+                                        </Button>
+                                    </>
+                                )}
                             </>
                         ) : (
                             <>

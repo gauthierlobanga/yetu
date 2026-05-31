@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/purity */
 // resources/js/Pages/Vendor/Success.tsx
 
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
     Rocket,
@@ -15,6 +15,7 @@ import {
     ShieldCheck,
     Globe,
     PartyPopper,
+    Home,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -273,6 +274,15 @@ export default function VendorSuccess({ tenant }: Props) {
                                             Ajouter un produit
                                         </a>
                                     </div>
+
+                                    {/* Return to account selection */}
+                                    <Link
+                                        href="/selection-compte"
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition-all hover:border-emerald-200 hover:text-emerald-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+                                    >
+                                        <Home className="h-4 w-4" />
+                                        Gérer mes boutiques
+                                    </Link>
                                 </div>
 
                                 {/* Right Summary */}
