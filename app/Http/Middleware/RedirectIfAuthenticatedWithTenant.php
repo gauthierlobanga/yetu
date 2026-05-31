@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\VendorRegistrationService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,10 +20,7 @@ class RedirectIfAuthenticatedWithTenant
 
             if ($tenant) {
 
-                return redirect()->away(
-                    app(VendorRegistrationService::class)
-                        ->getTenantSsoLoginUrl($tenant, $user)
-                );
+                return redirect()->route('central.account-selection.index');
             }
 
             return redirect()->route('plan.index');

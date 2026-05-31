@@ -15,7 +15,6 @@ use App\Models\Retour;
 use App\Models\User;
 use App\Observers\TenantRealtimeActivityObserver;
 use App\Observers\UserObserver;
-use App\Services\VendorRegistrationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -119,8 +118,8 @@ class AppServiceProvider extends ServiceProvider
                 return route('acheteur.dashboard');
             }
 
-            if ($user && $tenant = $user->tenants()->wherePivot('is_owner', true)->first()) {
-                return app(VendorRegistrationService::class)->getTenantSsoLoginUrl($tenant, $user);
+            if ($user && $user->tenants()->wherePivot('is_owner', true)->exists()) {
+                return route('central.account-selection.index');
             }
 
             return route('plan.index');

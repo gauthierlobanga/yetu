@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\VisitorStatsController;
 use App\Http\Controllers\Auth\TenantSsoLoginController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Central\HeroCentralController;
+use App\Http\Controllers\Central\TenantAccountController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Main\PaymentController as MainPaymentController;
 use App\Http\Controllers\Main\VendorRegistrationController;
@@ -60,6 +61,12 @@ Route::middleware('guest')->group(function () {
 
 Route::get('/auth/tenant-sso', [TenantSsoLoginController::class, '__invoke'])
     ->name('tenant.sso.central');
+
+Route::middleware('auth')->prefix('selection-compte')->name('central.account-selection.')->group(function () {
+    Route::get('/', [TenantAccountController::class, 'index'])->name('index');
+    Route::post('/ajouter', [TenantAccountController::class, 'addAccount'])->name('add-account');
+    Route::get('/{tenant:slug}/continuer', [TenantAccountController::class, 'select'])->name('select');
+});
 
 /*
 |--------------------------------------------------------------------------

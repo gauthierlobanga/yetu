@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import { Moon, Sun } from "lucide-react";
 import { useState, useEffect } from "react";
 
-// --- Nouveau composant ThemeToggle ---
-export default function ThemeToggle() {
+// --- Nouveau composant AppearanceToogle ---
+export default function AppearanceToogle() {
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {

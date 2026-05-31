@@ -11,7 +11,6 @@ use Filament\Pages\SettingsPage;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Storage;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use UnitEnum;
 
 class ManageAppSettings extends SettingsPage
@@ -25,6 +24,29 @@ class ManageAppSettings extends SettingsPage
     protected static ?string $navigationLabel = 'Paramètres généraux';
 
     protected static ?string $title = 'Paramètres de l’application';
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['logo_url'] = SettingApp::normalizeLogoPath($data['logo_url'] ?? null);
+
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $settings = app(SettingApp::class);
+
+        $oldLogo = SettingApp::normalizeLogoPath($settings->logo_url);
+        $newLogo = SettingApp::normalizeLogoPath($data['logo_url'] ?? null);
+
+        if ($oldLogo && $oldLogo !== $newLogo) {
+            Storage::disk('public')->delete($oldLogo);
+        }
+
+        $data['logo_url'] = $newLogo;
+
+        return $data;
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -41,27 +63,7 @@ class ManageAppSettings extends SettingsPage
                     ->disk('public')
                     ->directory('settings')
                     ->visibility('public')
-                    ->maxSize(1024)
-                    ->afterStateHydrated(function ($component, $state, SettingApp $settings) {
-                        $component->state($settings->logo_url);
-                    })
-                    ->dehydrateStateUsing(function ($state) {
-
-                        if ($state instanceof TemporaryUploadedFile) {
-                            // Supprimer l'ancien logo
-                            $oldLogo = app(SettingApp::class)->logo_url;
-                            if ($oldLogo) {
-                                $oldPath = str_replace('/storage/', '', $oldLogo);
-                                Storage::disk('public')->delete($oldPath);
-                            }
-                            // Stocker le nouveau
-                            $path = $state->store('settings', 'public');
-
-                            return '/storage/'.$path;
-                        }
-
-                        return $state;
-                    }),
+                    ->maxSize(1024),
             ]);
     }
 }

@@ -669,6 +669,7 @@ class VendorRegistrationService
                 'email' => $centralUser->email,
                 'password' => $centralUser->password,
                 'email_verified_at' => $centralUser->email_verified_at,
+                'global_id' => $centralUser->global_id ?? $centralUser->id,
             ]
         );
 

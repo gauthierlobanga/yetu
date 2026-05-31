@@ -124,7 +124,7 @@ class HandleInertiaRequests extends Middleware
             $appSettings = app(SettingApp::class);
 
             $sharedData['name'] = $appSettings->name;
-            $sharedData['app_logo'] = $appSettings->logo_url;
+            $sharedData['app_logo'] = $appSettings->logoUrl();
         } else {
             $sharedData['name'] = config('app.name');
         }

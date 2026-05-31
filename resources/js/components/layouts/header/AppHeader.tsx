@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, List, Menu,  } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
-import { ThemeToggle } from '@/components/appearance-toogle';
+import AppearanceToogle from '@/components/appearance-toogle';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ProductCategoryMenuContent } from '@/components/navigation/categorie-produits-explorer/ProductsMenuContent';
 import { CentreAcheteurs } from '@/components/navigation/CentreAcheteurs';
@@ -142,10 +142,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     {/* Actions à droite */}
                     <div className="flex items-center gap-2 sm:gap-3">
                         {/* Toggle Dark/Light – toujours visible */}
-                        <ThemeToggle />
 
                         {!isTenant ? (
                             <>
+                            <AppearanceToogle />
                                 <Button
                                     variant="ghost"
                                     size="sm"

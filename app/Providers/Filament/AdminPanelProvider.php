@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\ManageAppSettings;
 use App\Http\Middleware\EnsureCentralDomain;
 use App\Http\Middleware\EnsureUserIsSuperAdmin;
+use App\Settings\SettingApp;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -33,7 +34,13 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->brandLogo(fn () => view('filament.admin.logo'))
+            ->brandLogo(function () {
+                $settings = app(SettingApp::class);
+                $logoUrl = $settings->logoUrl();
+                $name = $settings->name ?: config('app.name');
+
+                return view('filament.admin.logo', compact('logoUrl', 'name'));
+            })
             ->brandLogoHeight('4rem')
             ->favicon(Storage::url('images/favicon.ico'))
             ->viteTheme('resources/css/filament/admin/theme.css')

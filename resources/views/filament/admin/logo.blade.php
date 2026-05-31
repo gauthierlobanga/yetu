@@ -1,3 +1,8 @@
+@php
+    $logoUrl ??= null;
+    $name ??= config('app.name');
+@endphp
+
 <a href="{{ filament()->getUrl() }}" class="flex items-center gap-3 outline-none">
     @if ($logoUrl)
         <img src="{{ $logoUrl }}" alt="{{ $name }}" class="h-8 w-auto rounded" loading="eager">
