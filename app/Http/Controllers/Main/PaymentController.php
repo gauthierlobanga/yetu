@@ -92,28 +92,38 @@ class PaymentController extends Controller
             if ($result['status'] === 'paid') {
                 $vendorRequest = VendorRequest::findOrFail($result['metadata']['vendor_request_id']);
 
-                // Approuver le vendeur et créer le tenant
-                $tenant = $this->vendorService->approve($vendorRequest);
+                // Approuver le vendeur et créer le tenant + subscription (via PaymentService webhook)
+                // Note: Le webhook Stripe se déclenche asynchrone et appelle approve()
+                // On vérifie ici que l'approbation a bien eu lieu
+                $tenant = $vendorRequest->tenant;
+                if (! $tenant) {
+                    // Fallback si le webhook n'a pas eu le temps de se déclencher
+                    $tenant = $this->vendorService->approve($vendorRequest);
+                }
 
                 if ($logoPath = session('temp_logo_path')) {
-                    $tenant->addMedia(storage_path('app/'.$logoPath))
-                        ->toMediaCollection('tenant_avatar');
-                    Storage::delete($logoPath);
-                    session()->forget('temp_logo_path');
+                    try {
+                        $fullPath = storage_path('app/'.$logoPath);
+                        if (file_exists($fullPath)) {
+                            $tenant->addMedia($fullPath)
+                                ->usingFileName('logo-'.$tenant->id.'.png')
+                                ->toMediaCollection('tenant_avatar');
+                        }
+                        Storage::delete($logoPath);
+                        session()->forget('temp_logo_path');
+                    } catch (\Exception $e) {
+                        Log::error('Erreur sauvegarde logo', [
+                            'error' => $e->getMessage(),
+                            'tenant_id' => $tenant->id,
+                        ]);
+                    }
                 }
                 // Nettoyer la session
                 session()->forget('vendor_request_id');
 
-                return Inertia::render('Vendor/Success', [
-                    'tenant' => [
-                        'id' => $tenant->id,
-                        'raison_sociale' => $tenant->raison_sociale,
-                        'slug' => $tenant->slug,
-                        'url' => $tenant->url,
-                        'logo_url' => $tenant->getFirstMediaUrl('tenant_avatar', 'tenant_thumb'),
-                        'admin_url' => $this->vendorService->getVendeurUrl($tenant),
-                    ],
-                ]);
+                // Rediriger vers le dashboard du tenant
+                $dashboardUrl = $this->vendorService->getVendeurDashboardUrl($tenant);
+                return redirect($dashboardUrl);
             }
 
             return redirect()->route('vendor.register')

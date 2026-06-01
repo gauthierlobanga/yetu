@@ -288,7 +288,9 @@ class VendorRegistrationController extends Controller
             }
         }
 
-        return redirect()->route('vendor.success', ['tenant' => $tenant->slug]);
+        // Rediriger vers le dashboard du tenant
+        $dashboardUrl = $this->vendorService->getVendeurDashboardUrl($tenant);
+        return redirect($dashboardUrl);
     }
 
     /**
