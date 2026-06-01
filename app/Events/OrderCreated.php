@@ -2,33 +2,45 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
+use App\Models\Order;
+use App\Notifications\OrderNotification;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 class OrderCreated
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, SerializesModels;
+
+    public function __construct(
+        public Order $order
+    ) {}
 
     /**
-     * Create a new event instance.
+     * Handle the event - Notifier le vendeur et le client
      */
-    public function __construct()
+    public function handle(NotificationService $notificationService): void
     {
-        //
-    }
+        // Notifier le vendeur (propriétaire du tenant)
+        $notificationService->notifyTenantOwner(
+            $this->order->shop,
+            OrderNotification::class,
+            [
+                'order' => $this->order,
+                'action' => 'created',
+                'message' => "Nouvelle commande #{$this->order->number}",
+            ]
+        );
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, Channel>
-     */
-    public function broadcastOn(): array
-    {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
+        // Notifier le client
+        $notificationService->notifyCustomer(
+            $this->order->user,
+            OrderNotification::class,
+            [
+                'order' => $this->order,
+                'action' => 'created',
+                'message' => "Votre commande #{$this->order->number} a été reçue",
+            ]
+        );
     }
 }

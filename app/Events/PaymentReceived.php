@@ -2,33 +2,49 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
+use App\Models\Order;
+use App\Notifications\PaymentNotification;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 class PaymentReceived
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, SerializesModels;
+
+    public function __construct(
+        public Order $order,
+        public float $amount,
+        public string $status = 'completed',
+    ) {}
 
     /**
-     * Create a new event instance.
+     * Handle the event - Notifier le vendeur et le client
      */
-    public function __construct()
+    public function handle(NotificationService $notificationService): void
     {
-        //
-    }
+        // Notifier le vendeur
+        $notificationService->notifyTenantOwner(
+            $this->order->shop,
+            PaymentNotification::class,
+            [
+                'order' => $this->order,
+                'amount' => $this->amount,
+                'status' => $this->status,
+                'message' => "Paiement de {$this->amount}€ reçu",
+            ]
+        );
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, Channel>
-     */
-    public function broadcastOn(): array
-    {
-        return [
-            new PrivateChannel('channel-name'),
-        ];
+        // Notifier le client
+        $notificationService->notifyCustomer(
+            $this->order->user,
+            PaymentNotification::class,
+            [
+                'order' => $this->order,
+                'amount' => $this->amount,
+                'status' => $this->status,
+                'message' => "Votre paiement de {$this->amount}€ a été confirmé",
+            ]
+        );
     }
 }
