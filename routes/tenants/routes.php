@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\TenantSsoLoginController;
 use App\Http\Controllers\Blog\BlogController;
@@ -31,6 +32,7 @@ use App\Http\Controllers\Shop\WishlistController;
 use App\Http\Controllers\Vendor\AnalyticsController;
 use App\Http\Controllers\Vendor\Settings\ParametresController;
 use App\Http\Controllers\Vendor\Settings\ParametresSecurityController;
+use App\Http\Controllers\Vendor\SubscriptionController;
 use App\Http\Controllers\vendor\TenantAiController;
 use App\Http\Controllers\Vendor\TenantDashboardNotificationController;
 use App\Http\Controllers\Vendor\TenantOrderController;
@@ -119,6 +121,18 @@ Route::middleware([
 
         Route::prefix('admin')->group(function () {
             Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('dashboard');
+
+            Route::prefix('subscriptions')->name('admin.subscriptions.')->group(function () {
+                Route::get('/', [AdminSubscriptionController::class, 'index'])->name('index');
+                Route::get('/{subscription}', [AdminSubscriptionController::class, 'show'])->name('show');
+                Route::post('/{subscription}/block', [AdminSubscriptionController::class, 'block'])->name('block');
+                Route::post('/{subscription}/unblock', [AdminSubscriptionController::class, 'unblock'])->name('unblock');
+                Route::post('/{subscription}/renew', [AdminSubscriptionController::class, 'renew'])->name('renew');
+                Route::post('/{subscription}/add-grace-period', [AdminSubscriptionController::class, 'addGracePeriod'])->name('add-grace-period');
+                Route::post('/batch/expired-to-block', [AdminSubscriptionController::class, 'expiredToBlock'])->name('expired-to-block');
+                Route::post('/batch/notify-expiring', [AdminSubscriptionController::class, 'notifyExpiring'])->name('notify-expiring');
+                Route::post('/batch/sync-stripe', [AdminSubscriptionController::class, 'syncWithStripe'])->name('sync-stripe');
+            });
         });
 
         Route::prefix('acheteur')->group(function () {
@@ -127,6 +141,16 @@ Route::middleware([
 
         Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])
             ->name('vendor.dashboard');
+
+        Route::prefix('subscription')->name('subscription.')->group(function () {
+            Route::get('/', [SubscriptionController::class, 'show'])->name('show');
+            Route::post('/upgrade', [SubscriptionController::class, 'upgrade'])->name('upgrade');
+            Route::post('/downgrade', [SubscriptionController::class, 'downgrade'])->name('downgrade');
+            Route::post('/cancel', [SubscriptionController::class, 'cancel'])->name('cancel');
+            Route::post('/pause', [SubscriptionController::class, 'pause'])->name('pause');
+            Route::post('/resume', [SubscriptionController::class, 'resume'])->name('resume');
+            Route::get('/invoices', [SubscriptionController::class, 'invoices'])->name('invoices');
+        });
 
         Route::prefix('notifications')->name('tenant.notifications.')->group(function () {
             Route::post('/{id}/mark-as-read', [TenantDashboardNotificationController::class, 'markAsRead'])
