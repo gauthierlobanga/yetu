@@ -51,7 +51,6 @@ class UserForm
 
                                         TextInput::make('first_name')
                                             ->label('Nom')
-                                            ->required()
                                             ->maxLength(255)
                                             ->placeholder('Lobanga')
                                             ->autofocus(),

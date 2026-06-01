@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { ChevronDown, LogIn } from 'lucide-react';
+import {  LogIn } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,15 +50,14 @@ export function UserNavigation({ user }: UserNavigationProps) {
                     variant="ghost"
                     className={cn(
                         'group relative h-10 rounded-full px-1.5 pr-2',
-                        'border border-slate-200/70 bg-white/80',
-                        'shadow-sm backdrop-blur-sm',
+                        'bg-white/80',
                         'transition-all duration-300',
-                        'hover:border-emerald-200 hover:bg-white hover:shadow-md',
-                        'dark:border-slate-700/70 dark:bg-slate-900/80',
-                        'dark:hover:border-emerald-800 dark:hover:bg-slate-900',
+                        'hover:bg-white',
+                        'dark:bg-slate-900/80',
+                        'dark:hover:bg-slate-900',
                     )}
                 >
-                    <Avatar className="h-8 w-8 ring-2 ring-white dark:ring-slate-800">
+                    <Avatar className="h-8 w-8">
                         {avatarUrl ? (
                             <AvatarImage src={avatarUrl} alt={userName} />
                         ) : (
@@ -67,7 +66,7 @@ export function UserNavigation({ user }: UserNavigationProps) {
                             </AvatarFallback>
                         )}
                     </Avatar>
-                    <ChevronDown className="ml-2 h-4 w-4 text-slate-400 transition-all duration-300 group-hover:rotate-180 group-hover:text-emerald-500" />
+                    {/* <ChevronDown className="ml-2 h-4 w-4 text-slate-400 transition-all duration-300 group-hover:rotate-180 group-hover:text-emerald-500" /> */}
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent

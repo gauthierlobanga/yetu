@@ -8,6 +8,7 @@ use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Storage;
@@ -21,7 +22,7 @@ class ManageAppSettings extends SettingsPage
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Profile;
 
-    protected static ?string $navigationLabel = 'Paramètres généraux';
+    protected static ?string $navigationLabel = 'Paramètres';
 
     protected static ?string $title = 'Paramètres de l’application';
 
@@ -52,18 +53,21 @@ class ManageAppSettings extends SettingsPage
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->label('Nom de l’application')
-                    ->required()
-                    ->maxLength(255),
+                Section::make()
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Nom de l’application')
+                            ->required()
+                            ->maxLength(255),
 
-                FileUpload::make('logo_url')
-                    ->label('Logo')
-                    ->image()
-                    ->disk('public')
-                    ->directory('settings')
-                    ->visibility('public')
-                    ->maxSize(1024),
+                        FileUpload::make('logo_url')
+                            ->label('Logo')
+                            ->image()
+                            ->disk('public')
+                            ->directory('settings')
+                            ->visibility('public')
+                            ->maxSize(1024),
+                    ]),
             ]);
     }
 }

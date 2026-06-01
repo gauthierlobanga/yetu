@@ -13,9 +13,10 @@ import {
 import {
     ChartContainer,
     ChartTooltip,
-    ChartTooltipContent,
-    type ChartConfig,
+    ChartTooltipContent
+
 } from '@/components/ui/chart';
+import type {ChartConfig} from '@/components/ui/chart';
 
 export const description = 'An interactive bar chart';
 
@@ -151,6 +152,7 @@ export function ChartBarInteractive() {
                 <div className="flex">
                     {['desktop', 'mobile'].map((key) => {
                         const chart = key as keyof typeof chartConfig;
+
                         return (
                             <button
                                 key={chart}
@@ -193,6 +195,7 @@ export function ChartBarInteractive() {
                             minTickGap={32}
                             tickFormatter={(value) => {
                                 const date = new Date(value);
+
                                 return date.toLocaleDateString('en-US', {
                                     month: 'short',
                                     day: 'numeric',

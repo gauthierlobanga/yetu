@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/SaaSLanding/Home.tsx
 import { Head, Link } from '@inertiajs/react';
-import { motion, useInView } from 'framer-motion';
+import type { Variants } from 'framer-motion';
+import { animate, motion, useInView } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -16,10 +17,13 @@ import {
     Sparkles,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { div } from 'three/src/nodes/math/OperatorNode.js';
+import CobePremiumGSAP from '@/components/eldoraui/cobe-globe';
 import { IntegrationProduct } from '@/components/eldoraui/IntegrationProduit';
 import AnimatedCtaButton from '@/components/hero/AnimatedCtaButton';
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/layouts/main-layout';
+import { duration } from '@/routes/track';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -100,6 +104,23 @@ const images: HeroImage[] = [
 // Grille d’images premium
 // ----------------------------------------------------------------------
 function HeroImageGridPremium() {
+
+     // Variantes d'animation
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.08,
+                delayChildren: 0.15,
+            },
+        },
+    };
+
+   const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }};
+
     const imageVariants = {
         hidden: { opacity: 0, y: 40, scale: 0.92 },
         visible: (i: number) => ({
@@ -122,9 +143,9 @@ function HeroImageGridPremium() {
             </div>
 
             <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 30 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
                 className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/70 p-4 shadow-2xl backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70"
             >
                 <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/40 to-transparent dark:from-white/5" />
@@ -134,7 +155,7 @@ function HeroImageGridPremium() {
                         <motion.div
                             key={index}
                             custom={index}
-                            variants={imageVariants}
+                            variants={itemVariants}
                             initial="hidden"
                             animate="visible"
                             whileHover={{
@@ -226,7 +247,6 @@ function HeroImageGridPremium() {
         </div>
     );
 }
-
 // ----------------------------------------------------------------------
 // Section « Pour Tous »
 // ----------------------------------------------------------------------
@@ -632,13 +652,15 @@ export default function SaaSLanding({ plans, stats, testimonials }: Props) {
                                 ))}
                             </ul>
                         </div>
-                        <div className="rounded-3xl border border-white/40 bg-white/40 p-6 shadow-xl shadow-slate-200/30 backdrop-blur-xl dark:border-slate-700/30 dark:bg-slate-800/30 dark:shadow-slate-900/30">
-                            <img
+                        {/* <div className="rounded-3xl border border-white/40 bg-white/40 p-6 shadow-xl shadow-slate-200/30 backdrop-blur-xl dark:border-slate-700/30 dark:bg-slate-800/30 dark:shadow-slate-900/30"> */}
+                            {/* <img
                                 src="/storage/images/shopping-basket.jpg"
                                 alt="Shopping"
                                 className="w-full rounded-2xl object-cover shadow-md"
-                            />
-                        </div>
+
+                            /> */}
+                        {/* </div> */}
+                            <CobePremiumGSAP />
                     </div>
                 </div>
             </section>

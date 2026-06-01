@@ -71,7 +71,8 @@ class AvisClientsTable
                     ->label('Date de l\'avis')
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->icon('heroicon-o-calendar'),
+                    ->icon('heroicon-o-calendar')
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                     ->label('Créé le')

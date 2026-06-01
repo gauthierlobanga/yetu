@@ -164,6 +164,7 @@ export function ReviewsSection({ productId, avis, ratingStats }: Props) {
             {
                 preserveScroll: true,
                 preserveState: true,
+                showProgress: false,
 
                 onSuccess: () => {
                     setReviewComment('');

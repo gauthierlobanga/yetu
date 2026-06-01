@@ -1,6 +1,6 @@
 import { easeOut, motion } from 'motion/react';
 
-export default function Example() {
+export default function ExampleAnimatedText() {
     return (
         <AnimatedText
             text="Welcome to the Future"

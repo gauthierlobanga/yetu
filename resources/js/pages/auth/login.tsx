@@ -204,12 +204,10 @@ export default function Login({
                                 disabled={processing}
                                 tabIndex={4}
                                 className={cn(
-                                    'group relative h-12 w-full overflow-hidden rounded-2xl',
+                                    'group relative h-12 w-full overflow-hidden rounded-xl',
                                     'bg-linear-to-r from-emerald-600 to-emerald-700',
                                     'text-sm font-semibold text-white',
-                                    'shadow-lg shadow-emerald-500/25',
-                                    'transition-all duration-300',
-                                    'hover:scale-[1.01] hover:shadow-xl hover:shadow-emerald-500/35',
+                                    'transition-all duration-300 hover:scale-[1.01] ',
                                     'disabled:cursor-not-allowed disabled:opacity-70',
                                     'dark:from-emerald-500 dark:to-emerald-600 dark:shadow-emerald-400/25 dark:hover:shadow-emerald-400/35',
                                 )}

@@ -70,27 +70,26 @@ export default function AccountSelection({ account, tenants }: Props) {
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.15 }}
-                    className="group relative overflow-hidden rounded-3xl border border-white/20 bg-white/40 p-5 shadow-2xl shadow-slate-200/50 backdrop-blur-2xl transition-all hover:shadow-emerald-200/30 dark:border-slate-700/30 dark:bg-slate-900/40 dark:shadow-slate-900/50 dark:hover:shadow-emerald-900/30"
+                    className="group relative overflow-hidden rounded-lg border border-white/20 bg-white/40 p-3 shadow shadow-slate-200/50 backdrop-blur-2xl transition-all hover:shadow-emerald-200/30 dark:border-slate-700/30 dark:bg-slate-900/40 dark:shadow-slate-900/50 dark:hover:shadow-emerald-900/30"
                 >
-                    {/* Fond décoratif subtil */}
                     <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_40%_at_50%_60%,rgba(16,185,129,0.08),transparent)] dark:bg-[radial-gradient(45%_40%_at_50%_60%,rgba(16,185,129,0.15),transparent)]" />
 
                     <div className="flex items-center gap-4">
-                        <Avatar className="h-14 w-14 ring-4 ring-emerald-500/20 ring-offset-2 ring-offset-white/50 transition-all duration-300 group-hover:ring-emerald-500/40 dark:ring-offset-slate-900/50">
+                        <Avatar className="h-10 w-10 ring-1 ring-emerald-500/20 ring-offset-2 ring-offset-white/50 transition-all duration-30 dark:ring-offset-slate-900/50">
                             <AvatarImage
                                 src={account.avatar_url ?? undefined}
                                 alt={account.name}
+                                className="object-cover"
                             />
                             <AvatarFallback className="bg-linear-to-br from-emerald-500 to-emerald-700 text-lg font-semibold text-white">
                                 {initials(account.name, account.email)}
                             </AvatarFallback>
                         </Avatar>
                         <div>
-                            <p className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
+                            <p className="text-base font-normal tracking-tight text-slate-900 dark:text-white">
                                 {account.name}
                             </p>
                             <div className="mt-1 flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400">
-                                <Mail className="h-3.5 w-3.5" />
                                 <span className="truncate">{account.email}</span>
                             </div>
                         </div>
@@ -132,12 +131,12 @@ export default function AccountSelection({ account, tenants }: Props) {
                                     >
                                         <a
                                             href={tenant.sso_login_url}
-                                            className="group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-slate-200/50 bg-white/50 p-4 backdrop-blur-xl transition-all duration-500 hover:border-emerald-300/60 hover:bg-white/80 hover:shadow-2xl hover:shadow-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 dark:border-slate-800/50 dark:bg-slate-900/50 dark:hover:border-emerald-600/40 dark:hover:bg-slate-900/80"
+                                            className="group relative flex w-full items-center gap-4 overflow-hidden rounded-lg border border-slate-200/50 bg-white/50 p-3.5 backdrop-blur-xl transition-all duration-500 hover:border-emerald-300/60 hover:bg-white/80 hover:shadow-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 dark:border-slate-800/50 dark:bg-slate-900/50 dark:hover:border-emerald-600/40 dark:hover:bg-slate-900/80"
                                         >
                                             {/* Effet de survol gradient */}
                                             <div className="absolute inset-0 -z-10 rounded-2xl bg-linear-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/0 opacity-0 transition-all duration-500 group-hover:from-emerald-500/5 group-hover:via-emerald-500/5 group-hover:opacity-100" />
 
-                                            <Avatar className="h-12 w-12 shrink-0 ring-2 ring-emerald-500/20 ring-offset-2 ring-offset-white/80 transition-all group-hover:ring-emerald-500/50 dark:ring-offset-slate-900/80">
+                                            <Avatar className="h-10 w-10 shrink-0 ring-1 ring-emerald-500/20 ring-offset-2 ring-offset-white/80 transition-all group-hover:ring-emerald-500/50 dark:ring-offset-slate-900/80">
                                                 <AvatarImage
                                                     src={tenant.logo_url ?? undefined}
                                                     alt={tenant.name}
@@ -161,13 +160,10 @@ export default function AccountSelection({ account, tenants }: Props) {
                                                         <span className="truncate">{tenant.email}</span>
                                                     </div>
                                                 )}
-                                                <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-slate-200/70 bg-slate-100/70 px-3 py-1 text-[11px] font-medium text-slate-600 backdrop-blur-sm transition-colors group-hover:border-emerald-200/70 group-hover:bg-emerald-50/70 group-hover:text-emerald-700 dark:border-slate-700/70 dark:bg-slate-800/70 dark:text-slate-300 dark:group-hover:border-emerald-800/70 dark:group-hover:bg-emerald-950/40 dark:group-hover:text-emerald-300">
-                                                    <Store className="h-3 w-3" />
-                                                    <span>Boutique</span>
-                                                </div>
+
                                             </div>
 
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/20 transition-all duration-300 group-hover:translate-x-1 group-hover:shadow-emerald-500/40">
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-emerald-700 to-emerald-800 text-white transition-all duration-300 group-hover:translate-x-1">
                                                 <ArrowRight className="h-4 w-4 transition-transform group-hover:scale-110" />
                                             </div>
                                         </a>

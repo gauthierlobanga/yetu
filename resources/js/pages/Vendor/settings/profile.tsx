@@ -1,5 +1,6 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import ParametresController from '@/actions/App/Http/Controllers/Vendor/Settings/ParametresController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { SiteHeader } from '@/components/site-header';
@@ -43,10 +44,11 @@ export default function Profile({
                             description="Mettez à jour votre nom et votre adresse email"
                         />
                         <Form
-                            method="patch"
-                            action={route('tenant.settings.profile.update')}
+                            {...ParametresController.update.form()}
                             className="space-y-6"
-                            preserveScroll
+                           options={{
+                            preserveScroll: true,
+                        }}
                         >
                             {({ processing, recentlySuccessful, errors }) => {
                                 return (

@@ -20,7 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 const formSchema = z.object({
     firstName: z.string().trim().min(1).max(20),
     lastName: z.string().trim().min(1).max(20),
-    email: z.string().email(),
+    email: z.email(),
     subject: z.string().trim().min(1),
     message: z.string().trim().min(2).max(255),
 });

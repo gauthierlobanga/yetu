@@ -15,7 +15,6 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { CanRole } from '@/core/permissions/Can';
-import DropdownSearchExperience from '@/pages/dropdown-search';
 import AppearanceToogle from './appearance-toogle';
 import { NotificationsDropdown } from './layouts/header/NotificationsDropdown';
 import ThemeCustomizer from './Themes/ThemeSettingsSheet';
@@ -67,14 +66,14 @@ export function SiteHeader() {
                 )}
 
                 <div className="hidden flex-1 justify-center lg:flex">
-                    <DropdownSearchExperience />
+                    {/* <DropdownSearchExperience /> */}
                     {/* <ExpandingSearchDock /> */}
                 </div>
 
                 <div className="ml-auto flex items-center gap-2">
                     <div className="lg:hidden">
                         {/* <ExpandingSearchDock /> */}
-                        <DropdownSearchExperience />
+                        {/* <DropdownSearchExperience /> */}
                     </div>
 
                     <CanRole roles="super_admin">

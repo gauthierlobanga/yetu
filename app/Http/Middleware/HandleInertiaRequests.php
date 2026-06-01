@@ -71,9 +71,6 @@ class HandleInertiaRequests extends Middleware
         $user = $this->resolveUser($request);
         $shouldShareCommerceData = $this->shouldShareCommerceData($request);
 
-        // Paramètres centralisés
-        $settings = app(SettingApp::class);
-
         $sharedData = [
             ...parent::share($request),
             'auth' => $this->getAuthData($user),

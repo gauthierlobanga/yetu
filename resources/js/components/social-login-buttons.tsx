@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import { FaFacebook, FaGithub } from 'react-icons/fa';
+import { FaApple, FaFacebook, FaMicrosoft } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -15,17 +15,22 @@ const providers: Provider[] = [
     {
         name: 'google',
         label: 'Google',
-        icon: <FcGoogle className="h-5 w-5" />,
+        icon: <FcGoogle className="h-10 w-10" />,
     },
     {
         name: 'facebook',
         label: 'Facebook',
-        icon: <FaFacebook className="h-5 w-5 text-[#1877F2]" />,
+        icon: <FaFacebook className="h-10 w-10 text-[#1877F2]" />,
     },
     {
-        name: 'github',
-        label: 'GitHub',
-        icon: <FaGithub className="h-5 w-5 text-slate-900 dark:text-white" />,
+        name: 'microsoft',
+        label: 'Microsoft',
+        icon: <FaMicrosoft className="h-10 w-10 text-[#1a7fcd] dark:text-white" />,
+    },
+    {
+        name: 'apple',
+        label: 'Apple',
+        icon: <FaApple className="h-10 w-10 text-slate-600 dark:text-white" />,
     },
 ];
 
@@ -39,7 +44,7 @@ export function SocialLoginButtons() {
     };
 
     return (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 gap-3">
             {providers.map((provider) => {
                 const url = getSocialUrl(provider.name);
                 const isDisabled = !url;
@@ -53,7 +58,7 @@ export function SocialLoginButtons() {
                         disabled={isDisabled}
                         asChild={!isDisabled}
                         className={cn(
-                            'group relative h-12 rounded-2xl border border-slate-200/80 bg-white/80 px-3 shadow-sm backdrop-blur-xl transition-all duration-300',
+                            'group relative h-12 border border-slate-200/80 bg-white/80 px-1.5 transition-all duration-300',
                             'hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-white hover:shadow-lg hover:shadow-emerald-500/10',
                             'dark:border-slate-700/80 dark:bg-slate-900/70',
                             'dark:hover:border-emerald-500/40 dark:hover:bg-slate-900',

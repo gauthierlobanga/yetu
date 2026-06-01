@@ -1,8 +1,8 @@
 'use client';
 
+import { usePage } from '@inertiajs/react';
 import * as React from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts';
-import { usePage } from '@inertiajs/react';
 
 import {
     Card,
@@ -15,8 +15,8 @@ import {
     ChartContainer,
     ChartTooltip,
     ChartTooltipContent,
-    type ChartConfig,
 } from '@/components/ui/chart';
+import type { ChartConfig } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface ChartDataPoint {
@@ -47,7 +47,7 @@ export function ChartBarInteractive({
 
     React.useEffect(() => {
         const loadData = () => {
-            let data = propChartData || chartStats;
+            const data = propChartData || chartStats;
 
             if (data && data.length > 0) {
                 setChartData(data);
@@ -55,6 +55,7 @@ export function ChartBarInteractive({
                 // Données mock si nécessaire
                 const mockData: ChartDataPoint[] = [];
                 const endDate = new Date();
+
                 for (let i = 0; i < 30; i++) {
                     const date = new Date(endDate);
                     date.setDate(endDate.getDate() - (29 - i));
@@ -65,8 +66,10 @@ export function ChartBarInteractive({
                         comments: Math.floor(Math.random() * 50) + 5,
                     });
                 }
+
                 setChartData(mockData);
             }
+
             setLoading(false);
         };
 
@@ -124,7 +127,7 @@ export function ChartBarInteractive({
                     </div>
                 </CardHeader>
                 <CardContent className="px-2 sm:p-6">
-                    <div className="flex h-[250px] items-center justify-center">
+                    <div className="flex h-62.5 items-center justify-center">
                         <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
                     </div>
                 </CardContent>
@@ -144,7 +147,7 @@ export function ChartBarInteractive({
                     </div>
                 </CardHeader>
                 <CardContent className="px-2 sm:p-6">
-                    <div className="flex h-[250px] items-center justify-center text-muted-foreground">
+                    <div className="flex h-62.5 items-center justify-center text-muted-foreground">
                         Aucune statistique disponible
                     </div>
                 </CardContent>
@@ -184,7 +187,7 @@ export function ChartBarInteractive({
             <CardContent className="px-2 sm:p-6">
                 <ChartContainer
                     config={chartConfig}
-                    className="aspect-auto h-[250px] w-full"
+                    className="aspect-auto h-62.5 w-full"
                 >
                     <BarChart
                         accessibilityLayer
@@ -203,6 +206,7 @@ export function ChartBarInteractive({
                             minTickGap={32}
                             tickFormatter={(value) => {
                                 const date = new Date(value);
+
                                 return date.toLocaleDateString('fr-FR', {
                                     month: 'short',
                                     day: 'numeric',
@@ -212,9 +216,12 @@ export function ChartBarInteractive({
                         <ChartTooltip
                             content={
                                 <ChartTooltipContent
-                                    className="w-[150px]"
+                                    className="w-37.5"
                                     labelFormatter={(value) => {
-                                        if (!value) return '';
+                                        if (!value) {
+                                            return '';
+                                        }
+
                                         return new Date(
                                             value,
                                         ).toLocaleDateString('fr-FR', {
@@ -236,6 +243,7 @@ export function ChartBarInteractive({
                                             typeof value === 'number'
                                                 ? value
                                                 : 0;
+
                                         return [
                                             `${numericValue.toLocaleString()} ${labels[metricName] || ''}`,
                                             '',

@@ -1,5 +1,4 @@
 import { usePage } from '@inertiajs/react';
-import { useState } from 'react';
 import AppearanceToogle from '@/components/appearance-toogle';
 import SearchExperience from '@/components/search-my-input';
 import { CartButton } from './CartButton';
@@ -10,8 +9,6 @@ export function HeaderActions() {
     const { auth } = usePage().props;
 
     const isCartPage = route().current('cart.index');
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     return (
         <>

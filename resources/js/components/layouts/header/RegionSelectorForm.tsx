@@ -5,7 +5,6 @@ import type { PageProps } from '@inertiajs/core';
 import { router, usePage } from '@inertiajs/react';
 import {
     Check,
-    ChevronDown,
     Globe,
     Loader2,
     MapPin,
@@ -247,6 +246,7 @@ export function RegionSelectorForm() {
     /* Derived data                                                           */
     /* ---------------------------------------------------------------------- */
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const summary = useMemo(() => {
         const country = selectedCountry?.code?.toUpperCase() ?? 'CD';
         const currency = selectedCurrency?.code?.toUpperCase() ?? 'USD';
@@ -306,7 +306,7 @@ export function RegionSelectorForm() {
                     variant="outline"
                     size="sm"
                     className={cn(
-                        'group h-10 rounded-full border-slate-200/70 bg-white/85 px-3.5',
+                        'group h-10 rounded-full border-slate-200/70 bg-white/85',
                         'shadow-sm backdrop-blur-xl transition-all duration-300',
                         'hover:border-emerald-300 hover:bg-white hover:shadow-md hover:shadow-emerald-500/10',
                         'dark:border-slate-700 dark:bg-slate-900/80',
@@ -314,10 +314,10 @@ export function RegionSelectorForm() {
                     )}
                 >
                     <div className="flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                            <Globe className="h-4 w-4" />
+                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            <Globe className="h-5 w-5" />
                         </div>
-
+                        {/*
                         <span className="hidden text-sm font-medium text-slate-700 sm:inline dark:text-slate-300">
                             {summary}
                         </span>
@@ -327,7 +327,7 @@ export function RegionSelectorForm() {
                                 'h-4 w-4 text-slate-400 transition-transform duration-300',
                                 open && 'rotate-180',
                             )}
-                        />
+                        /> */}
                     </div>
                 </Button>
             </PopoverTrigger>

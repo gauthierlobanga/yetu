@@ -4,15 +4,7 @@ import AppLogoIcon from '@/components/app-logo-icon';
 export default function AppLogo() {
     const { name, tenant, app_logo } = usePage().props as any;
     const logoUrl = tenant?.logo_url || app_logo;
-    const displayName = tenant?.raison_sociale || name || 'Laravel';
-
-    console.log('AppLogo props:', {
-        name,
-        tenant,
-        app_logo,
-        logoUrl,
-        displayName,
-    });
+    const displayName = tenant?.raison_sociale || name || 'Yetufy';
 
     return (
         <>
@@ -44,7 +36,7 @@ export default function AppLogo() {
                 </div>
             )}
             <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-2xl font-bold text-transparent">
+                <span className="bg-linear-to-r from-primary to-primary bg-clip-text text-2xl font-semibold text-transparent">
                     {displayName}
                 </span>
             </div>

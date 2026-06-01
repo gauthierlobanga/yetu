@@ -11,60 +11,60 @@ Système unifié permettant aux vendeurs authentifiés de:
 ## 🔄 Flux utilisateur complet
 
 ```
-┌─────────────────────────────────────────────────────┐
-│           USER SE CONNECTE                          │
-└────────────────────┬────────────────────────────────┘
+ ┌────────────────────────────────────────┐
+ │           USER SE CONNECTE             │
+ └───────────────────┬────────────────────┘
+                     │
+        ┌────────────┴──────────────┐
+        │  RedirectVendorAfterLogin |
+        │      (middleware)         |
+        └────────────┬──────────────┘
+                     │
+        ┌────────────▼──────────────┐
+        │     /selection-compte     |
+        │    (account-selection)    |
+        └────────────┬──────────────┘
                      │
          ┌───────────┴───────────┐
-         │ RedirectVendorAfterLogin
-         │    (middleware)
-         └───────────┬───────────┘
-                     │
-            ┌────────▼────────┐
-            │ /selection-compte
-            │ (account-selection)
-            └────────┬────────┘
-                     │
-         ┌───────────┴──────────┐
-         │                      │
-    ┌────▼─────┐         ┌──────▼─────┐
-    │ HAS TENANTS │ │NO TENANTS  │
-    └────┬─────┘         └──────┬─────┘
-         │                      │
-    ┌────▼──────────────┐  ┌───▼──────────────┐
-    │ Show tenants list │  │ Show empty state │
-    │ - Chaque boutique │  │ + Créer boutique │
-    │ - Options actions │  │   button only    │
-    └────┬──────────────┘  └───┬──────────────┘
-         │                      │
-    ┌────┴──────┬──────────┐   │
-    │            │          │   │
-┌───▼────┐  ┌───▼──────┐ ┌─┴──▼──────┐
-│ Clique │  │ Ajouter  │ │ Créer     │
-│boutique│  │ boutique │ │ boutique  │
-└───┬────┘  └───┬──────┘ └──────┬────┘
-    │          │                │
-┌───▼────┐ ┌──▼─────┐       ┌──▼──────┐
-│ SSO    │ │ /plans  │       │ /plans   │
-│ Login  │ │ (vendor)│       │ (vendor) │
-└───┬────┘ └──┬─────┘       └──┬───────┘
-    │         │                 │
-└───┴─────────┴─────────────────┘
-              │
-    ┌─────────▼──────────┐
-    │ Create new tenant  │
-    │ or select existing │
-    └─────────┬──────────┘
-              │
-    ┌─────────▼──────────────┐
+         │                       │
+   ┌─────▼───────┐       ┌───────▼─────┐
+   │ HAS TENANTS │       │  NO TENANTS │
+   └─────┬───────┘       └───────┬─────┘
+         │                       │
+┌────────▼──────────┐  ┌─────────▼─────────┐
+│ Show tenants list │  │ Show empty state  │
+│ - Chaque boutique │  │ + Créer boutique  │
+│ - Options actions │  │   button only     │
+└────────┬──────────┘  └─────────┬─────────┘
+         │                       │
+    ┌────┴─────────┬──────────┐  │
+    │              │          │  │
+┌───▼────┐    ┌────▼──────┐ ┌─┴──▼──────┐
+│ Clique │    │  Ajouter  │ │  Créer    │
+│boutique│    │ boutique  │ │ boutique  │
+└───┬────┘    └────┬──────┘ └──────┬────┘
+    │              │              │
+┌───▼────┐    ┌────▼─────┐    ┌───▼──────┐
+│  SSO   │    │  /plans  │    │  /plans  │
+│ Login  │    │ (vendor) │    │ (vendor) │
+└───┬────┘    └────┬─────┘    └────┬─────┘
+    │              │               │
+    └───────────┴──────────────────┘
+                │
+    ┌───────────▼──────────┐
+    │  Create new tenant   │
+    │  or select existing  │
+    └───────────┬──────────┘
+                │
+    ┌───────────▼────────────┐
     │ /vendor/success/{slug} │
     │ + "Gérer mes boutiques"│
-    └─────────┬──────────────┘
-              │
-    ┌─────────▼──────────────┐
-    │ /selection-compte      │
-    │ (back to list)         │
-    └────────────────────────┘
+    └───────────┬────────────┘
+                │
+    ┌───────────▼──────────────┐
+    │   /selection-compte      │
+    │    (back to list)        │
+    └──────────────────────────┘
 ```
 
 ## 🛣️ Routes Laravel
@@ -120,7 +120,7 @@ Route::middleware('auth')->prefix('selection-compte')->name('central.account-sel
   - Message "Aucune boutique créée"
   - Bouton "Créer votre boutique"
 
-### Success.tsx (amélioré)
+### Success.tsx
 - ✅ Nouveau: Bouton "Gérer mes boutiques"
 - Redirige vers `/selection-compte`
 

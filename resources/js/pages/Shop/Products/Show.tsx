@@ -154,7 +154,7 @@ function ProductGallery({
     const current = allImages[selected];
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-3 max-w-7xl">
             <div className="relative aspect-square overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800">
                 <img
                     src={resolveImageUrl(current.large)}
@@ -609,7 +609,7 @@ export default function ProductShow() {
                         </TabsTrigger>
                     </TabsList>
                     <TabsContent value="description" className="pt-6">
-                        <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-6 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
+                        <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-linear-to-br from-white via-slate-50 to-white p-6 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
                             {/* En-tête décoratif */}
                             <div className="mb-6 flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">

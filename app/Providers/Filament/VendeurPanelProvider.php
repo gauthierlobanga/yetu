@@ -35,13 +35,13 @@ class VendeurPanelProvider extends PanelProvider
             ->path('vendeur')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandLogo(function () {
-                $tenant = tenant(); // stancl/tenancy
+                $tenant = tenant();
                 if ($tenant) {
                     $logoUrl = $tenant->getFirstMediaUrl('tenant_avatar') ?: null;
                     $name = $tenant->raison_sociale;
                 } else {
                     $logoUrl = null;
-                    $name = config('app.name'); // fallback
+                    $name = config('app.name');
                 }
 
                 return view('filament.admin.logo', compact('logoUrl', 'name'));
@@ -49,7 +49,6 @@ class VendeurPanelProvider extends PanelProvider
             ->font('inter')
             ->sidebarWidth('16rem')
             ->profile()
-            ->login()
             ->navigationGroups(groups: [
                             NavigationGroup::make()
                                 ->label('Market')

@@ -53,6 +53,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import MainLayout from '@/layouts/main-layout';
+import getToastStyle from '@/lib/toast-style';
 import { cn } from '@/lib/utils';
 
 type ContactExperienceProps = {
@@ -146,10 +147,14 @@ export default function ContactPage({
             showProgress: false,
             onSuccess: () => {
                 reset();
-                toast.success('Votre message a été envoyé avec succès.');
+                toast.success('Votre message a été envoyé avec succès.',{
+                    style: getToastStyle('success')
+                });
             },
             onError: () => {
-                toast.error('Veuillez corriger les erreurs du formulaire.');
+                toast.error('Veuillez corriger les erreurs du formulaire.',{
+                    style: getToastStyle('error')
+                });
             },
         });
     }
@@ -203,6 +208,11 @@ export default function ContactPage({
                                 label: 'Email',
                                 value: contactMeta.email,
                             },
+                            {
+                                icon: MailIcon,
+                                label: 'Email',
+                                value: contactMeta.email,
+                            },
                             ...(contactMeta.phone
                                 ? [
                                       {
@@ -242,7 +252,7 @@ export default function ContactPage({
             </section>
 
             {/* FORM + INFO */}
-            <section className="mx-auto max-w-6xl px-4 py-16 lg:py-20">
+            <section className="mx-auto max-w-7xl px-4 py-16 lg:py-20">
                 <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
                     {/* Left column: Information & commitments */}
                     <motion.div
@@ -279,6 +289,12 @@ export default function ContactPage({
                                     title: 'Suivi structuré',
                                     description:
                                         'Chaque message est classé et suivi jusqu’à résolution.',
+                                },
+                                {
+                                    icon: Users,
+                                    title: 'Équipe dédiée',
+                                    description:
+                                        'Commercial, support et technique travaillent ensemble.',
                                 },
                                 {
                                     icon: Users,
@@ -364,7 +380,7 @@ export default function ContactPage({
                                             <Label className="text-sm font-medium">
                                                 Catégorie
                                             </Label>
-                                            <div className="relative">
+                                            <div className="relative grid">
                                                 <Carousel
                                                     opts={{
                                                         align: 'start',
