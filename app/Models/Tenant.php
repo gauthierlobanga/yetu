@@ -195,6 +195,11 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         return $this->belongsTo(Plan::class);
     }
 
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class);
+    }
+
     /** @return HasMany<Abonnement, self> */
     public function abonnements(): HasMany
     {

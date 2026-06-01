@@ -3,6 +3,7 @@
 ## 🎯 Étapes à Suivre
 
 ### Phase 1: Configuration de Base ✅ (Déjà fait)
+
 - [x] Installation de Laravel Socialite
 - [x] Création du service SocialiteService
 - [x] Amélioration du contrôleur SocialiteController
@@ -13,12 +14,15 @@
 - [x] Amélioration du composant React
 
 ### Phase 2: Exécution des Migrations
+
 - [ ] Exécuter les migrations:
+
   ```bash
   php artisan migrate
   ```
 
 ### Phase 3: Configuration de Google
+
 - [ ] Aller à [Google Cloud Console](https://console.cloud.google.com/)
 - [ ] Créer/Sélectionner un projet
 - [ ] Activer Google+ API
@@ -28,14 +32,17 @@
   - [ ] `https://votre-domaine.com/auth/google/callback`
 - [ ] Copier le Client ID et Secret
 - [ ] Ajouter à `.env`:
+
   ```env
   GOOGLE_CLIENT_ID=xxx
   GOOGLE_CLIENT_SECRET=xxx
   GOOGLE_REDIRECT_URI=http://localhost/auth/google/callback
   ```
+
 - [ ] Tester: `http://localhost/auth/google/redirect`
 
 ### Phase 4: Configuration de Facebook
+
 - [ ] Aller à [Meta Developers](https://developers.facebook.com/)
 - [ ] Créer une nouvelle application
 - [ ] Ajouter le produit "Connexion Facebook"
@@ -45,28 +52,34 @@
 - [ ] Configurer les domaines d'application
 - [ ] Copier l'ID et Secret
 - [ ] Ajouter à `.env`:
+
   ```env
   FACEBOOK_CLIENT_ID=xxx
   FACEBOOK_CLIENT_SECRET=xxx
   FACEBOOK_REDIRECT_URI=http://localhost/auth/facebook/callback
   ```
+
 - [ ] Tester: `http://localhost/auth/facebook/redirect`
 
 ### Phase 5: Configuration d'Instagram
+
 - [ ] Utiliser les credentials Facebook (même application)
 - [ ] Ajouter le produit "Instagram Basic Display"
 - [ ] Configurer les URIs valides:
   - [ ] `http://localhost/auth/instagram/callback`
   - [ ] `https://votre-domaine.com/auth/instagram/callback`
 - [ ] Ajouter à `.env`:
+
   ```env
   INSTAGRAM_CLIENT_ID=xxx
   INSTAGRAM_CLIENT_SECRET=xxx
   INSTAGRAM_REDIRECT_URI=http://localhost/auth/instagram/callback
   ```
+
 - [ ] Tester: `http://localhost/auth/instagram/redirect`
 
 ### Phase 6: Configuration de Microsoft
+
 - [ ] Aller à [Azure Portal](https://portal.azure.com/)
 - [ ] Créer une nouvelle inscription d'application
 - [ ] Ajouter les URIs de redirection:
@@ -75,20 +88,25 @@
 - [ ] Générer un secret client
 - [ ] Copier l'ID et Secret
 - [ ] Ajouter à `.env`:
+
   ```env
   MICROSOFT_CLIENT_ID=xxx
   MICROSOFT_CLIENT_SECRET=xxx
   MICROSOFT_REDIRECT_URI=http://localhost/auth/microsoft/callback
   MICROSOFT_TENANT=common
   ```
+
 - [ ] Tester: `http://localhost/auth/microsoft/redirect`
 
 ### Phase 7: Tests Locaux
+
 - [ ] Vérifier la configuration:
+
   ```bash
   php artisan tinker
   >>> config('socialite.providers')
   ```
+
 - [ ] Tester chaque provider:
   - [ ] Google: `http://localhost/auth/google/redirect`
   - [ ] Facebook: `http://localhost/auth/facebook/redirect`
@@ -97,6 +115,7 @@
 - [ ] Vérifier les boutons React sur la page de login
 
 ### Phase 8: Tests d'Authentification Complète
+
 - [ ] Tester la création d'un nouveau compte via Google
 - [ ] Tester la création d'un nouveau compte via Facebook
 - [ ] Tester la création d'un nouveau compte via Instagram
@@ -106,6 +125,7 @@
 - [ ] Vérifier les logs pour les erreurs
 
 ### Phase 9: Tests en Production
+
 - [ ] Mettre à jour les URLs de redirection pour les domaines de production
 - [ ] Reconfurer les CORS si nécessaire
 - [ ] Tester avec les domaines de production
@@ -114,6 +134,7 @@
 - [ ] Tester la connexion
 
 ### Phase 10: Monitoring et Maintenance
+
 - [ ] Configurer le monitoring des erreurs
 - [ ] Vérifier les logs régulièrement: `storage/logs/laravel.log`
 - [ ] Mettre à place des alertes pour les erreurs d'authentification
@@ -121,7 +142,8 @@
 
 ## 📋 Fichiers Modifiés/Créés
 
-### Fichiers Créés:
+### Fichiers Créés
+
 ```
 ✅ config/socialite.php
 ✅ app/Services/SocialiteService.php
@@ -131,7 +153,8 @@
 ✅ tests/Feature/Auth/SocialiteAuthTest.php
 ```
 
-### Fichiers Modifiés:
+### Fichiers Modifiés
+
 ```
 ✅ app/Http/Controllers/Auth/SocialiteController.php
 ✅ app/Models/User.php (fillable)
@@ -171,6 +194,7 @@ php artisan tinker
 ## 📞 Support et Dépannage
 
 En cas de problème:
+
 1. Voir `docs/SOCIALITE_SETUP.md` - Section "Dépannage"
 2. Vérifier les logs: `storage/logs/laravel.log`
 3. Vérifier la configuration: `php artisan tinker > config('socialite.providers')`

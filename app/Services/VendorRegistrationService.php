@@ -19,6 +19,13 @@ use Stancl\Tenancy\Tenancy;
 
 class VendorRegistrationService
 {
+    protected SubscriptionService $subscriptionService;
+
+    public function __construct(SubscriptionService $subscriptionService)
+    {
+        $this->subscriptionService = $subscriptionService;
+    }
+
     /**
      * Liste des slugs réservés (interdits pour les boutiques).
      */
@@ -167,6 +174,9 @@ class VendorRegistrationService
 
         // Nettoyage de la session
         session()->forget('temp_password');
+
+        // Créer la subscription pour le plan
+        $this->subscriptionService->createSubscription($tenant, $plan, $user);
 
         Log::info('Vendor approved', [
             'vendor_request_id' => $vendorRequest->id,

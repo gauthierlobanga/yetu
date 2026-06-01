@@ -26,6 +26,7 @@ APP_URL=http://localhost # ou votre domaine en production
 ```
 
 Les URLs de callback seront générées automatiquement :
+
 ```
 {APP_URL}/auth/{provider}/callback
 ```
@@ -49,6 +50,7 @@ Les URLs de callback seront générées automatiquement :
    - Cliquez "Créer des identifiants" → "OAuth 2.0 Client ID"
    - Sélectionnez "Application Web"
    - Ajoutez vos URIs autorisés :
+
      ```
      http://localhost
      http://localhost/auth/google/callback
@@ -82,6 +84,7 @@ GOOGLE_REDIRECT_URI=http://localhost/auth/google/callback
 4. **Configurez les URIs de redirection** :
    - Allez à "Produits" → "Connexion Facebook" → "Paramètres"
    - Ajoutez vos URIs valides :
+
      ```
      http://localhost/auth/facebook/callback
      https://votre-domaine.com/auth/facebook/callback
@@ -89,6 +92,7 @@ GOOGLE_REDIRECT_URI=http://localhost/auth/google/callback
 
 5. **Configurez les domaines d'application** :
    - Dans "Paramètres" → "Général", ajoutez :
+
      ```
      localhost
      votre-domaine.com
@@ -118,6 +122,7 @@ Instagram utilise les credentials Facebook (même application).
 3. **Configurez les paramètres** :
    - Allez à "Instagram Basic Display" → "Paramètres"
    - Ajoutez vos URIs valides :
+
      ```
      http://localhost/auth/instagram/callback
      https://votre-domaine.com/auth/instagram/callback
@@ -146,6 +151,7 @@ INSTAGRAM_REDIRECT_URI=http://localhost/auth/instagram/callback
    - Dans "Authentification", cliquez "Ajouter une plateforme"
    - Sélectionnez "Application Web"
    - Ajoutez votre URI de redirection :
+
      ```
      http://localhost/auth/microsoft/callback
      https://votre-domaine.com/auth/microsoft/callback
@@ -173,7 +179,7 @@ MICROSOFT_TENANT=common
 
 ## 🧪 Test de Configuration
 
-### 1. Vérifiez que les credentials sont correctement définis :
+### 1. Vérifiez que les credentials sont correctement définis
 
 ```bash
 php artisan tinker
@@ -184,9 +190,10 @@ php artisan tinker
 // Vous devriez voir vos providers avec enabled: true
 ```
 
-### 2. Testez manuellement :
+### 2. Testez manuellement
 
 Visitez ces URLs dans votre navigateur :
+
 - `http://localhost/auth/google/redirect`
 - `http://localhost/auth/facebook/redirect`
 - `http://localhost/auth/instagram/redirect`
@@ -220,19 +227,23 @@ Vous devriez être redirigé vers la page de connexion du provider.
 ## 🐛 Dépannage
 
 ### Le redirect ne fonctionne pas
+
 - Vérifiez que le provider est activé dans `config('socialite.providers')`
 - Vérifiez que les credentials sont correctement définis dans `.env`
 - Vérifiez que les URIs de redirection correspondent exactement
 
 ### L'erreur "Provider not enabled"
+
 - Vérifiez que les variables d'environnement CLIENT_ID et CLIENT_SECRET sont définies
 - Relancez `php artisan config:cache` après les modifications de `.env`
 
 ### L'utilisateur reçoit "Authentication failed"
+
 - Vérifiez les logs dans `storage/logs/laravel.log`
 - Vérifiez les permissions de l'application OAuth
 
 ### Problèmes de CORS
+
 - Assurez-vous que votre domaine est autorisé dans la configuration CORS
 - Vérifiez `config('cors.php')`
 
@@ -243,6 +254,7 @@ Vous devriez être redirigé vers la page de connexion du provider.
 ### Champs Utilisateur Disponibles
 
 Après l'authentification sociale, les champs suivants sont sauvegardés :
+
 - `name` : Nom du profil
 - `email` : Email (vérifié automatiquement)
 - `provider` : Nom du fournisseur (google, facebook, instagram, microsoft)
@@ -252,6 +264,7 @@ Après l'authentification sociale, les champs suivants sont sauvegardés :
 ### Linking Multiple Providers
 
 Un utilisateur peut se connecter avec plusieurs providers :
+
 - S'il se connecte avec un email qui existe déjà, le provider sera lié
 - Si le email n'existe pas, un nouveau compte sera créé
 
@@ -263,6 +276,7 @@ GET  /auth/{provider}/callback  - Callback après authentification
 ```
 
 Exemple d'utilisation dans le frontend :
+
 ```html
 <a href="/auth/google/redirect">Se connecter avec Google</a>
 <a href="/auth/facebook/redirect">Se connecter avec Facebook</a>

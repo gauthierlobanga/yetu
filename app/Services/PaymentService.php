@@ -12,8 +12,11 @@ use Stripe\Webhook;
 
 class PaymentService
 {
-    public function __construct()
+    protected VendorRegistrationService $vendorRegistrationService;
+
+    public function __construct(VendorRegistrationService $vendorRegistrationService)
     {
+        $this->vendorRegistrationService = $vendorRegistrationService;
         Stripe::setApiKey(config('services.stripe.secret'));
     }
 
@@ -123,15 +126,39 @@ class PaymentService
     {
         $vendorRequest = VendorRequest::find($session->metadata->vendor_request_id);
 
-        if ($vendorRequest) {
-            $vendorRequest->update([
-                'payment_session_id' => $session->id,
-                'status' => VendorRequest::STATUS_APPROVED,
-                'approved_at' => now(),
+        if (!$vendorRequest) {
+            Log::error('VendorRequest not found for checkout session', [
+                'session_id' => $session->id,
+                'vendor_request_id' => $session->metadata->vendor_request_id,
             ]);
+            return ['status' => 'error', 'message' => 'VendorRequest not found'];
         }
 
-        return ['status' => 'success', 'vendor_request_id' => $vendorRequest?->id];
+        try {
+            // Mettre à jour le statut de paiement
+            $vendorRequest->update([
+                'payment_session_id' => $session->id,
+                'payment_status' => 'paid',
+                'paid_at' => now(),
+            ]);
+
+            // Approuver la demande de vendeur et créer le tenant + subscription
+            $this->vendorRegistrationService->approve($vendorRequest);
+
+            Log::info('Vendor payment completed and approved', [
+                'vendor_request_id' => $vendorRequest->id,
+                'session_id' => $session->id,
+            ]);
+
+            return ['status' => 'success', 'vendor_request_id' => $vendorRequest->id];
+        } catch (\Exception $e) {
+            Log::error('Error approving vendor after payment', [
+                'vendor_request_id' => $vendorRequest->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return ['status' => 'error', 'message' => $e->getMessage()];
+        }
     }
 
     /**

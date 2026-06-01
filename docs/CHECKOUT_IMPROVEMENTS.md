@@ -14,6 +14,7 @@ Ce document détaille les améliorations apportées au processus de checkout de 
 ### 1. CheckoutController (`app/Http/Controllers/Shop/CheckoutController.php`)
 
 #### **checkoutIndex()**
+
 ```php
 // Avant: Aucune vérification d'authentification
 // Après: Vérification obligatoire
@@ -24,12 +25,14 @@ if (!Auth::check()) {
 ```
 
 **Bénéfices:**
+
 - Empêche l'accès au checkout pour les utilisateurs non authentifiés
 - Redirection transparente vers la page de login
 
 #### **checkoutProcess()**
 
 **Validations Améliorées:**
+
 ```php
 $validated = $request->validate([
     'adresse_facturation_id' => 'required|exists:adresses,id',
@@ -41,6 +44,7 @@ $validated = $request->validate([
 ```
 
 **Vérifications Propriétés d'Adresses:**
+
 ```php
 // Vérifier que les adresses appartiennent à l'utilisateur authentifié
 $billingAddress = Auth::user()->adresses()->find($validated['adresse_facturation_id']);
@@ -54,6 +58,7 @@ if (!$billingAddress || !$shippingAddress) {
 ```
 
 **Gestion des Erreurs de Stock Détaillée:**
+
 ```php
 if (!$item->produit->hasSufficientStock($item->quantite)) {
     return back()->withErrors([
@@ -64,6 +69,7 @@ if (!$item->produit->hasSufficientStock($item->quantite)) {
 ```
 
 **Logging Amélioré:**
+
 ```php
 Log::info('Order created successfully', [
     'order_id' => $commande->id,
@@ -80,6 +86,7 @@ Log::error('Checkout error', [
 ```
 
 #### **checkoutSuccess()**
+
 ```php
 // Authentification obligatoire avant d'accéder aux détails de commande
 if (!Auth::check()) {
@@ -90,6 +97,7 @@ if (!Auth::check()) {
 ### 2. Commande Model (`app/Models/Commande.php`)
 
 **Boot Hook pour Statut Initial:**
+
 ```php
 protected static function boot()
 {
@@ -104,6 +112,7 @@ protected static function boot()
 ```
 
 **Avantages:**
+
 - Aucune commande ne peut être créée sans statut
 - Garantit la cohérence des données
 - Statut défini automatiquement en base de données
@@ -115,12 +124,14 @@ protected static function boot()
 ### 1. Hook useCheckout (`resources/js/hooks/ecommerce/use-checkout.ts`)
 
 **Fonctionnalités:**
+
 - Gestion d'état centralisée du checkout
 - Validation step-by-step
 - Gestion des erreurs avec toasts
 - Support du formulaire multi-étapes
 
 **Interface de l'État:**
+
 ```typescript
 interface CheckoutState {
     currentStep: number;                    // Étape actuelle (1-4)
@@ -136,6 +147,7 @@ interface CheckoutState {
 ```
 
 **Méthodes Principales:**
+
 ```typescript
 // Navigation
 nextStep()              // Étape suivante avec validation
@@ -156,6 +168,7 @@ resetCheckout()         // Réinitialiser l'état
 ```
 
 **Exemple d'Utilisation:**
+
 ```typescript
 const checkout = useCheckout();
 
@@ -197,6 +210,7 @@ checkout.submitCheckout();
    - Lien vers les commandes
 
 **Props:**
+
 ```typescript
 interface CheckoutFormProps {
     cart: Cart;
@@ -207,6 +221,7 @@ interface CheckoutFormProps {
 ```
 
 **Exemple d'Utilisation:**
+
 ```tsx
 <CheckoutForm
     cart={cart}
@@ -219,12 +234,14 @@ interface CheckoutFormProps {
 ### 3. Composant AddAddressModal (`resources/js/components/ecommerce/checkout/add-address-modal.tsx`)
 
 **Fonctionnalités:**
+
 - Modal pour ajouter nouvelle adresse
 - Validation complète des champs
 - Toast notifications pour feedback
 - Callback pour intégration
 
 **Props:**
+
 ```typescript
 interface AddAddressModalProps {
     onAddAddress?: (address: {
@@ -238,6 +255,7 @@ interface AddAddressModalProps {
 ```
 
 **Validation:**
+
 - Rue: requise
 - Ville: requise
 - Code postal: requis
@@ -247,6 +265,7 @@ interface AddAddressModalProps {
 ### 4. OrderSummary Amélioré (`resources/js/components/ecommerce/checkout/order-summary.tsx`)
 
 **Props Dynamiques:**
+
 ```typescript
 interface OrderSummaryProps {
     subtotal: number;
@@ -258,6 +277,7 @@ interface OrderSummaryProps {
 ```
 
 **Formatage de Devise:**
+
 ```typescript
 const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
@@ -270,6 +290,7 @@ const formatCurrency = (amount: number) => {
 ```
 
 **Affichage:**
+
 - Position sticky pour visibilité lors du scroll
 - Détail de tous les frais (taxes, livraison, réduction)
 - Calcul du total en temps réel
@@ -293,6 +314,7 @@ const formatCurrency = (amount: number) => {
 ## 🧪 Tests Recommandés
 
 ### Test 1: Authentification
+
 ```bash
 # 1. Accéder au checkout sans login
 GET /checkout
@@ -305,6 +327,7 @@ GET /checkout
 ```
 
 ### Test 2: Validation Adresses
+
 ```bash
 # 1. Soumettre sans adresses
 POST /checkout/process
@@ -318,6 +341,7 @@ POST /checkout/process {
 ```
 
 ### Test 3: Stock Insuffisant
+
 ```bash
 # 1. Ajouter produit au panier
 POST /cart/add/1 { quantity: 100 }
@@ -329,6 +353,7 @@ POST /checkout/process
 ```
 
 ### Test 4: Statut Initial
+
 ```php
 // Dans tinker ou test:
 $commande = Commande::create([...]);
@@ -370,8 +395,8 @@ POST /checkout/process
 ## 📞 Support
 
 Pour toute question ou problème avec le checkout:
+
 1. Vérifier les logs: `storage/logs/laravel.log`
 2. Vérifier l'authentification utilisateur
 3. Vérifier les adresses de l'utilisateur
 4. Vérifier les stocks des produits
-

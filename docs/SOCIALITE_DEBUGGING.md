@@ -283,7 +283,7 @@ exit
 
 ### Test 1: Vérifier le Composant React
 
-1. Ouvrir http://localhost/login
+1. Ouvrir <http://localhost/login>
 2. Vérifier que les boutons sociaux s'affichent
 3. Vérifier que les icônes sont correctes
 4. Vérifier le responsive (redimensionner)
@@ -304,7 +304,7 @@ exit
 
 ### Test 4: Tester la Fusion de Comptes
 
-1. Créer un compte avec email "test@example.com" et mot de passe
+1. Créer un compte avec email "<test@example.com>" et mot de passe
 2. Se déconnecter
 3. Se connecter avec Google avec le même email
 4. Vérifier que c'est le même utilisateur

@@ -132,6 +132,7 @@ Artisan::command('inspire', function () {
 ```
 
 Exécution:
+
 ```bash
 php artisan inspire
 ```

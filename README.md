@@ -475,8 +475,8 @@ Ce projet est sous la licence MIT. Voir [LICENSE](./LICENSE) pour plus de détai
 
 ## 📞 Contact
 
-- 📧 Email: contact@yetufy.com
-- 🌐 Website: https://yetufy.com
+- 📧 Email: <contact@yetufy.com>
+- 🌐 Website: <https://yetufy.com>
 - 💬 Discord: [Lien Communauté]
 
 ---

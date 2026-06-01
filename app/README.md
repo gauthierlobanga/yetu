@@ -51,6 +51,7 @@ Http/
 ```
 
 **Exemple: Controller**
+
 ```php
 namespace App\Http\Controllers\Shop;
 
@@ -79,6 +80,7 @@ Models/
 ```
 
 **Exemple: Model**
+
 ```php
 namespace App\Models;
 
@@ -106,6 +108,7 @@ Services/
 ```
 
 **Exemple: Service**
+
 ```php
 namespace App\Services;
 
@@ -165,6 +168,7 @@ Policies/
 ```
 
 **Exemple: Policy**
+
 ```php
 public function update(User $user, Product $product)
 {
@@ -258,6 +262,7 @@ Console/
 ```
 
 **Exemple: Command**
+
 ```php
 php artisan make:admin --email=admin@example.com
 ```

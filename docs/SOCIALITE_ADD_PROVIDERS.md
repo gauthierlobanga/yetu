@@ -52,6 +52,7 @@ const providers: Provider[] = [
 ### 4. Configurer le Provider OAuth Externe
 
 Allez sur la plateforme du provider (ex: GitHub) et:
+
 - Créez une nouvelle OAuth application
 - Enregistrez votre URL de callback: `http://localhost/auth/github/callback`
 - Copiez les credentials (Client ID et Secret)
@@ -79,7 +80,7 @@ php artisan tinker
 
 ### GitHub
 
-1. Allez à: https://github.com/settings/developers
+1. Allez à: <https://github.com/settings/developers>
 2. New OAuth App
 3. Application name: `Yetufy`
 4. Authorization callback URL: `http://localhost/auth/github/callback`
@@ -93,7 +94,7 @@ GITHUB_REDIRECT_URI=http://localhost/auth/github/callback
 
 ### LinkedIn
 
-1. Allez à: https://www.linkedin.com/developers/apps
+1. Allez à: <https://www.linkedin.com/developers/apps>
 2. Create app
 3. Remplissez les informations
 4. Allez à "Auth" tab
@@ -107,7 +108,7 @@ LINKEDIN_REDIRECT_URI=http://localhost/auth/linkedin/callback
 
 ### Twitter (X)
 
-1. Allez à: https://developer.twitter.com/en/portal/dashboard
+1. Allez à: <https://developer.twitter.com/en/portal/dashboard>
 2. Create a new app
 3. Setup authentication
 4. Callback URLs: `http://localhost/auth/twitter/callback`
@@ -120,7 +121,7 @@ TWITTER_REDIRECT_URI=http://localhost/auth/twitter/callback
 
 ### Discord
 
-1. Allez à: https://discord.com/developers/applications
+1. Allez à: <https://discord.com/developers/applications>
 2. New Application
 3. OAuth2 → Redirects
 4. Add redirect: `http://localhost/auth/discord/callback`
@@ -174,18 +175,22 @@ public function socialiteShopRedirect($provider)
 ## ⚠️ Conseil: Provider-Specific Issues
 
 ### Google
+
 - Trustworthy server URI needs to be verified
 - Scopes: `openid`, `profile`, `email`
 
 ### Facebook
+
 - Email peut ne pas être disponible pour certains comptes
 - Nécessite approbation pour certains permissions
 
 ### Instagram
+
 - Utilise les credentials Facebook
 - Peut être limité pour les utilisateurs non professionnels
 
 ### Microsoft
+
 - Plusieurs tenants disponibles (common, organizations, consumers)
 - Scopes: `openid`, `profile`, `email`, `offline_access`
 

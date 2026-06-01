@@ -27,6 +27,7 @@ docs/
 ### 1. Validation Backend (Laravel)
 
 **Pattern de validation avec messages personnalisés:**
+
 ```php
 $validated = $request->validate([
     'field' => 'required|type|...constraint',
@@ -38,6 +39,7 @@ $validated = $request->validate([
 ```
 
 **Avantages:**
+
 - Messages localisés
 - Validation stricte
 - Feedback utilisateur clair
@@ -45,6 +47,7 @@ $validated = $request->validate([
 ### 2. État React avec Hook Personnalisé
 
 **Pattern useCheckout:**
+
 ```typescript
 // État central
 const [state, setState] = useState<CheckoutState>({...});
@@ -67,6 +70,7 @@ return {
 ```
 
 **Avantages:**
+
 - État prévisible
 - Réutilisable
 - Testable
@@ -75,6 +79,7 @@ return {
 ### 3. Validation Frontend
 
 **Pattern validation step-by-step:**
+
 ```typescript
 function validateCurrentStep(state: CheckoutState): Record<string, string> {
     const errors: Record<string, string> = {};
@@ -103,6 +108,7 @@ if (Object.keys(errors).length > 0) {
 ### 4. Soumission Inertia
 
 **Pattern POST avec gestion d'erreurs:**
+
 ```typescript
 router.post(
     route('tenant.checkout.process'),
@@ -251,15 +257,16 @@ case 5:
 ### Optimisations Mises en Place
 
 1. **useCallback**: Méthodes du hook mémorisées
+
 ```typescript
 const selectBillingAddress = useCallback((id: string) => {
     // ...
 }, []);
 ```
 
-2. **Validation optimisée**: Pas de re-validation inutile
-3. **Sticky position**: OrderSummary reste visible
-4. **Progressive loading**: Toast après action
+1. **Validation optimisée**: Pas de re-validation inutile
+2. **Sticky position**: OrderSummary reste visible
+3. **Progressive loading**: Toast après action
 
 ## Testing
 
@@ -364,4 +371,3 @@ php artisan tinker
 - [ ] Tests unitaires passent
 - [ ] Aucun warning TypeScript
 - [ ] Messages d'erreur clairs
-

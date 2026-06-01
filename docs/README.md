@@ -5,6 +5,7 @@ Index central de la documentation du projet Yetufy.
 ## 🎯 Vue d'Ensemble
 
 Yetufy est une plateforme e-commerce multi-tenant complète avec:
+
 - ✅ Authentification sociale (Google, Facebook, Instagram, Microsoft)
 - ✅ Gestion multi-tenant
 - ✅ Système d'e-commerce complet

@@ -3,6 +3,7 @@
 ## 📋 Vue d'ensemble
 
 Système unifié permettant aux vendeurs authentifiés de:
+
 - **Voir tous leurs comptes/boutiques** en un seul endroit
 - **Accéder directement** au dashboard d'une boutique
 - **Créer une nouvelle boutique** facilement sans perte de session
@@ -88,22 +89,26 @@ Route::middleware('auth')->prefix('selection-compte')->name('central.account-sel
 ### TenantAccountController.php
 
 **`index()`**
+
 - Récupère tous les tenants propres à l'utilisateur
 - Les affiche avec `account-selection.tsx`
 - **Important**: N'affiche pas d'erreur si vide, laisse la vue gérer
 
 **`select($tenant)`**
+
 - Vérifie l'ownership du tenant
 - Génère une URL SSO sécurisée avec token chiffré
 - Redirige vers le dashboard tenant
 
 **`addAccount()`**
+
 - Simple redirection vers `vendor.register`
 - Permet de créer une nouvelle boutique sans logout
 
 ### VendorRegistrationController.php
 
 **`vendeurIndex()`**
+
 - ✅ Supprimé la vérification de redirection
 - Permet la création de **plusieurs boutiques**
 - Affiche les plans disponibles
@@ -111,6 +116,7 @@ Route::middleware('auth')->prefix('selection-compte')->name('central.account-sel
 ## 🎨 Composants React
 
 ### account-selection.tsx
+
 - **État 1: Avec boutiques**
   - Affiche le profil utilisateur
   - Liste toutes les boutiques
@@ -121,14 +127,17 @@ Route::middleware('auth')->prefix('selection-compte')->name('central.account-sel
   - Bouton "Créer votre boutique"
 
 ### Success.tsx
+
 - ✅ Nouveau: Bouton "Gérer mes boutiques"
 - Redirige vers `/selection-compte`
 
 ## 🔐 Sécurité
 
 ### Authentification SSO Tenant
+
 - Token chiffré avec `Crypt::encryptString()`
 - Données du payload:
+
   ```json
   {
     "user_id": "uuid",
@@ -136,9 +145,11 @@ Route::middleware('auth')->prefix('selection-compte')->name('central.account-sel
     "expires_at": 1234567890
   }
   ```
+
 - Expiration: **5 minutes**
 
 ### Vérifications
+
 - Propriété du tenant (`is_owner=true`)
 - Token valide et non expiré
 - User ID cohérent
@@ -146,6 +157,7 @@ Route::middleware('auth')->prefix('selection-compte')->name('central.account-sel
 ## 🔑 Listeners
 
 ### RedirectVendorAfterLogin.php
+
 - **Change**: Toujours redirige vers `/selection-compte`
 - Pas de logique conditionnelle
 - Même comportement pour users avec/sans boutique
@@ -153,6 +165,7 @@ Route::middleware('auth')->prefix('selection-compte')->name('central.account-sel
 ## 📊 Architecture de données
 
 ### User ↔ Tenant (many-to-many)
+
 ```
 user_tenant table:
 - user_id
@@ -161,6 +174,7 @@ user_tenant table:
 ```
 
 ### Tenant (multi-tenant)
+
 ```
 tenants table (central):
 - id
@@ -184,6 +198,7 @@ tenants table (central):
 ## 🚀 Déploiement
 
 ### Fichiers modifiés
+
 1. `routes/web.php` - Routes account selection
 2. `app/Listeners/RedirectVendorAfterLogin.php` - Middleware redirect
 3. `app/Http/Controllers/central/TenantAccountController.php` - Logique
@@ -192,6 +207,7 @@ tenants table (central):
 6. `resources/js/pages/Vendor/Success.tsx` - Add back link
 
 ### Build & Cache
+
 ```bash
 npm run build
 php artisan cache:clear
@@ -206,4 +222,3 @@ php artisan view:clear
 - [ ] Gestion de collaborateurs
 - [ ] Archivage/suppression de boutique
 - [ ] Switching rapide entre boutiques (menu top)
-
