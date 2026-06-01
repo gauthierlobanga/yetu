@@ -1,64 +1,78 @@
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface OrderSummaryProps {
     subtotal: number;
-    discount: string;
-    delivery: string;
-    total: string;
+    tax: number;
+    shippingCost: number;
+    discount: number;
+    total: number;
 }
+
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'XOF',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(amount);
+};
 
 const OrderSummary = ({
     subtotal,
+    tax,
+    shippingCost,
     discount,
-    delivery,
     total,
 }: OrderSummaryProps) => {
     return (
-        <Card className="shadow-none">
-            <CardContent className="space-y-6">
+        <Card className="shadow-none sticky top-20">
+            <CardContent className="space-y-6 pt-6">
                 <div className="space-y-4">
                     <div className="flex items-center justify-between font-heading text-2xl">
                         <div>Total</div>
-                        <div>{total}</div>
+                        <div>{formatCurrency(total)}</div>
                     </div>
 
                     <div className="space-y-3 border-t border-border pt-4 text-sm">
                         <div className="flex items-center justify-between">
-                            <span className="">Subtotal</span>
+                            <span>Sous-total</span>
+                            <span className="font-medium">{formatCurrency(subtotal)}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <span>Taxes</span>
+                            <span className="font-medium">{formatCurrency(tax)}</span>
+                        </div>
+                        {discount > 0 && (
+                            <div className="flex items-center justify-between">
+                                <span>Réduction</span>
+                                <span className="font-medium text-destructive">
+                                    -{formatCurrency(discount)}
+                                </span>
+                            </div>
+                        )}
+                        <div className="flex items-center justify-between">
+                            <span>Livraison</span>
                             <span className="font-medium">
-                                {Number(subtotal).toFixed(2)}
+                                {shippingCost === 0
+                                    ? 'Gratuit'
+                                    : formatCurrency(shippingCost)}
                             </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="">Discount</span>
-                            <span className="font-medium text-destructive">
-                                -{discount}
-                            </span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                            <span className="">Delivery</span>
-                            <span className="font-medium">{delivery}</span>
                         </div>
                     </div>
                 </div>
 
-                <Button size="lg" className="w-full">
-                    Pay {total}
-                </Button>
-
                 <p className="text-xs leading-relaxed text-muted-foreground">
-                    By placing an order, you're agreeing to our{' '}
+                    En passant une commande, vous acceptez nos{' '}
                     <a href="#" className="underline">
-                        Privacy Policy
+                        Politique de confidentialité
                     </a>
                     ,{' '}
                     <a href="#" className="underline">
-                        Terms and Conditions
+                        Conditions générales
                     </a>{' '}
-                    and{' '}
+                    et{' '}
                     <a href="#" className="underline">
-                        Cancellation policy
+                        Politique d'annulation
                     </a>
                     .
                 </p>

@@ -14,6 +14,17 @@ class Commande extends Model
     use HasFactory, SoftDeletes;
     use HasUuids;
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (! $model->statut) {
+                $model->statut = self::STATUT_EN_ATTENTE;
+            }
+        });
+    }
+
     /**
      * Indique que les clés primaires sont de type string (UUID)
      *
