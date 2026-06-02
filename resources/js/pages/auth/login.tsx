@@ -24,8 +24,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { useTenant } from '@/hooks/useTenant';
 import AuthLayout from '@/layouts/auth-layout';
 import { cn } from '@/lib/utils';
-import { register as centralRegister } from '@/routes/central';
-import { request as centralPasswordRequest } from '@/routes/central/password';
 import { store } from '@/routes/login';
 import { register as tenantRegister } from '@/routes/tenant';
 import { request as tenantPasswordRequest } from '@/routes/tenant/password';
@@ -36,6 +34,11 @@ type Props = {
     canRegister: boolean;
 };
 
+const currentOriginUrl = (path: string) =>
+    typeof window === 'undefined'
+        ? path
+        : new URL(path, window.location.origin).toString();
+
 export default function Login({
     status,
     canResetPassword,
@@ -44,8 +47,10 @@ export default function Login({
     const { isTenant } = useTenant();
     const passwordRequest = isTenant
         ? tenantPasswordRequest()
-        : centralPasswordRequest();
-    const registerLink = (isTenant ? tenantRegister() : centralRegister()).url;
+        : currentOriginUrl('/forgot-password');
+    const registerLink = isTenant
+        ? tenantRegister().url
+        : currentOriginUrl('/register');
 
     // Variantes d'animation
     const containerVariants = {
@@ -59,10 +64,14 @@ export default function Login({
         },
     };
 
-   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
-};
+    const itemVariants: Variants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.4, ease: 'easeOut' },
+        },
+    };
 
     return (
         <AuthLayout
@@ -110,7 +119,10 @@ export default function Login({
                         )}
 
                         {/* Formulaire */}
-                        <motion.div variants={itemVariants} className="space-y-6">
+                        <motion.div
+                            variants={itemVariants}
+                            className="space-y-6"
+                        >
                             {/* Email */}
                             <div className="space-y-2">
                                 <Label
@@ -120,7 +132,7 @@ export default function Login({
                                     Adresse e-mail
                                 </Label>
                                 <div className="relative">
-                                    <Mail className="pointer-events-none absolute left-4 top-1/2 z-10 h-4.5 w-4.5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400" />
+                                    <Mail className="pointer-events-none absolute top-1/2 left-4 z-10 h-4.5 w-4.5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400" />
                                     <Input
                                         id="email"
                                         type="email"
@@ -161,7 +173,7 @@ export default function Login({
                                     )}
                                 </div>
                                 <div className="relative">
-                                    <Lock className="pointer-events-none absolute left-4 top-1/2 z-10 h-4.5 w-4.5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400" />
+                                    <Lock className="pointer-events-none absolute top-1/2 left-4 z-10 h-4.5 w-4.5 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-emerald-600 dark:group-focus-within:text-emerald-400" />
                                     <PasswordInput
                                         id="password"
                                         name="password"
@@ -207,7 +219,7 @@ export default function Login({
                                     'group relative h-12 w-full overflow-hidden rounded-xl',
                                     'bg-linear-to-r from-emerald-600 to-emerald-700',
                                     'text-sm font-semibold text-white',
-                                    'transition-all duration-300 hover:scale-[1.01] ',
+                                    'transition-all duration-300 hover:scale-[1.01]',
                                     'disabled:cursor-not-allowed disabled:opacity-70',
                                     'dark:from-emerald-500 dark:to-emerald-600 dark:shadow-emerald-400/25 dark:hover:shadow-emerald-400/35',
                                 )}
@@ -231,7 +243,10 @@ export default function Login({
                         </motion.div>
 
                         {/* Séparateur */}
-                        <motion.div variants={itemVariants} className="relative">
+                        <motion.div
+                            variants={itemVariants}
+                            className="relative"
+                        >
                             <div className="absolute inset-0 flex items-center">
                                 <div className="w-full border-t border-border" />
                             </div>
@@ -255,8 +270,7 @@ export default function Login({
                             >
                                 {isTenant
                                     ? "Vous n'avez pas encore de compte ?"
-                                    : 'Pas encore de boutique ?'}
-                                {' '}
+                                    : 'Pas encore de boutique ?'}{' '}
                                 <Link
                                     href={registerLink}
                                     tabIndex={5}

@@ -16,31 +16,31 @@ Yetufy est une plateforme e-commerce multi-tenant complète avec:
 
 ### 🚀 Démarrage
 
-| Document | Durée | Audience |
-|----------|-------|----------|
-| **[../README.md](../README.md)** | 10 min | Tout le monde |
-| **[Démarrage Rapide](#démarrage-rapide)** | 5 min | Développeurs |
+| Document                                  | Durée  | Audience      |
+| ----------------------------------------- | ------ | ------------- |
+| **[../README.md](../README.md)**          | 10 min | Tout le monde |
+| **[Démarrage Rapide](#démarrage-rapide)** | 5 min  | Développeurs  |
 
 ### 🔐 Authentification
 
-| Document | Contenu |
-|----------|---------|
-| **SOCIALITE_SETUP.md** | Configuration OAuth détaillée par provider |
-| **SOCIALITE_DEBUGGING.md** | Debugging et tests |
-| **SOCIALITE_ADD_PROVIDERS.md** | Ajouter de nouveaux providers |
-| **SOCIALITE_INDEX.md** | Index complet Socialite |
+| Document                       | Contenu                                    |
+| ------------------------------ | ------------------------------------------ |
+| **SOCIALITE_SETUP.md**         | Configuration OAuth détaillée par provider |
+| **SOCIALITE_DEBUGGING.md**     | Debugging et tests                         |
+| **SOCIALITE_ADD_PROVIDERS.md** | Ajouter de nouveaux providers              |
+| **SOCIALITE_INDEX.md**         | Index complet Socialite                    |
 
 ### 📂 Structure du Projet
 
-| Document | Contenu |
-|----------|---------|
-| **[../app/README.md](../app/README.md)** | Code métier (Models, Services, Controllers) |
-| **[../database/README.md](../database/README.md)** | Migrations, Seeders, Factories |
-| **[../routes/README.md](../routes/README.md)** | Définition des routes |
-| **[../resources/README.md](../resources/README.md)** | Frontend React/Inertia |
-| **[../tests/README.md](../tests/README.md)** | Tests unitaires et d'intégration |
-| **[../config/README.md](../config/README.md)** | Configuration application |
-| **[../storage/README.md](../storage/README.md)** | Logs, Cache, Uploads |
+| Document                                             | Contenu                                     |
+| ---------------------------------------------------- | ------------------------------------------- |
+| **[../app/README.md](../app/README.md)**             | Code métier (Models, Services, Controllers) |
+| **[../database/README.md](../database/README.md)**   | Migrations, Seeders, Factories              |
+| **[../routes/README.md](../routes/README.md)**       | Définition des routes                       |
+| **[../resources/README.md](../resources/README.md)** | Frontend React/Inertia                      |
+| **[../tests/README.md](../tests/README.md)**         | Tests unitaires et d'intégration            |
+| **[../config/README.md](../config/README.md)**       | Configuration application                   |
+| **[../storage/README.md](../storage/README.md)**     | Logs, Cache, Uploads                        |
 
 ## 🚀 Démarrage Rapide
 
@@ -66,9 +66,11 @@ php artisan db:seed
 # 5. Compiler les assets
 npm run build
 
-# 6. Démarrer l'application
-php artisan serve
+# 6. Démarrer l'environnement de développement complet
+composer run dev
 ```
+
+`composer run dev` démarre le serveur Laravel, le worker de queue et Vite. L'application est servie sur `http://localhost:8000`.
 
 ### Premier Administrateur
 
@@ -211,6 +213,9 @@ php artisan test --profile
 ### Commandes Utiles
 
 ```bash
+# Lancer l'environnement de développement
+composer run dev
+
 # Voir les routes
 php artisan route:list
 
@@ -258,16 +263,16 @@ php artisan queue:restart
 
 ## 📊 Statistiques
 
-| Métrique | Valeur |
-|----------|--------|
-| Lignes de code | 50,000+ |
-| Modèles | 15+ |
-| Controllers | 30+ |
-| Services | 20+ |
-| Routes | 100+ |
-| Migrations | 30+ |
-| Tests | 100+ |
-| Documentation | 2000+ lignes |
+| Métrique       | Valeur       |
+| -------------- | ------------ |
+| Lignes de code | 50,000+      |
+| Modèles        | 15+          |
+| Controllers    | 30+          |
+| Services       | 20+          |
+| Routes         | 100+         |
+| Migrations     | 30+          |
+| Tests          | 100+         |
+| Documentation  | 2000+ lignes |
 
 ## 🔗 Ressources Externes
 
@@ -324,12 +329,12 @@ php artisan queue:restart
 
 ### Problèmes Courants
 
-| Problème | Solution |
-|----------|----------|
+| Problème               | Solution                                  |
+| ---------------------- | ----------------------------------------- |
 | "Provider not enabled" | Vérifier `.env` et `config/socialite.php` |
-| Tests échouent | Vérifier la base de données (`:memory:`) |
-| Assets non compilés | Exécuter `npm run build` |
-| Routes non trouvées | Exécuter `php artisan route:cache` |
+| Tests échouent         | Vérifier la base de données (`:memory:`)  |
+| Assets non compilés    | Exécuter `npm run build`                  |
+| Routes non trouvées    | Exécuter `php artisan route:cache`        |
 
 ## 📈 Roadmap
 

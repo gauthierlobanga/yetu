@@ -8,5 +8,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('wishlist:send-reminders --days=0')->everyTenSeconds();
-Schedule::command('visits:clean')->daily();
+Schedule::command('wishlist:send-reminders --days=30')->daily();
+Schedule::command('visitors:clean')->daily();

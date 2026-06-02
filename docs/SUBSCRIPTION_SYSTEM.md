@@ -7,6 +7,7 @@ Complete implementation of subscription management for Yetu with Stripe integrat
 The subscription system implements a complete lifecycle for vendor subscriptions:
 
 ### Flow for Free Plans
+
 1. User registers with free plan → initiateRegistration()
 2. VendorRequest status = PENDING (auto-approved by admin)
 3. Admin approves → approve() → Subscription created with status='active'
@@ -14,6 +15,7 @@ The subscription system implements a complete lifecycle for vendor subscriptions
 5. Full access granted immediately
 
 ### Flow for Paid Plans
+
 1. User registers with paid plan → initiateRegistration()
 2. VendorRequest status = PAYMENT_PENDING
 3. Redirect to Stripe Checkout
@@ -24,6 +26,7 @@ The subscription system implements a complete lifecycle for vendor subscriptions
 8. Trial period begins (default 14 days)
 
 ### After Trial/Subscription Expiration
+
 1. Subscription status becomes 'expired' after trial_ends_at
 2. Grace period begins (14 days) - user warned but can still access
 3. After grace_period_ends_at → Subscription marked as is_blocked=true
@@ -33,6 +36,7 @@ The subscription system implements a complete lifecycle for vendor subscriptions
 ## Database Models
 
 ### Subscription
+
 - **tenant_id** (string FK): Links to tenant
 - **user_id** (UUID FK): Subscription owner
 - **plan_id** (UUID FK): Selected plan
@@ -46,6 +50,7 @@ The subscription system implements a complete lifecycle for vendor subscriptions
 - **canceled_at** / **cancellation_reason**: Cancellation info
 
 ### Invoice
+
 - **subscription_id** (FK): Related subscription
 - **stripe_invoice_id**: Stripe reference
 - **number**: Auto-generated invoice number
@@ -55,6 +60,7 @@ The subscription system implements a complete lifecycle for vendor subscriptions
 - **pdf_url**: Stripe hosted PDF link
 
 ### PaymentAttempt
+
 - **subscription_id** (FK): Related subscription
 - **stripe_charge_id**: Stripe reference
 - **status**: 'succeeded', 'failed', 'disputed'
@@ -66,6 +72,7 @@ The subscription system implements a complete lifecycle for vendor subscriptions
 ## Services
 
 ### SubscriptionService
+
 Main service handling all subscription operations:
 
 ```php
@@ -101,24 +108,41 @@ handleChargeFailed($stripeCharge): void
 ```
 
 ### VendorRegistrationService (Updated)
+
 Enhanced to create subscriptions automatically after approval.
 
 **Changes:**
+
 - Now injects SubscriptionService
 - approve() calls SubscriptionService::createSubscription()
 - Subscriptions created for both free and paid plans
 
 ### PaymentService (Updated)
+
 Enhanced to trigger subscription creation after payment.
 
 **Changes:**
-- Now injects VendorRegistrationService
+
+- Resolves VendorRegistrationService lazily when payment completion needs it
 - handleCheckoutCompleted() calls VendorRegistrationService::approve()
 - Full subscription created immediately after payment success
+
+### Dependency Notes
+
+Avoid constructor cycles between services. In particular, keep this graph acyclic:
+
+```text
+VendorRegistrationService -> SubscriptionService
+PaymentService -> VendorRegistrationService (lazy resolution only)
+SubscriptionService -> no PaymentService dependency
+```
+
+Console commands should inject business services in `handle()` instead of the constructor when possible. This lets Artisan list and boot commands without resolving the whole application service graph.
 
 ## Controllers
 
 ### Tenant/SubscriptionController
+
 Manages tenant subscriptions:
 
 - **show()**: Display subscription status, plan details, and invoices
@@ -130,6 +154,7 @@ Manages tenant subscriptions:
 - **invoices()**: Paginated invoice history
 
 ### Admin/SubscriptionController
+
 Manages all subscriptions (admin only):
 
 - **index()**: List all subscriptions with filters (status, blocked, plan, search)
@@ -145,6 +170,7 @@ Manages all subscriptions (admin only):
 ## Middlewares
 
 ### EnsureTenantSubscription
+
 Protects tenant routes from expired/invalid subscriptions:
 
 - Allows active subscriptions through
@@ -153,6 +179,7 @@ Protects tenant routes from expired/invalid subscriptions:
 - Redirects to `tenant.subscription.expired` if blocked
 
 ### CheckTenantAccess
+
 Checks if tenant or subscription is blocked:
 
 - Denies if subscription `is_blocked = true`
@@ -181,6 +208,7 @@ All queued for async delivery via mail and database:
 ## Commands & Jobs
 
 ### CheckSubscriptionsCommand
+
 ```bash
 php artisan subscriptions:check          # Just block expired
 php artisan subscriptions:check --notify # Block + send warnings
@@ -189,14 +217,17 @@ php artisan subscriptions:check --notify # Block + send warnings
 Checks and blocks expired subscriptions. Runs daily via scheduler.
 
 ### RenewSubscriptionJob
+
 Renews individual subscription when dispatched. Checks auto_renewal flag, sends notification, retries on failure.
 
 ### NotifyExpiringSubscriptionsJob
+
 Sends expiration warnings for subscriptions expiring within 7 days. Runs daily via scheduler.
 
 ## Routes
 
 ### Tenant Routes (authenticated users)
+
 ```
 GET    /subscription              - Show subscription status
 POST   /subscription/upgrade      - Upgrade plan
@@ -208,6 +239,7 @@ GET    /subscription/invoices     - View invoices
 ```
 
 ### Admin Routes
+
 ```
 GET    /admin/subscriptions                             - List subscriptions
 GET    /admin/subscriptions/{subscription}              - View details
@@ -221,6 +253,7 @@ POST   /admin/subscriptions/batch/sync-stripe           - Sync with Stripe
 ```
 
 ### Central Routes (existing)
+
 ```
 GET    /devenir-vendeur                  - Choose plan
 GET    /devenir-vendeur/configurer       - Configure shop
@@ -234,6 +267,7 @@ POST   /stripe/webhook                   - Stripe webhook
 ## Configuration
 
 ### .env Settings
+
 ```
 STRIPE_PUBLIC_KEY=pk_...
 STRIPE_SECRET_KEY=sk_...
@@ -243,6 +277,7 @@ QUEUE_CONNECTION=database  # For notifications
 ```
 
 ### Scheduler (Kernel.php)
+
 ```php
 $schedule->command('subscriptions:check --notify')
     ->daily()
@@ -256,30 +291,36 @@ $schedule->job(new NotifyExpiringSubscriptionsJob)
 ## Key Features
 
 ### Trial System
+
 - Free plans: Active immediately, no trial
 - Paid plans: Trial period (configurable per plan, default 14 days)
 - Trial status: `stripe_status = 'trialing'`
 - Trial end triggers grace period
 
 ### Grace Period
+
 - Default: 14 days after trial/subscription expiration
 - User gets warning but can still access shop
 - After grace period ends → Complete block via middleware
 - Admin can extend grace period manually (max 90 days)
 
 ### Blocking Logic
+
 **Soft Block (During Grace Period):**
+
 - User warned via notification
 - Warning displayed in UI
 - Full access maintained
 
 **Hard Block (After Grace Period):**
+
 - `is_blocked = true` set on Subscription
 - CheckTenantAccess middleware denies all requests
 - User redirected to blocked page
 - Cannot access dashboard/products/orders
 
 ### Auto-Renewal
+
 - Enabled by default
 - Only renews if `auto_renewal = true` and payment succeeds
 - Triggered by Stripe webhooks or RenewSubscriptionJob
@@ -288,23 +329,23 @@ $schedule->job(new NotifyExpiringSubscriptionsJob)
 ## Security Considerations
 
 1. **Access Control**
-   - Both EnsureTenantSubscription and CheckTenantAccess protect routes
-   - subscription() middleware relationship ensures tenant isolation
+    - Both EnsureTenantSubscription and CheckTenantAccess protect routes
+    - subscription() middleware relationship ensures tenant isolation
 
 2. **Payment Verification**
-   - Stripe webhooks used as source of truth
-   - Session-based verification as fallback
-   - All payments logged with retry count
+    - Stripe webhooks used as source of truth
+    - Session-based verification as fallback
+    - All payments logged with retry count
 
 3. **Grace Period**
-   - Prevents sudden access loss
-   - Sends multiple warnings before blocking
-   - Admin can extend for special cases
+    - Prevents sudden access loss
+    - Sends multiple warnings before blocking
+    - Admin can extend for special cases
 
 4. **Webhook Validation**
-   - Stripe signature verification required
-   - Stripe API key from config (not secrets file)
-   - All webhook events logged
+    - Stripe signature verification required
+    - Stripe API key from config (not secrets file)
+    - All webhook events logged
 
 ## Testing Checklist
 
@@ -330,21 +371,25 @@ $schedule->job(new NotifyExpiringSubscriptionsJob)
 ## Troubleshooting
 
 **Subscription not created after payment**
+
 - Check PaymentService::handleCheckoutCompleted() is called
 - Check webhook logs for Stripe events
-- Verify PaymentService has VendorRegistrationService injected
+- Verify PaymentService can resolve VendorRegistrationService from the container
 
 **User blocked unexpectedly**
+
 - Check if grace_period_ends_at has passed
 - Check if is_blocked flag was set manually
 - Review CheckTenantAccess middleware logic
 
 **Payment failures not recorded**
+
 - Check PaymentAttempt model for stripe_charge_id
 - Verify webhook received charge.failed event
 - Check SubscriptionService::handleChargeFailed()
 
 **Grace period not working**
+
 - Verify grace_period_ends_at is set to now()->addDays(14)
 - Check middleware order: EnsureTenantSubscription must run
 - Verify isGracePeriodActive() method logic

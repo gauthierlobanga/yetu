@@ -55,9 +55,12 @@ npm install
 # 7. Compiler les assets
 npm run build
 
-# 8. Démarrer le serveur de développement
-php artisan serve
+# 8. Démarrer l'environnement de développement complet
+composer run dev
 ```
+
+`composer run dev` lance `php artisan serve`, `php artisan queue:work` et `npm run dev`.
+L'application locale est disponible sur `http://localhost:8000`.
 
 ### Configuration Initiale
 
@@ -74,6 +77,17 @@ php artisan tinker
 # Accéder à l'admin panel
 # http://localhost:8000/admin
 ```
+
+### Dépannage mémoire en développement
+
+Si PHP affiche `Allowed memory size exhausted` pendant `composer run dev`, commencez par vérifier que les commandes Artisan démarrent avec une limite basse:
+
+```bash
+php -d memory_limit=256M artisan list
+php -d memory_limit=256M artisan wayfinder:generate --with-form
+```
+
+Une commande Artisan qui injecte un service trop lourd dans son constructeur peut forcer Laravel à résoudre une chaîne complète au démarrage. Les commandes doivent préférer l'injection dans `handle()` et les services doivent éviter les dépendances circulaires. Le script de développement utilise `queue:work --sleep=3` plutôt que `queue:listen` pour éviter de redémarrer tout le framework en boucle.
 
 ## 📁 Structure du Projet
 
@@ -142,34 +156,34 @@ yetu/
 
 ### Backend
 
-| Outil | Version | Usage |
-|-------|---------|-------|
-| Laravel | 13.0 | Framework principal |
-| PHP | 8.3+ | Langage serveur |
-| PostgreSQL | Latest | Base de données |
-| Inertia.js | 1.0 | Bridge React-Laravel |
-| Filament | 5.0 | Panel d'administration |
-| Socialite | 5.26 | Authentification sociale |
+| Outil      | Version | Usage                    |
+| ---------- | ------- | ------------------------ |
+| Laravel    | 13.0    | Framework principal      |
+| PHP        | 8.3+    | Langage serveur          |
+| PostgreSQL | Latest  | Base de données          |
+| Inertia.js | 1.0     | Bridge React-Laravel     |
+| Filament   | 5.0     | Panel d'administration   |
+| Socialite  | 5.26    | Authentification sociale |
 
 ### Frontend
 
-| Outil | Version | Usage |
-|-------|---------|-------|
-| React | 18+ | Framework UI |
-| TypeScript | Latest | Typage |
-| Tailwind CSS | 3.0 | Styling |
-| Vite | Latest | Bundler |
-| Lucide React | Latest | Icônes |
+| Outil        | Version | Usage        |
+| ------------ | ------- | ------------ |
+| React        | 18+     | Framework UI |
+| TypeScript   | Latest  | Typage       |
+| Tailwind CSS | 3.0     | Styling      |
+| Vite         | Latest  | Bundler      |
+| Lucide React | Latest  | Icônes       |
 
 ### Services
 
-| Service | Usage |
-|---------|-------|
-| Stripe | Paiements |
+| Service       | Usage                    |
+| ------------- | ------------------------ |
+| Stripe        | Paiements                |
 | Pusher/Reverb | Notifications temps réel |
-| AWS S3 | Stockage de fichiers |
-| Laravel Scout | Recherche |
-| Redis | Cache/Queue |
+| AWS S3        | Stockage de fichiers     |
+| Laravel Scout | Recherche                |
+| Redis         | Cache/Queue              |
 
 ## 🔑 Fonctionnalités Clés
 

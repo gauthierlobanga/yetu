@@ -12,24 +12,18 @@ class CheckSubscriptionsCommand extends Command
 
     protected $description = 'Check and block expired subscriptions, optionally send notifications';
 
-    public function __construct(
-        private readonly SubscriptionService $subscriptionService
-    ) {
-        parent::__construct();
-    }
-
-    public function handle()
+    public function handle(SubscriptionService $subscriptionService)
     {
         $this->info('Checking subscriptions...');
 
         try {
             // Block expired subscriptions
-            $blocked = $this->subscriptionService->blockExpiredSubscriptions();
+            $blocked = $subscriptionService->blockExpiredSubscriptions();
             $this->info("Blocked {$blocked->count()} expired subscription(s).");
 
             // Optionally send notifications for expiring subscriptions
             if ($this->option('notify')) {
-                $notified = $this->subscriptionService->notifyExpiringSubscriptions();
+                $notified = $subscriptionService->notifyExpiringSubscriptions();
                 $this->info("Notified {$notified->count()} user(s) of expiring subscriptions.");
             }
 

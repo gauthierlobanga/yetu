@@ -172,7 +172,7 @@ class Subscription extends Model
     /**
      * Annuler la subscription
      */
-    public function cancel(string $reason = null): self
+    public function cancel(?string $reason = null): self
     {
         $this->update([
             'stripe_status' => 'canceled',
@@ -265,7 +265,7 @@ class Subscription extends Model
     /**
      * Ajouter une tentative de paiement échoué au historique
      */
-    public function recordFailedPayment(string $reason, string $chargeId = null): void
+    public function recordFailedPayment(string $reason, ?string $chargeId = null): void
     {
         $history = $this->payment_history ?? [];
         $history[] = [

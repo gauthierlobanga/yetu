@@ -14,17 +14,10 @@ use Stripe\Subscription as StripeSubscription;
 
 class SubscriptionService
 {
-    protected PaymentService $paymentService;
-
-    public function __construct(PaymentService $paymentService)
-    {
-        $this->paymentService = $paymentService;
-    }
-
     /**
      * Créer une subscription pour un tenant
      */
-    public function createSubscription(Tenant $tenant, Plan $plan, User $user = null): Subscription
+    public function createSubscription(Tenant $tenant, Plan $plan, ?User $user = null): Subscription
     {
         $user = $user ?? $tenant->users()->where('is_owner', true)->first();
 
@@ -80,7 +73,7 @@ class SubscriptionService
     /**
      * Annuler une subscription
      */
-    public function cancelSubscription(Subscription $subscription, string $reason = null): Subscription
+    public function cancelSubscription(Subscription $subscription, ?string $reason = null): Subscription
     {
         $subscription->update([
             'stripe_status' => 'canceled',
@@ -366,7 +359,7 @@ class SubscriptionService
     /**
      * Obtenir une subscription à partir d'un client Stripe
      */
-    protected function getSubscriptionFromCharge(string $customerId = null): ?Subscription
+    protected function getSubscriptionFromCharge(?string $customerId = null): ?Subscription
     {
         if (!$customerId) {
             return null;
