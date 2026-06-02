@@ -592,6 +592,73 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         return 'Organisation';
     }
 
+    /**
+     * Récupère le thème actuel du tenant
+     */
+    public function theme(): ?array
+    {
+        return $this->getConfiguration('theme');
+    }
+
+    /**
+     * Met à jour le thème du tenant
+     */
+    public function updateTheme(array $theme): void
+    {
+        $this->setConfiguration('theme', $theme);
+        $this->save();
+    }
+
+    /**
+     * Récupère le thème par défaut
+     */
+    public static function getThemeDefaults(): array
+    {
+        return [
+            'preset' => 'modern_emerald',
+            'colors' => [
+                '--background' => '0 0% 100%',
+                '--foreground' => '215 16% 47%',
+                '--card' => '0 0% 100%',
+                '--card-foreground' => '215 16% 47%',
+                '--popover' => '0 0% 100%',
+                '--popover-foreground' => '215 16% 47%',
+                '--primary' => '142 76% 36%',
+                '--primary-foreground' => '0 0% 100%',
+                '--secondary' => '215 16% 91%',
+                '--secondary-foreground' => '215 16% 47%',
+                '--muted' => '215 16% 80%',
+                '--muted-foreground' => '215 16% 47%',
+                '--accent' => '142 76% 85%',
+                '--accent-foreground' => '142 76% 36%',
+                '--destructive' => '0 84% 60%',
+                '--destructive-foreground' => '0 0% 100%',
+                '--border' => '215 16% 47%',
+                '--input' => '215 16% 47%',
+                '--ring' => '142 76% 36%',
+            ],
+            'typography' => [
+                'font_family' => 'Inter',
+                'heading_size' => '1.25',
+                'body_size' => '1',
+                'line_height' => '1.5',
+            ],
+            'spacing' => [
+                'radius_sm' => '0.375rem',
+                'radius_md' => '0.5rem',
+                'radius_lg' => '1rem',
+            ],
+        ];
+    }
+
+    /**
+     * Réinitialise le thème au thème par défaut
+     */
+    public function resetTheme(): void
+    {
+        $this->updateTheme(self::getThemeDefaults());
+    }
+
     protected static function booted(): void
     {
         static::creating(function (Tenant $tenant) {

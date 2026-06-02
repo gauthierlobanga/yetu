@@ -140,7 +140,7 @@ class VendorDashboardController extends Controller
 
         return Inertia::render('Vendor/Dashboard', [
             'tenant' => $tenantProps->getTenantProps($tenant),
-            'theme' => $tenant->theme,
+            'theme' => $tenant->theme(),
             'stats' => $stats,
             'trial' => $trial,
             'recentProducts' => $recentProducts,

@@ -17,7 +17,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { CanRole } from '@/core/permissions/Can';
 import AppearanceToogle from './appearance-toogle';
 import { NotificationsDropdown } from './layouts/header/NotificationsDropdown';
-import ThemeCustomizer from './Themes/ThemeSettingsSheet';
+import ShopThemeCustomizer from './Themes/ShopThemeCustomizer';
 
 export function SiteHeader() {
     const {
@@ -98,7 +98,7 @@ export function SiteHeader() {
 
                     <AppearanceToogle />
 
-                    {isTenant && <ThemeCustomizer />}
+                    {isTenant && <ShopThemeCustomizer />}
 
                     {user && (
                         <DropdownMenu>

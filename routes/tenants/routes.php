@@ -41,7 +41,7 @@ use App\Http\Controllers\Vendor\TenantProductController;
 use App\Http\Controllers\Vendor\VendorDashboardController;
 use App\Http\Controllers\vendor\VendorSettingsController;
 use App\Http\Controllers\Vendor\VendorStatisticsController;
-use App\Http\Controllers\Vendor\VendorThemeController;
+use App\Http\Controllers\Vendor\ShopThemeController;
 use App\Http\Controllers\Vendor\VisitorAnalyticsController;
 use App\Http\Controllers\Vendor\VisitorStatsController;
 use App\Models\Visit;
@@ -193,11 +193,17 @@ Route::middleware([
         Route::get('/statistiques', [VendorStatisticsController::class, 'index'])
             ->name('vendor.statistics');
 
-        Route::get('/api/theme', [VendorThemeController::class, 'show'])
-            ->name('vendor.theme.show');
-
-        Route::post('/api/theme', [VendorThemeController::class, 'update'])
-            ->name('vendor.theme.update');
+        Route::prefix('api/theme')->name('shop.theme.')->group(function () {
+            Route::get('/', [ShopThemeController::class, 'show'])->name('show');
+            Route::post('/', [ShopThemeController::class, 'update'])->name('update');
+            Route::post('/preset/{preset}', [ShopThemeController::class, 'applyPreset'])->name('preset');
+            Route::post('/revert/{version}', [ShopThemeController::class, 'revert'])->name('revert');
+            Route::get('/export', [ShopThemeController::class, 'export'])->name('export');
+            Route::post('/import', [ShopThemeController::class, 'import'])->name('import');
+            Route::post('/compare', [ShopThemeController::class, 'compare'])->name('compare');
+            Route::get('/history', [ShopThemeController::class, 'history'])->name('history');
+            Route::post('/reset', [ShopThemeController::class, 'reset'])->name('reset');
+        });
 
         Route::get('/products', [TenantProductController::class, 'index'])->name('dashboard.products.index');
 
