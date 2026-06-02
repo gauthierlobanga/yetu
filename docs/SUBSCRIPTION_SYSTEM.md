@@ -123,21 +123,9 @@ Enhanced to trigger subscription creation after payment.
 
 **Changes:**
 
-- Resolves VendorRegistrationService lazily when payment completion needs it
+- Now injects VendorRegistrationService
 - handleCheckoutCompleted() calls VendorRegistrationService::approve()
 - Full subscription created immediately after payment success
-
-### Dependency Notes
-
-Avoid constructor cycles between services. In particular, keep this graph acyclic:
-
-```text
-VendorRegistrationService -> SubscriptionService
-PaymentService -> VendorRegistrationService (lazy resolution only)
-SubscriptionService -> no PaymentService dependency
-```
-
-Console commands should inject business services in `handle()` instead of the constructor when possible. This lets Artisan list and boot commands without resolving the whole application service graph.
 
 ## Controllers
 
@@ -329,23 +317,23 @@ $schedule->job(new NotifyExpiringSubscriptionsJob)
 ## Security Considerations
 
 1. **Access Control**
-    - Both EnsureTenantSubscription and CheckTenantAccess protect routes
-    - subscription() middleware relationship ensures tenant isolation
+   - Both EnsureTenantSubscription and CheckTenantAccess protect routes
+   - subscription() middleware relationship ensures tenant isolation
 
 2. **Payment Verification**
-    - Stripe webhooks used as source of truth
-    - Session-based verification as fallback
-    - All payments logged with retry count
+   - Stripe webhooks used as source of truth
+   - Session-based verification as fallback
+   - All payments logged with retry count
 
 3. **Grace Period**
-    - Prevents sudden access loss
-    - Sends multiple warnings before blocking
-    - Admin can extend for special cases
+   - Prevents sudden access loss
+   - Sends multiple warnings before blocking
+   - Admin can extend for special cases
 
 4. **Webhook Validation**
-    - Stripe signature verification required
-    - Stripe API key from config (not secrets file)
-    - All webhook events logged
+   - Stripe signature verification required
+   - Stripe API key from config (not secrets file)
+   - All webhook events logged
 
 ## Testing Checklist
 
@@ -374,7 +362,7 @@ $schedule->job(new NotifyExpiringSubscriptionsJob)
 
 - Check PaymentService::handleCheckoutCompleted() is called
 - Check webhook logs for Stripe events
-- Verify PaymentService can resolve VendorRegistrationService from the container
+- Verify PaymentService has VendorRegistrationService injected
 
 **User blocked unexpectedly**
 

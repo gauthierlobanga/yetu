@@ -47,6 +47,7 @@ use App\Http\Controllers\Vendor\VisitorStatsController;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -173,7 +174,9 @@ Route::middleware([
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('tenant/settings/profile', [ParametresController::class, 'destroy'])->name('tenant.profile.destroy');
+
         Route::get('tenant/settings/security', [ParametresSecurityController::class, 'edit'])->name('tenant.security.edit');
+
         Route::put('tenant/settings/password', [ParametresSecurityController::class, 'update'])
             ->middleware('throttle:6,1')
             ->name('tenant.user-password.update');
@@ -197,6 +200,7 @@ Route::middleware([
             ->name('vendor.theme.update');
 
         Route::get('/products', [TenantProductController::class, 'index'])->name('dashboard.products.index');
+
         Route::get('/vendor/stats/visitors', [VisitorStatsController::class, 'index'])->name('vendor.stats.visitors');
     });
 

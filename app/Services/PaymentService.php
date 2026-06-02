@@ -12,8 +12,11 @@ use Stripe\Webhook;
 
 class PaymentService
 {
-    public function __construct()
+    protected VendorRegistrationService $vendorRegistrationService;
+
+    public function __construct(VendorRegistrationService $vendorRegistrationService)
     {
+        $this->vendorRegistrationService = $vendorRegistrationService;
         Stripe::setApiKey(config('services.stripe.secret'));
     }
 
@@ -140,7 +143,7 @@ class PaymentService
             ]);
 
             // Approuver la demande de vendeur et créer le tenant + subscription
-            app(VendorRegistrationService::class)->approve($vendorRequest);
+            $this->vendorRegistrationService->approve($vendorRequest);
 
             Log::info('Vendor payment completed and approved', [
                 'vendor_request_id' => $vendorRequest->id,

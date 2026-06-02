@@ -25,6 +25,7 @@ php artisan test --env=testing --coverage
 **Scenario: Free plan → Immediate access**
 
 Steps:
+
 1. Go to `/devenir-vendeur`
 2. Select "Gratuit" (free) plan
 3. Fill configuration form (shop name, slug, etc.)
@@ -40,6 +41,7 @@ Steps:
 13. ✓ subscription.trial_ends_at = NULL
 
 **Expected Database State:**
+
 ```
 Subscription:
   - stripe_status = 'active'
@@ -64,6 +66,7 @@ Tenant:
 **Scenario: Paid plan → Checkout → Payment → Subscription with trial**
 
 Steps:
+
 1. Go to `/devenir-vendeur`
 2. Select "Pro" (paid) plan (e.g., 5000 CDF)
 3. Fill configuration form
@@ -91,6 +94,7 @@ Steps:
 21. ✓ User has full access
 
 **Expected Database State:**
+
 ```
 Subscription:
   - stripe_status = 'trialing'
@@ -120,9 +124,11 @@ Tenant:
 **Scenario: Trial expires but grace period active**
 
 Prerequisites:
+
 - Subscription with trial_ends_at = 5 days ago
 
 Steps:
+
 1. Run `php artisan subscriptions:check`
 2. ✓ Subscription NOT blocked yet (grace period active)
 3. ✓ User still has full dashboard access
@@ -136,6 +142,7 @@ Steps:
    - is_blocked = false
 
 **Verification Commands:**
+
 ```bash
 # Check middleware allows access during grace
 php artisan tinker
@@ -152,9 +159,11 @@ php artisan tinker
 **Scenario: Grace period ends, access completely blocked**
 
 Prerequisites:
+
 - Subscription with grace_period_ends_at = 1 day ago
 
 Steps:
+
 1. Run `php artisan subscriptions:check --notify`
 2. ✓ Subscription marked as blocked:
    - is_blocked = true
@@ -167,6 +176,7 @@ Steps:
 9. ✓ Can still view public shop (if not behind auth)
 
 **Verification Commands:**
+
 ```bash
 # Check blocking logic
 php artisan tinker
@@ -187,6 +197,7 @@ curl -H "Cookie: LARAVEL_SESSION=..." http://tenant.localhost/vendor/dashboard
 **Scenario: Admin blocks tenant for policy violation**
 
 Steps:
+
 1. Login as admin
 2. Go to `/admin/subscriptions`
 3. ✓ See list of all subscriptions
@@ -199,6 +210,7 @@ Steps:
 10. ✓ Admin can view blocking reason in subscription details
 
 **Expected State:**
+
 ```
 Subscription:
   - is_blocked = true
@@ -215,6 +227,7 @@ Event:
 **Scenario: Admin restores blocked subscription**
 
 Steps:
+
 1. Admin goes to blocked subscription details
 2. Click "Unblock subscription" button
 3. ✓ Subscription.is_blocked = false
@@ -230,10 +243,12 @@ Steps:
 **Scenario: User upgrades from Starter to Pro**
 
 Prerequisites:
+
 - Active subscription on "Starter" plan (1000 CDF/month)
 - User viewing /subscription page
 
 Steps:
+
 1. Click "Change plan" button
 2. ✓ Shown available plans (excluding current plan)
 3. Select "Pro" plan (5000 CDF/month)
@@ -248,6 +263,7 @@ Steps:
 12. ✓ Price shown as new price
 
 **Expected State:**
+
 ```
 Subscription:
   - plan_id = <pro_plan_id>
@@ -261,6 +277,7 @@ Subscription:
 **Scenario: User downgrades from Pro to Starter**
 
 Steps:
+
 1. From /subscription, click "Change plan"
 2. Select lower-tier plan
 3. Confirm downgrade
@@ -276,6 +293,7 @@ Steps:
 **Scenario: User cancels subscription**
 
 Steps:
+
 1. Click "Cancel subscription" button on /subscription
 2. Modal appears asking confirmation
 3. Optionally enter cancellation reason
@@ -293,6 +311,7 @@ Steps:
 11. ✓ User receives notification email
 
 **Behavior After Cancel:**
+
 - Days 1-14 (Grace): Full access, warning shown
 - Day 15+: Complete block via middleware
 
@@ -303,12 +322,14 @@ Steps:
 **Scenario: User pauses then resumes subscription**
 
 Steps - Pause:
+
 1. Click "Pause subscription"
 2. ✓ Subscription.stripe_status = 'paused'
 3. ✓ No charge during pause
 4. ✓ Access continues
 
 Steps - Resume:
+
 1. Click "Resume subscription"
 2. ✓ Subscription.stripe_status = 'active'
 3. ✓ Billing resumes
@@ -321,9 +342,11 @@ Steps - Resume:
 **Scenario: Invoice created and available**
 
 Prerequisites:
+
 - Active paid subscription
 
 Steps:
+
 1. Subscription enters active billing period
 2. Stripe creates invoice automatically
 3. Webhook received: `invoice.created`
@@ -338,6 +361,7 @@ Steps:
 9. ✓ invoice.pdf_url = valid URL
 
 **Invoice Lifecycle:**
+
 ```
 draft (just created) → open (awaiting payment) → paid (payment received)
 ```
@@ -349,6 +373,7 @@ draft (just created) → open (awaiting payment) → paid (payment received)
 **Scenario: Payment fails, system handles it**
 
 Steps:
+
 1. Subscription configured with declined payment method
 2. Billing date arrives
 3. Stripe attempts payment
@@ -370,6 +395,7 @@ Steps:
 **Scenario: Admin views and manages subscriptions**
 
 Steps:
+
 1. Admin goes to `/admin/subscriptions`
 2. ✓ Sees paginated list of ALL subscriptions
 3. ✓ Can filter by:
@@ -402,6 +428,7 @@ Steps:
 **Scenario: Check database state after each operation**
 
 Commands to verify:
+
 ```bash
 php artisan tinker
 
@@ -703,15 +730,18 @@ Expected performance metrics:
 ## Troubleshooting Test Failures
 
 **Webhook not processing:**
+
 - Check STRIPE_WEBHOOK_SECRET in .env
 - Verify webhook signature validation
 
 **Subscription not transitioning to blocked:**
+
 - Check grace_period_ends_at is in the past
 - Verify CheckSubscriptionsCommand runs
 - Check middleware is applied to route
 
 **Invoice not appearing:**
+
 - Verify stripe_subscription_id is set
 - Check invoice.created webhook received
 - Look at payment_history JSON field

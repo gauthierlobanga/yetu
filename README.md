@@ -26,7 +26,7 @@ Yetufy est une plateforme e-commerce avancée qui permet aux vendeurs de gérer 
 
 - PHP 8.3+
 - Node.js 18+
-- PostgreSQL/MySQL/SQLite
+- PostgreSQL
 - Composer
 - npm
 
@@ -161,7 +161,7 @@ yetu/
 | Laravel    | 13.0    | Framework principal      |
 | PHP        | 8.3+    | Langage serveur          |
 | PostgreSQL | Latest  | Base de données          |
-| Inertia.js | 1.0     | Bridge React-Laravel     |
+| Inertia.js | 3.0     | Bridge React-Laravel     |
 | Filament   | 5.0     | Panel d'administration   |
 | Socialite  | 5.26    | Authentification sociale |
 
@@ -171,7 +171,7 @@ yetu/
 | ------------ | ------- | ------------ |
 | React        | 18+     | Framework UI |
 | TypeScript   | Latest  | Typage       |
-| Tailwind CSS | 3.0     | Styling      |
+| Tailwind CSS | 4.0     | Styling      |
 | Vite         | Latest  | Bundler      |
 | Lucide React | Latest  | Icônes       |
 
