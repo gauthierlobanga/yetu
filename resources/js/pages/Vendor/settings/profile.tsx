@@ -2,7 +2,7 @@ import { Transition } from '@headlessui/react';
 import { Form, Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Camera, Mail, Phone, MapPin, Globe, ShoppingBag, Settings2, Lock, AlertCircle, CheckCircle2, Copy } from 'lucide-react';
+import { Camera, Mail, Phone, MapPin, Globe, ShoppingBag, Settings2, Lock, AlertCircle, CheckCircle2, Copy, User } from 'lucide-react';
 import { toast } from 'sonner';
 import ParametresController from '@/actions/App/Http/Controllers/Vendor/Settings/ParametresController';
 import InputError from '@/components/input-error';
@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { VendorSidebar } from '@/components/VendorSidebar';
 import SettingsLayout from '@/layouts/Vendor/settings/layout';
@@ -33,9 +34,10 @@ export default function VendorProfile({
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [copiedUrl, setCopiedUrl] = useState(false);
+    const [activeTab, setActiveTab] = useState('personal');
 
     const user = auth?.user;
-    const initials = user?.name
+    const userInitials = user?.name
         ? user.name
               .split(' ')
               .map((n: string) => n[0])
@@ -90,305 +92,396 @@ export default function VendorProfile({
                             <div>
                                 <Heading
                                     variant="small"
-                                    title="Profil de la boutique"
-                                    description="Gérez vos informations professionnelles et les détails de votre boutique"
+                                    title="Profil"
+                                    description="Gérez votre profil personnel et les détails de votre boutique"
                                 />
                             </div>
                         </motion.div>
 
-                        {/* Carte principale - Logo et infos shop */}
-                        <Card className="border-emerald-200/50 dark:border-emerald-900/20 overflow-hidden">
-                            <div className="h-32 bg-gradient-to-r from-emerald-50 via-emerald-100/50 to-white dark:from-emerald-950/40 dark:via-emerald-900/20 dark:to-slate-900" />
+                        {/* Onglets */}
+                        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                            <TabsList className="grid w-full max-w-md grid-cols-2">
+                                <TabsTrigger value="personal" className="flex items-center gap-2">
+                                    <User className="h-4 w-4" />
+                                    Profil personnel
+                                </TabsTrigger>
+                                <TabsTrigger value="shop" className="flex items-center gap-2">
+                                    <ShoppingBag className="h-4 w-4" />
+                                    Ma boutique
+                                </TabsTrigger>
+                            </TabsList>
 
-                            <CardContent className="pt-6">
-                                <div className="flex gap-8 items-start">
-                                    {/* Logo */}
-                                    <div className="relative -mt-20">
-                                        <Avatar className="h-40 w-40 border-4 border-white dark:border-slate-900 shadow-xl">
-                                            <AvatarImage src={previewUrl || tenant.logo_url} />
-                                            <AvatarFallback className="text-3xl font-bold bg-emerald-500 text-white">
-                                                {tenant.raison_sociale[0]}
-                                            </AvatarFallback>
-                                        </Avatar>
+                            {/* Onglet: Profil personnel */}
+                            <TabsContent value="personal" className="space-y-6">
+                                {/* Carte avec avatar */}
+                                <Card className="border-emerald-200/50 dark:border-emerald-900/20 overflow-hidden">
+                                    <div className="h-24 bg-gradient-to-r from-blue-50 via-blue-100/50 to-white dark:from-blue-950/40 dark:via-blue-900/20 dark:to-slate-900" />
 
-                                        <label className="absolute bottom-2 right-2 cursor-pointer">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                className="hidden"
-                                                onChange={handleAvatarChange}
-                                            />
-                                            <motion.div
-                                                whileHover={{ scale: 1.1 }}
-                                                whileTap={{ scale: 0.95 }}
-                                                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full p-3 shadow-lg transition-colors"
-                                            >
-                                                <Camera className="h-5 w-5" />
-                                            </motion.div>
-                                        </label>
-                                    </div>
+                                    <CardContent className="pt-6">
+                                        <div className="flex gap-6 items-start">
+                                            {/* Avatar utilisateur */}
+                                            <div className="relative -mt-16">
+                                                <Avatar className="h-32 w-32 border-4 border-white dark:border-slate-900 shadow-lg">
+                                                    <AvatarImage src={user?.avatar} />
+                                                    <AvatarFallback className="text-xl font-bold bg-blue-500 text-white">
+                                                        {userInitials}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                            </div>
 
-                                    {/* Infos boutique */}
-                                    <div className="flex-1 pt-6">
-                                        <div>
-                                            <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                                                {tenant.raison_sociale}
-                                            </h2>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                                                {tenant.type_entite && `Type: ${tenant.type_entite}`}
-                                            </p>
-                                        </div>
-
-                                        {/* URL Boutique */}
-                                        <div className="mt-6 p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                                            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                                                URL de votre boutique
-                                            </p>
-                                            <div className="flex items-center gap-2">
-                                                <code className="text-sm font-mono text-slate-900 dark:text-slate-100 flex-1 break-all">
-                                                    {shopUrl}
-                                                </code>
-                                                <button
-                                                    onClick={copyShopUrl}
-                                                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                                                >
-                                                    {copiedUrl ? (
-                                                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                                            {/* Infos utilisateur */}
+                                            <div className="flex-1 pt-4">
+                                                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                                                    {user?.name}
+                                                </h2>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                                    {user?.email}
+                                                </p>
+                                                <div className="mt-4 flex gap-2">
+                                                    {user?.email_verified_at ? (
+                                                        <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                                                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                                                            Email vérifié
+                                                        </Badge>
                                                     ) : (
-                                                        <Copy className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Badges */}
-                                        <div className="mt-4 flex gap-2 flex-wrap">
-                                            {tenant.email_verified_at || tenant.statut === 'actif' ? (
-                                                <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
-                                                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                                                    Actif
-                                                </Badge>
-                                            ) : (
-                                                <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
-                                                    <AlertCircle className="h-3 w-3 mr-1" />
-                                                    En attente de vérification
-                                                </Badge>
-                                            )}
-                                            <Badge variant="outline">
-                                                <ShoppingBag className="h-3 w-3 mr-1" />
-                                                Vendeur
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Formulaire principal */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Settings2 className="h-5 w-5" />
-                                    Informations du profil
-                                </CardTitle>
-                                <CardDescription>
-                                    Mettez à jour vos informations professionnelles
-                                </CardDescription>
-                            </CardHeader>
-
-                            <CardContent>
-                                <Form
-                                    {...ParametresController.update.form()}
-                                    className="space-y-6"
-                                    options={{ preserveScroll: true }}
-                                >
-                                    {({ processing, recentlySuccessful, errors }) => (
-                                        <>
-                                            {/* Informations du propriétaire */}
-                                            <div className="border-b border-slate-200 dark:border-slate-700 pb-6">
-                                                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-4">
-                                                    Informations du propriétaire
-                                                </h3>
-                                                <div className="grid gap-6 md:grid-cols-2">
-                                                    <div className="grid gap-2">
-                                                        <Label htmlFor="name" className="text-sm font-medium">
-                                                            Nom complet
-                                                        </Label>
-                                                        <Input
-                                                            id="name"
-                                                            name="name"
-                                                            defaultValue={user?.name}
-                                                            placeholder="Votre nom"
-                                                            className="h-10"
-                                                            required
-                                                        />
-                                                        <InputError message={errors.name} />
-                                                    </div>
-
-                                                    <div className="grid gap-2">
-                                                        <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
-                                                            <Mail className="h-4 w-4" />
-                                                            Email
-                                                        </Label>
-                                                        <Input
-                                                            id="email"
-                                                            type="email"
-                                                            name="email"
-                                                            defaultValue={user?.email}
-                                                            placeholder="votre@email.com"
-                                                            className="h-10"
-                                                            required
-                                                        />
-                                                        <InputError message={errors.email} />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Informations de la boutique */}
-                                            <div className="border-b border-slate-200 dark:border-slate-700 pb-6">
-                                                <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-4">
-                                                    Informations de la boutique
-                                                </h3>
-                                                <div className="grid gap-6 md:grid-cols-2">
-                                                    <div className="grid gap-2">
-                                                        <Label htmlFor="raison_sociale" className="text-sm font-medium">
-                                                            Raison sociale
-                                                        </Label>
-                                                        <Input
-                                                            id="raison_sociale"
-                                                            name="raison_sociale"
-                                                            defaultValue={tenant.raison_sociale}
-                                                            placeholder="Nom de votre entreprise"
-                                                            className="h-10"
-                                                            required
-                                                        />
-                                                    </div>
-
-                                                    <div className="grid gap-2">
-                                                        <Label htmlFor="telephone" className="text-sm font-medium flex items-center gap-2">
-                                                            <Phone className="h-4 w-4" />
-                                                            Téléphone
-                                                        </Label>
-                                                        <Input
-                                                            id="telephone"
-                                                            name="telephone"
-                                                            defaultValue={tenant.telephone || ''}
-                                                            placeholder="+243 XXX XXX XXX"
-                                                            className="h-10"
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                <div className="grid gap-2 mt-6">
-                                                    <Label htmlFor="description" className="text-sm font-medium">
-                                                        Description de la boutique
-                                                    </Label>
-                                                    <Textarea
-                                                        id="description"
-                                                        name="description"
-                                                        defaultValue={tenant.description || ''}
-                                                        placeholder="Décrivez votre boutique, vos spécialités..."
-                                                        className="min-h-24 resize-none"
-                                                    />
-                                                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                        Max 500 caractères
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {/* Email Verification */}
-                                            {mustVerifyEmail && !user?.email_verified_at && (
-                                                <div className="flex gap-3 p-4 rounded-lg border border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-900/10">
-                                                    <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-                                                    <div className="flex-1">
-                                                        <p className="text-sm text-amber-900 dark:text-amber-100 font-medium">
+                                                        <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                                                            <AlertCircle className="h-3 w-3 mr-1" />
                                                             Email non vérifié
-                                                        </p>
-                                                        <p className="text-xs text-amber-800 dark:text-amber-200 mt-1">
-                                                            Vérifiez votre adresse email pour accéder à toutes les fonctionnalités.
-                                                        </p>
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                {/* Formulaire profil personnel */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2">
+                                            <Settings2 className="h-5 w-5" />
+                                            Mes informations
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Mettez à jour vos informations personnelles
+                                        </CardDescription>
+                                    </CardHeader>
+
+                                    <CardContent>
+                                        <Form
+                                            {...ParametresController.update.form()}
+                                            className="space-y-6"
+                                            options={{ preserveScroll: true }}
+                                        >
+                                            {({ processing, recentlySuccessful, errors }) => (
+                                                <>
+                                                    <div className="grid gap-6 md:grid-cols-2">
+                                                        <div className="grid gap-2">
+                                                            <Label htmlFor="name" className="text-sm font-medium">
+                                                                Nom complet
+                                                            </Label>
+                                                            <Input
+                                                                id="name"
+                                                                name="name"
+                                                                defaultValue={user?.name}
+                                                                placeholder="Votre nom"
+                                                                className="h-10"
+                                                                required
+                                                            />
+                                                            <InputError message={errors.name} />
+                                                        </div>
+
+                                                        <div className="grid gap-2">
+                                                            <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
+                                                                <Mail className="h-4 w-4" />
+                                                                Email
+                                                            </Label>
+                                                            <Input
+                                                                id="email"
+                                                                type="email"
+                                                                name="email"
+                                                                defaultValue={user?.email}
+                                                                placeholder="votre@email.com"
+                                                                className="h-10"
+                                                                required
+                                                            />
+                                                            <InputError message={errors.email} />
+                                                        </div>
+                                                    </div>
+
+                                                    {mustVerifyEmail && !user?.email_verified_at && (
+                                                        <div className="flex gap-3 p-4 rounded-lg border border-amber-200 dark:border-amber-900/30 bg-amber-50/50 dark:bg-amber-900/10">
+                                                            <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                                            <div className="flex-1">
+                                                                <p className="text-sm text-amber-900 dark:text-amber-100 font-medium">
+                                                                    Email non vérifié
+                                                                </p>
+                                                                <p className="text-xs text-amber-800 dark:text-amber-200 mt-1">
+                                                                    Vérifiez votre adresse email pour accéder à toutes les fonctionnalités.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex items-center gap-4 pt-4">
+                                                        <Button
+                                                            disabled={processing}
+                                                            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+                                                        >
+                                                            Enregistrer
+                                                        </Button>
+
+                                                        <Transition
+                                                            show={recentlySuccessful}
+                                                            enter="transition ease-in-out duration-200"
+                                                            enterFrom="opacity-0"
+                                                            leave="transition ease-in-out duration-200"
+                                                            leaveTo="opacity-0"
+                                                        >
+                                                            <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                                                                <CheckCircle2 className="h-4 w-4" />
+                                                                Modifications sauvegardées
+                                                            </p>
+                                                        </Transition>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </Form>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+
+                            {/* Onglet: Ma boutique */}
+                            <TabsContent value="shop" className="space-y-6">
+                                {/* Carte avec logo */}
+                                <Card className="border-emerald-200/50 dark:border-emerald-900/20 overflow-hidden">
+                                    <div className="h-32 bg-gradient-to-r from-emerald-50 via-emerald-100/50 to-white dark:from-emerald-950/40 dark:via-emerald-900/20 dark:to-slate-900" />
+
+                                    <CardContent className="pt-6">
+                                        <div className="flex gap-8 items-start">
+                                            {/* Logo */}
+                                            <div className="relative -mt-20">
+                                                <Avatar className="h-40 w-40 border-4 border-white dark:border-slate-900 shadow-xl">
+                                                    <AvatarImage src={previewUrl || tenant.logo_url} />
+                                                    <AvatarFallback className="text-3xl font-bold bg-emerald-500 text-white">
+                                                        {tenant.raison_sociale[0]}
+                                                    </AvatarFallback>
+                                                </Avatar>
+
+                                                <label className="absolute bottom-2 right-2 cursor-pointer">
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="hidden"
+                                                        onChange={handleAvatarChange}
+                                                    />
+                                                    <motion.div
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.95 }}
+                                                        className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-full p-3 shadow-lg transition-colors"
+                                                    >
+                                                        <Camera className="h-5 w-5" />
+                                                    </motion.div>
+                                                </label>
+                                            </div>
+
+                                            {/* Infos boutique */}
+                                            <div className="flex-1 pt-6">
+                                                <div>
+                                                    <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                                                        {tenant.raison_sociale}
+                                                    </h2>
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                                                        {tenant.type_entite && `Type: ${tenant.type_entite}`}
+                                                    </p>
+                                                </div>
+
+                                                {/* URL Boutique */}
+                                                <div className="mt-6 p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                                                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                                                        URL de votre boutique
+                                                    </p>
+                                                    <div className="flex items-center gap-2">
+                                                        <code className="text-sm font-mono text-slate-900 dark:text-slate-100 flex-1 break-all">
+                                                            {shopUrl}
+                                                        </code>
+                                                        <button
+                                                            onClick={copyShopUrl}
+                                                            className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                                        >
+                                                            {copiedUrl ? (
+                                                                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                                                            ) : (
+                                                                <Copy className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                                                            )}
+                                                        </button>
                                                     </div>
                                                 </div>
-                                            )}
 
-                                            {/* Actions */}
-                                            <div className="flex items-center gap-4 pt-4">
-                                                <Button
-                                                    disabled={processing}
-                                                    className="gap-2 bg-emerald-600 hover:bg-emerald-700"
-                                                >
-                                                    Enregistrer les modifications
-                                                </Button>
-
-                                                <Transition
-                                                    show={recentlySuccessful}
-                                                    enter="transition ease-in-out duration-200"
-                                                    enterFrom="opacity-0"
-                                                    leave="transition ease-in-out duration-200"
-                                                    leaveTo="opacity-0"
-                                                >
-                                                    <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
-                                                        <CheckCircle2 className="h-4 w-4" />
-                                                        Modifications sauvegardées
-                                                    </p>
-                                                </Transition>
+                                                {/* Badges */}
+                                                <div className="mt-4 flex gap-2 flex-wrap">
+                                                    {tenant.email_verified_at || tenant.statut === 'actif' ? (
+                                                        <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                                                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                                                            Actif
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                                                            <AlertCircle className="h-3 w-3 mr-1" />
+                                                            En attente de vérification
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </>
-                                    )}
-                                </Form>
-                            </CardContent>
-                        </Card>
+                                        </div>
+                                    </CardContent>
+                                </Card>
 
-                        {/* Informations supplémentaires */}
-                        <div className="grid gap-4 md:grid-cols-2">
-                            {/* SIRET/RCCM */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-base">Documents légaux</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3">
-                                    <div>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">
-                                            RCCM
-                                        </p>
-                                        <p className="text-sm font-mono text-slate-900 dark:text-slate-100">
-                                            {tenant.siret || 'Non renseigné'}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">
-                                            Type d'entité
-                                        </p>
-                                        <Badge variant="outline">{tenant.type_entite}</Badge>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                {/* Formulaire boutique */}
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2">
+                                            <ShoppingBag className="h-5 w-5" />
+                                            Informations de la boutique
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Mettez à jour les détails de votre boutique
+                                        </CardDescription>
+                                    </CardHeader>
 
-                            {/* Abonnement */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-base">Abonnement</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3">
-                                    <div>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">
-                                            Statut
-                                        </p>
-                                        <Badge className={tenant.statut === 'actif' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-slate-100 text-slate-700'}>
-                                            {tenant.statut === 'actif' ? 'Actif' : 'Inactif'}
-                                        </Badge>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">
-                                            Plan
-                                        </p>
-                                        <p className="text-sm text-slate-900 dark:text-slate-100">
-                                            {tenant.plan_id ? 'Plan actif' : 'Pas de plan'}
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
+                                    <CardContent>
+                                        <Form
+                                            {...ParametresController.update.form()}
+                                            className="space-y-6"
+                                            options={{ preserveScroll: true }}
+                                        >
+                                            {({ processing, recentlySuccessful, errors }) => (
+                                                <>
+                                                    <div className="grid gap-6 md:grid-cols-2">
+                                                        <div className="grid gap-2">
+                                                            <Label htmlFor="raison_sociale" className="text-sm font-medium">
+                                                                Raison sociale
+                                                            </Label>
+                                                            <Input
+                                                                id="raison_sociale"
+                                                                name="raison_sociale"
+                                                                defaultValue={tenant.raison_sociale}
+                                                                placeholder="Nom de votre entreprise"
+                                                                className="h-10"
+                                                                required
+                                                            />
+                                                        </div>
+
+                                                        <div className="grid gap-2">
+                                                            <Label htmlFor="telephone" className="text-sm font-medium flex items-center gap-2">
+                                                                <Phone className="h-4 w-4" />
+                                                                Téléphone
+                                                            </Label>
+                                                            <Input
+                                                                id="telephone"
+                                                                name="telephone"
+                                                                defaultValue={tenant.telephone || ''}
+                                                                placeholder="+243 XXX XXX XXX"
+                                                                className="h-10"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid gap-2">
+                                                        <Label htmlFor="description" className="text-sm font-medium">
+                                                            Description de la boutique
+                                                        </Label>
+                                                        <Textarea
+                                                            id="description"
+                                                            name="description"
+                                                            defaultValue={tenant.description || ''}
+                                                            placeholder="Décrivez votre boutique, vos spécialités..."
+                                                            className="min-h-24 resize-none"
+                                                        />
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                            Max 500 caractères
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-4 pt-4">
+                                                        <Button
+                                                            disabled={processing}
+                                                            className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+                                                        >
+                                                            Enregistrer
+                                                        </Button>
+
+                                                        <Transition
+                                                            show={recentlySuccessful}
+                                                            enter="transition ease-in-out duration-200"
+                                                            enterFrom="opacity-0"
+                                                            leave="transition ease-in-out duration-200"
+                                                            leaveTo="opacity-0"
+                                                        >
+                                                            <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                                                                <CheckCircle2 className="h-4 w-4" />
+                                                                Modifications sauvegardées
+                                                            </p>
+                                                        </Transition>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </Form>
+                                    </CardContent>
+                                </Card>
+
+                                {/* Informations supplémentaires */}
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    {/* SIRET/RCCM */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="text-base">Documents légaux</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-3">
+                                            <div>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">
+                                                    RCCM
+                                                </p>
+                                                <p className="text-sm font-mono text-slate-900 dark:text-slate-100">
+                                                    {tenant.siret || 'Non renseigné'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">
+                                                    Type d'entité
+                                                </p>
+                                                <Badge variant="outline">{tenant.type_entite}</Badge>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Abonnement */}
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle className="text-base">Abonnement</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-3">
+                                            <div>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">
+                                                    Statut
+                                                </p>
+                                                <Badge className={tenant.statut === 'actif' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-slate-100 text-slate-700'}>
+                                                    {tenant.statut === 'actif' ? 'Actif' : 'Inactif'}
+                                                </Badge>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold mb-1">
+                                                    Plan
+                                                </p>
+                                                <p className="text-sm text-slate-900 dark:text-slate-100">
+                                                    {tenant.plan_id ? 'Plan actif' : 'Pas de plan'}
+                                                </p>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            </TabsContent>
+                        </Tabs>
                     </div>
                 </SettingsLayout>
             </SidebarInset>
