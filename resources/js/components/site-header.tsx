@@ -129,18 +129,20 @@ export function SiteHeader() {
                                 <DropdownMenuGroup>
                                     <DropdownMenuItem asChild>
                                         <Link
-                                            href={route('tenant.profile.edit')}
+                                            href={isTenant ? route('tenant.profile.edit') : route('profile.edit')}
                                         >
                                             <User className="mr-2 h-4 w-4" />
                                             Profil
                                         </Link>
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link href={route('vendor.configure')}>
-                                            <Settings className="mr-2 h-4 w-4" />
-                                            Paramètres boutique
-                                        </Link>
-                                    </DropdownMenuItem>
+                                    {isTenant && (
+                                        <DropdownMenuItem asChild>
+                                            <Link href={route('vendor.configure')}>
+                                                <Settings className="mr-2 h-4 w-4" />
+                                                Paramètres boutique
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
                                 </DropdownMenuGroup>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
