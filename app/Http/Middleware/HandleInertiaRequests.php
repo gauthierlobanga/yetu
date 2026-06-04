@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use App\Http\Controllers\Shop\CartController;
-use App\Http\Controllers\Shop\ProductController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Cart\CartController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ProductController;
 use App\Models\Brand;
 use App\Models\ProductCategory;
 use App\Models\Produit;

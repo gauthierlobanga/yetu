@@ -123,11 +123,12 @@ class PaymentService
     {
         $vendorRequest = VendorRequest::find($session->metadata->vendor_request_id);
 
-        if (!$vendorRequest) {
+        if (! $vendorRequest) {
             Log::error('VendorRequest not found for checkout session', [
                 'session_id' => $session->id,
                 'vendor_request_id' => $session->metadata->vendor_request_id,
             ]);
+
             return ['status' => 'error', 'message' => 'VendorRequest not found'];
         }
 

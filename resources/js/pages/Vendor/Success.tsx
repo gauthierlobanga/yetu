@@ -22,7 +22,15 @@ import { cn } from '@/lib/utils';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 
 interface Props {
-    tenant: Tenant;
+    tenant: {
+        id: string;
+        raison_sociale: string;
+        slug: string;
+        url: string;
+        admin_url: string;
+        logo_url: string | null;
+        dashboard_url?: string;
+    };
 }
 
 function useParticlePositions(count: number) {

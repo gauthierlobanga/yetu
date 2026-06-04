@@ -34,6 +34,9 @@ class SyncCentralUserProfile
         if (isset($changes['password'])) {
             $updateData['password'] = $user->password;
         }
+        if (isset($changes['avatar'])) {
+            $updateData['avatar'] = $user->avatar;
+        }
 
         if (! empty($updateData)) {
             DB::connection($centralConnection)

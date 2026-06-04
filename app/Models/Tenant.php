@@ -549,15 +549,27 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
     }
 
     // URLs
+
+    // Construit l'URL complète du tenant avec schéma et port dynamique
+    // En local: inclut le port de APP_URL (ex: 8000)
+    // En prod: utilise implicitement 80/443
     public function getUrlAttribute(): string
     {
-        if ($domain = $this->domains()->value('domain')) {
-            return 'http://'.$domain;
-        }
+        $domain = $this->domains()->value('domain')
+            ?: $this->slug.'.'.config('app.domain');
 
-        return 'http://'.$this->slug.'.'.config('app.domain');
+        $appUrl = config('app.url', 'http://localhost');
+        $scheme = parse_url($appUrl, PHP_URL_SCHEME) ?: 'http';
+        $port = parse_url($appUrl, PHP_URL_PORT);
+
+        $portSuffix = app()->environment('local') && $port && ! str_contains($domain, ':')
+            ? ':'.$port
+            : '';
+
+        return rtrim($scheme.'://'.$domain.$portSuffix, '/');
     }
 
+    // Retourne l'URL du panel Filament vendeur
     public function getAdminUrlAttribute(): string
     {
         return $this->url.'/vendeur';

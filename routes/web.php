@@ -1,16 +1,17 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\VisitorStatsController;
+use App\Http\Controllers\Auth\TenantAccountController;
 use App\Http\Controllers\Auth\TenantSsoLoginController;
-use App\Http\Controllers\Blog\BlogController;
-use App\Http\Controllers\Central\HeroCentralController;
-use App\Http\Controllers\Central\TenantAccountController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\Main\PaymentController as MainPaymentController;
-use App\Http\Controllers\Main\VendorRegistrationController;
-use App\Http\Controllers\Pages\EntrepriseController;
-use App\Http\Controllers\Pages\PageController;
-use App\Http\Controllers\PublicStorageController;
+use App\Http\Controllers\Central\Pages\Blog\BlogCentralController;
+use App\Http\Controllers\Central\Pages\Contact\ContactCentralController;
+use App\Http\Controllers\Central\Pages\Entreprises\EntrepriseController;
+use App\Http\Controllers\Central\Pages\Home\HeroCentralController;
+use App\Http\Controllers\Central\Pages\PageController;
+use App\Http\Controllers\Vendor\Config\PaymentController;
+use App\Http\Controllers\Vendor\Config\VendorRegistrationController;
 use App\Models\Visit;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
@@ -59,6 +60,33 @@ Route::middleware('guest')->group(function () {
 
 });
 
+/*
+       |--------------------------------------------------------------------------
+       | ROUTES GESTION BLOG ADMIN
+       |--------------------------------------------------------------------------
+       */
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::prefix('dashboard')->group(function () {
+        Route::post('/posts/reorder', [DashboardController::class, 'postsReorder'])->name('posts.reorder');
+    });
+});
+
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('dashboard');
+
+    Route::prefix('subscriptions')->name('admin.subscriptions.')->group(function () {
+        Route::get('/', [AdminSubscriptionController::class, 'index'])->name('index');
+        Route::get('/{subscription}', [AdminSubscriptionController::class, 'show'])->name('show');
+        Route::post('/{subscription}/block', [AdminSubscriptionController::class, 'block'])->name('block');
+        Route::post('/{subscription}/unblock', [AdminSubscriptionController::class, 'unblock'])->name('unblock');
+        Route::post('/{subscription}/renew', [AdminSubscriptionController::class, 'renew'])->name('renew');
+        Route::post('/{subscription}/add-grace-period', [AdminSubscriptionController::class, 'addGracePeriod'])->name('add-grace-period');
+        Route::post('/batch/expired-to-block', [AdminSubscriptionController::class, 'expiredToBlock'])->name('expired-to-block');
+        Route::post('/batch/notify-expiring', [AdminSubscriptionController::class, 'notifyExpiring'])->name('notify-expiring');
+        Route::post('/batch/sync-stripe', [AdminSubscriptionController::class, 'syncWithStripe'])->name('sync-stripe');
+    });
+});
+
 Route::get('/auth/tenant-sso', [TenantSsoLoginController::class, '__invoke'])
     ->name('tenant.sso.central');
 
@@ -74,15 +102,15 @@ Route::middleware('auth')->prefix('selection-compte')->name('central.account-sel
 |--------------------------------------------------------------------------
 */
 Route::prefix('blog')->group(function () {
-    Route::get('/', [BlogController::class, 'blogIndex'])->name('blog.index');
-    Route::get('/category/{category:slug}', [BlogController::class, 'blogByCategory'])->name('blog.category');
-    Route::get('/{post:slug}', [BlogController::class, 'blogShow'])->name('blog.show');
-    Route::post('/{post}/comment', [BlogController::class, 'blogComment'])->middleware('auth')->name('blog.comment');
-    Route::post('/{post}/like', [BlogController::class, 'blogLike'])->middleware('auth')->name('blog.like');
+    Route::get('/', [BlogCentralController::class, 'blogIndex'])->name('blog.index');
+    Route::get('/category/{category:slug}', [BlogCentralController::class, 'blogByCategory'])->name('blog.category');
+    Route::get('/{post:slug}', [BlogCentralController::class, 'blogShow'])->name('blog.show');
+    Route::post('/{post}/comment', [BlogCentralController::class, 'blogComment'])->middleware('auth')->name('blog.comment');
+    Route::post('/{post}/like', [BlogCentralController::class, 'blogLike'])->middleware('auth')->name('blog.like');
 });
 
-Route::get('/contact', [ContactController::class, 'contactIndex'])->name('page.contact');
-Route::post('/contact', [ContactController::class, 'contactStore'])->name('page.contact.store');
+Route::get('/contact', [ContactCentralController::class, 'contactIndex'])->name('page.contact');
+Route::post('/contact', [ContactCentralController::class, 'contactStore'])->name('page.contact.store');
 Route::get('/help', [PageController::class, 'pageHelp'])->name('page.help');
 Route::get('/about', [PageController::class, 'pageAbout'])->name('page.about');
 Route::get('/terms', [PageController::class, 'pageTerms'])->name('page.terms');
@@ -115,13 +143,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('suggest-domain');
 
         // Paiement
-        Route::get('/paiement', [MainPaymentController::class, 'index'])
+        Route::get('/paiement', [PaymentController::class, 'index'])
             ->name('payment');
-        Route::get('/paiement/checkout', [MainPaymentController::class, 'checkout'])
+        Route::get('/paiement/checkout', [PaymentController::class, 'checkout'])
             ->name('payment.checkout');
-        Route::get('/paiement/succes', [MainPaymentController::class, 'success'])
+        Route::get('/paiement/succes', [PaymentController::class, 'success'])
             ->name('payment.success');
-        Route::get('/paiement/annulation', [MainPaymentController::class, 'cancel'])
+        Route::get('/paiement/annulation', [PaymentController::class, 'cancel'])
             ->name('payment.cancel');
     });
 
@@ -132,7 +160,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 | Routes Webhook Stripe
 |--------------------------------------------------------------------------
 */
-Route::post('/stripe/webhook', [MainPaymentController::class, 'webhook'])
+Route::post('/stripe/webhook', [PaymentController::class, 'webhook'])
     ->name('stripe.webhook');
 
 /*
@@ -167,7 +195,3 @@ Route::post('/track-duration', function (Request $request) {
 
     return response()->noContent();
 })->name('track.duration')->middleware('web');
-
-// Route::get('/storage/{path?}', [PublicStorageController::class, 'show'])
-//     ->where('path', '.*')          // autorise les sous-dossiers
-//     ->name('public.storage');

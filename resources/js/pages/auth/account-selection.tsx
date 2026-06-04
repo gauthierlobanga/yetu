@@ -1,11 +1,20 @@
 import { Head, Link } from '@inertiajs/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Mail, Plus, ShieldCheck, Store, Sparkles } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+    ArrowRight,
+    ExternalLink,
+    LayoutDashboard,
+    Mail,
+    PanelTopOpen,
+    Plus,
+    ShieldCheck,
+    Sparkles,
+    Store,
+} from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import AuthLayout from '@/layouts/auth-layout';
-import type { Tenant } from '@/types/tenants/products/vendor/tenant';
+import { cn } from '@/lib/utils';
 
 type Account = {
     name: string;
@@ -13,9 +22,22 @@ type Account = {
     avatar_url: string | null;
 };
 
+type SelectionTenant = {
+    id: string;
+    slug: string;
+    name: string;
+    email?: string | null;
+    logo_url?: string | null;
+    url?: string;
+    admin_url?: string;
+    sso_login_url: string;
+};
+
 type Props = {
     account: Account;
-    tenants: Tenant[];
+    tenants: SelectionTenant[];
+    is_super_admin?: boolean;
+    admin_panel_url?: string;
 };
 
 function initials(name: string, email: string): string {
@@ -28,211 +50,245 @@ function initials(name: string, email: string): string {
         .join('');
 }
 
-// Petite animation pour un badge “en ligne”
-const OnlineIndicator = () => (
-    <span className="relative flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-    </span>
-);
+function tenantInitials(name: string): string {
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((part) => part.charAt(0).toUpperCase())
+        .slice(0, 2)
+        .join('');
+}
 
-export default function AccountSelection({ account, tenants }: Props) {
+function QuickAccess({
+    href,
+    icon: Icon,
+    label,
+    description,
+    disabled = false,
+}: {
+    href?: string;
+    icon: typeof LayoutDashboard;
+    label: string;
+    description: string;
+    disabled?: boolean;
+}) {
+    return (
+        <a
+            href={disabled ? undefined : href}
+            aria-disabled={disabled}
+            className={cn(
+                'group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-white/20 bg-white/30 p-5 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/60 hover:shadow-xl hover:shadow-emerald-500/10 dark:border-slate-800/40 dark:bg-slate-900/40 dark:hover:border-emerald-800/40 dark:hover:bg-slate-900/60',
+                disabled && 'pointer-events-none opacity-50',
+            )}
+        >
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-emerald-500 to-emerald-700 text-white shadow-lg shadow-emerald-500/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-emerald-500/30">
+                <Icon className="h-5 w-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold text-slate-800 dark:text-white">
+                    {label}
+                </span>
+                <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">
+                    {description}
+                </span>
+            </span>
+            <ExternalLink className="h-4 w-4 shrink-0 text-slate-400 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-emerald-600" />
+        </a>
+    );
+}
+
+export default function AccountSelection({
+    account,
+    tenants,
+    is_super_admin,
+    admin_panel_url,
+}: Props) {
     const hasTenants = tenants.length > 0;
+    const primaryTenant = tenants[0];
+
+    const dashboardUrl = primaryTenant?.sso_login_url ?? '/selection-compte/ajouter';
+    const panelUrl = is_super_admin ? admin_panel_url : primaryTenant?.admin_url;
+    const pageTitle = hasTenants ? 'Selection de compte' : 'Creer votre boutique';
 
     return (
-        <AuthLayout
-            title={hasTenants ? 'Choisir un compte' : 'Créer votre boutique'}
-            description={
-                hasTenants
-                    ? 'Retrouvez votre espace vendeur ou créez un nouveau compte pour une autre boutique.'
-                    : 'Bienvenue ! Créez votre première boutique pour commencer à vendre.'
-            }
-        >
-            <Head title={hasTenants ? 'Choisir un compte' : 'Créer votre boutique'} />
+        <main className="relative min-h-svh overflow-hidden bg-slate-50/30 px-4 py-8 sm:px-6 dark:bg-slate-950">
+            {/* Arrière‑plan sophistiqué : dégradé mouvant + grille + texture bruit */}
+            <div className="pointer-events-none fixed inset-0 -z-10">
+                {/* Dégradé de fond */}
+                <div className="absolute inset-0 bg-linear-to-br from-white via-slate-50 to-emerald-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20" />
+                {/* Grille subtile */}
+                <div className="absolute inset-0 bg-[image:radial-linear(circle_at_center,#cbd5e1_0.4px,transparent_0.4px)] bg-size-[20px_20px] opacity-30 dark:bg-[image:radial-linear(circle_at_center,#334155_0.4px,transparent_0.4px)] dark:opacity-20" />
+                {/* Texture bruit (noise) */}
+                <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJmIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjc0IiBudW1PY3RhdmVzPSIzIiAvPjwvZmlsdGVyPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNmKSIgb3BhY2l0eT0iMC4wMiIgLz48L3N2Zz4=')] opacity-20 dark:opacity-10" />
+            </div>
 
-            <div className="relative mx-auto max-w-lg space-y-8">
-                {/* Badge de session avec un effet de verre dépoli */}
-                <motion.div
-                    initial={{ opacity: 0, y: -10 }}
+            <Head title={pageTitle} />
+
+            <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
+                {/* Profil */}
+                <motion.section
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="flex justify-center"
+                    transition={{ duration: 0.45, ease: 'easeOut' }}
+                    className="flex flex-col items-center text-center"
                 >
-                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-white/60 px-4 py-2 text-xs font-semibold tracking-wide text-emerald-700 shadow-sm backdrop-blur-xl dark:border-emerald-400/20 dark:bg-slate-900/60 dark:text-emerald-300">
-                        <OnlineIndicator />
-                        <ShieldCheck className="h-3.5 w-3.5" />
-                        Session reconnue
-                    </div>
-                </motion.div>
-
-                {/* Carte compte principal – glassmorphisme avancé */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.15 }}
-                    className="group relative overflow-hidden rounded-lg border border-white/20 bg-white/40 p-3 shadow shadow-slate-200/50 backdrop-blur-2xl transition-all hover:shadow-emerald-200/30 dark:border-slate-700/30 dark:bg-slate-900/40 dark:shadow-slate-900/50 dark:hover:shadow-emerald-900/30"
-                >
-                    <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_40%_at_50%_60%,rgba(16,185,129,0.08),transparent)] dark:bg-[radial-gradient(45%_40%_at_50%_60%,rgba(16,185,129,0.15),transparent)]" />
-
-                    <div className="flex items-center gap-4">
-                        <Avatar className="h-10 w-10 ring-1 ring-emerald-500/20 ring-offset-2 ring-offset-white/50 transition-all duration-30 dark:ring-offset-slate-900/50">
-                            <AvatarImage
-                                src={account.avatar_url ?? undefined}
-                                alt={account.name}
-                                className="object-cover"
-                            />
-                            <AvatarFallback className="bg-linear-to-br from-emerald-500 to-emerald-700 text-lg font-semibold text-white">
+                    <div className="relative">
+                        <Avatar className="h-32 w-32 border-[3px] border-white/70 shadow-2xl shadow-black/10 ring-2 ring-emerald-500/30 backdrop-blur-sm dark:border-slate-800/70 dark:shadow-black/50 dark:ring-emerald-400/20">
+                            <AvatarImage src={account.avatar_url ?? undefined} alt={account.name} className="object-cover" />
+                            <AvatarFallback className="bg-linear-to-br from-slate-800 to-slate-950 text-3xl font-bold text-white dark:from-emerald-600 dark:to-emerald-800">
                                 {initials(account.name, account.email)}
                             </AvatarFallback>
                         </Avatar>
-                        <div>
-                            <p className="text-base font-normal tracking-tight text-slate-900 dark:text-white">
-                                {account.name}
-                            </p>
-                            <div className="mt-1 flex items-center gap-1.5 text-sm text-slate-600 dark:text-slate-400">
-                                <span className="truncate">{account.email}</span>
-                            </div>
-                        </div>
+                        <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 dark:border-slate-950">
+                            <Sparkles className="h-3.5 w-3.5" />
+                        </span>
                     </div>
-                </motion.div>
 
-                {/* Liste des boutiques ou état vide */}
+                    <h1 className="mt-5 max-w-full truncate text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                        {account.name}
+                    </h1>
+                    <div className="mt-3 flex max-w-full items-center gap-2 rounded-full border border-white/30 bg-white/50 px-4 py-1.5 text-xs font-medium text-slate-600 shadow-sm backdrop-blur-xl dark:border-slate-800/40 dark:bg-slate-900/50 dark:text-slate-400">
+                        <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                        <span className="truncate">{account.email}</span>
+                    </div>
+                </motion.section>
+
+                {/* Accès rapides */}
+                <motion.section
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45, delay: 0.1, ease: 'easeOut' }}
+                    className="grid gap-4 sm:grid-cols-2"
+                    aria-label="Acces rapides"
+                >
+                    <QuickAccess
+                        href={dashboardUrl}
+                        icon={LayoutDashboard}
+                        label="Dashboard"
+                        description={hasTenants ? 'Ouvrir votre espace vendeur' : 'Creer une boutique'}
+                    />
+                    <QuickAccess
+                        href={panelUrl}
+                        icon={PanelTopOpen}
+                        label="Panel Filament"
+                        description={panelUrl ? 'Administration avancee' : 'Disponible apres creation'}
+                        disabled={!panelUrl}
+                    />
+                </motion.section>
+
+                {/* Boutiques ou état vide */}
                 <AnimatePresence mode="wait">
                     {hasTenants ? (
-                        <motion.div
+                        <motion.section
                             key="tenants"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.35, ease: 'easeOut' }}
                             className="space-y-5"
                         >
                             <div className="flex items-center justify-between">
-                                <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                                    Mes boutiques ({tenants.length})
-                                </h3>
-                                <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
-                                    glissez pour choisir
+                                <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                                    Vos boutiques
+                                </h2>
+                                <span className="rounded-full bg-emerald-100/80 px-3 py-1 text-xs font-semibold text-emerald-800 backdrop-blur-sm dark:bg-emerald-900/50 dark:text-emerald-200">
+                                    {tenants.length}
                                 </span>
                             </div>
 
-                            <div className="space-y-4">
+                            <div className="grid gap-4 sm:grid-cols-2">
                                 {tenants.map((tenant, index) => (
-                                    <motion.div
+                                    <motion.article
                                         key={tenant.id}
-                                        initial={{ opacity: 0, y: 20 }}
+                                        initial={{ opacity: 0, y: 12 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{
-                                            delay: index * 0.07,
-                                            duration: 0.4,
-                                            ease: [0.25, 0.46, 0.45, 0.94],
-                                        }}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
+                                        transition={{ duration: 0.35, delay: index * 0.06, ease: 'easeOut' }}
+                                        className="group relative overflow-hidden rounded-2xl border border-white/20 bg-white/30 p-4 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/60 hover:shadow-xl hover:shadow-emerald-500/10 dark:border-slate-800/40 dark:bg-slate-900/40 dark:hover:border-emerald-800/40 dark:hover:bg-slate-900/60"
                                     >
-                                        <a
-                                            href={tenant.sso_login_url}
-                                            className="group relative flex w-full items-center gap-4 overflow-hidden rounded-lg border border-slate-200/50 bg-white/50 p-3.5 backdrop-blur-xl transition-all duration-500 hover:border-emerald-300/60 hover:bg-white/80 hover:shadow-emerald-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 dark:border-slate-800/50 dark:bg-slate-900/50 dark:hover:border-emerald-600/40 dark:hover:bg-slate-900/80"
-                                        >
-                                            {/* Effet de survol gradient */}
-                                            <div className="absolute inset-0 -z-10 rounded-2xl bg-linear-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/0 opacity-0 transition-all duration-500 group-hover:from-emerald-500/5 group-hover:via-emerald-500/5 group-hover:opacity-100" />
-
-                                            <Avatar className="h-10 w-10 shrink-0 ring-1 ring-emerald-500/20 ring-offset-2 ring-offset-white/80 transition-all group-hover:ring-emerald-500/50 dark:ring-offset-slate-900/80">
-                                                <AvatarImage
-                                                    src={tenant.logo_url ?? undefined}
-                                                    alt={tenant.name}
-                                                />
-                                                <AvatarFallback className="bg-linear-to-br from-emerald-500 to-emerald-700 text-sm font-bold text-white">
-                                                    {tenant.name
-                                                        .split(' ')
-                                                        .slice(0, 2)
-                                                        .map((n) => n[0])
-                                                        .join('')}
+                                        <div className="flex items-start gap-4">
+                                            <Avatar className="h-14 w-14 ring-2 ring-white/70 dark:ring-slate-800/70">
+                                                <AvatarImage src={tenant.logo_url ?? undefined} alt={tenant.name} />
+                                                <AvatarFallback className="bg-linear-to-br from-emerald-500 to-emerald-700 text-base font-bold text-white shadow-inner">
+                                                    {tenantInitials(tenant.name)}
                                                 </AvatarFallback>
                                             </Avatar>
-
                                             <div className="min-w-0 flex-1">
-                                                <p className="truncate text-sm font-semibold text-slate-900 transition-colors group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-300">
+                                                <p className="truncate text-base font-semibold text-slate-800 dark:text-white">
                                                     {tenant.name}
                                                 </p>
                                                 {tenant.email && (
-                                                    <div className="mt-1 flex min-w-0 items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                                                        <Mail className="h-3 w-3 shrink-0" />
+                                                    <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                                                        <Mail className="h-3.5 w-3.5 shrink-0" />
                                                         <span className="truncate">{tenant.email}</span>
                                                     </div>
                                                 )}
-
                                             </div>
+                                        </div>
 
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-emerald-700 to-emerald-800 text-white transition-all duration-300 group-hover:translate-x-1">
-                                                <ArrowRight className="h-4 w-4 transition-transform group-hover:scale-110" />
-                                            </div>
-                                        </a>
-                                    </motion.div>
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            <a
+                                                href={tenant.sso_login_url}
+                                                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-slate-800 to-slate-900 px-4 text-xs font-semibold text-white shadow-md shadow-slate-900/10 transition-all duration-300 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-lg hover:shadow-emerald-500/20 dark:from-emerald-600 dark:to-emerald-500 dark:hover:from-emerald-500 dark:hover:to-emerald-400"
+                                            >
+                                                Dashboard
+                                                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-0.5" />
+                                            </a>
+                                            {tenant.admin_url && (
+                                                <a
+                                                    href={tenant.admin_url}
+                                                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/20 px-4 text-xs font-semibold text-slate-700 backdrop-blur-md transition-all duration-300 hover:border-emerald-300/40 hover:text-emerald-700 dark:border-slate-700/40 dark:bg-slate-900/30 dark:text-slate-300 dark:hover:border-emerald-700/40 dark:hover:text-emerald-300"
+                                                >
+                                                    <PanelTopOpen className="h-3.5 w-3.5" />
+                                                    Panel
+                                                </a>
+                                            )}
+                                        </div>
+                                    </motion.article>
                                 ))}
                             </div>
 
-                            {/* Bouton ajouter une boutique – plus moderne */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
+                            <Button
+                                asChild
+                                variant="outline"
+                                className="h-12 w-full rounded-xl border-dashed border-white/30 bg-white/20 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-emerald-400/40 hover:text-emerald-700 hover:bg-white/40 hover:shadow-md dark:border-slate-700/40 dark:bg-slate-900/30 dark:text-slate-300 dark:hover:border-emerald-600/40 dark:hover:text-emerald-300"
                             >
-                                <Button
-                                    asChild
-                                    variant="outline"
-                                    className="group h-12 w-full rounded-2xl border-2 border-dashed border-slate-300/80 bg-white/30 text-sm font-semibold backdrop-blur-md transition-all hover:border-emerald-400 hover:bg-emerald-50/50 hover:text-emerald-700 dark:border-slate-700/80 dark:bg-slate-900/30 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-300"
-                                >
-                                    <Link href="/selection-compte/ajouter">
-                                        <Plus className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-                                        Ajouter une boutique
-                                    </Link>
-                                </Button>
-                            </motion.div>
-                        </motion.div>
+                                <Link href="/selection-compte/ajouter">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Ajouter une boutique
+                                </Link>
+                            </Button>
+                        </motion.section>
                     ) : (
-                        <motion.div
+                        <motion.section
                             key="empty"
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.4 }}
-                            className="space-y-6"
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.35, ease: 'easeOut' }}
+                            className="flex flex-col items-center rounded-3xl border border-white/20 bg-white/30 p-8 text-center shadow-sm backdrop-blur-xl dark:border-slate-800/40 dark:bg-slate-900/40"
                         >
-                            <div className="relative overflow-hidden rounded-3xl border border-dashed border-slate-300/80 bg-white/40 p-8 text-center backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/40">
-                                {/* Animation de fond */}
-                                <motion.div
-                                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-                                    transition={{ repeat: Infinity, duration: 4 }}
-                                    className="absolute left-1/2 top-1/2 -z-10 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/20"
-                                />
-                                <motion.div
-                                    whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
-                                    transition={{ duration: 0.4 }}
-                                    className="mb-6 inline-flex items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 to-emerald-600 p-4 shadow-2xl shadow-emerald-500/30"
-                                >
-                                    <Store className="h-10 w-10 text-white" />
-                                </motion.div>
-                                <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                    Bienvenue sur la plateforme
-                                </h3>
-                                <p className="mb-8 text-sm text-slate-600 dark:text-slate-400">
-                                    Créez votre première boutique pour commencer à vendre et développer votre activité.
-                                </p>
-
-                                <Button
-                                    asChild
-                                    className="group h-12 w-full rounded-2xl bg-linear-to-r from-emerald-500 to-emerald-600 text-sm font-semibold text-white shadow-xl shadow-emerald-500/30 transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-emerald-500/40 dark:from-emerald-600 dark:to-emerald-700"
-                                >
-                                    <Link href="/devenir-vendeur">
-                                        <Sparkles className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-                                        Créer votre boutique
-                                    </Link>
-                                </Button>
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-100 to-emerald-200 text-emerald-700 shadow-md shadow-emerald-500/10 dark:from-emerald-900/40 dark:to-emerald-800/40 dark:text-emerald-300">
+                                <Store className="h-8 w-8" />
                             </div>
-                        </motion.div>
+                            <h2 className="mt-5 text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                Aucune boutique pour le moment
+                            </h2>
+                            <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                Creez votre premiere boutique pour acceder au dashboard et au panel Filament.
+                            </p>
+                            <Button
+                                asChild
+                                className="mt-6 h-12 w-full rounded-xl bg-linear-to-r from-slate-800 to-slate-900 text-white shadow-md shadow-slate-900/10 transition-all duration-300 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-lg hover:shadow-emerald-500/20 dark:from-emerald-600 dark:to-emerald-500 dark:hover:from-emerald-500 dark:hover:to-emerald-400"
+                            >
+                                <Link href="/devenir-vendeur">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Creer une boutique
+                                </Link>
+                            </Button>
+                        </motion.section>
                     )}
                 </AnimatePresence>
             </div>
-        </AuthLayout>
+        </main>
     );
 }

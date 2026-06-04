@@ -272,6 +272,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             return $this->getFirstMediaUrl('avatar', 'medium');
         }
 
+        if (filled($this->avatar)) {
+            return $this->avatar;
+        }
+
         // Générer les initiales via ui-avatars
         $name = trim($this->name ?? $this->email);
         if (empty($name)) {

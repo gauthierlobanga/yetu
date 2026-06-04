@@ -18,11 +18,24 @@ This document summarizes the complete Subscription System implementation for Yet
 | 6 | Events & Notifications | ✅ Complete | `82c23ab` |
 | 7 | Commands & Jobs | ✅ Complete | `4d65b1a` |
 | 8 | Routes & Endpoints | ✅ Complete | `e8d5cd8` |
-| 9 | Testing & Docs | ✅ Complete | `6b63a9f` |
+## Phase 9: Testing & Docs | ✅ Complete | `6b63a9f` |
+| 10 | Major Restructuring | ✅ Complete | `[CURRENT]` |
+
+---
+
+## Phase 10: Major Restructuring (June 2026)
+
+**Key Changes:**
+- **Hierarchical Controller Structure**: Moved ~80 controllers to domain-specific subdirectories (`Central`, `Vendor`, `Admin`).
+- **Route Reorganization**: Refactored `routes/web.php` and `routes/tenants/routes.php` to align with the new controller structure.
+- **UI Modernization**: Updated `TenantAccountSelection.tsx` with a modern design and improved UX.
+- **Namespace Updates**: Comprehensive update of imports and namespaces across the entire codebase.
+- **Documentation**: Created `docs/PROJECT_RESTRUCTURING.md` and updated existing docs.
 
 ---
 
 ## Phase 1: Data Layer (Models & Migrations)
+
 
 **Files Created:**
 - `app/Models/Subscription.php` (214 lines)

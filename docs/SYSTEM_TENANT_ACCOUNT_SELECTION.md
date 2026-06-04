@@ -115,7 +115,7 @@ Route::middleware('auth')->prefix('selection-compte')->name('central.account-sel
 
 ## 🎨 Composants React
 
-### account-selection.tsx
+### TenantAccountSelection.tsx (Inertia: Auth/TenantAccountSelection)
 
 - **État 1: Avec boutiques**
   - Affiche le profil utilisateur
@@ -126,7 +126,7 @@ Route::middleware('auth')->prefix('selection-compte')->name('central.account-sel
   - Message "Aucune boutique créée"
   - Bouton "Créer votre boutique"
 
-### Success.tsx
+### Success.tsx (Inertia: Vendor/Success)
 
 - ✅ Nouveau: Bouton "Gérer mes boutiques"
 - Redirige vers `/selection-compte`
@@ -201,10 +201,11 @@ tenants table (central):
 
 1. `routes/web.php` - Routes account selection
 2. `app/Listeners/RedirectVendorAfterLogin.php` - Middleware redirect
-3. `app/Http/Controllers/central/TenantAccountController.php` - Logique
-4. `app/Http/Controllers/Main/VendorRegistrationController.php` - Allow multi-shop
-5. `resources/js/pages/auth/account-selection.tsx` - UI (with/without tenants)
-6. `resources/js/pages/Vendor/Success.tsx` - Add back link
+3. `app/Http/Controllers/Auth/TenantAccountController.php` - Logique
+4. `app/Http/Controllers/Vendor/Config/VendorRegistrationController.php` - Allow multi-shop
+5. `resources/js/Pages/Auth/TenantAccountSelection.tsx` - UI (with/without tenants)
+6. `resources/js/Pages/Vendor/Success.tsx` - Add back link
+
 
 ### Build & Cache
 

@@ -10,7 +10,7 @@ export default function AccessDenied({ message }: Props) {
         <>
             <Head title="Accès refusé" />
 
-            <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-red-50 to-red-100 p-4">
+            <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-red-50 to-red-100 p-4">
                 <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-lg">
                     <div className="flex justify-center">
                         <div className="rounded-full bg-red-100 p-3">

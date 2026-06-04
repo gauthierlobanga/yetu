@@ -2,12 +2,19 @@
 
 namespace App\Services;
 
+use App\Events\PaymentFailed;
+use App\Events\TenantSubscriptionBlocked;
+use App\Events\TenantSubscriptionCanceled;
+use App\Events\TenantSubscriptionCreated;
+use App\Events\TenantSubscriptionRenewed;
 use App\Models\Invoice;
 use App\Models\PaymentAttempt;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Notifications\PaymentFailedNotification;
+use App\Notifications\SubscriptionExpiringNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Stripe\Subscription as StripeSubscription;
@@ -48,7 +55,7 @@ class SubscriptionService
      */
     public function renewSubscription(Subscription $subscription): Subscription
     {
-        if (!$subscription->auto_renewal) {
+        if (! $subscription->auto_renewal) {
             throw new \Exception('Auto-renewal est désactivé pour cette subscription');
         }
 
@@ -91,6 +98,7 @@ class SubscriptionService
     public function pauseSubscription(Subscription $subscription): Subscription
     {
         $subscription->update(['stripe_status' => 'paused']);
+
         return $subscription;
     }
 
@@ -100,6 +108,7 @@ class SubscriptionService
     public function resumeSubscription(Subscription $subscription): Subscription
     {
         $subscription->update(['stripe_status' => 'active']);
+
         return $subscription;
     }
 
@@ -137,7 +146,7 @@ class SubscriptionService
         $subscription->block();
 
         if ($subscription->tenant) {
-            event(new \App\Events\TenantSubscriptionBlocked($subscription->tenant));
+            event(new TenantSubscriptionBlocked($subscription->tenant));
         }
 
         return $subscription;
@@ -149,6 +158,7 @@ class SubscriptionService
     public function unblockSubscription(Subscription $subscription): Subscription
     {
         $subscription->unblock();
+
         return $subscription;
     }
 
@@ -162,10 +172,10 @@ class SubscriptionService
         Subscription::where('is_blocked', false)
             ->where(function ($query) {
                 $query->where('grace_period_ends_at', '<', now())
-                      ->orWhere(function ($q) {
-                          $q->whereNull('grace_period_ends_at')
+                    ->orWhere(function ($q) {
+                        $q->whereNull('grace_period_ends_at')
                             ->where('ends_at', '<', now());
-                      });
+                    });
             })
             ->get()
             ->each(function (Subscription $subscription) use ($blocked) {
@@ -189,7 +199,7 @@ class SubscriptionService
             ->get()
             ->each(function (Subscription $subscription) use ($notified) {
                 if ($subscription->user && $subscription->tenant) {
-                    \Notification::send($subscription->user, new \App\Notifications\SubscriptionExpiringNotification(
+                    \Notification::send($subscription->user, new SubscriptionExpiringNotification(
                         $subscription->tenant,
                         $subscription->trial_ends_at
                     ));
@@ -235,7 +245,7 @@ class SubscriptionService
             ]
         );
 
-        event(new \App\Events\TenantSubscriptionCreated($subscription->tenant));
+        event(new TenantSubscriptionCreated($subscription->tenant));
     }
 
     /**
@@ -245,7 +255,7 @@ class SubscriptionService
     {
         $subscription = Subscription::where('stripe_subscription_id', $stripeSubscription['id'])->first();
 
-        if (!$subscription) {
+        if (! $subscription) {
             return;
         }
 
@@ -255,7 +265,7 @@ class SubscriptionService
             'current_period_end' => Carbon::createFromTimestamp($stripeSubscription['current_period_end']),
         ]);
 
-        event(new \App\Events\TenantSubscriptionRenewed($subscription->tenant));
+        event(new TenantSubscriptionRenewed($subscription->tenant));
     }
 
     /**
@@ -267,7 +277,7 @@ class SubscriptionService
 
         if ($subscription) {
             $this->cancelSubscription($subscription, 'Canceled via Stripe');
-            event(new \App\Events\TenantSubscriptionCanceled($subscription->tenant));
+            event(new TenantSubscriptionCanceled($subscription->tenant));
         }
     }
 
@@ -278,7 +288,7 @@ class SubscriptionService
     {
         $subscription = Subscription::where('stripe_subscription_id', $stripeInvoice['subscription'])->first();
 
-        if (!$subscription) {
+        if (! $subscription) {
             return;
         }
 
@@ -319,7 +329,7 @@ class SubscriptionService
     {
         $subscription = Subscription::where('stripe_subscription_id', $stripeInvoice['subscription'])->first();
 
-        if (!$subscription) {
+        if (! $subscription) {
             return;
         }
 
@@ -328,11 +338,11 @@ class SubscriptionService
             $stripeInvoice['charge'] ?? null
         );
 
-        event(new \App\Events\PaymentFailed($subscription->tenant, $stripeInvoice['amount_due'] / 100));
+        event(new PaymentFailed($subscription->tenant, $stripeInvoice['amount_due'] / 100));
 
         // Notifier l'utilisateur
         if ($subscription->user) {
-            \Notification::send($subscription->user, new \App\Notifications\PaymentFailedNotification(
+            \Notification::send($subscription->user, new PaymentFailedNotification(
                 $subscription->tenant,
                 'Votre paiement a échoué'
             ));
@@ -361,7 +371,7 @@ class SubscriptionService
      */
     protected function getSubscriptionFromCharge(?string $customerId = null): ?Subscription
     {
-        if (!$customerId) {
+        if (! $customerId) {
             return null;
         }
 
@@ -380,7 +390,7 @@ class SubscriptionService
             ->get()
             ->each(function (Subscription $subscription) use ($synced) {
                 try {
-                    $stripeSubscription = \Stripe\Subscription::retrieve(
+                    $stripeSubscription = StripeSubscription::retrieve(
                         $subscription->stripe_subscription_id,
                         ['api_key' => config('services.stripe.secret')]
                     );

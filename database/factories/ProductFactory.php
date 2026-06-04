@@ -6,7 +6,7 @@ use App\Models\Produit;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-class ProduitFactory extends Factory
+class ProductFactory extends Factory
 {
     protected $model = Produit::class;
 

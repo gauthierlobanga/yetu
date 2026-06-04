@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Produit;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -15,6 +16,7 @@ class ProductNotification extends Notification
     use Queueable;
 
     public ?string $userType = null;
+
     public ?string $tenantId = null;
 
     public function __construct(
@@ -35,7 +37,7 @@ class ProductNotification extends Notification
             ->subject($this->getMailSubject($action))
             ->greeting("Bonjour {$notifiable->name},")
             ->line($this->getMailLine($action, $product))
-            ->action('Voir le produit', route('products.show', $product?->id ?? '#'))
+            ->action('Voir le produit', route('tenant.product.show', $product?->id ?? '#'))
             ->line('Merci!');
     }
 
@@ -104,14 +106,16 @@ class ProductNotification extends Notification
         };
     }
 
-    private function getMailLine(string $action, $product): string
+    private function getMailLine(string $action, Produit $product): string
     {
+        $quantity = $this->data['quantity'] ?? 0;
+
         return match ($action) {
             'created' => "Vous avez créé un nouveau produit: {$product?->name}",
             'updated' => "Le produit {$product?->name} a été mis à jour.",
             'published' => "Le produit {$product?->name} est maintenant publié.",
             'archived' => "Le produit {$product?->name} a été archivé.",
-            'low_stock' => "Stock faible pour {$product?->name}. Quantité: {$this->data['quantity'] ?? 0}",
+            'low_stock' => "Stock faible pour {$product?->name}. Quantité: {$quantity}",
             'out_of_stock' => "Rupture de stock pour {$product?->name}.",
             default => "Mise à jour: {$product?->name}",
         };

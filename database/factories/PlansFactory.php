@@ -1,7 +1,5 @@
 <?php
 
-// database/factories/PlanFactory.php
-
 namespace Database\Factories;
 
 use App\Models\Plan;
@@ -11,7 +9,7 @@ use Illuminate\Support\Str;
 /**
  * @extends Factory<Plan>
  */
-class PlanFactory extends Factory
+class PlansFactory extends Factory
 {
     protected $model = Plan::class;
 

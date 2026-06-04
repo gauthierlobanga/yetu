@@ -24,6 +24,9 @@ class SyncVendorToCentral
         if (isset($event->changes['password'])) {
             $updateData['password'] = $user->password; // déjà hashé
         }
+        if (isset($event->changes['avatar'])) {
+            $updateData['avatar'] = $user->avatar;
+        }
 
         if (! empty($updateData)) {
             DB::connection($centralConnection)

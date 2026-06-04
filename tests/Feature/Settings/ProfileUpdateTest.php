@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -31,6 +33,29 @@ test('profile information can be updated', function () {
     expect($user->name)->toBe('Test User');
     expect($user->email)->toBe('test@example.com');
     expect($user->email_verified_at)->toBeNull();
+});
+
+test('profile avatar can be updated', function () {
+    Storage::fake('public');
+
+    $user = User::factory()->create();
+
+    $response = $this
+        ->actingAs($user)
+        ->patch(route('tenant.profile.update'), [
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => UploadedFile::fake()->image('avatar.jpg', 400, 400),
+        ]);
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('tenant.profile.edit'));
+
+    $user->refresh();
+
+    expect($user->hasMedia('avatar'))->toBeTrue();
+    expect($user->avatar)->not->toBeNull();
 });
 
 test('email verification status is unchanged when the email address is unchanged', function () {

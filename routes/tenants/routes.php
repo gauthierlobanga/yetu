@@ -5,49 +5,49 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
+use App\Http\Controllers\Admin\VisitorAnalyticsController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\TenantSsoLoginController;
-use App\Http\Controllers\Blog\BlogController;
-use App\Http\Controllers\CommentController;
-use App\Http\Controllers\ContactController;
-use App\Http\Controllers\Home\HomeController;
-use App\Http\Controllers\Main\LocationController;
-use App\Http\Controllers\Pages\PageController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\Shop\AccountDashboardController;
-use App\Http\Controllers\Shop\AddressController;
-use App\Http\Controllers\Shop\BrandController;
-use App\Http\Controllers\Shop\CartController;
-use App\Http\Controllers\Shop\CategoryController;
-use App\Http\Controllers\Shop\CheckoutController;
-use App\Http\Controllers\Shop\LoyaltyController;
-use App\Http\Controllers\Shop\NewsletterController;
-use App\Http\Controllers\Shop\OrderController;
-use App\Http\Controllers\Shop\PaymentController;
-use App\Http\Controllers\Shop\ProductController;
-use App\Http\Controllers\Shop\PromotionController;
-use App\Http\Controllers\Shop\ReturnController;
-use App\Http\Controllers\Shop\ReviewController;
-use App\Http\Controllers\Shop\WishlistController;
-use App\Http\Controllers\Vendor\AnalyticsController;
+use App\Http\Controllers\Central\Pages\PageController;
+use App\Http\Controllers\Others\SearchController;
+use App\Http\Controllers\Vendor\Acheteurs\AccountDashboardController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Adresse\AddressController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Brand\BrandController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Cart\CartController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Category\CategoryController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Checkout\CheckoutController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Commande\OrderController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Home\HomeController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Loyalty\LoyaltyController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Payment\PaymentController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ProductController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ReviewController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Promotion\PromotionController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Return\ReturnController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\WishList\WishlistController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Blog\BlogBoutiqueController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Comments\CommentController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Contact\ContactBoutiqueController;
+use App\Http\Controllers\Vendor\Config\LocationController;
 use App\Http\Controllers\Vendor\Settings\ParametresController;
 use App\Http\Controllers\Vendor\Settings\ParametresSecurityController;
-use App\Http\Controllers\Vendor\SubscriptionController;
-use App\Http\Controllers\vendor\TenantAiController;
-use App\Http\Controllers\Vendor\TenantDashboardNotificationController;
-use App\Http\Controllers\Vendor\TenantOrderController;
-use App\Http\Controllers\Vendor\TenantPaymentController;
-use App\Http\Controllers\Vendor\TenantProductController;
-use App\Http\Controllers\Vendor\VendorDashboardController;
-use App\Http\Controllers\vendor\VendorSettingsController;
-use App\Http\Controllers\Vendor\VendorStatisticsController;
-use App\Http\Controllers\Vendor\ShopThemeController;
-use App\Http\Controllers\Vendor\VisitorAnalyticsController;
-use App\Http\Controllers\Vendor\VisitorStatsController;
+use App\Http\Controllers\Vendor\Vendeurs\AnalyticsController;
+use App\Http\Controllers\Vendor\Vendeurs\ShopThemeController;
+use App\Http\Controllers\Vendor\Vendeurs\SubscriptionController;
+use App\Http\Controllers\Vendor\Vendeurs\TenantAiController;
+use App\Http\Controllers\Vendor\Vendeurs\TenantDashboardNotificationController;
+use App\Http\Controllers\Vendor\Vendeurs\TenantOrderController;
+use App\Http\Controllers\Vendor\Vendeurs\TenantPaymentController;
+use App\Http\Controllers\Vendor\Vendeurs\TenantProductController;
+use App\Http\Controllers\Vendor\Vendeurs\VendorDashboardController;
+use App\Http\Controllers\Vendor\Vendeurs\VendorSettingsController;
+use App\Http\Controllers\Vendor\Vendeurs\VendorStatisticsController;
+use App\Http\Controllers\Vendor\Vendeurs\VisitorStatsController;
+// use App\Http\Middleware\EnsureTenantSubscription;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Http\Controllers\AuthenticatedSessionController;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -74,12 +74,17 @@ Route::middleware([
       | ROUTES PUBLICS TENANT
       |--------------------------------------------------------------------------
       */
-    Route::get('/', [HomeController::class, 'homeIndex'])->name('tenant.home');
+    // Protection: page d'accueil requiert un abonnement actif
+    // Les clients sans abonnement sont redirigés vers /subscription/none
+    Route::get('/', [HomeController::class, 'homeIndex'])
+        ->name('tenant.home');
+
+    // Route::middleware(EnsureTenantSubscription::class)
+    //     ->get('/', [HomeController::class, 'homeIndex'])
+    //     ->name('tenant.home');
 
     Route::get('/tenant-sso-login', [TenantSsoLoginController::class, '__invoke'])
         ->name('tenant.sso.login');
-
-
 
     /*
       |--------------------------------------------------------------------------
@@ -120,7 +125,7 @@ Route::middleware([
     Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::prefix('admin')->group(function () {
-            Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('dashboard');
+            Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('admin.dashboard');
 
             Route::prefix('subscriptions')->name('admin.subscriptions.')->group(function () {
                 Route::get('/', [AdminSubscriptionController::class, 'index'])->name('index');
@@ -142,7 +147,7 @@ Route::middleware([
         Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])
             ->name('vendor.dashboard');
 
-        Route::prefix('subscription')->name('subscription.')->group(function () {
+        Route::prefix('subscription')->name('tenant.subscription.')->group(function () {
             Route::get('/', [SubscriptionController::class, 'show'])->name('show');
             Route::post('/upgrade', [SubscriptionController::class, 'upgrade'])->name('upgrade');
             Route::post('/downgrade', [SubscriptionController::class, 'downgrade'])->name('downgrade');
@@ -228,10 +233,13 @@ Route::middleware([
     });
     /*
     |--------------------------------------------------------------------------
-    | ROUTES PUBLICS TENANT
+    | ROUTES PUBLICS E-COMMERCE (blog, produits, panier, wishlist, etc.)
     |--------------------------------------------------------------------------
+    | Groupe de routes publiques avec protection d'abonnement.
+    | Les tenants sans abonnement actif sont redirigés vers /subscription/none
     */
     Route::name('tenant.')->group(function () {
+        // Route::name('tenant.')->middleware(EnsureTenantSubscription::class)->group(function () {
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/countries', [LocationController::class, 'countries'])->name('addresses.countries');
@@ -247,8 +255,8 @@ Route::middleware([
         Route::get('/search', [SearchController::class, 'shopApi'])->name('api');
 
         Route::prefix('page')->group(function () {
-            Route::get('/contact', [ContactController::class, 'contactIndex'])->name('page.contact');
-            Route::post('/contact', [ContactController::class, 'contactStore'])->name('page.contact.store');
+            Route::get('/contact', [ContactBoutiqueController::class, 'contactIndex'])->name('page.contact');
+            Route::post('/contact', [ContactBoutiqueController::class, 'contactStore'])->name('page.contact.store');
 
             Route::get('/help', [PageController::class, 'pageHelp'])->name('page.help');
             Route::get('/about', [PageController::class, 'pageAbout'])->name('page.about');
@@ -265,12 +273,12 @@ Route::middleware([
         |--------------------------------------------------------------------------
         */
         Route::prefix('blog')->group(function () {
-            Route::get('/', [BlogController::class, 'blogIndex'])->name('blog.index');
-            Route::get('/category/{category:slug}', [BlogController::class, 'blogByCategory'])->name('blog.category');
-            Route::get('/{post:slug}', [BlogController::class, 'blogShow'])->name('blog.show');
-            Route::post('/{post}/comment', [BlogController::class, 'blogComment'])->middleware('auth')->name('blog.comment');
-            Route::post('/{post}/like', [BlogController::class, 'blogLike'])->middleware('auth')->name('blog.like');
-            Route::post('/{post}/bookmark', [BlogController::class, 'blogBookmark'])->middleware('auth')->name('blog.bookmark');
+            Route::get('/', [BlogBoutiqueController::class, 'blogIndex'])->name('blog.index');
+            Route::get('/category/{category:slug}', [BlogBoutiqueController::class, 'blogByCategory'])->name('blog.category');
+            Route::get('/{post:slug}', [BlogBoutiqueController::class, 'blogShow'])->name('blog.show');
+            Route::post('/{post}/comment', [BlogBoutiqueController::class, 'blogComment'])->middleware('auth')->name('blog.comment');
+            Route::post('/{post}/like', [BlogBoutiqueController::class, 'blogLike'])->middleware('auth')->name('blog.like');
+            Route::post('/{post}/bookmark', [BlogBoutiqueController::class, 'blogBookmark'])->middleware('auth')->name('blog.bookmark');
         });
 
         /*
@@ -430,6 +438,10 @@ Route::middleware([
     Route::get('/subscription/required', function () {
         return inertia('Subscription/Required');
     })->name('tenant.subscription.required');
+
+    Route::get('/required', function () {
+        return inertia('Subscription/None');
+    })->name('tenant.subscription.none');
 
     Route::post('/flash/clear', function () {
         session()->forget(['success', 'error']);

@@ -235,16 +235,38 @@ class VendorRegistrationService
             return false;
         }
 
-        // Vérifier que l'utilisateur n'a pas déjà une boutique active
-        $hasActiveTenant = $user->tenants()
-            ->where('statut', Tenant::STATUT_ACTIF)
-            ->exists();
+        return true;
+    }
 
-        if ($hasActiveTenant) {
-            return false;
+    /**
+     * Obtenir le statut détaillé de l'utilisateur pour la création de boutique.
+     */
+    public function getVendorRegistrationStatus(User $user): array
+    {
+        // Vérifier les demandes en cours
+        $pendingRequest = VendorRequest::where('user_id', $user->id)
+            ->whereIn('status', [
+                VendorRequest::STATUS_PENDING,
+                VendorRequest::STATUS_PAYMENT_PENDING,
+            ])
+            ->first();
+
+        if ($pendingRequest) {
+            return [
+                'can_register' => false,
+                'status' => $pendingRequest->status === VendorRequest::STATUS_PAYMENT_PENDING
+                    ? 'payment_pending'
+                    : 'approval_pending',
+                'has_pending_request' => true,
+            ];
         }
 
-        return true;
+        // L'utilisateur peut toujours enregistrer une nouvelle boutique
+        return [
+            'can_register' => true,
+            'status' => 'ready',
+            'has_pending_request' => false,
+        ];
     }
 
     /**

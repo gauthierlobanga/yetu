@@ -426,7 +426,11 @@ interface Plan {
 
 interface Props {
     plans: Plan[];
-    canBecomeVendor: boolean;
+    registrationStatus: {
+        can_register: boolean;
+        status: 'ready' | 'payment_pending' | 'approval_pending';
+        has_pending_request: boolean;
+    };
 }
 
 const icons: Record<string, any> = {
@@ -436,13 +440,22 @@ const icons: Record<string, any> = {
     Business: Gem,
 };
 
-export default function VendorPlans({ plans, canBecomeVendor }: Props) {
+export default function VendorPlans({ plans, registrationStatus }: Props) {
     const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>(
         'monthly',
     );
 
-    if (!canBecomeVendor) {
+    if (!registrationStatus.can_register) {
+        const title =
+            registrationStatus.status === 'payment_pending'
+                ? 'Paiement en attente'
+                : 'Demande en cours';
+        const message =
+            registrationStatus.status === 'payment_pending'
+                ? 'Votre demande de création de boutique est en attente de paiement. Veuillez compléter le paiement pour continuer.'
+                : 'Une demande de création de boutique est déjà en cours de traitement. Vous recevrez une notification dès qu\'elle sera validée.';
+
         return (
             <div className="flex min-h-[60vh] items-center justify-center px-4">
                 <div className="max-w-md text-center">
@@ -450,12 +463,10 @@ export default function VendorPlans({ plans, canBecomeVendor }: Props) {
                         <SparklesSolid className="h-10 w-10 text-primary" />
                     </div>
                     <h1 className="text-2xl font-bold text-foreground">
-                        Demande en cours
+                        {title}
                     </h1>
                     <p className="mt-3 text-muted-foreground">
-                        Une demande de création de boutique est déjà en cours de
-                        traitement. Vous recevrez une notification dès qu'elle
-                        sera validée.
+                        {message}
                     </p>
                     <Link
                         href={dashboard()}

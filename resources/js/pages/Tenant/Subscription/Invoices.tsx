@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Head, Link } from '@inertiajs/react';
 import { Download, FileText, ChevronRight } from 'lucide-react';
 
@@ -22,7 +23,10 @@ type Props = {
 };
 
 function formatDate(date: string | null): string {
-    if (!date) return '—';
+    if (!date) {
+return '—';
+}
+
     return new Date(date).toLocaleDateString('fr-FR', {
         year: 'numeric',
         month: 'long',
@@ -192,7 +196,7 @@ export default function Invoices({ invoices }: Props) {
                 {/* Retour */}
                 <div>
                     <Link
-                        href={route('subscription.show')}
+                        href={route('tenant.subscription.show')}
                         className="inline-flex items-center gap-2 text-primary hover:underline"
                     >
                         ← Retour à mon abonnement

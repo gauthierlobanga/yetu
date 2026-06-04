@@ -29,6 +29,11 @@ class ParametresController extends Controller
     {
         $user = $request->user();
         $changes = [];
+        $validated = $request->validated();
+
+        unset($validated['avatar']);
+
+        $user->fill($validated);
 
         if ($user->isDirty('name')) {
             $changes['name'] = true;
@@ -36,8 +41,6 @@ class ParametresController extends Controller
         if ($user->isDirty('email')) {
             $changes['email'] = true;
         }
-
-        $user->fill($request->validated());
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
@@ -47,6 +50,18 @@ class ParametresController extends Controller
         }
 
         $user->save();
+
+        if ($request->hasFile('avatar')) {
+            $user
+                ->addMediaFromRequest('avatar')
+                ->toMediaCollection('avatar');
+
+            $user->forceFill([
+                'avatar' => $user->avatar_url,
+            ])->save();
+
+            $changes['avatar'] = true;
+        }
 
         if (! empty($changes)) {
             event(new VendorProfileUpdated($user, $changes));

@@ -3,7 +3,7 @@
 ## Structure des Fichiers
 
 ```
-app/Http/Controllers/Shop/
+app/Http/Controllers/Vendor/Boutique/Ecommerce/Checkout/
 ├── CheckoutController.php          [MODIFIÉ] - Logique checkout
 app/Models/
 ├── Commande.php                    [MODIFIÉ] - Boot hook pour statut

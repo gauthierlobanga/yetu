@@ -31,7 +31,11 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $validated = $request->validated();
+
+        unset($validated['avatar']);
+
+        $request->user()->fill($validated);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
@@ -43,7 +47,17 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return to_route('tenant.profile.edit');
+        if ($request->hasFile('avatar')) {
+            $request->user()
+                ->addMediaFromRequest('avatar')
+                ->toMediaCollection('avatar');
+
+            $request->user()->forceFill([
+                'avatar' => $request->user()->avatar_url,
+            ])->save();
+        }
+
+        return to_route('profile.edit');
     }
 
     /**

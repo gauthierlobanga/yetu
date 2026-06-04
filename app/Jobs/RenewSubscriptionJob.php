@@ -29,6 +29,7 @@ class RenewSubscriptionJob implements ShouldQueue
                 Log::info('Subscription auto-renewal disabled', [
                     'subscription_id' => $this->subscription->id,
                 ]);
+
                 return;
             }
 

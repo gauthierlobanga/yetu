@@ -2,18 +2,20 @@
 
 namespace App\Notifications;
 
+use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Carbon;
 
 class SubscriptionCanceledNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public function __construct(
-        private readonly \App\Models\Tenant $tenant,
-        private readonly ?\Illuminate\Support\Carbon $graceUntil = null,
+        private readonly Tenant $tenant,
+        private readonly ?Carbon $graceUntil = null,
     ) {}
 
     public function via(object $notifiable): array
@@ -28,8 +30,8 @@ class SubscriptionCanceledNotification extends Notification implements ShouldQue
             ->greeting("Bonjour {$notifiable->name},")
             ->line("Votre subscription pour **{$this->tenant->raison_sociale}** a été annulée.")
             ->line("Vous avez accès à votre boutique jusqu'au {$this->graceUntil?->format('d/m/Y')}.")
-            ->line("Après cette date, votre accès sera complètement bloqué.")
-            ->line("Si vous souhaitez réactiver votre abonnement, veuillez vous reconnecter.')
+            ->line('Après cette date, votre accès sera complètement bloqué.')
+            ->line('Si vous souhaitez réactiver votre abonnement, veuillez vous reconnecter.')
             ->action('Gérer mon abonnement', route('tenant.subscription.show'))
             ->line('Merci pour votre compréhension.');
     }
