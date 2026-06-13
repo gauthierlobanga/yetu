@@ -40,7 +40,7 @@ class HomeController extends Controller
                 ->inMenu()
                 ->parents()
                 ->ordered()
-                ->with(['media', 'children'])
+                ->with(['media', 'children.media', 'children.children'])
                 ->get()
             : collect();
 
@@ -289,7 +289,9 @@ class HomeController extends Controller
             'image' => $category->image_url,
             'icon' => $category->icon_url,
             'url' => route('tenant.product.category.show', $category->slug),
-            'children' => $category->children->map(fn ($child) => $this->formatCategory($child)),
+            'children' => $category->relationLoaded('children') 
+                ? $category->children->map(fn ($child) => $this->formatCategory($child))
+                : collect(),
         ];
     }
 
