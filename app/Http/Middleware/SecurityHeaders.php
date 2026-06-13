@@ -25,20 +25,27 @@ class SecurityHeaders
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }
 
-        // Content-Security-Policy de base
-        $response->headers->set('Content-Security-Policy',
-            "default-src 'self'; ".
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; ".
-            "style-src 'self' 'unsafe-inline'; ".
-            "img-src 'self' data: https:; ".
-            "font-src 'self' data:; ".
-            "connect-src 'self' ws: wss: https://api.stripe.com; ".
-            "frame-src 'self' https://js.stripe.com https://hooks.stripe.com; ".
-            "media-src 'self'; ".
-            "object-src 'none'; ".
-            "base-uri 'self'; ".
-            "form-action 'self';"
-        );
+        $csp = [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.bunny.net https://fonts.googleapis.com",
+            "img-src 'self' data: https:",
+            "font-src 'self' data: https://fonts.bunny.net https://fonts.gstatic.com",
+            "connect-src 'self' ws: wss: https://api.stripe.com",
+            "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+            "media-src 'self'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'"
+        ];
+
+        if (app()->environment('local')) {
+            $csp[1] .= " http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173";
+            $csp[2] .= " http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173";
+            $csp[5] .= " http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 ws://localhost:5173 ws://127.0.0.1:5173 ws://[::1]:5173";
+        }
+
+        $response->headers->set('Content-Security-Policy', implode('; ', $csp) . ';');
 
         return $response;
     }
