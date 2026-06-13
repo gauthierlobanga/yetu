@@ -1074,6 +1074,7 @@ export default function VendorConfigure({
                                                 <Link
                                                     href="/conditions"
                                                     target="_blank"
+                                                    rel="noopener noreferrer"
                                                     className="text-emerald-600 underline dark:text-emerald-400"
                                                 >
                                                     conditions générales
@@ -1082,6 +1083,7 @@ export default function VendorConfigure({
                                                 <Link
                                                     href="/confidentialite"
                                                     target="_blank"
+                                                    rel="noopener noreferrer"
                                                     className="text-emerald-600 underline dark:text-emerald-400"
                                                 >
                                                     politique de confidentialité

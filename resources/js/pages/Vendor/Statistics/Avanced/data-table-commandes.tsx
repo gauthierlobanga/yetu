@@ -219,7 +219,7 @@ export function DataTableCommandes({ commandes: initialCommandes }: Props) {
                     <a
                         href={row.original.url}
                         target="_blank"
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         className="font-semibold text-emerald-500 transition-colors hover:text-emerald-400 hover:underline"
                     >
                         {row.original.numero_commande}

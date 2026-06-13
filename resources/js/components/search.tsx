@@ -842,7 +842,7 @@ const Footer = memo(function Footer() {
                     className="flex items-center gap-2 text-sm text-muted-foreground no-underline transition-colors hover:text-primary"
                     href={poweredByHref}
                     target="_blank"
-                    rel="noopener sitesearch"
+                    rel="noopener noreferrer sitesearch"
                 >
                     <span className="hidden md:block">Powered by</span>
                     <AlgoliaLogo />
