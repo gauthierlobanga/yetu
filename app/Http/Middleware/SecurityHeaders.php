@@ -40,9 +40,12 @@ class SecurityHeaders
         ];
 
         if (app()->environment('local')) {
-            $csp[1] .= " http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173";
-            $csp[2] .= " http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173";
-            $csp[5] .= " http://localhost:5173 http://127.0.0.1:5173 http://[::1]:5173 ws://localhost:5173 ws://127.0.0.1:5173 ws://[::1]:5173";
+            // Dans l'environnement local, on relaxe la politique pour ne pas bloquer Vite (et éviter les bugs IPv6 CSP)
+            $csp[1] = "script-src * 'unsafe-inline' 'unsafe-eval'";
+            $csp[2] = "style-src * 'unsafe-inline'";
+            $csp[5] = "connect-src * ws: wss:";
+            $csp[3] = "img-src * data: blob:";
+            $csp[4] = "font-src * data:";
         }
 
         $response->headers->set('Content-Security-Policy', implode('; ', $csp) . ';');
