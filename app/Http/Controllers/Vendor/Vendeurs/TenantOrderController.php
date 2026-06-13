@@ -16,6 +16,7 @@ class TenantOrderController extends Controller
     public function index(Request $request): Response
     {
         $commandes = Commande::query()
+            ->with('client')
             ->when($request->input('statut'), fn ($q, $s) => $q->where('statut', $s))
             ->latest('date_commande')
             ->paginate(10)

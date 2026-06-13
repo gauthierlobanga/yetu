@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/Vendor/Configure.tsx
 import { Head, useForm, Link } from '@inertiajs/react';
@@ -564,16 +565,15 @@ export default function VendorConfigure({
                             <div className="space-y-2">
                                 <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
                                     <motion.div
-                                        className="h-full rounded-full bg-linear-to-r from-emerald-500 via-teal-500 to-emerald-500 bg-[length:200%_100%]"
+                                        className="h-full rounded-full bg-linear-to-r from-emerald-500 via-teal-500 to-emerald-500 bg-size-[200%_100%]"
                                         animate={{
                                             backgroundPosition: ['0% 0%', '100% 0%'],
+                                            width: `${submitProgress}%`,
                                         }}
                                         initial={{
                                             width: `${submitProgress}%`,
                                         }}
-                                        animate={{
-                                            width: `${submitProgress}%`,
-                                        }}
+
                                         transition={{
                                             backgroundPosition: {
                                                 duration: 2,

@@ -216,17 +216,17 @@ export default function VendorDashboard({
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.fromTo(
-                '.dashboard-card',
-                { opacity: 0, y: 30 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.4,
-                    stagger: 0.1,
-                    ease: 'power2.out',
-                },
-            );
+            // gsap.fromTo(
+            //     '.dashboard-card',
+            //     { opacity: 0, y: 30 },
+            //     {
+            //         opacity: 1,
+            //         y: 0,
+            //         duration: 0.4,
+            //         stagger: 0.1,
+            //         ease: 'power2.out',
+            //     },
+            // );
             gsap.fromTo(
                 '.dashboard-section',
                 { opacity: 0, y: 20 },

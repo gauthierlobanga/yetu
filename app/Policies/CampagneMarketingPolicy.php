@@ -21,6 +21,10 @@ class CampagneMarketingPolicy
             return true;
         }
 
+        if (function_exists('tenant') && tenant() && $user->canAccessTenant(tenant())) {
+            return true;
+        }
+
         return null;
     }
 

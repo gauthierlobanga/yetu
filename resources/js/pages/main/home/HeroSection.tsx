@@ -50,11 +50,11 @@ export default function HeroSection({ categories }: HeroSectionProps) {
                     { y: 20, opacity: 0, duration: 0.7 },
                     '-=0.5',
                 )
-                .from(
-                    '.hero-action-item',
-                    { y: 20, opacity: 0, duration: 0.5, stagger: 0.08 },
-                    '-=0.4',
-                )
+                // .from(
+                //     '.hero-action-item',
+                //     { y: 20, opacity: 0, duration: 0.5, stagger: 0.08 },
+                //     '-=0.4',
+                // )
                 .from(
                     '.hero-trust > *',
                     { y: 12, opacity: 0, duration: 0.4, stagger: 0.05 },
