@@ -84,7 +84,7 @@ export function SectionCards() {
     const cards = [
         {
             title: 'Total des produits',
-            value: stats.total_products.toLocaleString(),
+            value: stats.total_products,
             description: 'Tous statuts confondus',
             trend: stats.orders_change,
             icon: <IconFileText className="size-6" />,
@@ -119,7 +119,7 @@ export function SectionCards() {
         },
         {
             title: 'Commandes totales',
-            value: stats.total_orders.toLocaleString(),
+            value: stats.total_orders,
             description: 'Commandes reçues',
             trend: stats.orders_change,
             icon: <IconRocket className="size-6 text-primary" />,

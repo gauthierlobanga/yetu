@@ -10,7 +10,6 @@ use App\Services\VendorRegistrationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class PaymentController extends Controller
@@ -101,23 +100,14 @@ class PaymentController extends Controller
                     $tenant = $this->vendorService->approve($vendorRequest);
                 }
 
-                if ($logoPath = session('temp_logo_path')) {
-                    try {
-                        $fullPath = storage_path('app/'.$logoPath);
-                        if (file_exists($fullPath)) {
-                            $tenant->addMedia($fullPath)
-                                ->usingFileName('logo-'.$tenant->id.'.png')
-                                ->toMediaCollection('tenant_avatar');
-                        }
-                        Storage::delete($logoPath);
-                        session()->forget('temp_logo_path');
-                    } catch (\Exception $e) {
-                        Log::error('Erreur sauvegarde logo', [
-                            'error' => $e->getMessage(),
-                            'tenant_id' => $tenant->id,
-                        ]);
-                    }
+                if ($tenant->subscription) {
+                    $tenant->subscription->update([
+                        'stripe_id' => $result['subscription_id'] ?? $tenant->subscription->stripe_id,
+                        'stripe_customer_id' => $result['customer_id'] ?? $tenant->subscription->stripe_customer_id,
+                        'stripe_subscription_id' => $result['subscription_id'] ?? $tenant->subscription->stripe_subscription_id,
+                    ]);
                 }
+
                 // Nettoyer la session
                 session()->forget('vendor_request_id');
 

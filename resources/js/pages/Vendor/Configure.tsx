@@ -8,7 +8,6 @@ import {
     Store,
     Globe,
     Mail,
-    Camera,
     CheckCircle,
     AlertCircle,
     Sparkles,
@@ -16,11 +15,8 @@ import {
     Zap,
     Loader2,
     XCircle,
-    FileCheck,
-    Palette,
     Lock,
     Check,
-    Info,
     PartyPopper,
 } from 'lucide-react';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
@@ -28,14 +24,6 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
 // Types inchangés...
@@ -53,32 +41,11 @@ interface Country {
     name: string;
     phone_code: string;
 }
-interface TypeDocument {
-    id: string;
-    code: string;
-    nom: string;
-    description: string | null;
-    est_obligatoire: boolean;
-    forme_juridique?: string;
-}
-interface DocumentData {
-    numero: string;
-    date_delivrance: string;
-    date_expiration: string;
-}
-interface DocumentPayload {
-    type_document_id: string;
-    numero_document: string | null;
-    date_delivrance: string | null;
-    date_expiration: string | null;
-}
 interface Props {
     plan: { id: number; name: string; formatted_price: string; price: number };
     currencies: Currency[];
     languages: Language[];
     countries: Country[];
-    requiredDocuments: TypeDocument[];
-    optionalDocuments: TypeDocument[];
 }
 
 const STEPS = [
@@ -91,13 +58,6 @@ const STEPS = [
     },
     {
         id: 3,
-        name: 'Légal',
-        icon: FileCheck,
-        description: 'Documents (optionnel)',
-    },
-    { id: 4, name: 'Apparence', icon: Palette, description: 'Logo & réseaux' },
-    {
-        id: 5,
         name: 'Validation',
         icon: ShieldCheck,
         description: 'Récapitulatif',
@@ -320,15 +280,7 @@ function ShopPreview({ data }: { data: any }) {
         <div className="rounded-3xl border border-slate-200/70 bg-white/50 p-6 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950/30">
             <div className="flex items-center gap-4">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-400 to-teal-600 text-white shadow-lg">
-                    {data.logo ? (
-                        <img
-                            src={URL.createObjectURL(data.logo)}
-                            alt="Logo"
-                            className="h-full w-full rounded-2xl object-cover"
-                        />
-                    ) : (
-                        <Store className="h-8 w-8" />
-                    )}
+                    <Store className="h-8 w-8" />
                 </div>
                 <div>
                     <h3 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -354,8 +306,6 @@ export default function VendorConfigure({
     currencies,
     languages,
     countries,
-    requiredDocuments,
-    optionalDocuments,
 }: Props) {
     const detectedCountry = useMemo(
         () => detectUserCountry(countries),
@@ -369,7 +319,6 @@ export default function VendorConfigure({
     const [slugChecking, setSlugChecking] = useState(false);
     const [slugErrors, setSlugErrors] = useState<string[]>([]);
     const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
-    const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [submitProgress, setSubmitProgress] = useState(0);
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -385,16 +334,7 @@ export default function VendorConfigure({
             phone_code: detectedCountry?.phone_code || '+243',
             currency: 'CDF',
             language: 'fr',
-            logo: null as File | null,
-            facebook_url: '',
-            instagram_url: '',
-            twitter_url: '',
-            youtube_url: '',
-            tiktok_url: '',
             accept_terms: false,
-            forme_juridique: 'societe_commerciale',
-            legal_documents: {} as Record<string, DocumentData>,
-            documents: [] as DocumentPayload[],
         });
 
     const cleanSlug = (v: string) => v.toLowerCase().replace(/[^a-z0-9-]/g, '');
@@ -506,15 +446,6 @@ export default function VendorConfigure({
         return () => clearInterval(timer);
     }, [processing]);
 
-    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-
-        if (file) {
-            setData('logo', file);
-            setLogoPreview(URL.createObjectURL(file));
-        }
-    };
-
     const isFormValid = () =>
         data.shop_name.trim() &&
         data.shop_slug.trim() &&
@@ -522,30 +453,6 @@ export default function VendorConfigure({
         data.contact_email.trim() &&
         data.password.length >= 8 &&
         data.accept_terms;
-
-    const buildDocumentsPayload = (): DocumentPayload[] =>
-        [...requiredDocuments, ...optionalDocuments]
-            .filter(
-                (doc) =>
-                    doc.forme_juridique === data.forme_juridique ||
-                    doc.forme_juridique === 'toutes',
-            )
-            .map((doc) => {
-                const docData = data.legal_documents[doc.code];
-
-                return {
-                    type_document_id: doc.id,
-                    numero_document: docData?.numero?.trim() || null,
-                    date_delivrance: docData?.date_delivrance || null,
-                    date_expiration: docData?.date_expiration || null,
-                };
-            })
-            .filter(
-                (doc) =>
-                    doc.numero_document ||
-                    doc.date_delivrance ||
-                    doc.date_expiration,
-            );
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -555,7 +462,6 @@ export default function VendorConfigure({
         }
 
         setData('contact_phone', data.contact_phone?.trim() || '');
-        (data as any).documents = buildDocumentsPayload();
         post(route('vendor.store'), {
             forceFormData: true,
             preserveScroll: true,
@@ -574,10 +480,6 @@ export default function VendorConfigure({
                     ].some((p) => firstKey.startsWith(p))
                 ) {
                     setCurrentStep(2);
-                } else if (firstKey.startsWith('documents')) {
-                    setCurrentStep(3);
-                } else if (firstKey === 'logo' || firstKey.endsWith('_url')) {
-                    setCurrentStep(4);
                 }
             },
         });
@@ -585,43 +487,197 @@ export default function VendorConfigure({
 
     // État de chargement / succès
     if (processing || recentlySuccessful) {
+        const steps = [
+            { name: 'Création du tenant', duration: 2 },
+            { name: 'Configuration de la boutique', duration: 3 },
+            { name: 'Setup des permissions', duration: 2 },
+            { name: 'Finalisation', duration: 1 },
+        ];
+
+        const currentProgressStep = Math.floor(
+            (submitProgress / 100) * steps.length,
+        );
+
         return (
-            <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-white via-emerald-50 to-teal-50 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/30">
-                <div className="space-y-8 text-center">
+            <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-white via-emerald-50 to-teal-50 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/30 p-4">
+                <div className="w-full max-w-md space-y-8">
+                    {/* Animated Icon Circle */}
                     <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
+                        className="mx-auto flex h-32 w-32 items-center justify-center rounded-full bg-linear-to-br from-emerald-500 to-teal-600 shadow-2xl shadow-emerald-500/20"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
                         transition={{
                             type: 'spring',
                             stiffness: 200,
                             damping: 15,
                         }}
-                        className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-emerald-500 to-teal-600 shadow-2xl shadow-emerald-500/20"
                     >
                         {recentlySuccessful ? (
-                            <PartyPopper className="h-12 w-12 text-white" />
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: 0.3 }}
+                            >
+                                <PartyPopper className="h-16 w-16 text-white" />
+                            </motion.div>
                         ) : (
-                            <Loader2 className="h-12 w-12 animate-spin text-white" />
+                            <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: 'linear',
+                                }}
+                            >
+                                <Loader2 className="h-16 w-16 text-white" />
+                            </motion.div>
                         )}
                     </motion.div>
-                    <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                        {recentlySuccessful
-                            ? 'Félicitations ! Votre boutique est prête 🎉'
-                            : 'Création de votre boutique en cours...'}
-                    </h2>
+
+                    {/* Title */}
+                    <div className="text-center space-y-2">
+                        <motion.h2
+                            className="text-3xl font-bold text-slate-900 dark:text-white"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                        >
+                            {recentlySuccessful
+                                ? '🎉 Félicitations!'
+                                : 'Création de votre boutique'}
+                        </motion.h2>
+                        <motion.p
+                            className="text-sm text-slate-500 dark:text-slate-400"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                        >
+                            {recentlySuccessful
+                                ? 'Votre boutique est maintenant prête à être utilisée'
+                                : 'Veuillez patienter, nous configurons tout...'}
+                        </motion.p>
+                    </div>
+
                     {!recentlySuccessful && (
-                        <div className="mx-auto w-80">
-                            <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
-                                <motion.div
-                                    className="h-full rounded-full bg-linear-to-r from-emerald-500 to-teal-600"
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${submitProgress}%` }}
-                                />
+                        <div className="space-y-6">
+                            {/* Progress Bar */}
+                            <div className="space-y-2">
+                                <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                                    <motion.div
+                                        className="h-full rounded-full bg-linear-to-r from-emerald-500 via-teal-500 to-emerald-500 bg-[length:200%_100%]"
+                                        animate={{
+                                            backgroundPosition: ['0% 0%', '100% 0%'],
+                                        }}
+                                        initial={{
+                                            width: `${submitProgress}%`,
+                                        }}
+                                        animate={{
+                                            width: `${submitProgress}%`,
+                                        }}
+                                        transition={{
+                                            backgroundPosition: {
+                                                duration: 2,
+                                                repeat: Infinity,
+                                            },
+                                            width: {
+                                                duration: 0.5,
+                                                ease: 'easeOut',
+                                            },
+                                        }}
+                                    />
+                                </div>
+                                <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
+                                    <span>{Math.round(submitProgress)}%</span>
+                                    <span>
+                                        {
+                                            steps[currentProgressStep]?.name
+                                        }
+                                    </span>
+                                </div>
                             </div>
-                            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                                Configuration de votre espace sécurisé...
-                            </p>
+
+                            {/* Steps Timeline */}
+                            <div className="space-y-3">
+                                {steps.map((step, idx) => (
+                                    <motion.div
+                                        key={idx}
+                                        className="flex items-center gap-3"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                    >
+                                        <div
+                                            className={cn(
+                                                'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all',
+                                                idx < currentProgressStep
+                                                    ? 'bg-emerald-500 text-white'
+                                                    : idx ===
+                                                        currentProgressStep
+                                                      ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400'
+                                                      : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600',
+                                            )}
+                                        >
+                                            {idx <
+                                            currentProgressStep ? (
+                                                <Check className="h-4 w-4" />
+                                            ) : idx ===
+                                              currentProgressStep ? (
+                                                <motion.div
+                                                    animate={{
+                                                        rotate: 360,
+                                                    }}
+                                                    transition={{
+                                                        duration: 1.5,
+                                                        repeat: Infinity,
+                                                    }}
+                                                >
+                                                    <Loader2 className="h-4 w-4" />
+                                                </motion.div>
+                                            ) : (
+                                                idx + 1
+                                            )}
+                                        </div>
+                                        <span
+                                            className={cn(
+                                                'text-sm font-medium transition-colors',
+                                                idx <= currentProgressStep
+                                                    ? 'text-slate-900 dark:text-white'
+                                                    : 'text-slate-400 dark:text-slate-600',
+                                            )}
+                                        >
+                                            {step.name}
+                                        </span>
+                                    </motion.div>
+                                ))}
+                            </div>
+
+                            {/* Tip */}
+                            <div className="rounded-2xl bg-blue-50 p-4 dark:bg-blue-950/20">
+                                <p className="text-xs text-blue-700 dark:text-blue-300">
+                                    <Sparkles className="mr-2 inline h-3 w-3" />
+                                    Astuce: Ne fermez pas cette page
+                                    pendant la création de votre boutique.
+                                </p>
+                            </div>
                         </div>
+                    )}
+
+                    {recentlySuccessful && (
+                        <motion.button
+                            onClick={() =>
+                                (window.location.href = route(
+                                    'tenant.dashboard',
+                                ))
+                            }
+                            className="w-full rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-3 text-white font-semibold shadow-lg shadow-emerald-500/20 hover:from-emerald-700 hover:to-teal-700 transition-all"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            Accéder à ma boutique →
+                        </motion.button>
                     )}
                 </div>
             </div>
@@ -725,7 +781,7 @@ export default function VendorConfigure({
                                             </div>
                                             <div>
                                                 <Badge className="mb-2">
-                                                    Étape 1 sur 5
+                                                    Étape 1 sur 3
                                                 </Badge>
                                                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                                                     Identité de votre boutique
@@ -861,7 +917,7 @@ export default function VendorConfigure({
                                             </div>
                                             <div>
                                                 <Badge className="mb-2">
-                                                    Étape 2 sur 5
+                                                    Étape 2 sur 3
                                                 </Badge>
                                                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                                                     Contact & Sécurité
@@ -934,247 +990,10 @@ export default function VendorConfigure({
                                 </motion.div>
                             )}
 
-                            {/* ======== ÉTAPE 3 : Documents légaux ======== */}
+                            {/* ======== ÉTAPE 3 : Validation ======== */}
                             {currentStep === 3 && (
                                 <motion.div
                                     key="step3"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/90 shadow-xl shadow-slate-200/30 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-black/20"
-                                >
-                                    <div className="border-b border-slate-100 bg-linear-to-r from-emerald-50 via-white to-teal-50 px-6 py-6 dark:border-slate-800 dark:from-emerald-950/20 dark:via-slate-900 dark:to-teal-950/20">
-                                        <div className="flex items-start gap-4">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20">
-                                                <FileCheck className="h-6 w-6" />
-                                            </div>
-                                            <div>
-                                                <Badge className="mb-2">
-                                                    Étape 3 sur 5
-                                                </Badge>
-                                                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                                                    Documents légaux (optionnel)
-                                                </h2>
-                                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                                    Vous pourrez les ajouter
-                                                    plus tard depuis votre
-                                                    tableau de bord.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-6 p-6">
-                                        {/* Select de forme juridique avec correction dark */}
-                                        <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-4 dark:border-slate-800 dark:bg-slate-900/80">
-                                            <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                                Forme juridique{' '}
-                                                <span className="text-red-500">
-                                                    *
-                                                </span>
-                                            </label>
-                                            <Select
-                                                value={data.forme_juridique}
-                                                onValueChange={(v) => {
-                                                    setData(
-                                                        'forme_juridique',
-                                                        v,
-                                                    );
-                                                    setData(
-                                                        'legal_documents',
-                                                        {},
-                                                    );
-                                                }}
-                                            >
-                                                <SelectTrigger className="h-12 rounded-2xl border-slate-200 bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-emerald-500">
-                                                    <SelectValue placeholder="Sélectionnez votre forme juridique" />
-                                                </SelectTrigger>
-                                                <SelectContent className="rounded-2xl border-slate-200 bg-white/95 dark:border-slate-700 dark:bg-slate-900/95">
-                                                    <SelectItem value="societe_commerciale">
-                                                        Société commerciale
-                                                        (RCCM)
-                                                    </SelectItem>
-                                                    <SelectItem value="petit_commercant">
-                                                        Petit commerçant
-                                                        individuel (Patente)
-                                                    </SelectItem>
-                                                    <SelectItem value="organisation_sans_but_lucratif">
-                                                        Organisation sans but
-                                                        lucratif (ASBL/ONG)
-                                                    </SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        {/* Documents */}
-                                        <div className="space-y-4">
-                                            {[
-                                                ...requiredDocuments,
-                                                ...optionalDocuments,
-                                            ]
-                                                .filter(
-                                                    (doc) =>
-                                                        doc.forme_juridique ===
-                                                            data.forme_juridique ||
-                                                        doc.forme_juridique ===
-                                                            'toutes',
-                                                )
-                                                .map((doc) => (
-                                                    <DocumentCard
-                                                        key={doc.id}
-                                                        doc={doc}
-                                                        data={data}
-                                                        setData={setData}
-                                                    />
-                                                ))}
-                                        </div>
-
-                                        <div className="flex justify-between pt-4">
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="lg"
-                                                onClick={() =>
-                                                    setCurrentStep(2)
-                                                }
-                                                className="rounded-2xl"
-                                            >
-                                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                                Retour
-                                            </Button>
-                                            <Button
-                                                type="button"
-                                                size="lg"
-                                                onClick={() =>
-                                                    setCurrentStep(4)
-                                                }
-                                                className="rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
-                                            >
-                                                Continuer{' '}
-                                                <ArrowRight className="ml-2 h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
-
-                            {/* ======== ÉTAPE 4 : Apparence ======== */}
-                            {currentStep === 4 && (
-                                <motion.div
-                                    key="step4"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -20 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/90 shadow-xl shadow-slate-200/30 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-black/20"
-                                >
-                                    <div className="border-b border-slate-100 bg-linear-to-r from-violet-50 via-white to-pink-50 px-6 py-6 dark:border-slate-800 dark:from-violet-950/20 dark:via-slate-900 dark:to-pink-950/20">
-                                        <div className="flex items-start gap-4">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-violet-500 to-pink-600 text-white shadow-lg shadow-violet-500/20">
-                                                <Palette className="h-6 w-6" />
-                                            </div>
-                                            <div>
-                                                <Badge className="mb-2">
-                                                    Étape 4 sur 5
-                                                </Badge>
-                                                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                                                    Apparence & Réseaux sociaux
-                                                </h2>
-                                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                                    Ajoutez un logo et vos liens
-                                                    pour une boutique
-                                                    professionnelle.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="grid gap-6 p-6 md:grid-cols-2">
-                                        <div>
-                                            <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                                Logo
-                                            </label>
-                                            <div className="relative flex h-32 w-32 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 transition-colors hover:border-emerald-400 dark:border-slate-600 dark:bg-slate-800/50">
-                                                {logoPreview ? (
-                                                    <img
-                                                        src={logoPreview}
-                                                        alt="Logo preview"
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <Camera className="h-10 w-10 text-slate-400 dark:text-slate-500" />
-                                                )}
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleLogoChange}
-                                                    className="absolute inset-0 opacity-0"
-                                                />
-                                            </div>
-                                            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                                                500x500px recommandé, max 2 Mo
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                                Aperçu
-                                            </label>
-                                            <ShopPreview data={data} />
-                                        </div>
-                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:col-span-2">
-                                            {[
-                                                'facebook_url',
-                                                'instagram_url',
-                                                'twitter_url',
-                                                'youtube_url',
-                                                'tiktok_url',
-                                            ].map((field) => (
-                                                <FloatingLabelInput
-                                                    key={field}
-                                                    label={field
-                                                        .replace('_url', '')
-                                                        .replace('_', ' ')}
-                                                    value={
-                                                        (data as any)[field] ||
-                                                        ''
-                                                    }
-                                                    onChange={(e) =>
-                                                        setData(
-                                                            field as any,
-                                                            e.target.value,
-                                                        )
-                                                    }
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between p-6 pt-0">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="lg"
-                                            onClick={() => setCurrentStep(3)}
-                                            className="rounded-2xl"
-                                        >
-                                            <ArrowLeft className="mr-2 h-4 w-4" />
-                                            Retour
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            size="lg"
-                                            onClick={() => setCurrentStep(5)}
-                                            className="rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
-                                        >
-                                            Continuer{' '}
-                                            <ArrowRight className="ml-2 h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </motion.div>
-                            )}
-
-                            {/* ======== ÉTAPE 5 : Validation ======== */}
-                            {currentStep === 5 && (
-                                <motion.div
-                                    key="step5"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -20 }}
@@ -1188,7 +1007,7 @@ export default function VendorConfigure({
                                             </div>
                                             <div>
                                                 <Badge className="mb-2">
-                                                    Étape 5 sur 5
+                                                    Étape 3 sur 3
                                                 </Badge>
                                                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                                                     Validation
@@ -1282,7 +1101,7 @@ export default function VendorConfigure({
                                                 variant="outline"
                                                 size="lg"
                                                 onClick={() =>
-                                                    setCurrentStep(4)
+                                                    setCurrentStep(2)
                                                 }
                                                 className="rounded-2xl"
                                             >
@@ -1310,79 +1129,5 @@ export default function VendorConfigure({
                 </div>
             </div>
         </>
-    );
-}
-
-// ─── DocumentCard avec inputs corrigés pour le mode sombre ───
-function DocumentCard({
-    doc,
-    data,
-    setData,
-}: {
-    doc: TypeDocument;
-    data: any;
-    setData: any;
-}) {
-    const docData = data.legal_documents[doc.code] || {
-        numero: '',
-        date_delivrance: '',
-        date_expiration: '',
-    };
-    const update = (field: string, value: string) =>
-        setData('legal_documents', {
-            ...data.legal_documents,
-            [doc.code]: { ...docData, [field]: value },
-        });
-
-    return (
-        <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-4 backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/70">
-            <div className="flex items-start gap-3">
-                <FileCheck className="mt-0.5 h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-slate-900 dark:text-white">
-                            {doc.nom}
-                        </h4>
-                        {doc.est_obligatoire && (
-                            <Badge
-                                variant="outline"
-                                className="border-red-200 text-red-600 dark:border-red-800 dark:text-red-400"
-                            >
-                                Obligatoire
-                            </Badge>
-                        )}
-                    </div>
-                    {doc.description && (
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            {doc.description}
-                        </p>
-                    )}
-                    <div className="mt-3 grid grid-cols-3 gap-3">
-                        <input
-                            placeholder="N° document"
-                            value={docData.numero}
-                            onChange={(e) => update('numero', e.target.value)}
-                            className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-emerald-500"
-                        />
-                        <input
-                            type="date"
-                            value={docData.date_delivrance}
-                            onChange={(e) =>
-                                update('date_delivrance', e.target.value)
-                            }
-                            className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-emerald-500"
-                        />
-                        <input
-                            type="date"
-                            value={docData.date_expiration}
-                            onChange={(e) =>
-                                update('date_expiration', e.target.value)
-                            }
-                            className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-emerald-500"
-                        />
-                    </div>
-                </div>
-            </div>
-        </div>
     );
 }

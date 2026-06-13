@@ -196,7 +196,7 @@ export default function Invoices({ invoices }: Props) {
                 {/* Retour */}
                 <div>
                     <Link
-                        href={route('tenant.subscription.show')}
+                        href={route('subscription.show')}
                         className="inline-flex items-center gap-2 text-primary hover:underline"
                     >
                         ← Retour à mon abonnement

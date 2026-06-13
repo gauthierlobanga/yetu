@@ -2,7 +2,7 @@
 
 namespace App\Filament\Vendeur\Resources\Produits\Schemas;
 
-// use App\Models\Tenant;
+// use App\Models\ProductCategory;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
@@ -477,4 +477,5 @@ class ProduitForm
                     ]),
             ]);
     }
+
 }

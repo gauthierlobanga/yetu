@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\VendorRequestStatusController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,3 +23,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/delete-read', [NotificationController::class, 'deleteRead'])->name('delete-read');
     });
 });
+
+/**
+ * Routes API publiques
+ */
+Route::get('/vendor-request/{id}/status', [VendorRequestStatusController::class, '__invoke'])->name('vendor-request.status');
+

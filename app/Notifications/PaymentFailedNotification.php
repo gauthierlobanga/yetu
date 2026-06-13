@@ -30,7 +30,7 @@ class PaymentFailedNotification extends Notification implements ShouldQueue
             ->line('Le paiement de votre subscription a échoué.')
             ->line("**Erreur:** {$this->errorMessage}")
             ->line('Veuillez mettre à jour votre méthode de paiement.')
-            ->action('Gérer mon abonnement', route('tenant.subscription.show'))
+            ->action('Gérer mon abonnement', route('subscription.show'))
             ->line('Si le problème persiste, veuillez contacter notre support.');
     }
 

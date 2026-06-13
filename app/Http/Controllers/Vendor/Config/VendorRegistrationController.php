@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Vendor\Config;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\VendorRegistrationRequest;
+use App\Jobs\ApproveVendorRequest;
 use App\Models\Plan;
 use App\Models\Tenant;
-use App\Models\TypeDocumentLegal;
 use App\Services\VendorRegistrationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Nnjeim\World\Models\Country;
@@ -108,32 +106,6 @@ class VendorRegistrationController extends Controller
                 'phone_code' => '+'.$c->phone_code,
             ]);
 
-        $requiredDocuments = TypeDocumentLegal::obligatoires()
-            ->orderBy('ordre', 'asc')
-            ->get()
-            ->map(fn ($doc) => [
-                'id' => $doc->id,
-                'code' => $doc->code,
-                'nom' => $doc->nom,
-                'description' => $doc->description,
-                'est_obligatoire' => true,
-                'forme_juridique' => $doc->forme_juridique, // ← déjà présent en base
-            ])
-            ->values(); // on obtient une simple collection, pas un Record
-
-        $optionalDocuments = TypeDocumentLegal::optionnels()
-            ->orderBy('ordre', 'asc')
-            ->get()
-            ->map(fn ($doc) => [
-                'id' => $doc->id,
-                'code' => $doc->code,
-                'nom' => $doc->nom,
-                'description' => $doc->description,
-                'est_obligatoire' => false,
-                'forme_juridique' => $doc->forme_juridique,
-            ])
-            ->values();
-
         return Inertia::render('Vendor/Configure', [
             'plan' => [
                 'id' => $plan->id,
@@ -144,8 +116,6 @@ class VendorRegistrationController extends Controller
             'currencies' => $currencies,
             'languages' => $languages,
             'countries' => $countries,
-            'requiredDocuments' => $requiredDocuments,
-            'optionalDocuments' => $optionalDocuments,
         ]);
     }
 
@@ -237,70 +207,56 @@ class VendorRegistrationController extends Controller
             return back()->withErrors(['shop_slug' => 'Ce sous-domaine est déjà utilisé.']);
         }
 
-        // Initier la demande (les documents sont déjà dans $request->validated() si la FormRequest les accepte)
+        // Initier la demande de boutique avec les informations essentielles.
         $vendorRequest = $this->vendorService->initiateRegistration($user, $request->validated());
         session()->forget('selected_plan_id');
 
         // Stocker le mot de passe en session pour l'utiliser lors de l'approbation
         session(['temp_password' => $request->password]);
 
-        // Sauvegarder temporairement le logo s'il existe
-        if ($request->hasFile('logo')) {
-            session(['temp_logo_path' => $request->file('logo')->store('temp')]);
-        }
+        // Construire l'URL temporaire du tenant
+        $appUrl = config('app.url', 'http://localhost');
+        $scheme = parse_url($appUrl, PHP_URL_SCHEME) ?: 'http';
+        $port = parse_url($appUrl, PHP_URL_PORT);
+        $domain = str_replace('_', '-', $request->shop_slug).'.localhost';
+        $portSuffix = app()->environment('local') && $port && ! str_contains($domain, ':') ? ':'.$port : '';
+        $shopUrl = rtrim($scheme.'://'.$domain.$portSuffix, '/');
 
-        // Si le plan est payant, on redirige vers le paiement
+        // Pour les plans gratuits : approuver directement
+        // Pour les plans payants : dispatcher en background
         if ($plan->price > 0) {
-            session(['vendor_request_id' => $vendorRequest->id]);
+            // Plan payant : dispatcher le job et afficher écran de progression
+            ApproveVendorRequest::dispatch($vendorRequest);
 
-            return redirect()->route('vendor.payment');
+            return Inertia::render('Vendor/Success', [
+                'tenant' => [
+                    'id' => $vendorRequest->id,
+                    'raison_sociale' => $request->shop_name,
+                    'slug' => $request->shop_slug,
+                    'url' => $shopUrl,
+                    'admin_url' => $shopUrl.'/vendeur',
+                    'logo_url' => null,
+                    'dashboard_url' => $shopUrl.'/vendor/dashboard',
+                ],
+                'isCreating' => true,
+            ]);
+        } else {
+            // Plan gratuit : approuver immédiatement
+            $tenant = $this->vendorService->approve($vendorRequest);
+
+            return Inertia::render('Vendor/Success', [
+                'tenant' => [
+                    'id' => $tenant->id,
+                    'raison_sociale' => $tenant->raison_sociale,
+                    'slug' => $tenant->slug,
+                    'url' => $this->vendorService->getShopUrl($tenant),
+                    'admin_url' => $this->vendorService->getVendeurUrl($tenant),
+                    'logo_url' => $tenant->logo_url,
+                    'dashboard_url' => $this->vendorService->getVendeurDashboardUrl($tenant),
+                ],
+                'isCreating' => false,
+            ]);
         }
-
-        // Approbation immédiate (plan gratuit)
-        $tenant = $this->vendorService->approve($vendorRequest);
-
-        // Attacher le logo au tenant (avec vérification d'existence du fichier)
-        if ($logoPath = session('temp_logo_path')) {
-            try {
-                $fullPath = storage_path('app/'.$logoPath);
-                if (file_exists($fullPath)) {
-                    $tenant->addMedia($fullPath)
-                        ->usingFileName('logo-'.$tenant->id.'.png')
-                        ->toMediaCollection('tenant_avatar');
-
-                    Log::info('Logo attaché au tenant', [
-                        'tenant_id' => $tenant->id,
-                        'file' => $logoPath,
-                    ]);
-                } else {
-                    Log::warning('Logo temporaire introuvable', [
-                        'path' => $logoPath,
-                        'tenant_id' => $tenant->id,
-                    ]);
-                }
-                // Nettoyage systématique
-                Storage::delete($logoPath);
-                session()->forget('temp_logo_path');
-            } catch (\Exception $e) {
-                Log::error('Erreur sauvegarde logo', [
-                    'error' => $e->getMessage(),
-                    'tenant_id' => $tenant->id,
-                ]);
-            }
-        }
-
-        // Retourner une réponse Inertia avec les infos du tenant
-        return Inertia::render('Vendor/Success', [
-            'tenant' => [
-                'id' => $tenant->id,
-                'raison_sociale' => $tenant->raison_sociale,
-                'slug' => $tenant->slug,
-                'url' => $this->vendorService->getShopUrl($tenant),
-                'admin_url' => $this->vendorService->getVendeurUrl($tenant),
-                'logo_url' => $tenant->logo_url,
-                'dashboard_url' => $this->vendorService->getVendeurDashboardUrl($tenant),
-            ],
-        ]);
     }
 
     /**
@@ -318,6 +274,7 @@ class VendorRegistrationController extends Controller
                 'url' => $this->vendorService->getShopUrl($tenant),
                 'admin_url' => $this->vendorService->getVendeurUrl($tenant),
                 'logo_url' => $tenant->logo_url,
+                'dashboard_url' => $this->vendorService->getVendeurDashboardUrl($tenant),
             ],
         ]);
     }

@@ -27,15 +27,23 @@ class SubscriptionService
     public function createSubscription(Tenant $tenant, Plan $plan, ?User $user = null): Subscription
     {
         $user = $user ?? $tenant->users()->where('is_owner', true)->first();
+        $trialEndsAt = ($plan->trial_days ?? 0) > 0
+            ? now()->addDays($plan->trial_days)
+            : null;
+        $stripeId = $plan->isFree()
+            ? 'free_'.$tenant->id
+            : 'pending_'.$tenant->id;
 
         $subscription = Subscription::create([
             'user_id' => $user->id,
             'tenant_id' => $tenant->id,
             'plan_id' => $plan->id,
             'type' => 'default',
+            'stripe_id' => $stripeId,
             'stripe_status' => $plan->isFree() ? 'active' : 'trialing',
+            'stripe_price' => $plan->stripe_price_id,
             'trial_started_at' => now(),
-            'trial_ends_at' => $plan->isFree() ? null : now()->addDays($plan->trial_days ?? 14),
+            'trial_ends_at' => $trialEndsAt,
             'current_period_start' => now(),
             'current_period_end' => now()->addMonths(1),
             'auto_renewal' => true,
@@ -44,7 +52,7 @@ class SubscriptionService
         // Mettre à jour les dates du tenant
         $tenant->update([
             'date_activation' => now(),
-            'date_expiration' => $plan->isFree() ? null : now()->addDays($plan->trial_days ?? 14),
+            'date_expiration' => $plan->isFree() ? null : $trialEndsAt,
         ]);
 
         return $subscription;
@@ -195,7 +203,7 @@ class SubscriptionService
 
         Subscription::where('is_blocked', false)
             ->where('stripe_status', '!=', 'canceled')
-            ->whereBetween('trial_ends_at', [now(), now()->addDays(7)])
+            ->whereBetween('trial_ends_at', [now()->subDays(7), now()->addDays(7)])
             ->get()
             ->each(function (Subscription $subscription) use ($notified) {
                 if ($subscription->user && $subscription->tenant) {

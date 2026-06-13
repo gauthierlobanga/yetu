@@ -83,8 +83,6 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
             'id',
             'raison_sociale',
             'slug',
-            'domain',
-            'siret',
             'email',
             'password',
             'telephone',
@@ -94,7 +92,6 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
             'date_activation',
             'date_expiration',
             'configuration',
-            'metadata',
         ];
     }
 

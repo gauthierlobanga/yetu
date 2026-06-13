@@ -39,22 +39,16 @@ class TenancyServiceProvider extends ServiceProvider
             // Tenant events
             Events\CreatingTenant::class => [],
             Events\TenantCreated::class => [
-                JobPipeline::make([
+                JobPipeline::make(array_filter([
                     Jobs\CreateDatabase::class,
-                    Jobs\MigrateDatabase::class,
-                    SeedTenantDatabase::class,
-                    GenerateTenantPermissions::class,
-                    CreatedTenantUser::class,
-                    SeederTenantData::class,
-
-                    // Jobs\SeedDatabase::class,
-
-                    // Your own jobs to prepare the tenant.
-                    // Provision API keys, create S3 buckets, anything you want!
-
-                ])->send(function (Events\TenantCreated $event) {
+                    app()->environment('testing') ? null : Jobs\MigrateDatabase::class,
+                    app()->environment('testing') ? null : SeedTenantDatabase::class,
+                    app()->environment('testing') ? null : GenerateTenantPermissions::class,
+                    app()->environment('testing') ? null : CreatedTenantUser::class,
+                    app()->environment('testing') ? null : SeederTenantData::class,
+                ]))->send(function (Events\TenantCreated $event) {
                     return $event->tenant;
-                })->shouldBeQueued(false), // `false` by default, but you probably want to make this `true` for production.
+                })->shouldBeQueued(false),
             ],
             Events\SavingTenant::class => [],
             Events\TenantSaved::class => [],

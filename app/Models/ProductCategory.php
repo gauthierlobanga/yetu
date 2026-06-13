@@ -105,7 +105,10 @@ class ProductCategory extends Model implements HasMedia, Sitemapable
 
     public function products(): BelongsToMany
     {
-        return $this->belongsToMany(Produit::class, 'produit_categorie_pivot', 'category_id', 'produit_id')
+        return $this->belongsToMany(Produit::class,
+        'produit_categorie_pivot',
+        'category_id',
+        'produit_id')
             ->using(ProductCategoryPivot::class)
             ->withPivot(['is_primary', 'order', 'created_at', 'updated_at'])
             ->withTimestamps();

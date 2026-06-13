@@ -13,9 +13,9 @@ import { ChartWeeklyActivity } from '@/components/board/chart-weekly-activity';
 import { ChartBarLabel } from '@/components/board/ChartBarLabelPost';
 import { DashboardFilters } from '@/components/board/dashboard-filters';
 import { ChartPieInteractive } from '@/components/board/PieChartInteractivePost';
+import { SiteHeader } from '@/components/Central/site-header';
 import { DataTable } from '@/components/data-table-post';
 import { SectionCards } from '@/components/section-cards-post';
-import { SiteHeader } from '@/components/site-header';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 interface DashboardProps {
@@ -189,53 +189,53 @@ export default function Dashboard({
                     <div className="@container/main flex flex-1 flex-col gap-4">
                         {/* Filtres globaux */}
                         <div className="py-4 lg:py-6">
-                            <DashboardFilters currentFilters={filters} />
+                            {/* <DashboardFilters currentFilters={filters} /> */}
                         </div>
 
-                        <SectionCards />
+                        {/* <SectionCards /> */}
 
                         {/* Tableau des articles */}
-                        {/* <div className="px-4 lg:px-6">
-                            <ChartAreaInteractive chartData={chartStats} />
-                        </div> */}
+                        <div className="px-4 lg:px-6">
+                            {/* <ChartAreaInteractive chartData={chartStats} /> */}
+                        </div>
 
                         {/* Ligne 1: Graphiques principaux */}
                         <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-2 lg:px-6">
-                            <ChartBarMixed categoriesData={categoriesStats} />
-                            <ChartCategoryPerformance
+                            {/* <ChartBarMixed categoriesData={categoriesStats} /> */}
+                            {/* <ChartCategoryPerformance
                                 data={categoryPerformance}
-                            />
+                            /> */}
                         </div>
 
                         {/* Ligne 2: Répartition et performance */}
                         <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-2 lg:px-6">
-                            <ChartTopAuthors authors={topAuthors} />
-                            <ChartBarLabel topPosts={topPosts} />
+                            {/* <ChartTopAuthors authors={topAuthors} />
+                            <ChartBarLabel topPosts={topPosts} /> */}
                         </div>
 
                         {/* Ligne 3: Auteurs et activité */}
                         <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-2 lg:px-6">
-                            <ChartPieInteractive
+                            {/* <ChartPieInteractive
                                 postsStats={postsStatusStats}
                             />
-                            <ChartWeeklyActivity data={weeklyActivity} />
+                            <ChartWeeklyActivity data={weeklyActivity} /> */}
                         </div>
 
                         {/* Ligne 4: Tendances temporelles */}
                         <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-2 lg:px-6">
-                            <ChartMonthlyPosts data={monthlyPostsStats} />
-                            <ChartHourlyPosts data={hourlyPostsStats} />
+                            {/* <ChartMonthlyPosts data={monthlyPostsStats} />
+                            <ChartHourlyPosts data={hourlyPostsStats} /> */}
                         </div>
 
                         {/* Ligne 5: Catégories et tags */}
                         <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-2 lg:px-6">
-                            <ChartTopTags topTags={topTags} />
-                            <ChartScheduledPosts posts={scheduledPosts} />
+                            {/* <ChartTopTags topTags={topTags} />
+                            <ChartScheduledPosts posts={scheduledPosts} /> */}
                         </div>
 
                         {/* Tableau des articles */}
                         <div className="px-4 lg:px-6">
-                            <DataTable posts={posts} filters={filters} />
+                            {/* <DataTable posts={posts} filters={filters} /> */}
                         </div>
                     </div>
                 </div>

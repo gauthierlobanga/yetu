@@ -106,7 +106,7 @@ export default function AccountSelection({
     const hasTenants = tenants.length > 0;
     const primaryTenant = tenants[0];
 
-    const dashboardUrl = primaryTenant?.sso_login_url ?? '/selection-compte/ajouter';
+    const dashboardUrl = primaryTenant?.sso_login_url ?? 'admin/dashboard';
     const panelUrl = is_super_admin ? admin_panel_url : primaryTenant?.admin_url;
     const pageTitle = hasTenants ? 'Selection de compte' : 'Creer votre boutique';
 

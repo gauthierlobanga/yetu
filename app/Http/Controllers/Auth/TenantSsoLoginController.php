@@ -28,12 +28,14 @@ class TenantSsoLoginController extends Controller
         $user = $service->handleSsoLogin($token, $tenant);
         abort_unless($user, 403);
 
-        // Vérification d'abonnement: évite les accès 403 pour les tenants sans abonnement
-        // En les redirigeant plutôt vers une page d'information professionnelle
+        // Vérification d'abonnement: ne bloquer l'absence d'abonnement qu'après l'essai.
         $subscription = $tenant->subscription;
-        if (! $subscription || ! $subscription->isActive()) {
-            // Rediriger vers la page d'absence d'abonnement au lieu de 403
+        if (! $subscription && $tenant->isTrialExpired()) {
             return redirect()->route('tenant.subscription.none');
+        }
+
+        if ($subscription && ! $subscription->isActive() && ! $subscription->isGracePeriodActive()) {
+            return redirect()->route('tenant.subscription.required');
         }
 
         Auth::login($user);

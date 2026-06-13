@@ -4,21 +4,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class ProductCategoryPivot extends Pivot
 {
-    use HasUuids;
-
     protected $table = 'produit_categorie_pivot';
-
-    protected $keyType = 'string';
 
     public $incrementing = false;
 
-    protected $primaryKey = null;
+    public $timestamps = true;
 
     protected $fillable = [
         'produit_id',

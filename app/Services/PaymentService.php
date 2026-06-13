@@ -23,7 +23,6 @@ class PaymentService
     public function createCheckoutSession(User $user, Plan $plan, VendorRequest $vendorRequest): Session
     {
         return Session::create([
-            'payment_method_types' => ['card', 'mobile_money'],
             'line_items' => [[
                 'price_data' => [
                     'currency' => strtolower($plan->currency),
@@ -141,7 +140,15 @@ class PaymentService
             ]);
 
             // Approuver la demande de vendeur et créer le tenant + subscription
-            app(VendorRegistrationService::class)->approve($vendorRequest);
+            $tenant = app(VendorRegistrationService::class)->approve($vendorRequest);
+
+            if ($tenant->subscription) {
+                $tenant->subscription->update([
+                    'stripe_id' => $session->subscription ?? $tenant->subscription->stripe_id,
+                    'stripe_customer_id' => $session->customer ?? null,
+                    'stripe_subscription_id' => $session->subscription ?? null,
+                ]);
+            }
 
             Log::info('Vendor payment completed and approved', [
                 'vendor_request_id' => $vendorRequest->id,

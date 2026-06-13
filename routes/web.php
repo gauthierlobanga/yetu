@@ -72,7 +72,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::prefix('admin')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('admin.dashboard');
 
     Route::prefix('subscriptions')->name('admin.subscriptions.')->group(function () {
         Route::get('/', [AdminSubscriptionController::class, 'index'])->name('index');

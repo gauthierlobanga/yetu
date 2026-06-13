@@ -20,7 +20,7 @@ class DashboardController extends Controller
     public function adminDashboardIndex(Request $request)
     {
         if (! $this->hasDashboardSchema()) {
-            return Inertia::render('dashboard', $this->emptyDashboardPayload($request));
+            return Inertia::render('Admin/analytics/Dashboard', $this->emptyDashboardPayload($request));
         }
 
         $user = Auth::user();
@@ -1236,7 +1236,7 @@ class DashboardController extends Controller
         // Liste des catégories (pour le filtre)
         $categoriesList = PostCategory::orderBy('nom')->get(['id', 'nom', 'slug']);
 
-        return Inertia::render('dashboard', [
+        return Inertia::render('Admin/analytics/Dashboard', [
             'posts' => $posts,
             'stats' => $stats,
             'chartStats' => $chartStats,
@@ -1515,7 +1515,7 @@ class DashboardController extends Controller
         return Schema::hasTable('posts')
             && Schema::hasTable('users')
             && Schema::hasTable('posts_categories')
-            && Schema::hasTable('category_post');
+            && Schema::hasTable('posts_categories_pivot');
     }
 
     private function emptyDashboardPayload(Request $request): array

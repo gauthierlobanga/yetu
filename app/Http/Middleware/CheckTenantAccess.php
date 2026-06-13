@@ -24,8 +24,12 @@ class CheckTenantAccess
         $subscription = $tenant->subscription;
 
         if (! $subscription) {
+            if (! $tenant->isTrialExpired()) {
+                return $next($request);
+            }
+
             return redirect()->route('tenant.subscription.none')
-                ->with('error', 'Aucune subscription trouvée.');
+                ->with('error', 'Votre période d\'essai a expiré. Veuillez choisir un plan.');
         }
 
         // If subscription is blocked, deny all access

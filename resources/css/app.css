@@ -8,6 +8,12 @@
 
 @import '@fontsource-variable/inter';
 
+@import "tw-animate-css";
+
+@import "shadcn/tailwind.css";
+
+@import "@fontsource-variable/instrument-sans";
+
 @plugin "@tailwindcss/typography";
 
 @source '../views';
@@ -172,6 +178,9 @@
     }
     html {
         @apply font-sans;
+    }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
     }
 }
 
@@ -357,7 +366,7 @@ input[type='search']::-webkit-search-results-decoration {
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
     --font-heading: var(--font-sans);
-    --font-sans: 'Inter Variable', sans-serif;
+    --font-sans: 'Instrument Sans Variable', sans-serif;
     --color-chart-5: var(--chart-5);
     --color-chart-4: var(--chart-4);
     --color-chart-3: var(--chart-3);

@@ -24,8 +24,12 @@ class EnsureTenantSubscription
 
         // No subscription found
         if (! $subscription) {
+            if (! $tenant->isTrialExpired()) {
+                return $next($request);
+            }
+
             return redirect()->route('tenant.subscription.none')
-                ->with('error', 'Aucune subscription trouvée.');
+                ->with('error', 'Votre période d\'essai a expiré. Veuillez choisir un plan.');
         }
 
         // Subscription is active (paid or free plan)
@@ -56,7 +60,7 @@ class EnsureTenantSubscription
         }
 
         // Subscription is expired and grace period is over - block access
-        return redirect()->route('tenant.subscription.expired')
+        return redirect()->route('tenant.subscription.required')
             ->with('error', 'Votre subscription a expiré. Votre accès a été bloqué.');
     }
 }

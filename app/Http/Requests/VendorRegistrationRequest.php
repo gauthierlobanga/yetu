@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\VendorRequest;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -28,7 +29,13 @@ class VendorRegistrationRequest extends FormRequest
                 'required', 'string', 'min:3', 'max:50',
                 'regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
                 Rule::unique('tenants', 'slug'),
-                Rule::unique('vendor_requests', 'shop_slug'),
+                Rule::unique('vendor_requests', 'shop_slug')
+                    ->where(fn ($query) => $query
+                        ->whereIn('status', [
+                            VendorRequest::STATUS_PENDING,
+                            VendorRequest::STATUS_PAYMENT_PENDING,
+                        ])
+                        ->whereNull('deleted_at')),
             ],
             'shop_description' => ['nullable', 'string', 'max:500'],
 
@@ -43,27 +50,6 @@ class VendorRegistrationRequest extends FormRequest
             // Localisation & préférences
             'currency' => ['nullable', 'string', 'max:3'],
             'language' => ['nullable', 'string', 'max:5'],
-
-            // Logo
-            'logo' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
-
-            // Réseaux sociaux
-            'facebook_url' => ['nullable', 'url', 'max:255'],
-            'instagram_url' => ['nullable', 'url', 'max:255'],
-            'twitter_url' => ['nullable', 'url', 'max:255'],
-            'youtube_url' => ['nullable', 'url', 'max:255'],
-            'tiktok_url' => ['nullable', 'url', 'max:255'],
-
-            // Documents légaux
-            'documents' => ['nullable', 'array'],
-            'documents.*.type_document_id' => [
-                'required', 'uuid', 'exists:type_documents_legaux,id',
-            ],
-            'documents.*.numero_document' => ['nullable', 'string', 'max:100'],
-            'documents.*.date_delivrance' => ['nullable', 'date', 'before_or_equal:today'],
-            'documents.*.date_expiration' => ['nullable', 'date', 'after:documents.*.date_delivrance'],
-            'documents.*.lieu_delivrance' => ['nullable', 'string', 'max:255'],
-            'documents.*.autorite_delivrance' => ['nullable', 'string', 'max:255'],
 
             // Conditions
             'accept_terms' => ['required', 'accepted'],
@@ -80,10 +66,6 @@ class VendorRegistrationRequest extends FormRequest
             'shop_slug.unique' => 'Ce sous-domaine est déjà utilisé.',
             'contact_email.required' => "L'email de contact est requis.",
             'accept_terms.accepted' => 'Vous devez accepter les conditions générales.',
-            'documents.*.type_document_id.required' => 'Le type de document est requis.',
-            'documents.*.type_document_id.exists' => "Le type de document sélectionné n'existe pas.",
-            'documents.*.date_expiration.after' => "La date d'expiration doit être postérieure à la date de délivrance.",
-            'documents.*.date_delivrance.before_or_equal' => 'La date de délivrance ne peut pas être dans le futur.',
             'phone_full.phone' => 'Le numéro de téléphone n\'est pas valide pour le pays sélectionné.',
         ];
     }

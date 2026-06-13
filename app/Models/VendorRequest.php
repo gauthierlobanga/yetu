@@ -5,6 +5,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class VendorRequest extends Model
 {
-    use HasUuids, SoftDeletes;
+    use HasFactory, HasUuids, SoftDeletes;
 
     protected $keyType = 'string';
 
@@ -30,6 +31,11 @@ class VendorRequest extends Model
         'status',
         'rejection_reason',
         'payment_session_id',
+        'payment_status',
+        'payment_transaction_id',
+        'payment_failure_reason',
+        'paid_at',
+        'reminder_sent',
         'approved_at',
         'rejected_at',
     ];
@@ -37,6 +43,8 @@ class VendorRequest extends Model
     protected $casts = [
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
+        'paid_at' => 'datetime',
+        'reminder_sent' => 'boolean',
     ];
 
     // Constantes de statut

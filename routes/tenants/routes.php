@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\VisitorAnalyticsController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\TenantSsoLoginController;
@@ -26,9 +25,7 @@ use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ReviewController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Promotion\PromotionController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Return\ReturnController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\WishList\WishlistController;
-use App\Http\Controllers\Vendor\Boutique\Pages\Blog\BlogBoutiqueController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Comments\CommentController;
-use App\Http\Controllers\Vendor\Boutique\Pages\Contact\ContactBoutiqueController;
 use App\Http\Controllers\Vendor\Config\LocationController;
 use App\Http\Controllers\Vendor\Settings\ParametresController;
 use App\Http\Controllers\Vendor\Settings\ParametresSecurityController;
@@ -44,7 +41,10 @@ use App\Http\Controllers\Vendor\Vendeurs\VendorDashboardController;
 use App\Http\Controllers\Vendor\Vendeurs\VendorSettingsController;
 use App\Http\Controllers\Vendor\Vendeurs\VendorStatisticsController;
 use App\Http\Controllers\Vendor\Vendeurs\VisitorStatsController;
-// use App\Http\Middleware\EnsureTenantSubscription;
+use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Blog\BlogBoutiqueController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Contact\ContactBoutiqueController;
+use App\Http\Middleware\EnsureTenantSubscription;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -76,15 +76,14 @@ Route::middleware([
       */
     // Protection: page d'accueil requiert un abonnement actif
     // Les clients sans abonnement sont redirigés vers /subscription/none
-    Route::get('/', [HomeController::class, 'homeIndex'])
+    Route::middleware(EnsureTenantSubscription::class)
+        ->get('/', [HomeController::class, 'homeIndex'])
         ->name('tenant.home');
-
-    // Route::middleware(EnsureTenantSubscription::class)
-    //     ->get('/', [HomeController::class, 'homeIndex'])
-    //     ->name('tenant.home');
 
     Route::get('/tenant-sso-login', [TenantSsoLoginController::class, '__invoke'])
         ->name('tenant.sso.login');
+
+
 
     /*
       |--------------------------------------------------------------------------
@@ -125,7 +124,7 @@ Route::middleware([
     Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::prefix('admin')->group(function () {
-            Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('admin.dashboard');
+            Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('dashboard');
 
             Route::prefix('subscriptions')->name('admin.subscriptions.')->group(function () {
                 Route::get('/', [AdminSubscriptionController::class, 'index'])->name('index');
@@ -147,7 +146,7 @@ Route::middleware([
         Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])
             ->name('vendor.dashboard');
 
-        Route::prefix('subscription')->name('tenant.subscription.')->group(function () {
+        Route::prefix('subscription')->name('subscription.')->group(function () {
             Route::get('/', [SubscriptionController::class, 'show'])->name('show');
             Route::post('/upgrade', [SubscriptionController::class, 'upgrade'])->name('upgrade');
             Route::post('/downgrade', [SubscriptionController::class, 'downgrade'])->name('downgrade');
@@ -238,8 +237,7 @@ Route::middleware([
     | Groupe de routes publiques avec protection d'abonnement.
     | Les tenants sans abonnement actif sont redirigés vers /subscription/none
     */
-    Route::name('tenant.')->group(function () {
-        // Route::name('tenant.')->middleware(EnsureTenantSubscription::class)->group(function () {
+    Route::name('tenant.')->middleware(EnsureTenantSubscription::class)->group(function () {
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/countries', [LocationController::class, 'countries'])->name('addresses.countries');

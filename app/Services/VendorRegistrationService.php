@@ -63,37 +63,11 @@ class VendorRegistrationService
                 'shop_description' => $data['shop_description'] ?? null,
                 'contact_email' => $data['contact_email'] ?? $user->email,
                 'contact_phone' => $data['contact_phone'] ?? null,
-                'billing_cycle' => $data['billing_cycle'] ?? 'monthly',
                 'status' => $plan->is_free
                     ? VendorRequest::STATUS_PENDING
                     : VendorRequest::STATUS_PAYMENT_PENDING,
-                'metadata' => [
-                    'user_agent' => request()->userAgent(),
-                    'ip_address' => request()->ip(),
-                    'submitted_at' => now()->toIso8601String(),
-                    'currency' => $data['currency'] ?? 'CDF',
-                    'language' => $data['language'] ?? 'fr',
-                    'facebook_url' => $data['facebook_url'] ?? null,
-                    'instagram_url' => $data['instagram_url'] ?? null,
-                    'twitter_url' => $data['twitter_url'] ?? null,
-                    'youtube_url' => $data['youtube_url'] ?? null,
-                    'tiktok_url' => $data['tiktok_url'] ?? null,
-                ],
+                'payment_status' => $plan->is_free ? null : 'pending',
             ]);
-
-            // ✅ Enregistrer les documents légaux (table centrale)
-            if (! empty($data['documents'])) {
-                foreach ($data['documents'] as $doc) {
-                    $vr->documents()->create([
-                        'type_document_id' => $doc['type_document_id'],
-                        'numero_document' => $doc['numero_document'] ?? null,
-                        'date_delivrance' => $doc['date_delivrance'] ?? null,
-                        'date_expiration' => $doc['date_expiration'] ?? null,
-                        'lieu_delivrance' => $doc['lieu_delivrance'] ?? null,
-                        'autorite_delivrance' => $doc['autorite_delivrance'] ?? null,
-                    ]);
-                }
-            }
 
             return $vr;
         });
@@ -104,6 +78,12 @@ class VendorRegistrationService
      */
     public function approve(VendorRequest $vendorRequest): Tenant
     {
+        $vendorRequest->loadMissing(['tenant', 'plan', 'user']);
+
+        if ($vendorRequest->tenant) {
+            return $vendorRequest->tenant;
+        }
+
         $plan = $vendorRequest->plan;
         $user = $vendorRequest->user;
         $password = session('temp_password') ?? 'password';
@@ -147,7 +127,7 @@ class VendorRegistrationService
         $user = $vendorRequest->user; // rafraîchir si besoin
         $user->tenants()->attach($tenant->id, ['is_owner' => true]);
 
-        if ($plan->trial_days > 0) {
+        if (! $plan->isFree() && $plan->trial_days > 0) {
             $tenant->update([
                 'date_activation' => now(),
                 'date_expiration' => now()->addDays($plan->trial_days),
@@ -161,10 +141,12 @@ class VendorRegistrationService
         // Rôles / permissions (contexte central)
         try {
             setPermissionsTeamId($tenant->id);
+            // 1. Créer les rôles par défaut EN PREMIER
+            $this->seedDefaultTenantRoles($tenant);
+            // 2. ENSUITE assigner le rôle à l'utilisateur
             if (! $user->hasRole('owner')) {
                 $user->assignRole('owner');
             }
-            $this->seedDefaultTenantRoles($tenant);
         } catch (\Exception $e) {
             Log::warning('Failed to set up permissions for tenant', [
                 'tenant_id' => $tenant->id,
