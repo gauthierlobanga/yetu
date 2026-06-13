@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\TenantPropsService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -42,35 +43,37 @@ class VendorStatisticsController extends Controller
 
         $planAllowsAdvanced = $tenant->plan && $tenant->plan->price > 0;
 
-        $stats = $tenant->run(function () use ($planAllowsAdvanced) {
-            return [
-                // -- Évolution du chiffre d’affaires et des commandes --
-                'salesOverTime' => $this->getSalesOverTime(),
-                // -- Meilleurs produits --
-                'topProducts' => $this->getTopProducts(),
-                // -- Meilleurs clients --
-                'topClients' => $this->getTopClients(),
-                // -- Répartition des statuts de commandes --
-                'orderStatuses' => $this->getOrderStatuses(),
-                // -- Activité sur 7 jours glissants --
-                'weeklyActivity' => $this->getWeeklyActivity(),
-                // -- Commandes par mois (12 derniers) --
-                'monthlyOrders' => $this->getMonthlyOrders(),
-                // -- Commandes par heure --
-                'hourlyOrders' => $this->getHourlyOrders(),
-                // -- Performance par catégorie --
-                'categoryPerformance' => $this->getCategoryPerformance(),
-                // -- Top catégories (CA) --
-                'topCategories' => $this->getTopCategories(),
-                // -- Paniers actifs / abandonnés --
-                'cartStats' => $this->getCartStats(),
-                // -- Métriques clients --
-                'customerMetrics' => $this->getCustomerMetrics(),
-                // -- Derniers mouvements de stock --
-                'recentMovements' => $this->getRecentMovements(),
-                // -- Statistiques avancées supplémentaires --
-                'advancedStats' => $this->getAdvancedStats($planAllowsAdvanced),
-            ];
+        $stats = Cache::remember('vendor_stats_' . $tenant->id, now()->addMinutes(15), function () use ($tenant, $planAllowsAdvanced) {
+            return $tenant->run(function () use ($planAllowsAdvanced) {
+                return [
+                    // -- Évolution du chiffre d’affaires et des commandes --
+                    'salesOverTime' => $this->getSalesOverTime(),
+                    // -- Meilleurs produits --
+                    'topProducts' => $this->getTopProducts(),
+                    // -- Meilleurs clients --
+                    'topClients' => $this->getTopClients(),
+                    // -- Répartition des statuts de commandes --
+                    'orderStatuses' => $this->getOrderStatuses(),
+                    // -- Activité sur 7 jours glissants --
+                    'weeklyActivity' => $this->getWeeklyActivity(),
+                    // -- Commandes par mois (12 derniers) --
+                    'monthlyOrders' => $this->getMonthlyOrders(),
+                    // -- Commandes par heure --
+                    'hourlyOrders' => $this->getHourlyOrders(),
+                    // -- Performance par catégorie --
+                    'categoryPerformance' => $this->getCategoryPerformance(),
+                    // -- Top catégories (CA) --
+                    'topCategories' => $this->getTopCategories(),
+                    // -- Paniers actifs / abandonnés --
+                    'cartStats' => $this->getCartStats(),
+                    // -- Métriques clients --
+                    'customerMetrics' => $this->getCustomerMetrics(),
+                    // -- Derniers mouvements de stock --
+                    'recentMovements' => $this->getRecentMovements(),
+                    // -- Statistiques avancées supplémentaires --
+                    'advancedStats' => $this->getAdvancedStats($planAllowsAdvanced),
+                ];
+            });
         });
 
         // Récupérer les 10 dernières commandes
