@@ -18,7 +18,12 @@ class HomeController extends Controller
     public function homeIndex(Request $request)
     {
         $productsCount = Produit::published()->count();
-        $recentProducts = Produit::published()->latest()->take(4)->get();
+        // Pour les produits récents, on charge les relations si la vue les utilise
+        $recentProducts = Produit::published()
+            ->latest()
+            ->with(['media', 'brand'])
+            ->take(4)
+            ->get();
 
         $hasProductCategories = Schema::hasTable('produit_categories');
         $canLoadProductCategories = $hasProductCategories && Schema::hasTable('produit_categorie_pivot');
@@ -35,16 +40,38 @@ class HomeController extends Controller
             ? Produit::published()->inStock()->with($productRelations)
             : null;
 
-        $categoriesModels = $hasProductCategories
-            ? ProductCategory::active()
-                ->inMenu()
-                ->parents()
-                ->ordered()
-                ->with(['media', 'children.media', 'children.children'])
-                ->get()
-            : collect();
+        // ========== OPTIMISATION DES CATÉGORIES ==========
+        $allCategories = collect();
+        $categoriesModels = collect();
+        $grouped = collect();
+        $getDescendantIds = null;
 
-        // Formatage pour le frontend
+        if ($canLoadProductCategories) {
+            $allCategories = ProductCategory::active()
+                ->inMenu()
+                ->ordered()
+                ->with('media')
+                ->get()
+                ->keyBy('id');
+
+            $grouped = $allCategories->groupBy('parente_id');
+
+            foreach ($allCategories as $cat) {
+                $cat->setRelation('children', $grouped->get($cat->id, collect())->values());
+            }
+
+            $categoriesModels = $allCategories->whereNull('parente_id')->values();
+
+            $getDescendantIds = function ($categoryId) use (&$getDescendantIds, $grouped) {
+                $ids = [$categoryId];
+                foreach ($grouped->get($categoryId, collect()) as $child) {
+                    $ids = array_merge($ids, $getDescendantIds($child->id));
+                }
+
+                return $ids;
+            };
+        }
+
         $categories = $categoriesModels->map(fn ($category) => $this->formatCategory($category));
 
         // Produits mis en avant
@@ -71,21 +98,24 @@ class HomeController extends Controller
 
         // Produits par catégorie pour les onglets
         $productsByCategory = [];
-        foreach ($canLoadProductCategories ? $categoriesModels : collect() as $category) {
-            $categoryIds = $category->getAllChildrenIds();
-            $products = Produit::published()
-                ->inStock()
-                ->whereHas('categories', fn ($q) => $q->whereIn('produit_categories.id', $categoryIds))
-                ->with(['media', 'brand'])
-                ->take(6)
-                ->get()
-                ->map(fn ($product) => $this->formatProduct($product));
+        if ($canLoadProductCategories) {
+            foreach ($categoriesModels as $category) {
+                $categoryIds = $getDescendantIds($category->id);
 
-            if ($products->isNotEmpty()) {
-                $productsByCategory[$category->slug] = [
-                    'category' => $this->formatCategory($category),
-                    'products' => $products,
-                ];
+                $products = Produit::published()
+                    ->inStock()
+                    ->whereHas('categories', fn ($q) => $q->whereIn('produit_categories.id', $categoryIds))
+                    ->with(['media', 'brand'])
+                    ->take(6)
+                    ->get()
+                    ->map(fn ($product) => $this->formatProduct($product));
+
+                if ($products->isNotEmpty()) {
+                    $productsByCategory[$category->slug] = [
+                        'category' => $this->formatCategory($category),
+                        'products' => $products,
+                    ];
+                }
             }
         }
 
@@ -94,10 +124,11 @@ class HomeController extends Controller
         $activePromotion = $hasPromotions ? Promotion::activePromotion() : null;
 
         if ($activePromotion && $hasProducts) {
-            // Récupère 3 produits best‑sellers pour la section "Les meilleures ventes"
+            // 🔧 Ajout de with(['media', 'brand']) pour éviter le lazy loading
             $promoProducts = Produit::published()
                 ->inStock()
                 ->bestseller()
+                ->with(['media', 'brand'])
                 ->take(10)
                 ->get()
                 ->map(fn ($product) => $this->formatProduct($product));
@@ -126,44 +157,19 @@ class HomeController extends Controller
             : collect();
 
         // Deal du jour
-        // $dealOfTheDay = $hasProducts && $hasPromotions
-        //     ? Produit::published()
-        //         ->inStock()
-        //         ->onSale()
-        //         ->whereHas('promotions', function ($q) {
-        //             $q->where('type', 'pourcentage')
-        //                 ->where('est_active', true)
-        //                 ->where('valeur', '>=', 30)
-        //                 ->where('date_debut', '<=', now())
-        //                 ->where(function ($q2) {
-        //                     $q2->whereNull('date_fin')->orWhere('date_fin', '>=', now());
-        //                 });
-        //         })
-        //         ->with(['media', 'brand', 'promotions' => function ($q) {
-        //             $q->where('est_active', true)->where('type', 'pourcentage');
-        //         }])
-        //         ->take(10)
-        //         ->get()
-        //         ->map(function ($product) {
-        //             $data = $this->formatProduct($product);
-        //             $maxDiscount = $product->promotions->max('valeur');
-        //             $data['discount_label'] = $maxDiscount ? "-{$maxDiscount}%" : null;
-
-        //             return $data;
-        //         })
-        //     : collect();
+        // 🔧 Ajout de with(['media', 'brand'])
         $dealOfTheDay = $hasProducts
             ? Produit::dealOfTheDay()
                 ->latest('expires_at')
+                ->with(['media', 'brand'])
                 ->take(10)
                 ->get()
                 ->map(function ($product) {
                     $data = $this->formatProduct($product);
-                    // Le `discount_label` peut être calculé à partir de la réduction
                     $data['discount_label'] = $product->reduction_pourcentage
                         ? "-{$product->reduction_pourcentage}%"
                         : null;
-                    $data['is_deal_of_the_day'] = true; // optionnel, pour un badge éventuel
+                    $data['is_deal_of_the_day'] = true;
 
                     return $data;
                 })
@@ -195,6 +201,11 @@ class HomeController extends Controller
     {
         $primaryImage = $product->getPrimaryImage();
 
+        // Désormais 'brand' est toujours chargé, mais on peut ajouter une sécurité
+        $brandData = $product->relationLoaded('brand') && $product->brand
+            ? ['nom' => $product->brand->nom, 'slug' => $product->brand->slug]
+            : null;
+
         $data = [
             'id' => $product->id,
             'nom' => $product->nom,
@@ -209,26 +220,21 @@ class HomeController extends Controller
             'note_moyenne' => (float) $product->note_moyenne,
             'nombre_avis' => (int) $product->nombre_avis,
             'badge' => $product->is_new ? 'Nouveauté' : ($product->is_bestseller ? 'Best Seller' : null),
-            'brand' => $product->brand ? ['nom' => $product->brand->nom, 'slug' => $product->brand->slug] : null,
+            'brand' => $brandData,
             'url' => route('tenant.product.show', $product->slug),
             'sold_count' => (int) $product->sold_count,
         ];
 
         if ($withDetails) {
-            // Description
             $data['description'] = $product->description_longue;
             $data['short_description'] = $product->short_description;
-
-            // Images (galerie complète)
             $data['images'] = $product->images;
 
-            // Catégories
             $data['categories'] = $product->categories->map(fn ($c) => [
                 'nom' => $c->nom,
                 'slug' => $c->slug,
             ])->values()->toArray();
 
-            // Variantes
             $data['variantes'] = $product->variantes->map(fn ($v) => [
                 'id' => $v->id,
                 'nom' => $v->nom,
@@ -238,10 +244,8 @@ class HomeController extends Controller
                 'prix_actuel' => (float) $v->prix_actuel,
             ])->values()->toArray();
 
-            // Stock disponible total
             $data['stock_disponible'] = $product->stock_disponible;
 
-            // Avis approuvés
             $avis = $product->approvedAvis()->with('client')->latest()->get();
             $data['avis'] = $avis->map(fn ($a) => [
                 'id' => $a->id,
@@ -249,10 +253,9 @@ class HomeController extends Controller
                 'commentaire' => $a->commentaire,
                 'client' => $a->client->full_name ?? 'Client',
                 'date' => $a->created_at->diffForHumans(),
-                'utile' => $a->votes_utiles ?? 0, // si vous avez ce champ
+                'utile' => $a->votes_utiles ?? 0,
             ])->values()->toArray();
 
-            // Statistiques des avis (distribution)
             $distribution = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
             foreach ($avis as $a) {
                 $note = (int) $a->note;
@@ -267,7 +270,6 @@ class HomeController extends Controller
                 'distribution' => $distribution,
             ];
 
-            // Offres groupées (exemple simple basé sur le prix actuel)
             $prixBase = $product->prix_actuel;
             $data['bulk_discounts'] = [
                 ['quantity' => 1, 'discount_percentage' => 0,  'price' => $prixBase],
@@ -289,7 +291,7 @@ class HomeController extends Controller
             'image' => $category->image_url,
             'icon' => $category->icon_url,
             'url' => route('tenant.product.category.show', $category->slug),
-            'children' => $category->relationLoaded('children') 
+            'children' => $category->relationLoaded('children')
                 ? $category->children->map(fn ($child) => $this->formatCategory($child))
                 : collect(),
         ];

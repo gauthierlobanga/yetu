@@ -106,9 +106,9 @@ class ProductCategory extends Model implements HasMedia, Sitemapable
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Produit::class,
-        'produit_categorie_pivot',
-        'category_id',
-        'produit_id')
+            'produit_categorie_pivot',
+            'category_id',
+            'produit_id')
             ->using(ProductCategoryPivot::class)
             ->withPivot(['is_primary', 'order', 'created_at', 'updated_at'])
             ->withTimestamps();
@@ -419,7 +419,8 @@ class ProductCategory extends Model implements HasMedia, Sitemapable
     {
         $ids = [$this->id];
 
-        foreach ($this->children as $child) {
+        // Utilisation de la requête -> pas de lazy loading
+        foreach ($this->children()->get() as $child) {
             $ids = array_merge($ids, $child->getAllChildrenIds());
         }
 
