@@ -211,9 +211,6 @@ class VendorRegistrationController extends Controller
         $vendorRequest = $this->vendorService->initiateRegistration($user, $request->validated());
         session()->forget('selected_plan_id');
 
-        // Stocker le mot de passe en session pour l'utiliser lors de l'approbation
-        session(['temp_password' => $request->password]);
-
         // Construire l'URL temporaire du tenant
         $appUrl = config('app.url', 'http://localhost');
         $scheme = parse_url($appUrl, PHP_URL_SCHEME) ?: 'http';
@@ -266,6 +263,9 @@ class VendorRegistrationController extends Controller
      */
     public function vendeurSuccess(Tenant $tenant)
     {
+        if ((string) $tenant->user_id !== (string) Auth::id()) {
+            abort(403);
+        }
         return Inertia::render('Vendor/Success', [
             'tenant' => [
                 'id' => $tenant->id,

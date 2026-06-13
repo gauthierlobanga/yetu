@@ -62,6 +62,12 @@ class PaymentController extends Controller
     public function index()
     {
         $vendorRequest = VendorRequest::findOrFail(session('vendor_request_id'));
+
+        // Vérifier que l'utilisateur est le propriétaire de la demande
+        if ($vendorRequest->user_id !== Auth::id()) {
+            abort(403);
+        }
+
         $plan = Plan::findOrFail($vendorRequest->plan_id);
 
         return Inertia::render('Vendor/Payment', [
@@ -90,6 +96,9 @@ class PaymentController extends Controller
 
             if ($result['status'] === 'paid') {
                 $vendorRequest = VendorRequest::findOrFail($result['metadata']['vendor_request_id']);
+                if ((string) $vendorRequest->user_id !== (string) Auth::id()) {
+                    abort(403);
+                }
 
                 // Approuver le vendeur et créer le tenant + subscription (via PaymentService webhook)
                 // Note: Le webhook Stripe se déclenche asynchrone et appelle approve()
@@ -119,6 +128,8 @@ class PaymentController extends Controller
 
             return redirect()->route('vendor.register')
                 ->with('error', 'Le paiement n\'a pas abouti. Veuillez réessayer.');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Erreur vérification paiement', [
                 'session_id' => $sessionId,

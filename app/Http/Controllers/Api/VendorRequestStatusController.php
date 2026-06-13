@@ -12,8 +12,13 @@ class VendorRequestStatusController extends Controller
     {
         $vendorRequest = VendorRequest::find($id);
 
-        if (!$vendorRequest) {
+        if (! $vendorRequest) {
             return response()->json(['error' => 'Not found'], 404);
+        }
+
+        // Vérifier que la demande appartient à l'utilisateur authentifié
+        if ($vendorRequest->user_id !== request()->user()->id) {
+            return response()->json(['error' => 'Forbidden'], 403);
         }
 
         return response()->json([

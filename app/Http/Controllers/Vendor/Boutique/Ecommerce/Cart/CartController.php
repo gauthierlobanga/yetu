@@ -57,6 +57,8 @@ class CartController extends Controller
 
     public function cartUpdate(Request $request, ItemPanier $item)
     {
+        $this->authorizeCartItemAccess($request, $item);
+
         $request->validate(['quantite' => 'required|integer|min:1']);
 
         $item->quantite = $request->quantite;
@@ -74,8 +76,10 @@ class CartController extends Controller
         return back()->with('success', 'Panier mis à jour');
     }
 
-    public function cartRemove(ItemPanier $item)
+    public function cartRemove(Request $request, ItemPanier $item)
     {
+        $this->authorizeCartItemAccess($request, $item);
+
         $item->delete();
         $item->panier->recalculerTotaux();
 
@@ -209,6 +213,18 @@ class CartController extends Controller
         }
 
         return $cart;
+    }
+
+    /**
+     * Vérifie que l'item du panier appartient bien au panier de l'utilisateur/session courant.
+     */
+    private function authorizeCartItemAccess(Request $request, ItemPanier $item): void
+    {
+        $userCart = $this->getOrCreateCart($request);
+
+        if ($item->panier_id !== $userCart->id) {
+            abort(403, 'Accès non autorisé à cet article du panier.');
+        }
     }
 
     public function cartCalculate(Request $request)

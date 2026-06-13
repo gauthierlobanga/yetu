@@ -25,7 +25,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 /**
- * Routes API publiques
+ * Routes API protégées (vendor request status accessible uniquement au propriétaire)
  */
-Route::get('/vendor-request/{id}/status', [VendorRequestStatusController::class, '__invoke'])->name('vendor-request.status');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/vendor-request/{id}/status', [VendorRequestStatusController::class, '__invoke'])->name('vendor-request.status');
+});
 

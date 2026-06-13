@@ -86,7 +86,8 @@ class VendorRegistrationService
 
         $plan = $vendorRequest->plan;
         $user = $vendorRequest->user;
-        $password = session('temp_password') ?? 'password';
+        // Mot de passe par défaut sécurisé : forcer l'utilisateur à le changer via reset password
+        $password = Str::password(16);
 
         // 1ère phase : créer le tenant (sans événements) et le domaine
         $tenant = DB::transaction(function () use ($vendorRequest, $plan, $user, $password) {
@@ -155,7 +156,6 @@ class VendorRegistrationService
         }
 
         // Nettoyage de la session
-        session()->forget('temp_password');
 
         // Créer la subscription pour le plan
         $this->subscriptionService->createSubscription($tenant, $plan, $user);

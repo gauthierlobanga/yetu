@@ -13,6 +13,29 @@ class StorePostRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        // Sanitize HTML content to prevent XSS attacks
+        if ($this->has('content')) {
+            $this->merge([
+                'content' => strip_tags((string) $this->input('content'), $this->allowedHtmlTags()),
+            ]);
+        }
+        if ($this->has('excerpt')) {
+            $this->merge([
+                'excerpt' => strip_tags((string) $this->input('excerpt')),
+            ]);
+        }
+    }
+
+    /**
+     * Balises HTML autorisées dans le contenu.
+     */
+    private function allowedHtmlTags(): string
+    {
+        return '<p><br><strong><em><u><h2><h3><h4><ul><ol><li><a><blockquote><pre><code><img><table><thead><tbody><tr><th><td><hr>';
+    }
+
     public function rules(): array
     {
         return [
