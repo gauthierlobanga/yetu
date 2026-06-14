@@ -211,7 +211,8 @@ class ProductController extends Controller
                 'valeur' => $v->valeur,
                 'supplement_prix' => $v->supplement_prix,
                 'stock' => $v->stock,
-                'prix_actuel' => $v->prix_actuel,
+                // Optimisation : calcul manuel au lieu d'utiliser $v->prix_actuel pour éviter le Lazy Loading de la relation 'produit'
+                'prix_actuel' => $product->prix_actuel + $v->supplement_prix,
             ]);
             $data['avis'] = $product->approvedAvis()->with('client')->latest()->take(5)->get()->map(fn ($a) => [
                 'note' => $a->note,

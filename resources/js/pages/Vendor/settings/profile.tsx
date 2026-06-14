@@ -38,10 +38,13 @@ import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 export default function VendorProfile({
     tenant,
     mustVerifyEmail,
+    status,
+    isOwner = false,
 }: {
     tenant: Tenant;
     mustVerifyEmail: boolean;
     status?: string;
+    isOwner?: boolean;
 }) {
     const { auth } = usePage().props;
     const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(
@@ -110,7 +113,7 @@ export default function VendorProfile({
                                 <Heading
                                     variant="small"
                                     title="Profil"
-                                    description="Gérez votre profil personnel et les détails de votre boutique"
+                                    description={isOwner ? "Gérez votre profil personnel et les détails de votre boutique" : "Gérez votre profil personnel"}
                                 />
                             </div>
                         </motion.div>
@@ -121,25 +124,27 @@ export default function VendorProfile({
                             onValueChange={setActiveTab}
                             className="w-full"
                         >
-                            <TabsList className="grid w-full max-w-md grid-cols-2">
-                                <TabsTrigger
-                                    value="personal"
-                                    className="flex items-center gap-2"
-                                >
-                                    <User className="h-4 w-4" />
-                                    Profil personnel
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="shop"
-                                    className="flex items-center gap-2"
-                                >
-                                    <ShoppingBag className="h-4 w-4" />
-                                    Ma boutique
-                                </TabsTrigger>
-                            </TabsList>
+                            {isOwner && (
+                                <TabsList className="mb-6 grid w-full max-w-md grid-cols-2 p-1 bg-slate-100/80 dark:bg-slate-900/50 rounded-xl">
+                                    <TabsTrigger
+                                        value="personal"
+                                        className="flex items-center gap-2 rounded-lg data-[state=active]:shadow-sm"
+                                    >
+                                        <User className="h-4 w-4" />
+                                        Profil personnel
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="shop"
+                                        className="flex items-center gap-2 rounded-lg data-[state=active]:shadow-sm"
+                                    >
+                                        <ShoppingBag className="h-4 w-4" />
+                                        Ma boutique
+                                    </TabsTrigger>
+                                </TabsList>
+                            )}
 
                             {/* Onglet: Profil personnel */}
-                            <TabsContent value="personal" className="space-y-6">
+                            <TabsContent value="personal" className="space-y-8 mt-0">
                                 <Form
                                     {...ParametresController.update.form()}
                                     className="space-y-6"
@@ -151,7 +156,7 @@ export default function VendorProfile({
                                         recentlySuccessful,
                                         errors,
                                     }) => (
-                                        <Card className="border-slate-200/80 bg-white/95 shadow-sm shadow-slate-900/5 dark:border-slate-800 dark:bg-slate-950/80">
+                                        <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
                                             <div className="border-b border-slate-200/70 px-5 py-6 sm:px-6 dark:border-slate-800">
                                                 <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
                                                     <div className="relative">
@@ -345,10 +350,11 @@ export default function VendorProfile({
                             </TabsContent>
 
                             {/* Onglet: Ma boutique */}
-                            <TabsContent value="shop" className="space-y-6">
-                                {/* Carte avec logo */}
-                                <Card className="overflow-hidden border-emerald-200/50 dark:border-emerald-900/20">
-                                    <div className="h-32 bg-gradient-to-r from-emerald-50 via-emerald-100/50 to-white dark:from-emerald-950/40 dark:via-emerald-900/20 dark:to-slate-900" />
+                            {isOwner && (
+                                <TabsContent value="shop" className="space-y-8 mt-0">
+                                    {/* Carte avec logo */}
+                                    <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
+                                        <div className="h-32 bg-gradient-to-br from-emerald-500/10 via-emerald-400/5 to-slate-50 dark:from-emerald-900/40 dark:via-emerald-900/10 dark:to-slate-950" />
 
                                     <CardContent className="pt-6">
                                         <div className="flex items-start gap-8">
@@ -426,7 +432,7 @@ export default function VendorProfile({
                                 </Card>
 
                                 {/* Réglages boutique */}
-                                <Card>
+                                <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2">
                                             <ShoppingBag className="h-5 w-5" />
@@ -466,7 +472,7 @@ export default function VendorProfile({
                                 {/* Informations supplémentaires */}
                                 <div className="grid gap-4 md:grid-cols-2">
                                     {/* SIRET/RCCM */}
-                                    <Card>
+                                    <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
                                         <CardHeader>
                                             <CardTitle className="text-base">
                                                 Documents légaux
@@ -494,7 +500,7 @@ export default function VendorProfile({
                                     </Card>
 
                                     {/* Abonnement */}
-                                    <Card>
+                                    <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
                                         <CardHeader>
                                             <CardTitle className="text-base">
                                                 Abonnement
@@ -532,6 +538,7 @@ export default function VendorProfile({
                                     </Card>
                                 </div>
                             </TabsContent>
+                            )}
                         </Tabs>
                     </div>
                 </SettingsLayout>

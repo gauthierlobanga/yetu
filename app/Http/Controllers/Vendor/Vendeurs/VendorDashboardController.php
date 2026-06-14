@@ -101,11 +101,19 @@ class VendorDashboardController extends Controller
             $currentPlanFeatures = is_array($featuresRaw) ? $featuresRaw : json_decode($featuresRaw, true) ?? [];
         }
 
+        $subscription = $tenant->subscription;
+
         return Inertia::render('Vendor/Dashboard', [
             'tenant' => $tenantProps->getTenantProps($tenant),
             'theme' => $tenant->theme(),
             'stats' => $stats,
             'trial' => $trial,
+            'subscription' => $subscription ? [
+                'status' => $subscription->stripe_status,
+                'is_active' => $subscription->isActive(),
+                'is_paid' => ! $subscription->plan->isFree(),
+                'trial_ends_at' => $subscription->trial_ends_at?->toIso8601String(),
+            ] : null,
             'recentProducts' => $recentProducts,
             'currentPlanFeatures' => $currentPlanFeatures,
             'allPlansFeatures' => $allPlans->pluck('features', 'name')->toArray(),

@@ -8,7 +8,7 @@ use Spatie\LaravelSettings\Settings;
 
 class SettingApp extends Settings
 {
-    public string $name;
+    public string $name = 'Yetu';
 
     public ?string $logo_url = null;
 

@@ -163,7 +163,8 @@ class CartController extends Controller
 
     public function formatCart(Panier $cart): array
     {
-        $cart->load(['items', 'promotions']);
+        // Optimisation : eager loading pour éviter un LazyLoadingViolation sur l'accès aux relations de l'item du panier
+        $cart->load(['items.produit.media', 'items.variante', 'promotions']);
 
         return [
             'id' => $cart->id,

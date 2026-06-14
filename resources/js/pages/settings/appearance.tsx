@@ -1,33 +1,40 @@
-import { Head } from '@inertiajs/react';
+﻿import { Head } from '@inertiajs/react';
 import AppearanceTabs from '@/components/appearance-tabs';
-import Heading from '@/components/heading';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Palette } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
-import { edit as editAppearance } from '@/routes/tenant/appearance';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Appearance settings',
-        href: editAppearance(),
+        title: 'Apparence',
+        href: '#',
     },
 ];
 
 export default function Appearance() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Appearance settings" />
-
-            <h1 className="sr-only">Appearance settings</h1>
+            <Head title="Apparence" />
+            <h1 className="sr-only">Paramètres d'apparence</h1>
 
             <SettingsLayout>
-                <div className="space-y-6">
-                    <Heading
-                        variant="small"
-                        title="Appearance settings"
-                        description="Update your account's appearance settings"
-                    />
-                    <AppearanceTabs />
+                <div className="space-y-6 max-w-4xl">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-lg">
+                                <Palette className="h-5 w-5 text-emerald-500" />
+                                Personnaliser l'apparence
+                            </CardTitle>
+                            <CardDescription>
+                                Choisissez le thème qui correspond le mieux à vos préférences de navigation.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <AppearanceTabs />
+                        </CardContent>
+                    </Card>
                 </div>
             </SettingsLayout>
         </AppLayout>

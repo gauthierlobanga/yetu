@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\VisitorAnalyticsController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\TenantSsoLoginController;
 use App\Http\Controllers\Central\Pages\PageController;
 use App\Http\Controllers\Others\SearchController;
+use App\Http\Controllers\Settings\ProfileController;
+use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Vendor\Acheteurs\AccountDashboardController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Adresse\AddressController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Brand\BrandController;
@@ -25,7 +28,9 @@ use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ReviewController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Promotion\PromotionController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Return\ReturnController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\WishList\WishlistController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Blog\BlogBoutiqueController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Comments\CommentController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Contact\ContactBoutiqueController;
 use App\Http\Controllers\Vendor\Config\LocationController;
 use App\Http\Controllers\Vendor\Settings\ParametresController;
 use App\Http\Controllers\Vendor\Settings\ParametresSecurityController;
@@ -41,9 +46,6 @@ use App\Http\Controllers\Vendor\Vendeurs\VendorDashboardController;
 use App\Http\Controllers\Vendor\Vendeurs\VendorSettingsController;
 use App\Http\Controllers\Vendor\Vendeurs\VendorStatisticsController;
 use App\Http\Controllers\Vendor\Vendeurs\VisitorStatsController;
-use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
-use App\Http\Controllers\Vendor\Boutique\Pages\Blog\BlogBoutiqueController;
-use App\Http\Controllers\Vendor\Boutique\Pages\Contact\ContactBoutiqueController;
 use App\Http\Middleware\EnsureTenantSubscription;
 use App\Models\Visit;
 use Illuminate\Http\Request;
@@ -82,8 +84,6 @@ Route::middleware([
 
     Route::get('/tenant-sso-login', [TenantSsoLoginController::class, '__invoke'])
         ->name('tenant.sso.login');
-
-
 
     /*
       |--------------------------------------------------------------------------
@@ -139,8 +139,20 @@ Route::middleware([
             });
         });
 
-        Route::prefix('acheteur')->group(function () {
-            Route::get('/account', [AccountDashboardController::class, 'AccountDashboardIndex'])->name('acheteur.dashboard');
+        Route::prefix('acheteur')->name('acheteur.')->group(function () {
+            Route::get('/account', [AccountDashboardController::class, 'AccountDashboardIndex'])->name('dashboard');
+
+            Route::prefix('settings')->group(function () {
+                Route::redirect('/', '/acheteur/settings/profile');
+                Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+                Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+                Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+                Route::get('/security', [SecurityController::class, 'edit'])->name('security.edit');
+                Route::put('/password', [SecurityController::class, 'update'])->name('password.update');
+
+                Route::inertia('/appearance', 'settings/appearance')->name('appearance.edit');
+            });
         });
 
         Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])

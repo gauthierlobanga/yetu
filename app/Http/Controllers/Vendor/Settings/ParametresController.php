@@ -22,6 +22,7 @@ class ParametresController extends Controller
         return Inertia::render('Vendor/settings/profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'isOwner' => tenant('user_id') === $request->user()->id,
         ]);
     }
 

@@ -20,7 +20,8 @@ class CategoryController extends Controller
     public function categoriesShow(ProductCategory $category)
     {
         $category->load('media');
-        $products = $category->products()->published()->inStock()->paginate(24)
+        // Optimisation : eager loading de media et brand pour éviter le Lazy Loading dans formatProduct
+        $products = $category->products()->published()->inStock()->with(['media', 'brand'])->paginate(24)
             ->through(fn ($p) => app(ProductController::class)->formatProduct($p));
 
         $subcategories = $category->children()->active()->ordered()->get()->map(fn ($c) => $this->formatCategory($c));

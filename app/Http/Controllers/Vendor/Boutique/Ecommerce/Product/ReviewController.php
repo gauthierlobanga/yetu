@@ -14,6 +14,8 @@ class ReviewController extends Controller
 {
     public function productsReviewsIndex(Produit $produit)
     {
+        // Optimisation : chargement des relations media et brand pour éviter le Lazy Loading
+        $produit->loadMissing(['media', 'brand']);
         $reviews = $produit->approvedAvis()->with('client')->latest()->paginate(10);
 
         return Inertia::render('Shop/Products/Reviews', [

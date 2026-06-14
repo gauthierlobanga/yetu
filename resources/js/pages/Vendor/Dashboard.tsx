@@ -159,10 +159,19 @@ interface Stats {
     growth_percent: number;
 }
 
+import { SubscriptionReminderBanner } from '@/components/ecommerce/others/SubscriptionReminderBanner';
+
 interface Trial {
     start: string;
     end: string;
     remaining_days: number;
+}
+
+interface Subscription {
+    status: string;
+    is_active: boolean;
+    is_paid: boolean;
+    trial_ends_at: string | null;
 }
 
 interface RecentProduct {
@@ -181,6 +190,7 @@ interface Props {
     tenant: Tenant;
     stats: Stats;
     trial?: Trial;
+    subscription?: Subscription | null;
     recentProducts: RecentProduct[];
     currentPlanFeatures: string[];
     allPlansFeatures: Record<string, string[]>;
@@ -190,6 +200,7 @@ export default function VendorDashboard({
     tenant,
     stats,
     trial,
+    subscription,
     allPlansFeatures,
 }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -346,7 +357,7 @@ export default function VendorDashboard({
                                 />
 
                                 <QuickActionCard
-                                    href={route('vendor.payment')}
+                                    href={route('subscription.show')}
                                     icon={CreditCard}
                                     label="Abonnement"
                                     description="Plan & facturation"
@@ -609,7 +620,7 @@ export default function VendorDashboard({
                                                             >
                                                                 <Link
                                                                     href={route(
-                                                                        'vendor.payment',
+                                                                        'subscription.show',
                                                                     )}
                                                                 >
                                                                     <Sparkles className="mr-2 h-4 w-4" />
@@ -629,6 +640,8 @@ export default function VendorDashboard({
 
                         {aiEnabled && <FloatingChatWidget />}
                     </div>
+
+                    <SubscriptionReminderBanner trial={trial ?? null} subscription={subscription ?? null} />
 
                     <AlertDialog
                         open={deleteProductId !== null}

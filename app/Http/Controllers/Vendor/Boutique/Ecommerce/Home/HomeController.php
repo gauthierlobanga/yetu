@@ -241,7 +241,8 @@ class HomeController extends Controller
                 'valeur' => $v->valeur,
                 'supplement_prix' => (float) $v->supplement_prix,
                 'stock' => (int) $v->stock,
-                'prix_actuel' => (float) $v->prix_actuel,
+                // Optimisation : calcul direct pour contourner le Lazy Loading de $v->prix_actuel
+                'prix_actuel' => (float) ($product->prix_actuel + $v->supplement_prix),
             ])->values()->toArray();
 
             $data['stock_disponible'] = $product->stock_disponible;

@@ -12,12 +12,20 @@ trait ProfileValidationRules
      *
      * @return array<string, array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>>
      */
-    protected function profileRules(int|string|null $userId = null): array
+     protected function profileRules(int|string|null $userId = null): array
     {
         return [
-            'name' => $this->nameRules(),
-            'email' => $this->emailRules($userId),
-            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048'],
+            'name'    => $this->nameRules(),
+            'email'   => $this->emailRules($userId),
+            'avatar'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048'],
+            // Nouveaux champs
+            'phone'   => ['nullable', 'string', 'max:20'],
+            'city'    => ['nullable', 'string', 'max:100'],
+            'country' => ['nullable', 'string', 'max:100'],
+            'locale'  => ['nullable', 'string', 'in:fr,en,es'],
+            'currency'=> ['nullable', 'string', 'in:XOF,EUR,USD'],
+            'notifications_email'  => ['nullable', 'boolean'],
+            'notifications_offers' => ['nullable', 'boolean'],
         ];
     }
 
@@ -36,32 +44,6 @@ trait ProfileValidationRules
      *
      * @return array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>
      */
-    // protected function emailRules(int|string|null $userId = null): array
-    // {
-    //     // Déterminer la connexion à utiliser pour la validation
-    //     $connection = null;
-    //     if (function_exists('tenancy') && tenancy()->initialized) {
-    //         $connection = 'tenant';
-    //     }
-
-    //     $uniqueRule = $userId === null
-    //         ? Rule::unique(User::class)
-    //         : Rule::unique(User::class)->ignore($userId);
-
-    //     // Si une connexion spécifique est définie, l'utiliser pour la validation
-    //     if ($connection) {
-    //         $uniqueRule->connection($connection);
-    //     }
-
-    //     return [
-    //         'required',
-    //         'string',
-    //         'email',
-    //         'max:255',
-    //         $uniqueRule,
-    //     ];
-    // }
-
     protected function emailRules(int|string|null $userId = null): array
     {
         $uniqueRule = $userId === null

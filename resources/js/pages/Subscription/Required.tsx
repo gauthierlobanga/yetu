@@ -153,7 +153,7 @@ export default function SubscriptionRequired({ trialEndedAt }: Props) {
                                     asChild
                                     className="group relative w-full overflow-hidden rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 py-3.5 text-base font-bold text-white shadow-lg transition-all duration-300 hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl dark:from-emerald-500 dark:to-teal-500 dark:hover:from-emerald-600 dark:hover:to-teal-600"
                                 >
-                                    <Link href={route('vendor.payment')} className="flex items-center justify-center gap-2">
+                                    <Link href={route('subscription.show')} className="flex items-center justify-center gap-2">
                                         <Sparkles className="h-5 w-5 transition-transform group-hover:scale-110" />
                                         Choisir un plan
                                         <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
