@@ -21,12 +21,10 @@ class SubscriptionController extends Controller
      */
     protected function getPlanIdValidationRule(): array
     {
-        $centralConnection = config('tenancy.database.central_connection', 'central');
-
         return [
             'required',
             'uuid',
-            Rule::exists("{$centralConnection}.plans", 'id')->where('is_active', true)
+            Rule::exists(Plan::class, 'id')->where('is_active', true)
         ];
     }
 
