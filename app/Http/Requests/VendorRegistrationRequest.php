@@ -16,9 +16,14 @@ class VendorRegistrationRequest extends FormRequest
 
     public function rules(): array
     {
+        $centralConnection = config('tenancy.database.central_connection', 'central');
+
         return [
             // Plan
-            'plan_id' => ['required', 'exists:plans,id'],
+            'plan_id' => [
+                'required',
+                Rule::exists("{$centralConnection}.plans", 'id')
+            ],
 
             // Informations de base
             'shop_name' => [

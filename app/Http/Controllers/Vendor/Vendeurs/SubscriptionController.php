@@ -7,6 +7,7 @@ use App\Models\Plan;
 use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class SubscriptionController extends Controller
@@ -14,6 +15,20 @@ class SubscriptionController extends Controller
     public function __construct(
         private readonly SubscriptionService $subscriptionService
     ) {}
+
+    /**
+     * Obtenir la règle de validation pour le plan_id (connexion centrale)
+     */
+    protected function getPlanIdValidationRule(): array
+    {
+        $centralConnection = config('tenancy.database.central_connection', 'central');
+
+        return [
+            'required',
+            'uuid',
+            Rule::exists("{$centralConnection}.plans", 'id')->where('is_active', true)
+        ];
+    }
 
     /**
      * Afficher l'état actuel de la subscription.
@@ -95,7 +110,7 @@ class SubscriptionController extends Controller
      */
     public function upgrade(Request $request)
     {
-        $request->validate(['plan_id' => 'required|uuid|exists:plans,id']);
+        $request->validate(['plan_id' => $this->getPlanIdValidationRule()]);
 
         $tenant = tenant();
         $subscription = $tenant->subscription;
@@ -139,7 +154,7 @@ class SubscriptionController extends Controller
      */
     public function downgrade(Request $request)
     {
-        $request->validate(['plan_id' => 'required|uuid|exists:plans,id']);
+        $request->validate(['plan_id' => $this->getPlanIdValidationRule()]);
 
         $tenant = tenant();
         $subscription = $tenant->subscription;
