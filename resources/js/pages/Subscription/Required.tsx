@@ -1,6 +1,13 @@
 import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { Lock, ArrowRight, Clock, ShieldCheck, Sparkles, Calendar } from 'lucide-react';
+import {
+    Lock,
+    ArrowRight,
+    Clock,
+    ShieldCheck,
+    Sparkles,
+    Calendar,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface Props {
@@ -87,18 +94,30 @@ export default function SubscriptionRequired({ trialEndedAt }: Props) {
                                 <motion.div
                                     className="relative"
                                     animate={{ rotate: [0, -5, 5, 0] }}
-                                    transition={{ duration: 4, repeat: Infinity }}
+                                    transition={{
+                                        duration: 4,
+                                        repeat: Infinity,
+                                    }}
                                 >
                                     <div className="absolute inset-0 rounded-full bg-linear-to-br from-emerald-400/20 to-teal-400/20 blur-2xl" />
                                     <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-emerald-500 to-teal-600 shadow-xl shadow-emerald-500/30 dark:shadow-emerald-900/50">
-                                        <Lock className="h-12 w-12 text-white" strokeWidth={1.5} />
+                                        <Lock
+                                            className="h-12 w-12 text-white"
+                                            strokeWidth={1.5}
+                                        />
                                     </div>
                                     <motion.div
-                                        className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/20 bg-linear-to-br from-emerald-400 to-teal-500 shadow-lg dark:border-slate-700"
+                                        className="absolute -right-2 -bottom-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/20 bg-linear-to-br from-emerald-400 to-teal-500 shadow-lg dark:border-slate-700"
                                         animate={{ scale: [1, 1.1, 1] }}
-                                        transition={{ duration: 2, repeat: Infinity }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                        }}
                                     >
-                                        <Clock className="h-4 w-4 text-white" strokeWidth={2} />
+                                        <Clock
+                                            className="h-4 w-4 text-white"
+                                            strokeWidth={2}
+                                        />
                                     </motion.div>
                                 </motion.div>
                             </motion.div>
@@ -124,7 +143,10 @@ export default function SubscriptionRequired({ trialEndedAt }: Props) {
                                 variants={itemVariants}
                                 className="mb-8 leading-relaxed text-slate-500 dark:text-slate-400"
                             >
-                                Pour continuer à profiter de toutes les fonctionnalités de votre boutique et rester compétitif, choisissez un plan adapté à votre activité.
+                                Pour continuer à profiter de toutes les
+                                fonctionnalités de votre boutique et rester
+                                compétitif, choisissez un plan adapté à votre
+                                activité.
                             </motion.p>
 
                             {/* Trial end date */}
@@ -137,7 +159,9 @@ export default function SubscriptionRequired({ trialEndedAt }: Props) {
                                         <Calendar className="h-4 w-4" />
                                         Expiré depuis le{' '}
                                         <span className="font-bold">
-                                            {new Date(trialEndedAt).toLocaleDateString('fr-FR', {
+                                            {new Date(
+                                                trialEndedAt,
+                                            ).toLocaleDateString('fr-FR', {
                                                 day: 'numeric',
                                                 month: 'long',
                                                 year: 'numeric',
@@ -148,12 +172,18 @@ export default function SubscriptionRequired({ trialEndedAt }: Props) {
                             )}
 
                             {/* Primary Button */}
-                            <motion.div variants={itemVariants} className="mb-4">
+                            <motion.div
+                                variants={itemVariants}
+                                className="mb-4"
+                            >
                                 <Button
                                     asChild
                                     className="group relative w-full overflow-hidden rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 py-3.5 text-base font-bold text-white shadow-lg transition-all duration-300 hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl dark:from-emerald-500 dark:to-teal-500 dark:hover:from-emerald-600 dark:hover:to-teal-600"
                                 >
-                                    <Link href={route('subscription.show')} className="flex items-center justify-center gap-2">
+                                    <Link
+                                        href={route('subscription.show')}
+                                        className="flex items-center justify-center gap-2"
+                                    >
                                         <Sparkles className="h-5 w-5 transition-transform group-hover:scale-110" />
                                         Choisir un plan
                                         <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -179,7 +209,8 @@ export default function SubscriptionRequired({ trialEndedAt }: Props) {
                         transition={{ delay: 0.8 }}
                         className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400"
                     >
-                        Accès illimité à toutes les fonctionnalités de votre boutique
+                        Accès illimité à toutes les fonctionnalités de votre
+                        boutique
                     </motion.p>
                 </motion.div>
             </div>

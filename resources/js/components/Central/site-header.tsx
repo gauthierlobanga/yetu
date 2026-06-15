@@ -129,7 +129,13 @@ export function SiteHeader() {
                                 <DropdownMenuGroup>
                                     <DropdownMenuItem asChild>
                                         <Link
-                                            href={isTenant ? route('tenant.profile.edit') : '#'}
+                                            href={
+                                                isTenant
+                                                    ? route(
+                                                          'tenant.profile.edit',
+                                                      )
+                                                    : '#'
+                                            }
                                         >
                                             <User className="mr-2 h-4 w-4" />
                                             Profil
@@ -137,7 +143,9 @@ export function SiteHeader() {
                                     </DropdownMenuItem>
                                     {isTenant && (
                                         <DropdownMenuItem asChild>
-                                            <Link href={route('vendor.configure')}>
+                                            <Link
+                                                href={route('vendor.configure')}
+                                            >
                                                 <Settings className="mr-2 h-4 w-4" />
                                                 Paramètres boutique
                                             </Link>

@@ -1,15 +1,22 @@
-import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { Check, ChevronLeft, ChevronRight, MapPin, Truck, CreditCard } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useCheckout } from '@/hooks/ecommerce/use-checkout';
-import OrderSummary from './order-summary';
-import OrderItem from './order-item';
-import PaymentStepper from './payment-stepper';
+import {
+    Check,
+    ChevronLeft,
+    ChevronRight,
+    MapPin,
+    Truck,
+    CreditCard,
+} from 'lucide-react';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Textarea } from '@/components/ui/textarea';
+import { useCheckout } from '@/hooks/ecommerce/use-checkout';
+import { cn } from '@/lib/utils';
+import OrderItem from './order-item';
+import OrderSummary from './order-summary';
+import PaymentStepper from './payment-stepper';
 
 interface Address {
     id: string;
@@ -76,14 +83,17 @@ export default function CheckoutForm({
             ?.price ?? 0;
 
     const selectedBillingAddress = addresses.find(
-        (a) => a.id === checkout.state.billingAddressId
+        (a) => a.id === checkout.state.billingAddressId,
     );
     const selectedShippingAddress = checkout.state.sameAsShipping
         ? selectedBillingAddress
         : addresses.find((a) => a.id === checkout.state.shippingAddressId);
 
     const formatAddress = (address: Address | undefined) => {
-        if (!address) return 'Non sélectionnée';
+        if (!address) {
+return 'Non sélectionnée';
+}
+
         return `${address.street}, ${address.city} ${address.postal_code}, ${address.country}`;
     };
 
@@ -106,7 +116,9 @@ export default function CheckoutForm({
             <Button
                 variant="outline"
                 size="sm"
-                onClick={() => window.location.href = route('tenant.cart.index')}
+                onClick={() =>
+                    (window.location.href = route('tenant.cart.index'))
+                }
             >
                 Modifier le panier
             </Button>
@@ -128,15 +140,23 @@ export default function CheckoutForm({
                     <div className="space-y-3">
                         {addresses.length > 0 ? (
                             addresses.map((address) => (
-                                <div key={address.id} className="flex items-center space-x-2">
-                                    <RadioGroupItem value={address.id} id={`bill-${address.id}`} />
+                                <div
+                                    key={address.id}
+                                    className="flex items-center space-x-2"
+                                >
+                                    <RadioGroupItem
+                                        value={address.id}
+                                        id={`bill-${address.id}`}
+                                    />
                                     <Label
                                         htmlFor={`bill-${address.id}`}
                                         className="flex-1 cursor-pointer"
                                     >
                                         <div className="text-sm">
                                             {address.name && (
-                                                <div className="font-medium">{address.name}</div>
+                                                <div className="font-medium">
+                                                    {address.name}
+                                                </div>
                                             )}
                                             <div className="text-muted-foreground">
                                                 {formatAddress(address)}
@@ -187,7 +207,10 @@ export default function CheckoutForm({
                             <div className="space-y-3">
                                 {addresses.length > 0 ? (
                                     addresses.map((address) => (
-                                        <div key={address.id} className="flex items-center space-x-2">
+                                        <div
+                                            key={address.id}
+                                            className="flex items-center space-x-2"
+                                        >
                                             <RadioGroupItem
                                                 value={address.id}
                                                 id={`ship-${address.id}`}
@@ -234,7 +257,10 @@ export default function CheckoutForm({
                 >
                     <div className="space-y-3">
                         {shippingMethods.map((method) => (
-                            <div key={method.id} className="flex items-center space-x-2">
+                            <div
+                                key={method.id}
+                                className="flex items-center space-x-2"
+                            >
                                 <RadioGroupItem
                                     value={method.id}
                                     id={`shipping-${method.id}`}
@@ -244,7 +270,7 @@ export default function CheckoutForm({
                                     className="flex-1 cursor-pointer"
                                 >
                                     <div className="text-sm">
-                                        <div className="font-medium flex justify-between">
+                                        <div className="flex justify-between font-medium">
                                             <span>{method.name}</span>
                                             <span>
                                                 {method.price > 0
@@ -253,7 +279,8 @@ export default function CheckoutForm({
                                             </span>
                                         </div>
                                         <div className="text-muted-foreground">
-                                            {method.description} - {method.estimatedDays}
+                                            {method.description} -{' '}
+                                            {method.estimatedDays}
                                         </div>
                                     </div>
                                 </Label>
@@ -280,7 +307,10 @@ export default function CheckoutForm({
                 >
                     <div className="space-y-3">
                         {paymentMethods.map((method) => (
-                            <div key={method.id} className="flex items-center space-x-2">
+                            <div
+                                key={method.id}
+                                className="flex items-center space-x-2"
+                            >
                                 <RadioGroupItem
                                     value={method.id}
                                     id={`payment-${method.id}`}
@@ -290,7 +320,9 @@ export default function CheckoutForm({
                                     className="flex-1 cursor-pointer"
                                 >
                                     <div className="text-sm">
-                                        <div className="font-medium">{method.name}</div>
+                                        <div className="font-medium">
+                                            {method.name}
+                                        </div>
                                         {method.description && (
                                             <div className="text-muted-foreground">
                                                 {method.description}
@@ -332,9 +364,11 @@ export default function CheckoutForm({
                     {/* Billing Address */}
                     <Card className="shadow-none">
                         <CardContent className="flex gap-4">
-                            <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                            <MapPin className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                             <div className="flex-1">
-                                <h4 className="font-medium">Adresse de facturation</h4>
+                                <h4 className="font-medium">
+                                    Adresse de facturation
+                                </h4>
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     {formatAddress(selectedBillingAddress)}
                                 </p>
@@ -346,9 +380,11 @@ export default function CheckoutForm({
                     {!checkout.state.sameAsShipping && (
                         <Card className="shadow-none">
                             <CardContent className="flex gap-4">
-                                <Truck className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                <Truck className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                                 <div className="flex-1">
-                                    <h4 className="font-medium">Adresse de livraison</h4>
+                                    <h4 className="font-medium">
+                                        Adresse de livraison
+                                    </h4>
                                     <p className="mt-1 text-sm text-muted-foreground">
                                         {formatAddress(selectedShippingAddress)}
                                     </p>
@@ -358,20 +394,26 @@ export default function CheckoutForm({
                     )}
 
                     {/* Shipping Method */}
-                    {shippingMethods.find((m) => m.id === checkout.state.shippingMethodId) && (
+                    {shippingMethods.find(
+                        (m) => m.id === checkout.state.shippingMethodId,
+                    ) && (
                         <Card className="shadow-none">
                             <CardContent className="pt-6">
                                 <h4 className="font-medium">
                                     {
                                         shippingMethods.find(
-                                            (m) => m.id === checkout.state.shippingMethodId
+                                            (m) =>
+                                                m.id ===
+                                                checkout.state.shippingMethodId,
                                         )?.name
                                     }
                                 </h4>
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     {
                                         shippingMethods.find(
-                                            (m) => m.id === checkout.state.shippingMethodId
+                                            (m) =>
+                                                m.id ===
+                                                checkout.state.shippingMethodId,
                                         )?.estimatedDays
                                     }
                                 </p>
@@ -380,15 +422,20 @@ export default function CheckoutForm({
                     )}
 
                     {/* Payment Method */}
-                    {paymentMethods.find((m) => m.id === checkout.state.paymentMethodId) && (
+                    {paymentMethods.find(
+                        (m) => m.id === checkout.state.paymentMethodId,
+                    ) && (
                         <Card className="shadow-none">
                             <CardContent className="flex gap-4">
-                                <CreditCard className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                                <CreditCard className="mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
                                 <div className="flex-1">
                                     <h4 className="font-medium">
                                         {
                                             paymentMethods.find(
-                                                (m) => m.id === checkout.state.paymentMethodId
+                                                (m) =>
+                                                    m.id ===
+                                                    checkout.state
+                                                        .paymentMethodId,
                                             )?.name
                                         }
                                     </h4>
@@ -402,7 +449,7 @@ export default function CheckoutForm({
     );
 
     const renderStep4 = () => (
-        <div className="text-center space-y-4">
+        <div className="space-y-4 text-center">
             <div className="flex justify-center">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
                     <Check className="h-8 w-8 text-green-600" />
@@ -436,13 +483,13 @@ export default function CheckoutForm({
                 <div className="mx-auto max-w-5xl">
                     <PaymentStepper currentStep={checkout.state.currentStep} />
 
-                    <div className="grid gap-8 lg:grid-cols-[1fr_400px] mt-10">
+                    <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_400px]">
                         {/* Main Content */}
                         <div className="space-y-8">
                             {renderStep()}
 
                             {/* Navigation Buttons */}
-                            <div className="flex justify-between gap-4 pt-8 border-t">
+                            <div className="flex justify-between gap-4 border-t pt-8">
                                 <Button
                                     variant="outline"
                                     onClick={checkout.previousStep}
@@ -482,7 +529,9 @@ export default function CheckoutForm({
                                 ) : (
                                     <Button
                                         onClick={() =>
-                                            window.location.href = route('tenant.orders.index')
+                                            (window.location.href = route(
+                                                'tenant.orders.index',
+                                            ))
                                         }
                                     >
                                         Voir mes commandes
@@ -498,7 +547,12 @@ export default function CheckoutForm({
                                 tax={cart.total_taxes}
                                 shippingCost={shippingCost}
                                 discount={cart.total_remises}
-                                total={cart.sous_total + cart.total_taxes + shippingCost - cart.total_remises}
+                                total={
+                                    cart.sous_total +
+                                    cart.total_taxes +
+                                    shippingCost -
+                                    cart.total_remises
+                                }
                             />
                         </div>
                     </div>

@@ -1,6 +1,5 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head, usePage } from '@inertiajs/react';
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
     Camera,
@@ -12,14 +11,15 @@ import {
     Copy,
     User,
 } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import ParametresController from '@/actions/App/Http/Controllers/Vendor/Settings/ParametresController';
-import InputError from '@/components/input-error';
 import Heading from '@/components/heading';
+import InputError from '@/components/input-error';
 import { SiteHeader } from '@/components/site-header';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Card,
     CardContent,
@@ -27,10 +27,10 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VendorSidebar } from '@/components/VendorSidebar';
 import SettingsLayout from '@/layouts/Vendor/settings/layout';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
@@ -70,6 +70,7 @@ export default function VendorProfile({
 
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             setSelectedFile(file);
             const reader = new FileReader();
@@ -113,7 +114,11 @@ export default function VendorProfile({
                                 <Heading
                                     variant="small"
                                     title="Profil"
-                                    description={isOwner ? "Gérez votre profil personnel et les détails de votre boutique" : "Gérez votre profil personnel"}
+                                    description={
+                                        isOwner
+                                            ? 'Gérez votre profil personnel et les détails de votre boutique'
+                                            : 'Gérez votre profil personnel'
+                                    }
                                 />
                             </div>
                         </motion.div>
@@ -125,7 +130,7 @@ export default function VendorProfile({
                             className="w-full"
                         >
                             {isOwner && (
-                                <TabsList className="mb-6 grid w-full max-w-md grid-cols-2 p-1 bg-slate-100/80 dark:bg-slate-900/50 rounded-xl">
+                                <TabsList className="mb-6 grid w-full max-w-md grid-cols-2 rounded-xl bg-slate-100/80 p-1 dark:bg-slate-900/50">
                                     <TabsTrigger
                                         value="personal"
                                         className="flex items-center gap-2 rounded-lg data-[state=active]:shadow-sm"
@@ -144,7 +149,10 @@ export default function VendorProfile({
                             )}
 
                             {/* Onglet: Profil personnel */}
-                            <TabsContent value="personal" className="space-y-8 mt-0">
+                            <TabsContent
+                                value="personal"
+                                className="mt-0 space-y-8"
+                            >
                                 <Form
                                     {...ParametresController.update.form()}
                                     className="space-y-6"
@@ -156,7 +164,7 @@ export default function VendorProfile({
                                         recentlySuccessful,
                                         errors,
                                     }) => (
-                                        <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
+                                        <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md ring-1 shadow-slate-200/40 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
                                             <div className="border-b border-slate-200/70 px-5 py-6 sm:px-6 dark:border-slate-800">
                                                 <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
                                                     <div className="relative">
@@ -351,193 +359,207 @@ export default function VendorProfile({
 
                             {/* Onglet: Ma boutique */}
                             {isOwner && (
-                                <TabsContent value="shop" className="space-y-8 mt-0">
+                                <TabsContent
+                                    value="shop"
+                                    className="mt-0 space-y-8"
+                                >
                                     {/* Carte avec logo */}
-                                    <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
+                                    <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md ring-1 shadow-slate-200/40 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
                                         <div className="h-32 bg-gradient-to-br from-emerald-500/10 via-emerald-400/5 to-slate-50 dark:from-emerald-900/40 dark:via-emerald-900/10 dark:to-slate-950" />
 
-                                    <CardContent className="pt-6">
-                                        <div className="flex items-start gap-8">
-                                            {/* Logo */}
-                                            <div className="relative -mt-20">
-                                                <Avatar className="h-40 w-40 border-4 border-white shadow-xl dark:border-slate-900">
-                                                    <AvatarImage
-                                                        src={tenant.logo_url}
-                                                    />
-                                                    <AvatarFallback className="bg-emerald-500 text-3xl font-bold text-white">
-                                                        {
-                                                            tenant
-                                                                .raison_sociale[0]
-                                                        }
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                            </div>
-
-                                            {/* Infos boutique */}
-                                            <div className="flex-1 pt-6">
-                                                <div>
-                                                    <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                                                        {tenant.raison_sociale}
-                                                    </h2>
-                                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                                        {tenant.type_entite &&
-                                                            `Type: ${tenant.type_entite}`}
-                                                    </p>
+                                        <CardContent className="pt-6">
+                                            <div className="flex items-start gap-8">
+                                                {/* Logo */}
+                                                <div className="relative -mt-20">
+                                                    <Avatar className="h-40 w-40 border-4 border-white shadow-xl dark:border-slate-900">
+                                                        <AvatarImage
+                                                            src={
+                                                                tenant.logo_url
+                                                            }
+                                                        />
+                                                        <AvatarFallback className="bg-emerald-500 text-3xl font-bold text-white">
+                                                            {
+                                                                tenant
+                                                                    .raison_sociale[0]
+                                                            }
+                                                        </AvatarFallback>
+                                                    </Avatar>
                                                 </div>
 
-                                                {/* URL Boutique */}
-                                                <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
-                                                    <p className="mb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
-                                                        URL de votre boutique
-                                                    </p>
-                                                    <div className="flex items-center gap-2">
-                                                        <code className="flex-1 font-mono text-sm break-all text-slate-900 dark:text-slate-100">
-                                                            {shopUrl}
-                                                        </code>
-                                                        <button
-                                                            onClick={
-                                                                copyShopUrl
+                                                {/* Infos boutique */}
+                                                <div className="flex-1 pt-6">
+                                                    <div>
+                                                        <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                                                            {
+                                                                tenant.raison_sociale
                                                             }
-                                                            className="rounded-lg p-2 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
-                                                        >
-                                                            {copiedUrl ? (
-                                                                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                                                            ) : (
-                                                                <Copy className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                                                            )}
-                                                        </button>
+                                                        </h2>
+                                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                            {tenant.type_entite &&
+                                                                `Type: ${tenant.type_entite}`}
+                                                        </p>
+                                                    </div>
+
+                                                    {/* URL Boutique */}
+                                                    <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+                                                        <p className="mb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                                                            URL de votre
+                                                            boutique
+                                                        </p>
+                                                        <div className="flex items-center gap-2">
+                                                            <code className="flex-1 font-mono text-sm break-all text-slate-900 dark:text-slate-100">
+                                                                {shopUrl}
+                                                            </code>
+                                                            <button
+                                                                onClick={
+                                                                    copyShopUrl
+                                                                }
+                                                                className="rounded-lg p-2 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+                                                            >
+                                                                {copiedUrl ? (
+                                                                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                                                                ) : (
+                                                                    <Copy className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                                                                )}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Badges */}
+                                                    <div className="mt-4 flex flex-wrap gap-2">
+                                                        {tenant.email_verified_at ||
+                                                        tenant.statut ===
+                                                            'actif' ? (
+                                                            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                                                                <CheckCircle2 className="mr-1 h-3 w-3" />
+                                                                Actif
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                                                                <AlertCircle className="mr-1 h-3 w-3" />
+                                                                En attente de
+                                                                vérification
+                                                            </Badge>
+                                                        )}
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
 
-                                                {/* Badges */}
-                                                <div className="mt-4 flex flex-wrap gap-2">
-                                                    {tenant.email_verified_at ||
-                                                    tenant.statut ===
-                                                        'actif' ? (
-                                                        <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                                                            <CheckCircle2 className="mr-1 h-3 w-3" />
-                                                            Actif
-                                                        </Badge>
-                                                    ) : (
-                                                        <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                                                            <AlertCircle className="mr-1 h-3 w-3" />
-                                                            En attente de
-                                                            vérification
-                                                        </Badge>
+                                    {/* Réglages boutique */}
+                                    <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md ring-1 shadow-slate-200/40 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-2">
+                                                <ShoppingBag className="h-5 w-5" />
+                                                Réglages boutique
+                                            </CardTitle>
+                                            <CardDescription>
+                                                Les informations commerciales,
+                                                le logo et les coordonnées se
+                                                modifient dans l'espace
+                                                boutique.
+                                            </CardDescription>
+                                        </CardHeader>
+
+                                        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                                                    {tenant.raison_sociale}
+                                                </p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                    {tenant.telephone ||
+                                                        tenant.email ||
+                                                        'Coordonnées de boutique'}
+                                                </p>
+                                            </div>
+
+                                            <Button
+                                                asChild
+                                                variant="outline"
+                                                className="h-10"
+                                            >
+                                                <a
+                                                    href={route(
+                                                        'vendor.settings',
                                                     )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
-                                {/* Réglages boutique */}
-                                <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <ShoppingBag className="h-5 w-5" />
-                                            Réglages boutique
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Les informations commerciales, le
-                                            logo et les coordonnées se modifient
-                                            dans l'espace boutique.
-                                        </CardDescription>
-                                    </CardHeader>
-
-                                    <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                        <div className="space-y-1">
-                                            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                                                {tenant.raison_sociale}
-                                            </p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                {tenant.telephone ||
-                                                    tenant.email ||
-                                                    'Coordonnées de boutique'}
-                                            </p>
-                                        </div>
-
-                                        <Button
-                                            asChild
-                                            variant="outline"
-                                            className="h-10"
-                                        >
-                                            <a href={route('vendor.settings')}>
-                                                Ouvrir les paramètres
-                                            </a>
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-
-                                {/* Informations supplémentaires */}
-                                <div className="grid gap-4 md:grid-cols-2">
-                                    {/* SIRET/RCCM */}
-                                    <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
-                                        <CardHeader>
-                                            <CardTitle className="text-base">
-                                                Documents légaux
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-3">
-                                            <div>
-                                                <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                                                    RCCM
-                                                </p>
-                                                <p className="font-mono text-sm text-slate-900 dark:text-slate-100">
-                                                    {tenant.siret ||
-                                                        'Non renseigné'}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                                                    Type d'entité
-                                                </p>
-                                                <Badge variant="outline">
-                                                    {tenant.type_entite}
-                                                </Badge>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-
-                                    {/* Abonnement */}
-                                    <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md shadow-slate-200/40 ring-1 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
-                                        <CardHeader>
-                                            <CardTitle className="text-base">
-                                                Abonnement
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="space-y-3">
-                                            <div>
-                                                <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                                                    Statut
-                                                </p>
-                                                <Badge
-                                                    className={
-                                                        tenant.statut ===
-                                                        'actif'
-                                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                                                            : 'bg-slate-100 text-slate-700'
-                                                    }
                                                 >
-                                                    {tenant.statut === 'actif'
-                                                        ? 'Actif'
-                                                        : 'Inactif'}
-                                                </Badge>
-                                            </div>
-                                            <div>
-                                                <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                                                    Plan
-                                                </p>
-                                                <p className="text-sm text-slate-900 dark:text-slate-100">
-                                                    {tenant.plan_id
-                                                        ? 'Plan actif'
-                                                        : 'Pas de plan'}
-                                                </p>
-                                            </div>
+                                                    Ouvrir les paramètres
+                                                </a>
+                                            </Button>
                                         </CardContent>
                                     </Card>
-                                </div>
-                            </TabsContent>
+
+                                    {/* Informations supplémentaires */}
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        {/* SIRET/RCCM */}
+                                        <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md ring-1 shadow-slate-200/40 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
+                                            <CardHeader>
+                                                <CardTitle className="text-base">
+                                                    Documents légaux
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="space-y-3">
+                                                <div>
+                                                    <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
+                                                        RCCM
+                                                    </p>
+                                                    <p className="font-mono text-sm text-slate-900 dark:text-slate-100">
+                                                        {tenant.siret ||
+                                                            'Non renseigné'}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
+                                                        Type d'entité
+                                                    </p>
+                                                    <Badge variant="outline">
+                                                        {tenant.type_entite}
+                                                    </Badge>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+
+                                        {/* Abonnement */}
+                                        <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md ring-1 shadow-slate-200/40 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
+                                            <CardHeader>
+                                                <CardTitle className="text-base">
+                                                    Abonnement
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="space-y-3">
+                                                <div>
+                                                    <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
+                                                        Statut
+                                                    </p>
+                                                    <Badge
+                                                        className={
+                                                            tenant.statut ===
+                                                            'actif'
+                                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                                                : 'bg-slate-100 text-slate-700'
+                                                        }
+                                                    >
+                                                        {tenant.statut ===
+                                                        'actif'
+                                                            ? 'Actif'
+                                                            : 'Inactif'}
+                                                    </Badge>
+                                                </div>
+                                                <div>
+                                                    <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
+                                                        Plan
+                                                    </p>
+                                                    <p className="text-sm text-slate-900 dark:text-slate-100">
+                                                        {tenant.plan_id
+                                                            ? 'Plan actif'
+                                                            : 'Pas de plan'}
+                                                    </p>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                </TabsContent>
                             )}
                         </Tabs>
                     </div>

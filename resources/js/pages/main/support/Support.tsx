@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { BookOpenIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import MainLayout from '@/layouts/main-layout';

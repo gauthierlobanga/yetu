@@ -25,7 +25,7 @@ const OrderSummary = ({
     total,
 }: OrderSummaryProps) => {
     return (
-        <Card className="shadow-none sticky top-20">
+        <Card className="sticky top-20 shadow-none">
             <CardContent className="space-y-6 pt-6">
                 <div className="space-y-4">
                     <div className="flex items-center justify-between font-heading text-2xl">
@@ -36,11 +36,15 @@ const OrderSummary = ({
                     <div className="space-y-3 border-t border-border pt-4 text-sm">
                         <div className="flex items-center justify-between">
                             <span>Sous-total</span>
-                            <span className="font-medium">{formatCurrency(subtotal)}</span>
+                            <span className="font-medium">
+                                {formatCurrency(subtotal)}
+                            </span>
                         </div>
                         <div className="flex items-center justify-between">
                             <span>Taxes</span>
-                            <span className="font-medium">{formatCurrency(tax)}</span>
+                            <span className="font-medium">
+                                {formatCurrency(tax)}
+                            </span>
                         </div>
                         {discount > 0 && (
                             <div className="flex items-center justify-between">

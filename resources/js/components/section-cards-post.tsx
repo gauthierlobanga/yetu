@@ -98,15 +98,16 @@ export function SectionCards() {
             trend:
                 stats.published_products > 0
                     ? Math.round(
-                        (stats.published_products / stats.total_products) * 100,
-                    )
+                          (stats.published_products / stats.total_products) *
+                              100,
+                      )
                     : 0,
             icon: <IconFileText className="size-6 text-primary" />,
             subText: `${stats.low_stock_count} en stock faible`,
             trendUp: true,
         },
         {
-            title: 'Chiffre d\'affaires',
+            title: "Chiffre d'affaires",
             value: new Intl.NumberFormat('fr-CD', {
                 style: 'currency',
                 currency: 'CDF',
@@ -150,7 +151,7 @@ export function SectionCards() {
             description: 'Paniers non finalisés',
             trend: stats.return_rate,
             icon: <IconClock className="size-6 text-destructive" />,
-            subText: 'Taux d\'abandon',
+            subText: "Taux d'abandon",
             trendUp: false,
         },
         {

@@ -62,7 +62,7 @@ export function ChooseYetuContent() {
             style={{ transformOrigin: 'top center' }}
             className="mx-auto w-full border border-white/20 bg-white/70 shadow-2xl shadow-black/5 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/80"
         >
-            <div className="relative overflow-hidden ">
+            <div className="relative overflow-hidden">
                 {/* Fond décoratif */}
                 <div className="absolute inset-0 bg-linear-to-br from-white/60 via-slate-50/40 to-emerald-50/30 dark:from-slate-950/60 dark:via-slate-900/40 dark:to-emerald-950/20" />
                 <div className="absolute top-0 left-0 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
@@ -82,7 +82,8 @@ export function ChooseYetuContent() {
                                     Catégories populaires
                                 </h3>
                                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                    Découvrez les produits les plus recherchés par nos clients.
+                                    Découvrez les produits les plus recherchés
+                                    par nos clients.
                                 </p>
                             </div>
 
@@ -98,59 +99,65 @@ export function ChooseYetuContent() {
                         {/* Grille de catégories */}
                         {categories.length > 0 ? (
                             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                                {categories.slice(0, 6).map((category, index) => (
-                                    <motion.div
-                                        key={category.id}
-                                        initial={{ opacity: 0, y: 18 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{
-                                            duration: 0.4,
-                                            delay: index * 0.05,
-                                        }}
-                                        whileHover={{ y: -6, scale: 1.02 }}
-                                        className="group"
-                                    >
-                                        <Link
-                                            href={category.url}
-                                            className="relative isolate block overflow-hidden rounded-2xl border border-slate-200/70 bg-white/75 shadow-sm ring-1 ring-slate-100/60 backdrop-blur-xl transition-all duration-500 hover:border-emerald-300/70 hover:shadow-xl hover:shadow-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/80 dark:ring-slate-800/60 dark:hover:border-emerald-800"
+                                {categories
+                                    .slice(0, 6)
+                                    .map((category, index) => (
+                                        <motion.div
+                                            key={category.id}
+                                            initial={{ opacity: 0, y: 18 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{
+                                                duration: 0.4,
+                                                delay: index * 0.05,
+                                            }}
+                                            whileHover={{ y: -6, scale: 1.02 }}
+                                            className="group"
                                         >
-                                            {/* Image */}
-                                            <div className="relative aspect-4/2.5 overflow-hidden bg-slate-100 dark:bg-slate-800">
-                                                {category.image ? (
-                                                    <>
-                                                        <img
-                                                            src={category.image}
-                                                            alt={category.nom}
-                                                            loading="lazy"
-                                                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                        />
-                                                        <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/10 to-transparent opacity-80" />
-                                                    </>
-                                                ) : (
-                                                    <div className="flex h-full items-center justify-center bg-linear-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700">
-                                                        <ImageOff className="h-8 w-8 text-slate-400 dark:text-slate-500" />
+                                            <Link
+                                                href={category.url}
+                                                className="relative isolate block overflow-hidden rounded-2xl border border-slate-200/70 bg-white/75 shadow-sm ring-1 ring-slate-100/60 backdrop-blur-xl transition-all duration-500 hover:border-emerald-300/70 hover:shadow-xl hover:shadow-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/80 dark:ring-slate-800/60 dark:hover:border-emerald-800"
+                                            >
+                                                {/* Image */}
+                                                <div className="relative aspect-4/2.5 overflow-hidden bg-slate-100 dark:bg-slate-800">
+                                                    {category.image ? (
+                                                        <>
+                                                            <img
+                                                                src={
+                                                                    category.image
+                                                                }
+                                                                alt={
+                                                                    category.nom
+                                                                }
+                                                                loading="lazy"
+                                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                            />
+                                                            <div className="absolute inset-0 bg-linear-to-t from-black/50 via-black/10 to-transparent opacity-80" />
+                                                        </>
+                                                    ) : (
+                                                        <div className="flex h-full items-center justify-center bg-linear-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700">
+                                                            <ImageOff className="h-8 w-8 text-slate-400 dark:text-slate-500" />
+                                                        </div>
+                                                    )}
+
+                                                    <div className="absolute top-3 left-3 rounded-xl border border-white/20 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200">
+                                                        Catégorie
                                                     </div>
-                                                )}
-
-                                                <div className="absolute top-3 left-3 rounded-xl border border-white/20 bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-slate-900/80 dark:text-slate-200">
-                                                    Catégorie
                                                 </div>
-                                            </div>
 
-                                            {/* Contenu */}
-                                            <div className="p-4">
-                                                <div className="flex items-center justify-between gap-3">
-                                                    <h4 className="line-clamp-1 text-sm font-semibold text-slate-900 transition-colors duration-300 group-hover:text-emerald-600 dark:text-slate-100 dark:group-hover:text-emerald-400">
-                                                        {category.nom}
-                                                    </h4>
-                                                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-all duration-300 group-hover:bg-emerald-100 group-hover:text-emerald-600 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-emerald-900/30 dark:group-hover:text-emerald-400">
-                                                        <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
-                                                    </span>
+                                                {/* Contenu */}
+                                                <div className="p-4">
+                                                    <div className="flex items-center justify-between gap-3">
+                                                        <h4 className="line-clamp-1 text-sm font-semibold text-slate-900 transition-colors duration-300 group-hover:text-emerald-600 dark:text-slate-100 dark:group-hover:text-emerald-400">
+                                                            {category.nom}
+                                                        </h4>
+                                                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-all duration-300 group-hover:bg-emerald-100 group-hover:text-emerald-600 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-emerald-900/30 dark:group-hover:text-emerald-400">
+                                                            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </Link>
-                                    </motion.div>
-                                ))}
+                                            </Link>
+                                        </motion.div>
+                                    ))}
                             </div>
                         ) : (
                             <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50/80 p-10 text-center dark:border-slate-700 dark:bg-slate-900/50">
@@ -159,7 +166,8 @@ export function ChooseYetuContent() {
                                     Aucune catégorie disponible pour le moment.
                                 </p>
                                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                    Revenez bientôt pour découvrir de nouvelles catégories.
+                                    Revenez bientôt pour découvrir de nouvelles
+                                    catégories.
                                 </p>
                             </div>
                         )}
@@ -219,7 +227,8 @@ export function ChooseYetuContent() {
                                     Lancez votre boutique
                                 </h4>
                                 <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                                    Créez votre boutique en ligne gratuitement et commencez à vendre en quelques minutes.
+                                    Créez votre boutique en ligne gratuitement
+                                    et commencez à vendre en quelques minutes.
                                 </p>
 
                                 <Link

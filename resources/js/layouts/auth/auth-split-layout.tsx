@@ -22,17 +22,12 @@ export default function AuthSplitLayout({
     };
 
     // Détermine le branding affiché à gauche
-    const brandingName = isTenant && tenant
-        ? tenant.raison_sociale
-        : (name ?? 'Yetufy');
+    const brandingName =
+        isTenant && tenant ? tenant.raison_sociale : (name ?? 'Yetufy');
 
-    const brandingLogo = isTenant && tenant?.logo_url
-        ? tenant.logo_url
-        : null;
+    const brandingLogo = isTenant && tenant?.logo_url ? tenant.logo_url : null;
 
-    const brandingUrl = isTenant && tenant?.url
-        ? tenant.url
-        : home();
+    const brandingUrl = isTenant && tenant?.url ? tenant.url : home();
 
     const features = [
         { icon: Globe, label: 'E-commerce international' },
@@ -65,7 +60,7 @@ export default function AuthSplitLayout({
                         className="inline-flex items-center gap-3"
                     >
                         {brandingLogo ? (
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-xl overflow-hidden">
+                            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-white/10 backdrop-blur-xl">
                                 <img
                                     src={brandingLogo}
                                     alt={brandingName}
@@ -77,7 +72,7 @@ export default function AuthSplitLayout({
                                 <AppLogoIcon className="size-7 fill-current text-white" />
                             </div>
                         )}
-                        <span className="text-lg font-semibold tracking-tight truncate max-w-55">
+                        <span className="max-w-55 truncate text-lg font-semibold tracking-tight">
                             {brandingName}
                         </span>
                     </Link>
@@ -129,7 +124,8 @@ export default function AuthSplitLayout({
 
                     {/* Footer */}
                     <p className="text-sm text-slate-400">
-                        © {new Date().getFullYear()} {brandingName}. Tous droits réservés.
+                        © {new Date().getFullYear()} {brandingName}. Tous droits
+                        réservés.
                     </p>
                 </div>
             </div>
@@ -158,7 +154,7 @@ export default function AuthSplitLayout({
                         <div className="group relative">
                             <div className="absolute inset-0 rounded-3xl bg-emerald-500/20 blur-xl transition-all duration-300 group-hover:bg-emerald-500/30" />
                             {brandingLogo ? (
-                                <div className="relative flex h-16 w-16 items-center justify-center rounded-3xl border border-white/60 bg-white/90 shadow-xl shadow-slate-900/5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/85 dark:shadow-black/20 overflow-hidden">
+                                <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-3xl border border-white/60 bg-white/90 shadow-xl shadow-slate-900/5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/85 dark:shadow-black/20">
                                     <img
                                         src={brandingLogo}
                                         alt={brandingName}
@@ -175,7 +171,6 @@ export default function AuthSplitLayout({
 
                     {/* Header */}
                     <div className="mb-8 text-center lg:text-left">
-
                         <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl dark:text-white">
                             {title}
                         </h1>

@@ -147,13 +147,13 @@ export default function ContactPage({
             showProgress: false,
             onSuccess: () => {
                 reset();
-                toast.success('Votre message a été envoyé avec succès.',{
-                    style: getToastStyle('success')
+                toast.success('Votre message a été envoyé avec succès.', {
+                    style: getToastStyle('success'),
                 });
             },
             onError: () => {
-                toast.error('Veuillez corriger les erreurs du formulaire.',{
-                    style: getToastStyle('error')
+                toast.error('Veuillez corriger les erreurs du formulaire.', {
+                    style: getToastStyle('error'),
                 });
             },
         });

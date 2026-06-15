@@ -1,7 +1,6 @@
-
 import { Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, List, Menu,  } from 'lucide-react';
+import { ArrowRight, List, Menu } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import AppearanceToogle from '@/components/appearance-toogle';
@@ -37,16 +36,22 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
     const centralNavItems: NavItem[] = [
         {
-            title: 'Choisir Yetu', content: <ChooseYetuContent />, href: '',
+            title: 'Choisir Yetu',
+            content: <ChooseYetuContent />,
+            href: '',
         },
         {
-            title: 'Produits', content: <ProductsMenuContent />, href: '',
+            title: 'Produits',
+            content: <ProductsMenuContent />,
+            href: '',
         },
         {
-            title: 'Tarification', href: route('plan.index'),
+            title: 'Tarification',
+            href: route('plan.index'),
         },
         {
-            title: 'Enterprise', href: route('entreprise.index'),
+            title: 'Enterprise',
+            href: route('entreprise.index'),
         },
     ];
 
@@ -122,7 +127,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                                 className="w-full"
                                                 size="lg"
                                             >
-                                                <Link href={route('central.account-selection.index')}>
+                                                <Link
+                                                    href={route(
+                                                        'central.account-selection.index',
+                                                    )}
+                                                >
                                                     Accéder aux boutiques
                                                 </Link>
                                             </Button>
@@ -152,11 +161,10 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
                     {/* Actions à droite */}
                     <div className="flex items-center gap-2 sm:gap-3">
-
                         {!isTenant ? (
                             <>
-                            {/* Toggle Dark/Light – toujours visible */}
-                            <AppearanceToogle />
+                                {/* Toggle Dark/Light – toujours visible */}
+                                <AppearanceToogle />
                                 {/* Si user authentifié sur page centrale, redirection vers sélection compte */}
                                 {auth.user ? (
                                     <Button
@@ -164,7 +172,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         className="group relative overflow-hidden rounded-full bg-linear-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 transition-all hover:shadow-lg hover:shadow-emerald-300 dark:shadow-emerald-900/30 dark:hover:shadow-emerald-800/40"
                                         asChild
                                     >
-                                        <Link href={route('central.account-selection.index')}>
+                                        <Link
+                                            href={route(
+                                                'central.account-selection.index',
+                                            )}
+                                        >
                                             <span className="relative z-10 flex items-center">
                                                 Accéder aux boutiques
                                                 <ArrowRight className="ml-2 h-5 w-4 transition-transform group-hover:translate-x-1" />
@@ -180,14 +192,18 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                             asChild
                                             className="hidden text-sm font-medium text-slate-700 hover:text-slate-900 sm:inline-flex dark:text-slate-300 dark:hover:text-white"
                                         >
-                                            <Link href={login()}>Se connecter</Link>
+                                            <Link href={login()}>
+                                                Se connecter
+                                            </Link>
                                         </Button>
                                         <Button
                                             size="lg"
                                             className="group relative overflow-hidden rounded-full bg-linear-to-r from-emerald-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-200 transition-all hover:shadow-lg hover:shadow-emerald-300 dark:shadow-emerald-900/30 dark:hover:shadow-emerald-800/40"
                                             asChild
                                         >
-                                            <Link href={route('vendor.register')}>
+                                            <Link
+                                                href={route('vendor.register')}
+                                            >
                                                 <span className="relative z-10 flex items-center">
                                                     Démarrer gratuitement
                                                     <ArrowRight className="ml-2 h-5 w-4 transition-transform group-hover:translate-x-1" />

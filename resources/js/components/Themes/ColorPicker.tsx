@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Copy, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 interface ColorPickerProps {
@@ -25,7 +25,10 @@ export default function ColorPicker({
 
     // Parsez la valeur HSL
     useEffect(() => {
-        const match = value.match(/(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%/);
+        const match = value.match(
+            /(\d+(?:\.\d+)?)\s+(\d+(?:\.\d+)?)%\s+(\d+(?:\.\d+)?)%/,
+        );
+
         if (match) {
             setHsl({
                 h: parseFloat(match[1]),
@@ -67,7 +70,7 @@ export default function ColorPicker({
                     </Label>
                 )}
                 {description && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                         {description}
                     </p>
                 )}
@@ -75,16 +78,16 @@ export default function ColorPicker({
 
             <div className="space-y-3">
                 {/* Aperçu couleur */}
-                <div className="flex gap-3 items-center">
+                <div className="flex items-center gap-3">
                     <div
-                        className="h-12 w-12 rounded-lg border-2 border-slate-200 dark:border-slate-700 shadow-sm"
+                        className="h-12 w-12 rounded-lg border-2 border-slate-200 shadow-sm dark:border-slate-700"
                         style={{ backgroundColor: `hsl(${value})` }}
                     />
                     <div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                             Valeur HSL
                         </p>
-                        <code className="text-sm font-mono text-slate-900 dark:text-slate-100">
+                        <code className="font-mono text-sm text-slate-900 dark:text-slate-100">
                             {value}
                         </code>
                     </div>
@@ -106,11 +109,13 @@ export default function ColorPicker({
                 <div className="space-y-3">
                     {/* Hue */}
                     <div>
-                        <div className="flex justify-between mb-1">
+                        <div className="mb-1 flex justify-between">
                             <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
                                 Teinte
                             </span>
-                            <span className="text-xs text-slate-500">{Math.round(hsl.h)}°</span>
+                            <span className="text-xs text-slate-500">
+                                {Math.round(hsl.h)}°
+                            </span>
                         </div>
                         <input
                             type="range"
@@ -119,24 +124,31 @@ export default function ColorPicker({
                             step="1"
                             value={hsl.h}
                             onChange={(e) => {
-                                const newHsl = { ...hsl, h: parseFloat(e.target.value) };
+                                const newHsl = {
+                                    ...hsl,
+                                    h: parseFloat(e.target.value),
+                                };
                                 setHsl(newHsl);
                                 updateValue(newHsl);
                             }}
-                            className="w-full h-2 bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-cyan-500 via-blue-500 to-red-500 rounded-lg appearance-none cursor-pointer"
-                            style={{
-                                WebkitAppearance: 'none',
-                            } as any}
+                            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gradient-to-r from-red-500 via-blue-500 via-cyan-500 via-green-500 via-yellow-500 to-red-500"
+                            style={
+                                {
+                                    WebkitAppearance: 'none',
+                                } as any
+                            }
                         />
                     </div>
 
                     {/* Saturation */}
                     <div>
-                        <div className="flex justify-between mb-1">
+                        <div className="mb-1 flex justify-between">
                             <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
                                 Saturation
                             </span>
-                            <span className="text-xs text-slate-500">{Math.round(hsl.s)}%</span>
+                            <span className="text-xs text-slate-500">
+                                {Math.round(hsl.s)}%
+                            </span>
                         </div>
                         <input
                             type="range"
@@ -145,24 +157,31 @@ export default function ColorPicker({
                             step="1"
                             value={hsl.s}
                             onChange={(e) => {
-                                const newHsl = { ...hsl, s: parseFloat(e.target.value) };
+                                const newHsl = {
+                                    ...hsl,
+                                    s: parseFloat(e.target.value),
+                                };
                                 setHsl(newHsl);
                                 updateValue(newHsl);
                             }}
-                            className="w-full h-2 bg-gradient-to-r from-gray-400 to-slate-600 rounded-lg appearance-none cursor-pointer"
-                            style={{
-                                WebkitAppearance: 'none',
-                            } as any}
+                            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gradient-to-r from-gray-400 to-slate-600"
+                            style={
+                                {
+                                    WebkitAppearance: 'none',
+                                } as any
+                            }
                         />
                     </div>
 
                     {/* Lightness */}
                     <div>
-                        <div className="flex justify-between mb-1">
+                        <div className="mb-1 flex justify-between">
                             <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
                                 Luminosité
                             </span>
-                            <span className="text-xs text-slate-500">{Math.round(hsl.l)}%</span>
+                            <span className="text-xs text-slate-500">
+                                {Math.round(hsl.l)}%
+                            </span>
                         </div>
                         <input
                             type="range"
@@ -171,21 +190,26 @@ export default function ColorPicker({
                             step="1"
                             value={hsl.l}
                             onChange={(e) => {
-                                const newHsl = { ...hsl, l: parseFloat(e.target.value) };
+                                const newHsl = {
+                                    ...hsl,
+                                    l: parseFloat(e.target.value),
+                                };
                                 setHsl(newHsl);
                                 updateValue(newHsl);
                             }}
-                            className="w-full h-2 bg-gradient-to-r from-black via-slate-500 to-white rounded-lg appearance-none cursor-pointer"
-                            style={{
-                                WebkitAppearance: 'none',
-                            } as any}
+                            className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gradient-to-r from-black via-slate-500 to-white"
+                            style={
+                                {
+                                    WebkitAppearance: 'none',
+                                } as any
+                            }
                         />
                     </div>
                 </div>
 
                 {/* Couleurs prédéfinies */}
                 <div>
-                    <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
+                    <p className="mb-2 text-xs font-medium text-slate-600 dark:text-slate-400">
                         Couleurs rapides
                     </p>
                     <div className="grid grid-cols-8 gap-1">
@@ -199,9 +223,11 @@ export default function ColorPicker({
                                     'h-8 rounded-lg border-2 transition-all',
                                     value === preset.value
                                         ? 'border-emerald-500 shadow-md'
-                                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                                        : 'border-slate-200 hover:border-slate-300 dark:border-slate-700',
                                 )}
-                                style={{ backgroundColor: `hsl(${preset.value})` }}
+                                style={{
+                                    backgroundColor: `hsl(${preset.value})`,
+                                }}
                                 title={preset.label}
                             />
                         ))}

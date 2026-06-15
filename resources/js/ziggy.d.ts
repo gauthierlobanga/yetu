@@ -4,125 +4,125 @@ import type { route as routeFn } from 'ziggy-js';
 
 declare module 'ziggy-js' {
     interface RouteList {
-        "filament.exports.download": [
+        'filament.exports.download': [
             {
-                "name": "export",
-                "required": true,
-                "binding": "id"
-            }
-        ],
-        "filament.imports.failed-rows.download": [
+                name: 'export';
+                required: true;
+                binding: 'id';
+            },
+        ];
+        'filament.imports.failed-rows.download': [
             {
-                "name": "import",
-                "required": true,
-                "binding": "id"
-            }
-        ],
-        "login": [],
-        "login.store": [],
-        "logout": [],
-        "password.request": [],
-        "password.reset": [
+                name: 'import';
+                required: true;
+                binding: 'id';
+            },
+        ];
+        login: [];
+        'login.store': [];
+        logout: [];
+        'password.request': [];
+        'password.reset': [
             {
-                "name": "token",
-                "required": true
-            }
-        ],
-        "password.email": [],
-        "password.update": [],
-        "register": [],
-        "register.store": [],
-        "verification.notice": [],
-        "verification.verify": [
+                name: 'token';
+                required: true;
+            },
+        ];
+        'password.email': [];
+        'password.update': [];
+        register: [];
+        'register.store': [];
+        'verification.notice': [];
+        'verification.verify': [
             {
-                "name": "id",
-                "required": true
+                name: 'id';
+                required: true;
             },
             {
-                "name": "hash",
-                "required": true
-            }
-        ],
-        "verification.send": [],
-        "password.confirm": [],
-        "password.confirmation": [],
-        "password.confirm.store": [],
-        "two-factor.login": [],
-        "two-factor.login.store": [],
-        "two-factor.enable": [],
-        "two-factor.confirm": [],
-        "two-factor.disable": [],
-        "two-factor.qr-code": [],
-        "two-factor.secret-key": [],
-        "two-factor.recovery-codes": [],
-        "two-factor.regenerate-recovery-codes": [],
-        "default-livewire.update": [],
-        "livewire.upload-file": [],
-        "livewire.preview-file": [
+                name: 'hash';
+                required: true;
+            },
+        ];
+        'verification.send': [];
+        'password.confirm': [];
+        'password.confirmation': [];
+        'password.confirm.store': [];
+        'two-factor.login': [];
+        'two-factor.login.store': [];
+        'two-factor.enable': [];
+        'two-factor.confirm': [];
+        'two-factor.disable': [];
+        'two-factor.qr-code': [];
+        'two-factor.secret-key': [];
+        'two-factor.recovery-codes': [];
+        'two-factor.regenerate-recovery-codes': [];
+        'default-livewire.update': [];
+        'livewire.upload-file': [];
+        'livewire.preview-file': [
             {
-                "name": "filename",
-                "required": true
-            }
-        ],
-        "home": [],
-        "tasks.list": [],
-        "tasks.create": [],
-        "tasks.show": [
+                name: 'filename';
+                required: true;
+            },
+        ];
+        home: [];
+        'tasks.list': [];
+        'tasks.create': [];
+        'tasks.show': [
             {
-                "name": "task",
-                "required": true,
-                "binding": "id"
-            }
-        ],
-        "tasks.edit": [
+                name: 'task';
+                required: true;
+                binding: 'id';
+            },
+        ];
+        'tasks.edit': [
             {
-                "name": "task",
-                "required": true,
-                "binding": "id"
-            }
-        ],
-        "tasks.update": [
+                name: 'task';
+                required: true;
+                binding: 'id';
+            },
+        ];
+        'tasks.update': [
             {
-                "name": "task",
-                "required": true
-            }
-        ],
-        "post.list": [],
-        "post.create": [],
-        "post.store": [],
-        "post.show": [
+                name: 'task';
+                required: true;
+            },
+        ];
+        'post.list': [];
+        'post.create': [];
+        'post.store': [];
+        'post.show': [
             {
-                "name": "post",
-                "required": true,
-                "binding": "slug"
-            }
-        ],
-        "post.edit": [
+                name: 'post';
+                required: true;
+                binding: 'slug';
+            },
+        ];
+        'post.edit': [
             {
-                "name": "post",
-                "required": true,
-                "binding": "id"
-            }
-        ],
-        "dashboard": [],
-        "profile.edit": [],
-        "profile.update": [],
-        "profile.destroy": [],
-        "security.edit": [],
-        "user-password.update": [],
-        "appearance.edit": [],
-        "storage.local": [
+                name: 'post';
+                required: true;
+                binding: 'id';
+            },
+        ];
+        dashboard: [];
+        'profile.edit': [];
+        'profile.update': [];
+        'profile.destroy': [];
+        'security.edit': [];
+        'user-password.update': [];
+        'appearance.edit': [];
+        'storage.local': [
             {
-                "name": "path",
-                "required": true
-            }
-        ],
-        "storage.local.upload": [
+                name: 'path';
+                required: true;
+            },
+        ];
+        'storage.local.upload': [
             {
-                "name": "path",
-                "required": true
-            }
-        ]
+                name: 'path';
+                required: true;
+            },
+        ];
     }
 }
 
@@ -135,4 +135,4 @@ declare global {
     }
 }
 
-export { };
+export {};

@@ -91,13 +91,15 @@ export default function ClientProfile() {
     });
 
     const initials = useMemo(() => {
-        return (form.data.name || '')
-            .split(' ')
-            .filter(Boolean)
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2) || '?';
+        return (
+            (form.data.name || '')
+                .split(' ')
+                .filter(Boolean)
+                .map((n) => n[0])
+                .join('')
+                .toUpperCase()
+                .slice(0, 2) || '?'
+        );
     }, [form.data.name]);
 
     const billingAddress = user.adresses?.find(
@@ -110,15 +112,18 @@ export default function ClientProfile() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         // Utilisation de post avec _method PATCH pour supporter l'upload de fichiers
-        form.post(ProfileController.update.url({ query: { _method: 'PATCH' } }), {
-            preserveScroll: true,
-            onSuccess: () => {
-                toast.success('Modifications sauvegardées', {
-                    style: getToastStyles('success'),
-                });
-                setPreviewUrl(null);
+        form.post(
+            ProfileController.update.url({ query: { _method: 'PATCH' } }),
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success('Modifications sauvegardées', {
+                        style: getToastStyles('success'),
+                    });
+                    setPreviewUrl(null);
+                },
             },
-        });
+        );
     };
 
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,7 +214,8 @@ export default function ClientProfile() {
                                             Informations personnelles
                                         </CardTitle>
                                         <CardDescription>
-                                            Gérez vos coordonnées et votre identité.
+                                            Gérez vos coordonnées et votre
+                                            identité.
                                         </CardDescription>
                                     </CardHeader>
 
@@ -223,10 +229,13 @@ export default function ClientProfile() {
                                                     type="file"
                                                     accept="image/*"
                                                     className="hidden"
-                                                    onChange={handleAvatarChange}
+                                                    onChange={
+                                                        handleAvatarChange
+                                                    }
                                                 />
                                             </label>
-                                            {(previewUrl || user.avatar_url) && (
+                                            {(previewUrl ||
+                                                user.avatar_url) && (
                                                 <button
                                                     type="button"
                                                     onClick={removeAvatar}
@@ -240,81 +249,127 @@ export default function ClientProfile() {
 
                                         <div className="grid gap-6 sm:grid-cols-2">
                                             <Field
-                                                icon={<User className="h-4 w-4" />}
+                                                icon={
+                                                    <User className="h-4 w-4" />
+                                                }
                                                 label="Nom complet"
                                                 id="name"
                                                 value={form.data.name}
-                                                onChange={(e) => form.setData('name', e.target.value)}
+                                                onChange={(e) =>
+                                                    form.setData(
+                                                        'name',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 required
                                                 autoComplete="name"
                                                 error={form.errors.name}
                                             />
                                             <Field
-                                                icon={<Mail className="h-4 w-4" />}
+                                                icon={
+                                                    <Mail className="h-4 w-4" />
+                                                }
                                                 label="Adresse email"
                                                 id="email"
                                                 type="email"
                                                 value={form.data.email}
-                                                onChange={(e) => form.setData('email', e.target.value)}
+                                                onChange={(e) =>
+                                                    form.setData(
+                                                        'email',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 required
                                                 autoComplete="email"
                                                 error={form.errors.email}
                                             />
                                             <Field
-                                                icon={<Phone className="h-4 w-4" />}
+                                                icon={
+                                                    <Phone className="h-4 w-4" />
+                                                }
                                                 label="Téléphone"
                                                 id="phone"
                                                 value={form.data.phone}
-                                                onChange={(e) => form.setData('phone', e.target.value)}
+                                                onChange={(e) =>
+                                                    form.setData(
+                                                        'phone',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 autoComplete="tel"
                                                 error={form.errors.phone}
                                             />
                                             <Field
-                                                icon={<MapPin className="h-4 w-4" />}
+                                                icon={
+                                                    <MapPin className="h-4 w-4" />
+                                                }
                                                 label="Ville"
                                                 id="city"
                                                 value={form.data.city}
-                                                onChange={(e) => form.setData('city', e.target.value)}
+                                                onChange={(e) =>
+                                                    form.setData(
+                                                        'city',
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 error={form.errors.city}
                                             />
                                             <div className="sm:col-span-2">
                                                 <Field
-                                                    icon={<MapPin className="h-4 w-4" />}
+                                                    icon={
+                                                        <MapPin className="h-4 w-4" />
+                                                    }
                                                     label="Pays"
                                                     id="country"
                                                     value={form.data.country}
-                                                    onChange={(e) => form.setData('country', e.target.value)}
+                                                    onChange={(e) =>
+                                                        form.setData(
+                                                            'country',
+                                                            e.target.value,
+                                                        )
+                                                    }
                                                     error={form.errors.country}
                                                 />
                                             </div>
                                         </div>
 
-                                        {mustVerifyEmail && !user.email_verified_at && (
-                                            <div className="flex gap-3 rounded-xl border border-amber-200/60 bg-amber-50 p-4 dark:bg-amber-500/5">
-                                                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-                                                <div className="space-y-1 text-sm">
-                                                    <p className="font-medium text-amber-900 dark:text-amber-200">
-                                                        Vérification d’email requise
-                                                    </p>
-                                                    <p className="text-amber-800 dark:text-amber-300/80">
-                                                        Pour débloquer toutes les fonctionnalités, vérifiez votre adresse email.
-                                                    </p>
-                                                    <Link
-                                                        href={route('verification.send')}
-                                                        method="post"
-                                                        as="button"
-                                                        className="inline-block text-xs font-semibold text-amber-600 underline transition-colors hover:text-amber-800"
-                                                    >
-                                                        Renvoyer le lien de vérification
-                                                    </Link>
-                                                    {status === 'verification-link-sent' && (
-                                                        <p className="mt-1 flex items-center gap-1 text-xs text-emerald-600">
-                                                            <CheckCircle className="h-3 w-3" /> Lien envoyé
+                                        {mustVerifyEmail &&
+                                            !user.email_verified_at && (
+                                                <div className="flex gap-3 rounded-xl border border-amber-200/60 bg-amber-50 p-4 dark:bg-amber-500/5">
+                                                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                                                    <div className="space-y-1 text-sm">
+                                                        <p className="font-medium text-amber-900 dark:text-amber-200">
+                                                            Vérification d’email
+                                                            requise
                                                         </p>
-                                                    )}
+                                                        <p className="text-amber-800 dark:text-amber-300/80">
+                                                            Pour débloquer
+                                                            toutes les
+                                                            fonctionnalités,
+                                                            vérifiez votre
+                                                            adresse email.
+                                                        </p>
+                                                        <Link
+                                                            href={route(
+                                                                'verification.send',
+                                                            )}
+                                                            method="post"
+                                                            as="button"
+                                                            className="inline-block text-xs font-semibold text-amber-600 underline transition-colors hover:text-amber-800"
+                                                        >
+                                                            Renvoyer le lien de
+                                                            vérification
+                                                        </Link>
+                                                        {status ===
+                                                            'verification-link-sent' && (
+                                                            <p className="mt-1 flex items-center gap-1 text-xs text-emerald-600">
+                                                                <CheckCircle className="h-3 w-3" />{' '}
+                                                                Lien envoyé
+                                                            </p>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
 
                                         <div className="flex items-center gap-4 border-t border-slate-100 pt-4 dark:border-slate-800">
                                             <Button
@@ -351,17 +406,26 @@ export default function ClientProfile() {
                                             <Label>Langue</Label>
                                             <Select
                                                 value={form.data.locale}
-                                                onValueChange={(v) => form.setData('locale', v)}
+                                                onValueChange={(v) =>
+                                                    form.setData('locale', v)
+                                                }
                                             >
                                                 <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Choisir une langue" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {AVAILABLE_LOCALES.map((opt) => (
-                                                        <SelectItem key={opt.value} value={opt.value}>
-                                                            {opt.label}
-                                                        </SelectItem>
-                                                    ))}
+                                                    {AVAILABLE_LOCALES.map(
+                                                        (opt) => (
+                                                            <SelectItem
+                                                                key={opt.value}
+                                                                value={
+                                                                    opt.value
+                                                                }
+                                                            >
+                                                                {opt.label}
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -369,17 +433,26 @@ export default function ClientProfile() {
                                             <Label>Devise</Label>
                                             <Select
                                                 value={form.data.currency}
-                                                onValueChange={(v) => form.setData('currency', v)}
+                                                onValueChange={(v) =>
+                                                    form.setData('currency', v)
+                                                }
                                             >
                                                 <SelectTrigger className="w-full">
                                                     <SelectValue placeholder="Choisir une devise" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {AVAILABLE_CURRENCIES.map((opt) => (
-                                                        <SelectItem key={opt.value} value={opt.value}>
-                                                            {opt.label}
-                                                        </SelectItem>
-                                                    ))}
+                                                    {AVAILABLE_CURRENCIES.map(
+                                                        (opt) => (
+                                                            <SelectItem
+                                                                key={opt.value}
+                                                                value={
+                                                                    opt.value
+                                                                }
+                                                            >
+                                                                {opt.label}
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -399,15 +472,29 @@ export default function ClientProfile() {
                                             icon={<Bell className="h-5 w-5" />}
                                             title="Notifications email"
                                             description="Commandes et messages"
-                                            checked={form.data.notifications_email}
-                                            onCheckedChange={(v) => form.setData('notifications_email', v)}
+                                            checked={
+                                                form.data.notifications_email
+                                            }
+                                            onCheckedChange={(v) =>
+                                                form.setData(
+                                                    'notifications_email',
+                                                    v,
+                                                )
+                                            }
                                         />
                                         <ToggleItem
                                             icon={<Tag className="h-5 w-5" />}
                                             title="Offres promotionnelles"
                                             description="Réductions exclusives"
-                                            checked={form.data.notifications_offers}
-                                            onCheckedChange={(v) => form.setData('notifications_offers', v)}
+                                            checked={
+                                                form.data.notifications_offers
+                                            }
+                                            onCheckedChange={(v) =>
+                                                form.setData(
+                                                    'notifications_offers',
+                                                    v,
+                                                )
+                                            }
                                         />
                                     </CardContent>
                                 </Card>
@@ -420,7 +507,8 @@ export default function ClientProfile() {
                                             Adresses
                                         </CardTitle>
                                         <CardDescription>
-                                            Adresses de facturation et de livraison par défaut.
+                                            Adresses de facturation et de
+                                            livraison par défaut.
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
@@ -428,10 +516,12 @@ export default function ClientProfile() {
                                             <AddressCard
                                                 type="Facturation"
                                                 address={billingAddress}
-                                                icon={<Shield className="h-4 w-4" />}
+                                                icon={
+                                                    <Shield className="h-4 w-4" />
+                                                }
                                             />
                                         ) : (
-                                            <p className="text-sm italic text-slate-500">
+                                            <p className="text-sm text-slate-500 italic">
                                                 Aucune adresse de facturation
                                             </p>
                                         )}
@@ -439,15 +529,19 @@ export default function ClientProfile() {
                                             <AddressCard
                                                 type="Livraison"
                                                 address={shippingAddress}
-                                                icon={<MapPin className="h-4 w-4" />}
+                                                icon={
+                                                    <MapPin className="h-4 w-4" />
+                                                }
                                             />
                                         ) : (
-                                            <p className="text-sm italic text-slate-500">
+                                            <p className="text-sm text-slate-500 italic">
                                                 Aucune adresse de livraison
                                             </p>
                                         )}
                                         <Link
-                                            href={route('tenant.addresses.index')}
+                                            href={route(
+                                                'tenant.addresses.index',
+                                            )}
                                             className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:underline"
                                         >
                                             <Pencil className="h-4 w-4" />
@@ -460,9 +554,12 @@ export default function ClientProfile() {
                                 <Card className="border-red-200/50 shadow-md dark:border-red-900/30">
                                     <CardHeader className="pb-4">
                                         <CardTitle className="flex items-center gap-2 text-red-600">
-                                            <Trash2 className="h-5 w-5" /> Zone de danger
+                                            <Trash2 className="h-5 w-5" /> Zone
+                                            de danger
                                         </CardTitle>
-                                        <CardDescription>Actions irréversibles.</CardDescription>
+                                        <CardDescription>
+                                            Actions irréversibles.
+                                        </CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         <Link
@@ -514,7 +611,8 @@ function Field({
                     id={id}
                     className={cn(
                         'h-11 border-slate-200 bg-white pl-10 transition-colors hover:border-emerald-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900',
-                        error && 'border-red-500 focus:border-red-500 focus:ring-red-500/20',
+                        error &&
+                            'border-red-500 focus:border-red-500 focus:ring-red-500/20',
                     )}
                     {...inputProps}
                 />
@@ -574,7 +672,9 @@ function AddressCard({
             <p className="mt-1 text-sm text-slate-900 dark:text-slate-100">
                 {address.rue}, {address.code_postal} {address.ville}
             </p>
-            {address.pays && <p className="text-xs text-slate-500">{address.pays}</p>}
+            {address.pays && (
+                <p className="text-xs text-slate-500">{address.pays}</p>
+            )}
         </div>
     );
 }

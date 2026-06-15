@@ -37,7 +37,7 @@ export default function CartPreview() {
             </div>
 
             {/* ITEMS */}
-            <div className="scrollbar-none max-h-72 space-y-3 overflow-y-auto pr-1">
+            <div className="max-h-72 scrollbar-none space-y-3 overflow-y-auto pr-1">
                 {previewItems.map((item) => (
                     <div
                         key={item.id}

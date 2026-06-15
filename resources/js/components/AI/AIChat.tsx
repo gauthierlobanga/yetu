@@ -115,7 +115,7 @@ export default function AIChat() {
             </div>
 
             {/* Messages */}
-            <div className="scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 max-h-100 flex-1 space-y-6 overflow-y-auto px-4 py-6">
+            <div className="max-h-100 flex-1 scrollbar-thin scrollbar-thumb-slate-200 space-y-6 overflow-y-auto px-4 py-6 dark:scrollbar-thumb-slate-800">
                 <AnimatePresence initial={false}>
                     {messages.map((msg, i) => (
                         <motion.div

@@ -1,5 +1,5 @@
 // resources/js/utils/routes.ts
-import { useTenant } from "@/hooks/useTenant";
+import { useTenant } from '@/hooks/useTenant';
 
 /**
  * Retourne le nom complet de la route en fonction du contexte (central ou tenant).

@@ -16,7 +16,6 @@ export interface Notification {
     updated_at?: string;
 }
 
-
 /** Notification telle que retournée par le middleware (notifications partagées) */
 export interface DashboardNotification {
     id: string;

@@ -679,7 +679,7 @@ const ResultsPanel = memo(function ResultsPanel({
             return;
         }
 
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setHoverEnabled(false);
         const enable = () => setHoverEnabled(true);
         container.addEventListener('pointermove', enable, {

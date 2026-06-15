@@ -106,7 +106,8 @@ export default function CategoriesIndex() {
     }, [viewMode]);
 
     // Nombre de squelettes à afficher selon le mode
-    const skeletonCount = viewMode === 'compact' ? categories.length : categories.length;
+    const skeletonCount =
+        viewMode === 'compact' ? categories.length : categories.length;
 
     return (
         <MainLayout>

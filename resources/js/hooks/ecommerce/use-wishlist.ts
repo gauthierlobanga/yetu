@@ -35,7 +35,12 @@ export function useWishlist() {
             // Conversion sécurisée en chaîne
             const idStr = String(productId);
 
-            if (idStr === 'NaN' || idStr === '' || idStr === 'undefined' || idStr === 'null') {
+            if (
+                idStr === 'NaN' ||
+                idStr === '' ||
+                idStr === 'undefined' ||
+                idStr === 'null'
+            ) {
                 toast.error('Produit invalide.');
 
                 return;
@@ -56,7 +61,7 @@ export function useWishlist() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json',
+                        Accept: 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': getCsrfToken(),
                     },
@@ -69,7 +74,9 @@ export function useWishlist() {
                 }
 
                 const data = await response.json();
-                toast.success(data.message ?? 'Wishlist mise à jour', { duration: 2000 });
+                toast.success(data.message ?? 'Wishlist mise à jour', {
+                    duration: 2000,
+                });
             } catch (error: any) {
                 // Rétablir l'état précédent
                 setWishlistIds((prev) => {
@@ -78,7 +85,9 @@ export function useWishlist() {
 
                     return next;
                 });
-                toast.error(error.message || 'Impossible de modifier la wishlist.');
+                toast.error(
+                    error.message || 'Impossible de modifier la wishlist.',
+                );
             }
         },
         [wishlistIds, isAuthenticated],

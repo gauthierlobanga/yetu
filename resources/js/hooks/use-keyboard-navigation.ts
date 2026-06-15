@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import type { BaseHit, Hit } from "instantsearch.js";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import type { BaseHit, Hit } from 'instantsearch.js';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface UseKeyboardNavigationReturn {
     selectedIndex: number;
@@ -8,7 +8,7 @@ interface UseKeyboardNavigationReturn {
     moveUp: () => void;
     activateSelection: () => boolean;
     hoverIndex: (index: number) => void;
-    selectionOrigin: "keyboard" | "pointer" | "init";
+    selectionOrigin: 'keyboard' | 'pointer' | 'init';
 }
 
 export function useKeyboardNavigation(
@@ -18,19 +18,19 @@ export function useKeyboardNavigation(
 ): UseKeyboardNavigationReturn {
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const [selectionOrigin, setSelectionOrigin] = useState<
-        "keyboard" | "pointer" | "init"
-    >("init");
+        'keyboard' | 'pointer' | 'init'
+    >('init');
 
     const totalItems = useMemo(() => hits.length, [hits.length]);
 
     const moveDown = useCallback(() => {
         setSelectedIndex((prev) => (prev + 1) % totalItems);
-        setSelectionOrigin("keyboard");
+        setSelectionOrigin('keyboard');
     }, [totalItems]);
 
     const moveUp = useCallback(() => {
         setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems);
-        setSelectionOrigin("keyboard");
+        setSelectionOrigin('keyboard');
     }, [totalItems]);
 
     const hoverIndex = useCallback(
@@ -40,18 +40,18 @@ export function useKeyboardNavigation(
             }
 
             setSelectedIndex(index);
-            setSelectionOrigin("pointer");
+            setSelectionOrigin('pointer');
         },
         [totalItems],
     );
 
     const activateSelection = useCallback((): boolean => {
         const hit = hits[selectedIndex];
-        const url = typeof hit?.url === "string" ? hit.url : undefined;
+        const url = typeof hit?.url === 'string' ? hit.url : undefined;
 
         if (url) {
             if (openResultsInNewTab) {
-                window.open(url, "_blank", "noopener,noreferrer");
+                window.open(url, '_blank', 'noopener,noreferrer');
             } else {
                 window.location.assign(url);
             }
@@ -65,7 +65,7 @@ export function useKeyboardNavigation(
     // biome-ignore lint/correctness/useExhaustiveDependencies: expected
     useEffect(() => {
         setSelectedIndex(0);
-        setSelectionOrigin("init");
+        setSelectionOrigin('init');
     }, [query]);
 
     return {

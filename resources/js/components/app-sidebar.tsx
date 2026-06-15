@@ -26,12 +26,12 @@ import {
     SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes/acheteur';
+import { edit } from '@/routes/acheteur/profile';
 import tenant from '@/routes/tenant';
 import addresses from '@/routes/tenant/addresses';
 import loyalty from '@/routes/tenant/loyalty';
 import orders from '@/routes/tenant/orders';
 import { help } from '@/routes/tenant/page';
-import { edit } from '@/routes/acheteur/profile';
 import wishlist from '@/routes/tenant/wishlist';
 import vendor from '@/routes/vendor';
 import type { NavItem } from '@/types';
@@ -149,7 +149,7 @@ export function AppSidebar() {
                       title: 'Ma boutique',
                       href: vendor.dashboard().url,
                       icon: Store,
-                    },
+                  },
               ]),
           }
         : null;

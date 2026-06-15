@@ -155,7 +155,7 @@ function ProductGallery({
     const current = allImages[selected];
 
     return (
-        <div className="space-y-3 max-w-7xl">
+        <div className="max-w-7xl space-y-3">
             <div className="relative aspect-square overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800">
                 <img
                     src={resolveImageUrl(current.large)}
@@ -633,7 +633,9 @@ export default function ProductShow() {
                                 <div
                                     className="prose max-w-none prose-slate dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-p:leading-relaxed prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-a:text-emerald-600 prose-a:no-underline hover:prose-a:underline prose-blockquote:border-l-4 prose-blockquote:border-emerald-500 prose-blockquote:bg-emerald-50/50 prose-blockquote:px-4 prose-blockquote:py-2 prose-blockquote:italic dark:prose-blockquote:bg-emerald-950/20 prose-code:rounded-md prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm dark:prose-code:bg-slate-800 prose-pre:rounded-xl prose-pre:bg-slate-100 prose-pre:p-4 dark:prose-pre:bg-slate-800 prose-img:rounded-xl prose-img:shadow-md"
                                     dangerouslySetInnerHTML={{
-                                        __html: DOMPurify.sanitize(product.description),
+                                        __html: DOMPurify.sanitize(
+                                            product.description,
+                                        ),
                                     }}
                                 />
                             </div>

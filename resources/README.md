@@ -45,23 +45,21 @@ components/
 **Exemple de Composant:**
 
 ```tsx
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/button';
 
 interface ProductCardProps {
-    product: Product
-    onAddToCart: (product: Product) => void
+    product: Product;
+    onAddToCart: (product: Product) => void;
 }
 
 export function ProductCard({ product, onAddToCart }: ProductCardProps) {
     return (
-        <div className="border rounded-lg p-4">
+        <div className="rounded-lg border p-4">
             <h3>{product.name}</h3>
             <p>${product.price}</p>
-            <Button onClick={() => onAddToCart(product)}>
-                Add to Cart
-            </Button>
+            <Button onClick={() => onAddToCart(product)}>Add to Cart</Button>
         </div>
-    )
+    );
 }
 ```
 
@@ -87,17 +85,17 @@ pages/
 **Structure de Page:**
 
 ```tsx
-import { useRoute } from '@inertiajs/react'
-import Layout from '@/layouts/Layout'
+import { useRoute } from '@inertiajs/react';
+import Layout from '@/layouts/Layout';
 
 interface Product {
-    id: string
-    name: string
-    price: number
+    id: string;
+    name: string;
+    price: number;
 }
 
 interface Props {
-    product: Product
+    product: Product;
 }
 
 export default function ProductShow({ product }: Props) {
@@ -108,7 +106,7 @@ export default function ProductShow({ product }: Props) {
                 <p>${product.price}</p>
             </div>
         </Layout>
-    )
+    );
 }
 ```
 
@@ -127,12 +125,12 @@ layouts/
 **Exemple de Layout:**
 
 ```tsx
-import Header from '@/components/layout/header'
-import Sidebar from '@/components/layout/sidebar'
-import Footer from '@/components/layout/footer'
+import Header from '@/components/layout/header';
+import Sidebar from '@/components/layout/sidebar';
+import Footer from '@/components/layout/footer';
 
 interface LayoutProps {
-    children: React.ReactNode
+    children: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
@@ -145,7 +143,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
             <Footer />
         </div>
-    )
+    );
 }
 ```
 
@@ -154,15 +152,15 @@ export default function Layout({ children }: LayoutProps) {
 Point d'entrée de l'application React.
 
 ```tsx
-import './bootstrap'
-import '../css/app.css'
+import './bootstrap';
+import '../css/app.css';
 
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import { createInertiaApp } from '@inertiajs/react'
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { createInertiaApp } from '@inertiajs/react';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Yetufy'
+const appName = import.meta.env.VITE_APP_NAME || 'Yetufy';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -172,9 +170,9 @@ createInertiaApp({
             import.meta.glob('./pages/**/*.tsx'),
         ),
     setup({ el, App, props }) {
-        createRoot(el).render(<App {...props} />)
+        createRoot(el).render(<App {...props} />);
     },
-})
+});
 ```
 
 ## 🎨 CSS - `resources/css/`
@@ -197,7 +195,7 @@ css/
 
 @layer components {
     .btn-primary {
-        @apply px-4 py-2 rounded bg-blue-500 text-white;
+        @apply rounded bg-blue-500 px-4 py-2 text-white;
     }
 }
 ```
@@ -288,33 +286,35 @@ export default function ProductShow({ product, recommendations }) {
 
 ### Nommage des Fichiers
 
-| Type | Convention | Exemple |
-|------|-----------|---------|
-| Component | PascalCase | `ProductCard.tsx` |
-| Page | kebab-case | `product-show.tsx` |
-| Layout | PascalCase | `MainLayout.tsx` |
-| Style | Tailwind | `className="..."` |
+| Type      | Convention | Exemple            |
+| --------- | ---------- | ------------------ |
+| Component | PascalCase | `ProductCard.tsx`  |
+| Page      | kebab-case | `product-show.tsx` |
+| Layout    | PascalCase | `MainLayout.tsx`   |
+| Style     | Tailwind   | `className="..."`  |
 
 ### Organisation des Composants
 
 ```tsx
 // ✅ Bon - Structure claire
 interface ComponentProps {
-    title: string
-    onSubmit: (data: FormData) => void
+    title: string;
+    onSubmit: (data: FormData) => void;
 }
 
 export function MyComponent({ title, onSubmit }: ComponentProps) {
     // Logique
-    const handleSubmit = (data) => { /* ... */ }
-    
+    const handleSubmit = (data) => {
+        /* ... */
+    };
+
     // Render
-    return <form onSubmit={handleSubmit}>...</form>
+    return <form onSubmit={handleSubmit}>...</form>;
 }
 
 // ❌ Mauvais - Pas de types
 export function MyComponent(props) {
-    return <form>{props.children}</form>
+    return <form>{props.children}</form>;
 }
 ```
 
@@ -331,7 +331,7 @@ describe('ProductCard', () => {
     it('renders product name', () => {
         const product = { id: 1, name: 'Test', price: 99 }
         render(<ProductCard product={product} />)
-        
+
         expect(screen.getByText('Test')).toBeInTheDocument()
     })
 })
@@ -358,9 +358,9 @@ npm run dev
 ### Configuration - `vite.config.js`
 
 ```javascript
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import laravel from 'laravel-vite-plugin'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import laravel from 'laravel-vite-plugin';
 
 export default defineConfig({
     plugins: [
@@ -370,7 +370,7 @@ export default defineConfig({
         }),
         react(),
     ],
-})
+});
 ```
 
 ## 🎯 Bonnes Pratiques
@@ -380,13 +380,13 @@ export default defineConfig({
 ```tsx
 // ✅ Bon - Petit, réutilisable
 function ProductPrice({ price }: { price: number }) {
-    return <span className="text-lg font-bold">${price}</span>
+    return <span className="text-lg font-bold">${price}</span>;
 }
 
 // ❌ Mauvais - Trop de logique
 function ProductPrice({ product, user, cart }: Props) {
-    const discountedPrice = product.price * (1 - user.discount)
-    const withTax = discountedPrice * 1.2
+    const discountedPrice = product.price * (1 - user.discount);
+    const withTax = discountedPrice * 1.2;
     // 50 lignes de logique...
 }
 ```
@@ -396,8 +396,8 @@ function ProductPrice({ product, user, cart }: Props) {
 ```tsx
 // ✅ Bon - Typé
 interface Props {
-    productId: string
-    onSelect: (id: string) => void
+    productId: string;
+    onSelect: (id: string) => void;
 }
 
 export function ProductSelector({ productId, onSelect }: Props) {

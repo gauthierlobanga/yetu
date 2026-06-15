@@ -500,7 +500,7 @@ export default function VendorConfigure({
         );
 
         return (
-            <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-white via-emerald-50 to-teal-50 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/30 p-4">
+            <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-white via-emerald-50 to-teal-50 p-4 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/30">
                 <div className="w-full max-w-md space-y-8">
                     {/* Animated Icon Circle */}
                     <motion.div
@@ -536,7 +536,7 @@ export default function VendorConfigure({
                     </motion.div>
 
                     {/* Title */}
-                    <div className="text-center space-y-2">
+                    <div className="space-y-2 text-center">
                         <motion.h2
                             className="text-3xl font-bold text-slate-900 dark:text-white"
                             initial={{ opacity: 0, y: 10 }}
@@ -567,13 +567,15 @@ export default function VendorConfigure({
                                     <motion.div
                                         className="h-full rounded-full bg-linear-to-r from-emerald-500 via-teal-500 to-emerald-500 bg-size-[200%_100%]"
                                         animate={{
-                                            backgroundPosition: ['0% 0%', '100% 0%'],
+                                            backgroundPosition: [
+                                                '0% 0%',
+                                                '100% 0%',
+                                            ],
                                             width: `${submitProgress}%`,
                                         }}
                                         initial={{
                                             width: `${submitProgress}%`,
                                         }}
-
                                         transition={{
                                             backgroundPosition: {
                                                 duration: 2,
@@ -589,9 +591,7 @@ export default function VendorConfigure({
                                 <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
                                     <span>{Math.round(submitProgress)}%</span>
                                     <span>
-                                        {
-                                            steps[currentProgressStep]?.name
-                                        }
+                                        {steps[currentProgressStep]?.name}
                                     </span>
                                 </div>
                             </div>
@@ -617,11 +617,9 @@ export default function VendorConfigure({
                                                       : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600',
                                             )}
                                         >
-                                            {idx <
-                                            currentProgressStep ? (
+                                            {idx < currentProgressStep ? (
                                                 <Check className="h-4 w-4" />
-                                            ) : idx ===
-                                              currentProgressStep ? (
+                                            ) : idx === currentProgressStep ? (
                                                 <motion.div
                                                     animate={{
                                                         rotate: 360,
@@ -655,8 +653,8 @@ export default function VendorConfigure({
                             <div className="rounded-2xl bg-blue-50 p-4 dark:bg-blue-950/20">
                                 <p className="text-xs text-blue-700 dark:text-blue-300">
                                     <Sparkles className="mr-2 inline h-3 w-3" />
-                                    Astuce: Ne fermez pas cette page
-                                    pendant la création de votre boutique.
+                                    Astuce: Ne fermez pas cette page pendant la
+                                    création de votre boutique.
                                 </p>
                             </div>
                         </div>
@@ -665,11 +663,10 @@ export default function VendorConfigure({
                     {recentlySuccessful && (
                         <motion.button
                             onClick={() =>
-                                (window.location.href = route(
-                                    'tenant.dashboard',
-                                ))
+                                (window.location.href =
+                                    route('tenant.dashboard'))
                             }
-                            className="w-full rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-3 text-white font-semibold shadow-lg shadow-emerald-500/20 hover:from-emerald-700 hover:to-teal-700 transition-all"
+                            className="w-full rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-3 font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:from-emerald-700 hover:to-teal-700"
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5 }}

@@ -1,9 +1,9 @@
 'use client';
 
+import { Area, AreaChart, XAxis } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChartContainer } from '@/components/ui/chart';
 import { cn } from '@/lib/utils';
-import { Area, AreaChart, XAxis } from 'recharts';
 
 const data = [
     {

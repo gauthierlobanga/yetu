@@ -1,7 +1,11 @@
 import { echo } from '@laravel/echo-react';
 import { useEffect } from 'react';
 
-export function useEcho(channel: string, event: string, callback: (data: any) => void) {
+export function useEcho(
+    channel: string,
+    event: string,
+    callback: (data: any) => void,
+) {
     useEffect(() => {
         // echo() retourne l'instance Echo configurée
         const instance = echo();

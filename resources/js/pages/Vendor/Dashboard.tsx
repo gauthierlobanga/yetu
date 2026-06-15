@@ -161,7 +161,6 @@ interface Stats {
     growth_percent: number;
 }
 
-
 interface Trial {
     start: string;
     end: string;
@@ -643,7 +642,10 @@ export default function VendorDashboard({
                         {aiEnabled && <FloatingChatWidget />}
                     </div>
 
-                    <SubscriptionReminderBanner trial={trial ?? null} subscription={subscription ?? null} />
+                    <SubscriptionReminderBanner
+                        trial={trial ?? null}
+                        subscription={subscription ?? null}
+                    />
 
                     <AlertDialog
                         open={deleteProductId !== null}

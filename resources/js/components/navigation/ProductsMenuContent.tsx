@@ -14,12 +14,36 @@ import {
 } from 'lucide-react';
 
 const tools = [
-    { icon: Store, title: 'Boutique en ligne', desc: 'Créez un site vitrine et vendez 24h/24.' },
-    { icon: ShoppingCart, title: 'Panier & Checkout', desc: 'Processus de commande optimisé pour convertir.' },
-    { icon: Smartphone, title: 'Mobile first', desc: 'Thèmes responsives pour smartphones et tablettes.' },
-    { icon: Globe, title: 'Domaines personnalisés', desc: 'Utilisez votre propre nom de domaine.' },
-    { icon: Palette, title: 'Personnalisation', desc: 'Modifiez les couleurs, polices et mises en page.' },
-    { icon: Settings, title: 'Gestion avancée', desc: 'Inventaire, commandes, clients, tout est intégré.' },
+    {
+        icon: Store,
+        title: 'Boutique en ligne',
+        desc: 'Créez un site vitrine et vendez 24h/24.',
+    },
+    {
+        icon: ShoppingCart,
+        title: 'Panier & Checkout',
+        desc: 'Processus de commande optimisé pour convertir.',
+    },
+    {
+        icon: Smartphone,
+        title: 'Mobile first',
+        desc: 'Thèmes responsives pour smartphones et tablettes.',
+    },
+    {
+        icon: Globe,
+        title: 'Domaines personnalisés',
+        desc: 'Utilisez votre propre nom de domaine.',
+    },
+    {
+        icon: Palette,
+        title: 'Personnalisation',
+        desc: 'Modifiez les couleurs, polices et mises en page.',
+    },
+    {
+        icon: Settings,
+        title: 'Gestion avancée',
+        desc: 'Inventaire, commandes, clients, tout est intégré.',
+    },
 ];
 
 const solutions = [
@@ -98,7 +122,9 @@ export function ProductsMenuContent() {
                                             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                                                 <sol.icon className="h-4 w-4" />
                                             </div>
-                                            <span className="font-medium">{sol.label}</span>
+                                            <span className="font-medium">
+                                                {sol.label}
+                                            </span>
                                         </Link>
                                     </li>
                                 ))}

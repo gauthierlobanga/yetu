@@ -18,7 +18,9 @@ This document summarizes the complete Subscription System implementation for Yet
 | 6 | Events & Notifications | ✅ Complete | `82c23ab` |
 | 7 | Commands & Jobs | ✅ Complete | `4d65b1a` |
 | 8 | Routes & Endpoints | ✅ Complete | `e8d5cd8` |
+
 ## Phase 9: Testing & Docs | ✅ Complete | `6b63a9f` |
+
 | 10 | Major Restructuring | ✅ Complete | `[CURRENT]` |
 
 ---
@@ -26,6 +28,7 @@ This document summarizes the complete Subscription System implementation for Yet
 ## Phase 10: Major Restructuring (June 2026)
 
 **Key Changes:**
+
 - **Hierarchical Controller Structure**: Moved ~80 controllers to domain-specific subdirectories (`Central`, `Vendor`, `Admin`).
 - **Route Reorganization**: Refactored `routes/web.php` and `routes/tenants/routes.php` to align with the new controller structure.
 - **UI Modernization**: Updated `TenantAccountSelection.tsx` with a modern design and improved UX.
@@ -36,14 +39,15 @@ This document summarizes the complete Subscription System implementation for Yet
 
 ## Phase 1: Data Layer (Models & Migrations)
 
-
 **Files Created:**
+
 - `app/Models/Subscription.php` (214 lines)
 - `app/Models/Invoice.php` (85 lines)
 - `app/Models/PaymentAttempt.php` (116 lines)
 - 3 Migration files
 
 **Key Features:**
+
 - Full subscription lifecycle with trial, grace period, and blocking
 - Invoice tracking with Stripe sync
 - Payment failure tracking with retry counts
@@ -51,6 +55,7 @@ This document summarizes the complete Subscription System implementation for Yet
 - UUID primary keys for security
 
 **Database Schema:**
+
 ```
 Subscriptions:
   - tenant_id (string FK) - Links to shop
@@ -86,6 +91,7 @@ PaymentAttempts:
 ## Phase 2: Business Logic (Services)
 
 **SubscriptionService (360 lines):**
+
 - CRUD: create, renew, cancel, pause, resume
 - Plan Management: upgrade, downgrade
 - Access Control: block, unblock, shouldBlockTenant()
@@ -93,10 +99,12 @@ PaymentAttempts:
 - Utilities: notifyExpiring, syncWithStripe, blockExpired
 
 **Updated Services:**
+
 - `VendorRegistrationService`: Now injects SubscriptionService
 - `PaymentService`: Triggers subscription creation on payment success
 
 **Key Methods:**
+
 ```php
 createSubscription(Tenant, Plan, User): Subscription
 renewSubscription(Subscription): Subscription
@@ -112,12 +120,14 @@ upgradeToPlan(Subscription, Plan): Subscription
 ## Phase 3: API Layer (Controllers)
 
 **SubscriptionController (Tenant Dashboard):**
+
 - `show()` - Display subscription status and manage
 - `upgrade()/downgrade()` - Change plans
 - `cancel()/pause()/resume()` - Manage state
 - `invoices()` - Paginated invoice history
 
 **AdminSubscriptionController (Admin Dashboard):**
+
 - `index()` - List all with filters
 - `show()` - Detailed view
 - `block()/unblock()` - Manual access control
@@ -128,6 +138,7 @@ upgradeToPlan(Subscription, Plan): Subscription
 - `syncWithStripe()` - Batch sync
 
 **Updated Controllers:**
+
 - `VendorRegistrationController`: Free plan → direct dashboard
 - `PaymentController`: Paid plan success → direct dashboard (no success page)
 
@@ -136,17 +147,20 @@ upgradeToPlan(Subscription, Plan): Subscription
 ## Phase 4: Access Control (Middlewares)
 
 **EnsureTenantSubscription:**
+
 - Protects tenant routes from expired subscriptions
 - Allows active subscriptions through
 - Allows grace period access with warning
 - Blocks access after grace period expires
 
 **CheckTenantAccess:**
+
 - Checks if subscription is hard-blocked
 - Checks if tenant status is inactive
 - Returns 403 Forbidden with custom message
 
 **Protection Matrix:**
+
 ```
 Route Access Decision Tree:
 ├─ No subscription → Redirect to subscription.none
@@ -162,30 +176,33 @@ Route Access Decision Tree:
 ## Phase 5: Frontend (Inertia Components)
 
 **Tenant Pages:**
+
 - `Tenant/Subscription/Show.tsx` - Main dashboard
-  * Subscription details, plan info, dates
-  * Status indicators with alerts
-  * Action buttons for plan changes, pause, cancel
-  * Recent invoices table
-  * Modal for cancellation with reason
+  - Subscription details, plan info, dates
+  - Status indicators with alerts
+  - Action buttons for plan changes, pause, cancel
+  - Recent invoices table
+  - Modal for cancellation with reason
 
 - `Tenant/Subscription/Invoices.tsx` - Invoice history
-  * Paginated table of all invoices
-  * Download PDF from Stripe
-  * Filter by status
+  - Paginated table of all invoices
+  - Download PDF from Stripe
+  - Filter by status
 
 - `Tenant/Subscription/Expired.tsx` - Access denied page
-  * Shown when grace period expires
-  * Explains reactivation steps
-  * Contact support CTA
+  - Shown when grace period expires
+  - Explains reactivation steps
+  - Contact support CTA
 
 - `Tenant/Subscription/None.tsx` - No subscription page
-  * Troubleshooting tips
+  - Troubleshooting tips
 
 **Error Pages:**
+
 - `Errors/AccessDenied.tsx` - Hard block page
 
 **Design:**
+
 - Tailwind CSS styling
 - Lucide icons
 - Responsive mobile design
@@ -197,6 +214,7 @@ Route Access Decision Tree:
 ## Phase 6: Async Operations (Events & Notifications)
 
 **5 Events (broadcast on private channels):**
+
 1. `TenantSubscriptionCreated` - When created
 2. `TenantSubscriptionRenewed` - When renewed
 3. `TenantSubscriptionCanceled` - When canceled
@@ -204,6 +222,7 @@ Route Access Decision Tree:
 5. `PaymentFailed` - Payment failure
 
 **4 Notifications (queued, mail + database):**
+
 1. `SubscriptionExpiringNotification` - 7 days warning
 2. `PaymentFailedNotification` - Error details + recovery
 3. `SubscriptionCanceledNotification` - Cancellation + grace date
@@ -214,18 +233,21 @@ Route Access Decision Tree:
 ## Phase 7: Scheduled Tasks (Commands & Jobs)
 
 **CheckSubscriptionsCommand:**
+
 ```bash
 php artisan subscriptions:check           # Block expired
 php artisan subscriptions:check --notify  # Block + notify
 ```
 
 **RenewSubscriptionJob:**
+
 - Renews individual subscriptions
 - Checks auto_renewal flag
 - Sends notification to user
 - Retries on failure (60s delay)
 
 **NotifyExpiringSubscriptionsJob:**
+
 - Sends warnings for expiring in 7 days
 - Daily scheduler job
 - Retries on failure (5min delay)
@@ -235,6 +257,7 @@ php artisan subscriptions:check --notify  # Block + notify
 ## Phase 8: Routing (Endpoints)
 
 **Tenant Routes (authenticated):**
+
 ```
 GET    /subscription              - Show status
 POST   /subscription/upgrade      - Upgrade
@@ -246,6 +269,7 @@ GET    /subscription/invoices     - Invoice history
 ```
 
 **Admin Routes:**
+
 ```
 GET    /admin/subscriptions                           - List
 GET    /admin/subscriptions/{id}                      - Show
@@ -259,6 +283,7 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 ```
 
 **Central Routes (existing, already configured):**
+
 - Vendor registration → Checkout → Stripe → Dashboard
 
 ---
@@ -266,6 +291,7 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 ## Phase 9: Testing & Documentation
 
 **Comprehensive Test Suite (20 automated tests):**
+
 - Free plan immediate activation
 - Paid plan with trial
 - Trial to active transition
@@ -283,6 +309,7 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 - Payment attempts
 
 **Manual Test Checklist (14 scenarios):**
+
 1. Free plan → dashboard redirect
 2. Paid plan → checkout → dashboard
 3. Trial → grace period
@@ -299,6 +326,7 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 14. Performance
 
 **Documentation:**
+
 - `SUBSCRIPTION_SYSTEM.md` - Complete reference (360 lines)
 - `SUBSCRIPTION_TESTING.md` - Testing guide (650+ lines)
 - `SubscriptionSystemTest.php` - 20 automated tests
@@ -308,6 +336,7 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 ## User Flows
 
 ### Free Plan User
+
 ```
 1. Choose Plan (Gratuit) → /devenir-vendeur
 2. Configure Shop → /devenir-vendeur/configurer
@@ -319,6 +348,7 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 ```
 
 ### Paid Plan User
+
 ```
 1. Choose Plan (Pro/Business) → /devenir-vendeur
 2. Configure Shop → /devenir-vendeur/configurer
@@ -341,30 +371,35 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 ## Key Features Implemented
 
 ### ✅ Trial System
+
 - Free plans: No trial, immediate active
 - Paid plans: Configurable trial (default 14 days)
 - Trial countdown visible in UI
 - Auto-transition to billing after trial
 
 ### ✅ Grace Period
+
 - Soft block: 14 days after trial/expiration
 - User warned but can still access
 - Countdown displayed on dashboard
 - Admin can extend (max 90 days)
 
 ### ✅ Hard Block
+
 - After grace period expires
 - Complete access revocation via middleware
 - Returns 403 Forbidden on all tenant routes
 - Cannot access dashboard, products, orders, etc.
 
 ### ✅ Auto-Renewal
+
 - Enabled by default
 - Stripe handles billing
 - Failed payments tracked
 - Retry logic with notifications
 
 ### ✅ Admin Controls
+
 - View all subscriptions
 - Filter by status, plan, blocked state
 - Manual block/unblock
@@ -373,6 +408,7 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 - Batch operations
 
 ### ✅ Stripe Integration
+
 - Full webhook support
 - Payment failure tracking
 - Invoice generation
@@ -380,6 +416,7 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 - Customer management
 
 ### ✅ Notifications
+
 - Email + database delivery
 - 4 notification types
 - Queued for async processing
@@ -448,6 +485,7 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 ## Files Summary
 
 **Backend (Server-side):**
+
 - 3 Models
 - 3 Migrations
 - 2 Services
@@ -460,17 +498,20 @@ POST   /admin/subscriptions/batch/sync-stripe         - Batch
 - 1 Test File (20 tests)
 
 **Frontend (Client-side):**
+
 - 5 Inertia Components
 - 1 Error Page
 - Tailwind CSS
 - Lucide Icons
 
 **Documentation:**
+
 - 2 Documentation files (1000+ lines)
 - Comprehensive testing guide
 - API reference
 
 **Total Code:**
+
 - ~2000 lines of production code
 - ~1200 lines of tests
 - ~1000 lines of documentation

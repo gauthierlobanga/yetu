@@ -1,7 +1,4 @@
 // resources/js/components/data-table-post.tsx
-import * as React from 'react';
-import { useState, useCallback, useEffect } from 'react';
-import { router, usePage } from '@inertiajs/react';
 import {
     closestCenter,
     DndContext,
@@ -9,10 +6,11 @@ import {
     MouseSensor,
     TouchSensor,
     useSensor,
-    useSensors,
-    type DragEndEvent,
-    type UniqueIdentifier,
+    useSensors
+    
+    
 } from '@dnd-kit/core';
+import type {DragEndEvent, UniqueIdentifier} from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
     arrayMove,
@@ -21,6 +19,7 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { router, usePage } from '@inertiajs/react';
 import {
     IconChevronDown,
     IconChevronLeft,
@@ -43,25 +42,28 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    useReactTable,
-    type ColumnDef,
-    type ColumnFiltersState,
-    type Row,
-    type SortingState,
-    type VisibilityState,
+    useReactTable
+    
+    
+    
+    
+    
 } from '@tanstack/react-table';
+import type {ColumnDef, ColumnFiltersState, Row, SortingState, VisibilityState} from '@tanstack/react-table';
+import { useState, useCallback, useEffect } from 'react';
+import * as React from 'react';
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts';
 import { toast } from 'sonner';
 
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     ChartContainer,
     ChartTooltip,
-    ChartTooltipContent,
-    type ChartConfig,
+    ChartTooltipContent
+    
 } from '@/components/ui/chart';
+import type {ChartConfig} from '@/components/ui/chart';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
     Drawer,
@@ -100,6 +102,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Types pour les données Post
 interface Category {
@@ -554,6 +557,7 @@ export function DataTableProducts({
     // Gestion du drag & drop
     function handleDragEnd(event: DragEndEvent) {
         const { active, over } = event;
+
         if (active && over && active.id !== over.id) {
             const oldIndex = dataIds.indexOf(active.id);
             const newIndex = dataIds.indexOf(over.id);
@@ -648,6 +652,7 @@ export function DataTableProducts({
                                             user: 'Auteur',
                                             published_at: 'Date',
                                         };
+
                                         return (
                                             <DropdownMenuCheckboxItem
                                                 key={column.id}

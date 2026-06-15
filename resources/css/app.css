@@ -8,11 +8,11 @@
 
 @import '@fontsource-variable/inter';
 
-@import "tw-animate-css";
+@import 'tw-animate-css';
 
-@import "shadcn/tailwind.css";
+@import 'shadcn/tailwind.css';
 
-@import "@fontsource-variable/instrument-sans";
+@import '@fontsource-variable/instrument-sans';
 
 @plugin "@tailwindcss/typography";
 
@@ -179,8 +179,9 @@
     html {
         @apply font-sans;
     }
-  button:not(:disabled), [role="button"]:not(:disabled) {
-    cursor: pointer;
+    button:not(:disabled),
+    [role='button']:not(:disabled) {
+        cursor: pointer;
     }
 }
 

@@ -29,7 +29,6 @@ export interface PlatformStats {
     }>;
 }
 
-
 export interface RecentProduct {
     id: string;
     nom: string;

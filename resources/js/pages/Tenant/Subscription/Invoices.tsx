@@ -24,8 +24,8 @@ type Props = {
 
 function formatDate(date: string | null): string {
     if (!date) {
-return '—';
-}
+        return '—';
+    }
 
     return new Date(date).toLocaleDateString('fr-FR', {
         year: 'numeric',
@@ -84,7 +84,7 @@ export default function Invoices({ invoices }: Props) {
                                     {invoices.data.map((invoice) => (
                                         <tr
                                             key={invoice.id}
-                                            className="hover:bg-muted/50 transition"
+                                            className="transition hover:bg-muted/50"
                                         >
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
@@ -95,14 +95,12 @@ export default function Invoices({ invoices }: Props) {
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-muted-foreground">
-                                                {formatDate(
-                                                    invoice.issued_at
-                                                )}
+                                                {formatDate(invoice.issued_at)}
                                             </td>
                                             <td className="px-6 py-4 font-semibold text-foreground">
                                                 {formatAmount(
                                                     invoice.amount_due,
-                                                    'CDF'
+                                                    'CDF',
                                                 )}
                                             </td>
                                             <td className="px-6 py-4">
@@ -112,31 +110,28 @@ export default function Invoices({ invoices }: Props) {
                                                         'paid'
                                                             ? 'bg-green-100 text-green-800'
                                                             : invoice.status ===
-                                                              'open'
-                                                            ? 'bg-blue-100 text-blue-800'
-                                                            : 'bg-gray-100 text-gray-800'
+                                                                'open'
+                                                              ? 'bg-blue-100 text-blue-800'
+                                                              : 'bg-gray-100 text-gray-800'
                                                     }`}
                                                 >
-                                                    {invoice.status ===
-                                                    'paid'
+                                                    {invoice.status === 'paid'
                                                         ? 'Payée'
                                                         : invoice.status ===
-                                                          'open'
-                                                        ? 'En attente'
-                                                        : invoice.status.charAt(
-                                                              0
-                                                          ).toUpperCase() +
-                                                          invoice.status.slice(
-                                                              1
-                                                          )}
+                                                            'open'
+                                                          ? 'En attente'
+                                                          : invoice.status
+                                                                .charAt(0)
+                                                                .toUpperCase() +
+                                                            invoice.status.slice(
+                                                                1,
+                                                            )}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 {invoice.pdf_url && (
                                                     <a
-                                                        href={
-                                                            invoice.pdf_url
-                                                        }
+                                                        href={invoice.pdf_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="inline-flex items-center gap-2 rounded bg-primary/10 px-3 py-2 text-primary transition hover:bg-primary/20"

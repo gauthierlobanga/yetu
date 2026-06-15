@@ -4,7 +4,7 @@
 export function formatPrice(
     price: number,
     currency: string = 'EUR',
-    locale: string = 'fr-FR'
+    locale: string = 'fr-FR',
 ): string {
     return new Intl.NumberFormat(locale, {
         style: 'currency',
@@ -35,7 +35,10 @@ export function formatPercent(value: number, locale: string = 'fr-FR'): string {
 /**
  * Formate une date relative
  */
-export function formatRelativeDate(date: string | Date, locale: string = 'fr'): string {
+export function formatRelativeDate(
+    date: string | Date,
+    locale: string = 'fr',
+): string {
     const now = new Date();
     const target = new Date(date);
     const diffInSeconds = Math.floor((now.getTime() - target.getTime()) / 1000);
@@ -51,6 +54,7 @@ export function formatRelativeDate(date: string | Date, locale: string = 'fr'): 
 
     for (const [unit, seconds] of Object.entries(intervals)) {
         const interval = Math.floor(diffInSeconds / seconds);
+
         if (interval >= 1) {
             return `Il y a ${interval} ${unit}${interval > 1 ? 's' : ''}`;
         }
@@ -63,7 +67,10 @@ export function formatRelativeDate(date: string | Date, locale: string = 'fr'): 
  * Tronque un texte à une longueur maximale
  */
 export function truncateText(text: string, maxLength: number = 100): string {
-    if (text.length <= maxLength) return text;
+    if (text.length <= maxLength) {
+return text;
+}
+
     return text.substring(0, maxLength) + '...';
 }
 
@@ -87,7 +94,7 @@ export function slugify(text: string): string {
  */
 export function calculateDiscountedPrice(
     originalPrice: number,
-    discountPercentage: number
+    discountPercentage: number,
 ): number {
     return originalPrice * (1 - discountPercentage / 100);
 }
@@ -97,7 +104,9 @@ export function calculateDiscountedPrice(
  */
 export function calculateDiscountPercentage(
     originalPrice: number,
-    discountedPrice: number
+    discountedPrice: number,
 ): number {
-    return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+    return Math.round(
+        ((originalPrice - discountedPrice) / originalPrice) * 100,
+    );
 }

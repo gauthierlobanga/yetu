@@ -1,4 +1,4 @@
-import type { Tenant } from "@/types/tenants/products/vendor/tenant";
+import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 
 interface TopTenant {
     raison_sociale: string;
@@ -19,5 +19,5 @@ export interface AdminVisitorStatsProps {
     unique_visitors_tenants: number;
     top_tenants: TopTenant[];
     daily_central: DailyStat[];
-    tenant: Tenant
+    tenant: Tenant;
 }

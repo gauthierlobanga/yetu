@@ -1,10 +1,16 @@
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Modal, ModalContent, ModalHeader, ModalTitle, ModalTrigger } from '@/components/ui/modal';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { Plus } from 'lucide-react';
+import {
+    Modal,
+    ModalContent,
+    ModalHeader,
+    ModalTitle,
+    ModalTrigger,
+} from '@/components/ui/modal';
 
 interface AddAddressModalProps {
     onAddAddress?: (address: {
@@ -16,7 +22,9 @@ interface AddAddressModalProps {
     }) => void;
 }
 
-export default function AddAddressModal({ onAddAddress }: AddAddressModalProps) {
+export default function AddAddressModal({
+    onAddAddress,
+}: AddAddressModalProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -32,19 +40,23 @@ export default function AddAddressModal({ onAddAddress }: AddAddressModalProps) 
         const newErrors: Record<string, string> = {};
 
         if (!formData.street.trim()) {
-            newErrors.street = 'L\'adresse est requise';
+            newErrors.street = "L'adresse est requise";
         }
+
         if (!formData.city.trim()) {
             newErrors.city = 'La ville est requise';
         }
+
         if (!formData.postal_code.trim()) {
             newErrors.postal_code = 'Le code postal est requis';
         }
+
         if (!formData.country.trim()) {
             newErrors.country = 'Le pays est requis';
         }
 
         setErrors(newErrors);
+
         return Object.keys(newErrors).length === 0;
     };
 
@@ -53,6 +65,7 @@ export default function AddAddressModal({ onAddAddress }: AddAddressModalProps) 
 
         if (!validateForm()) {
             toast.error('Veuillez remplir tous les champs requis');
+
             return;
         }
 
@@ -69,7 +82,7 @@ export default function AddAddressModal({ onAddAddress }: AddAddressModalProps) 
             });
 
             if (!response.ok) {
-                throw new Error('Erreur lors de la création de l\'adresse');
+                throw new Error("Erreur lors de la création de l'adresse");
             }
 
             const newAddress = await response.json();
@@ -88,7 +101,7 @@ export default function AddAddressModal({ onAddAddress }: AddAddressModalProps) 
                 country: '',
             });
         } catch (error) {
-            toast.error('Erreur lors de l\'ajout de l\'adresse');
+            toast.error("Erreur lors de l'ajout de l'adresse");
             console.error(error);
         } finally {
             setIsLoading(false);
@@ -115,7 +128,10 @@ export default function AddAddressModal({ onAddAddress }: AddAddressModalProps) 
                             placeholder="Ex: Domicile, Bureau"
                             value={formData.name}
                             onChange={(e) =>
-                                setFormData({ ...formData, name: e.target.value })
+                                setFormData({
+                                    ...formData,
+                                    name: e.target.value,
+                                })
                             }
                         />
                     </div>
@@ -127,12 +143,17 @@ export default function AddAddressModal({ onAddAddress }: AddAddressModalProps) 
                             placeholder="123 rue de la Paix"
                             value={formData.street}
                             onChange={(e) =>
-                                setFormData({ ...formData, street: e.target.value })
+                                setFormData({
+                                    ...formData,
+                                    street: e.target.value,
+                                })
                             }
                             className={errors.street ? 'border-red-500' : ''}
                         />
                         {errors.street && (
-                            <p className="text-sm text-red-500 mt-1">{errors.street}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.street}
+                            </p>
                         )}
                     </div>
 
@@ -144,12 +165,17 @@ export default function AddAddressModal({ onAddAddress }: AddAddressModalProps) 
                                 placeholder="Dakar"
                                 value={formData.city}
                                 onChange={(e) =>
-                                    setFormData({ ...formData, city: e.target.value })
+                                    setFormData({
+                                        ...formData,
+                                        city: e.target.value,
+                                    })
                                 }
                                 className={errors.city ? 'border-red-500' : ''}
                             />
                             {errors.city && (
-                                <p className="text-sm text-red-500 mt-1">{errors.city}</p>
+                                <p className="mt-1 text-sm text-red-500">
+                                    {errors.city}
+                                </p>
                             )}
                         </div>
 
@@ -165,10 +191,12 @@ export default function AddAddressModal({ onAddAddress }: AddAddressModalProps) 
                                         postal_code: e.target.value,
                                     })
                                 }
-                                className={errors.postal_code ? 'border-red-500' : ''}
+                                className={
+                                    errors.postal_code ? 'border-red-500' : ''
+                                }
                             />
                             {errors.postal_code && (
-                                <p className="text-sm text-red-500 mt-1">
+                                <p className="mt-1 text-sm text-red-500">
                                     {errors.postal_code}
                                 </p>
                             )}
@@ -182,16 +210,21 @@ export default function AddAddressModal({ onAddAddress }: AddAddressModalProps) 
                             placeholder="Sénégal"
                             value={formData.country}
                             onChange={(e) =>
-                                setFormData({ ...formData, country: e.target.value })
+                                setFormData({
+                                    ...formData,
+                                    country: e.target.value,
+                                })
                             }
                             className={errors.country ? 'border-red-500' : ''}
                         />
                         {errors.country && (
-                            <p className="text-sm text-red-500 mt-1">{errors.country}</p>
+                            <p className="mt-1 text-sm text-red-500">
+                                {errors.country}
+                            </p>
                         )}
                     </div>
 
-                    <div className="flex gap-3 justify-end pt-4">
+                    <div className="flex justify-end gap-3 pt-4">
                         <Button
                             type="button"
                             variant="outline"

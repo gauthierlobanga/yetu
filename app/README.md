@@ -36,7 +36,7 @@ app/
 
 Contient les contrôleurs, middleware et logique HTTP.
 
-```
+```bash
 Http/
 ├── Controllers/
 │   ├── Auth/              # Authentification

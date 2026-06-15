@@ -107,8 +107,12 @@ export default function AccountSelection({
     const primaryTenant = tenants[0];
 
     const dashboardUrl = primaryTenant?.sso_login_url ?? 'admin/dashboard';
-    const panelUrl = is_super_admin ? admin_panel_url : primaryTenant?.admin_url;
-    const pageTitle = hasTenants ? 'Selection de compte' : 'Creer votre boutique';
+    const panelUrl = is_super_admin
+        ? admin_panel_url
+        : primaryTenant?.admin_url;
+    const pageTitle = hasTenants
+        ? 'Selection de compte'
+        : 'Creer votre boutique';
 
     return (
         <main className="relative min-h-svh overflow-hidden bg-slate-50/30 px-4 py-8 sm:px-6 dark:bg-slate-950">
@@ -133,13 +137,17 @@ export default function AccountSelection({
                     className="flex flex-col items-center text-center"
                 >
                     <div className="relative">
-                        <Avatar className="h-32 w-32 border-[3px] border-white/70 shadow-2xl shadow-black/10 ring-2 ring-emerald-500/30 backdrop-blur-sm dark:border-slate-800/70 dark:shadow-black/50 dark:ring-emerald-400/20">
-                            <AvatarImage src={account.avatar_url ?? undefined} alt={account.name} className="object-cover" />
+                        <Avatar className="h-32 w-32 border-[3px] border-white/70 shadow-2xl ring-2 shadow-black/10 ring-emerald-500/30 backdrop-blur-sm dark:border-slate-800/70 dark:shadow-black/50 dark:ring-emerald-400/20">
+                            <AvatarImage
+                                src={account.avatar_url ?? undefined}
+                                alt={account.name}
+                                className="object-cover"
+                            />
                             <AvatarFallback className="bg-linear-to-br from-slate-800 to-slate-950 text-3xl font-bold text-white dark:from-emerald-600 dark:to-emerald-800">
                                 {initials(account.name, account.email)}
                             </AvatarFallback>
                         </Avatar>
-                        <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 dark:border-slate-950">
+                        <span className="absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 dark:border-slate-950">
                             <Sparkles className="h-3.5 w-3.5" />
                         </span>
                     </div>
@@ -165,13 +173,21 @@ export default function AccountSelection({
                         href={dashboardUrl}
                         icon={LayoutDashboard}
                         label="Dashboard"
-                        description={hasTenants ? 'Ouvrir votre espace vendeur' : 'Creer une boutique'}
+                        description={
+                            hasTenants
+                                ? 'Ouvrir votre espace vendeur'
+                                : 'Creer une boutique'
+                        }
                     />
                     <QuickAccess
                         href={panelUrl}
                         icon={PanelTopOpen}
                         label="Panel Filament"
-                        description={panelUrl ? 'Administration avancee' : 'Disponible apres creation'}
+                        description={
+                            panelUrl
+                                ? 'Administration avancee'
+                                : 'Disponible apres creation'
+                        }
                         disabled={!panelUrl}
                     />
                 </motion.section>
@@ -188,7 +204,7 @@ export default function AccountSelection({
                             className="space-y-5"
                         >
                             <div className="flex items-center justify-between">
-                                <h2 className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                                <h2 className="text-xs font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400">
                                     Vos boutiques
                                 </h2>
                                 <span className="rounded-full bg-emerald-100/80 px-3 py-1 text-xs font-semibold text-emerald-800 backdrop-blur-sm dark:bg-emerald-900/50 dark:text-emerald-200">
@@ -202,14 +218,26 @@ export default function AccountSelection({
                                         key={tenant.id}
                                         initial={{ opacity: 0, y: 12 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.35, delay: index * 0.06, ease: 'easeOut' }}
+                                        transition={{
+                                            duration: 0.35,
+                                            delay: index * 0.06,
+                                            ease: 'easeOut',
+                                        }}
                                         className="group relative overflow-hidden rounded-2xl border border-white/20 bg-white/30 p-4 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/60 hover:shadow-xl hover:shadow-emerald-500/10 dark:border-slate-800/40 dark:bg-slate-900/40 dark:hover:border-emerald-800/40 dark:hover:bg-slate-900/60"
                                     >
                                         <div className="flex items-start gap-4">
                                             <Avatar className="h-14 w-14 ring-2 ring-white/70 dark:ring-slate-800/70">
-                                                <AvatarImage src={tenant.logo_url ?? undefined} alt={tenant.name} />
+                                                <AvatarImage
+                                                    src={
+                                                        tenant.logo_url ??
+                                                        undefined
+                                                    }
+                                                    alt={tenant.name}
+                                                />
                                                 <AvatarFallback className="bg-linear-to-br from-emerald-500 to-emerald-700 text-base font-bold text-white shadow-inner">
-                                                    {tenantInitials(tenant.name)}
+                                                    {tenantInitials(
+                                                        tenant.name,
+                                                    )}
                                                 </AvatarFallback>
                                             </Avatar>
                                             <div className="min-w-0 flex-1">
@@ -219,7 +247,9 @@ export default function AccountSelection({
                                                 {tenant.email && (
                                                     <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                                                         <Mail className="h-3.5 w-3.5 shrink-0" />
-                                                        <span className="truncate">{tenant.email}</span>
+                                                        <span className="truncate">
+                                                            {tenant.email}
+                                                        </span>
                                                     </div>
                                                 )}
                                             </div>
@@ -250,7 +280,7 @@ export default function AccountSelection({
                             <Button
                                 asChild
                                 variant="outline"
-                                className="h-12 w-full rounded-xl border-dashed border-white/30 bg-white/20 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-emerald-400/40 hover:text-emerald-700 hover:bg-white/40 hover:shadow-md dark:border-slate-700/40 dark:bg-slate-900/30 dark:text-slate-300 dark:hover:border-emerald-600/40 dark:hover:text-emerald-300"
+                                className="h-12 w-full rounded-xl border-dashed border-white/30 bg-white/20 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-emerald-400/40 hover:bg-white/40 hover:text-emerald-700 hover:shadow-md dark:border-slate-700/40 dark:bg-slate-900/30 dark:text-slate-300 dark:hover:border-emerald-600/40 dark:hover:text-emerald-300"
                             >
                                 <Link href="/selection-compte/ajouter">
                                     <Plus className="mr-2 h-4 w-4" />
@@ -274,7 +304,8 @@ export default function AccountSelection({
                                 Aucune boutique pour le moment
                             </h2>
                             <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                Creez votre premiere boutique pour acceder au dashboard et au panel Filament.
+                                Creez votre premiere boutique pour acceder au
+                                dashboard et au panel Filament.
                             </p>
                             <Button
                                 asChild

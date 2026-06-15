@@ -14,10 +14,9 @@ import {
 import {
     ChartContainer,
     ChartTooltip,
-    ChartTooltipContent
-
+    ChartTooltipContent,
 } from '@/components/ui/chart';
-import type {ChartConfig} from '@/components/ui/chart';
+import type { ChartConfig } from '@/components/ui/chart';
 
 export const description = 'A bar chart';
 

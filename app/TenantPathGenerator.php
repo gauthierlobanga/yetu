@@ -7,6 +7,7 @@ use Spatie\MediaLibrary\Support\PathGenerator\PathGenerator;
 
 class TenantPathGenerator implements PathGenerator
 {
+
     public function getPath(Media $media): string
     {
         $tenantId = tenancy()->initialized ? tenant('id') : 'central';
@@ -23,4 +24,5 @@ class TenantPathGenerator implements PathGenerator
     {
         return $this->getPath($media).'responsive/';
     }
+
 }

@@ -28,24 +28,37 @@ export function useCheckout() {
     });
 
     const setCurrentStep = useCallback((step: number) => {
-        if (step < 1 || step > 4) return;
+        if (step < 1 || step > 4) {
+return;
+}
+
         setState((prev) => ({ ...prev, currentStep: step }));
     }, []);
 
     const nextStep = useCallback(() => {
         const errors = validateCurrentStep(state);
+
         if (Object.keys(errors).length > 0) {
             setState((prev) => ({ ...prev, errors }));
             Object.values(errors).forEach((error) => {
                 toast.error(error);
             });
+
             return;
         }
-        setState((prev) => ({ ...prev, currentStep: Math.min(prev.currentStep + 1, 4), errors: {} }));
+
+        setState((prev) => ({
+            ...prev,
+            currentStep: Math.min(prev.currentStep + 1, 4),
+            errors: {},
+        }));
     }, [state]);
 
     const previousStep = useCallback(() => {
-        setState((prev) => ({ ...prev, currentStep: Math.max(prev.currentStep - 1, 1) }));
+        setState((prev) => ({
+            ...prev,
+            currentStep: Math.max(prev.currentStep - 1, 1),
+        }));
     }, []);
 
     const selectBillingAddress = useCallback((addressId: string) => {
@@ -68,7 +81,9 @@ export function useCheckout() {
         setState((prev) => ({
             ...prev,
             sameAsShipping: !prev.sameAsShipping,
-            shippingAddressId: !prev.sameAsShipping ? null : prev.billingAddressId,
+            shippingAddressId: !prev.sameAsShipping
+                ? null
+                : prev.billingAddressId,
             errors: { ...prev.errors, shippingAddressId: '' },
         }));
     }, []);
@@ -95,11 +110,13 @@ export function useCheckout() {
 
     const submitCheckout = useCallback(async () => {
         const errors = validateCheckout(state);
+
         if (Object.keys(errors).length > 0) {
             setState((prev) => ({ ...prev, errors }));
             Object.values(errors).forEach((error) => {
                 toast.error(error);
             });
+
             return;
         }
 
@@ -130,7 +147,7 @@ export function useCheckout() {
                         toast.error(error);
                     });
                 },
-            }
+            },
         );
     }, [state]);
 
@@ -173,18 +190,22 @@ function validateCurrentStep(state: CheckoutState): Record<string, string> {
                 errors.billingAddressId =
                     'Veuillez sélectionner une adresse de facturation';
             }
+
             if (!state.sameAsShipping && !state.shippingAddressId) {
                 errors.shippingAddressId =
                     'Veuillez sélectionner une adresse de livraison';
             }
+
             if (!state.shippingMethodId) {
                 errors.shippingMethodId =
                     'Veuillez sélectionner une méthode de livraison';
             }
+
             if (!state.paymentMethodId) {
                 errors.paymentMethodId =
                     'Veuillez sélectionner un mode de paiement';
             }
+
             break;
     }
 

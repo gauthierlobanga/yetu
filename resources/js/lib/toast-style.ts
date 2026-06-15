@@ -31,7 +31,6 @@ export default function getToastStyle(type: 'success' | 'error' = 'success') {
     return isDark ? styles[type].dark : styles[type].light;
 }
 
-
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 export function getToastStyles(type: ToastType = 'success') {

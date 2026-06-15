@@ -454,7 +454,7 @@ export default function VendorPlans({ plans, registrationStatus }: Props) {
         const message =
             registrationStatus.status === 'payment_pending'
                 ? 'Votre demande de création de boutique est en attente de paiement. Veuillez compléter le paiement pour continuer.'
-                : 'Une demande de création de boutique est déjà en cours de traitement. Vous recevrez une notification dès qu\'elle sera validée.';
+                : "Une demande de création de boutique est déjà en cours de traitement. Vous recevrez une notification dès qu'elle sera validée.";
 
         return (
             <div className="flex min-h-[60vh] items-center justify-center px-4">
@@ -465,9 +465,7 @@ export default function VendorPlans({ plans, registrationStatus }: Props) {
                     <h1 className="text-2xl font-bold text-foreground">
                         {title}
                     </h1>
-                    <p className="mt-3 text-muted-foreground">
-                        {message}
-                    </p>
+                    <p className="mt-3 text-muted-foreground">{message}</p>
                     <Link
                         href={dashboard()}
                         className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"

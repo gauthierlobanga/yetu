@@ -25,7 +25,6 @@ export interface Tenant {
     } | null;
     logo_url?: string | null;
     sso_login_url: string;
-
 }
 
 export interface Summary {

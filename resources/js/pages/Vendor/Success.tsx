@@ -55,11 +55,15 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
 
     // Polling pour vérifier quand le tenant est créé
     useEffect(() => {
-        if (!creationStatus) return;
+        if (!creationStatus) {
+return;
+}
 
         const pollInterval = setInterval(async () => {
             try {
-                const response = await fetch(`/api/vendor-request/${tenant.id}/status`);
+                const response = await fetch(
+                    `/api/vendor-request/${tenant.id}/status`,
+                );
                 const data = await response.json();
 
                 if (data.status === 'approved') {
@@ -80,7 +84,7 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
     // Si la création est en cours, afficher l'écran de progression premium
     if (creationStatus) {
         return (
-            <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black dark:bg-black p-4">
+            <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black p-4 dark:bg-black">
                 {/* Animated background with glassmorphism */}
                 <div className="absolute inset-0 overflow-hidden">
                     {/* Gradient blobs */}
@@ -120,9 +124,9 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: 'easeOut' }}
                 >
-                    <div className="backdrop-blur-2xl rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl">
+                    <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-2xl">
                         {/* Animated geometric shapes */}
-                        <div className="mb-12 h-32 flex items-center justify-center relative">
+                        <div className="relative mb-12 flex h-32 items-center justify-center">
                             {/* Rotating shapes */}
                             <motion.div
                                 className="absolute h-24 w-24 rounded-3xl border-2 border-emerald-500/30"
@@ -193,7 +197,7 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                                 Création en cours
                             </motion.h2>
                             <motion.p
-                                className="text-sm text-white/60 font-light"
+                                className="text-sm font-light text-white/60"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.3 }}
@@ -227,7 +231,11 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                                         key={i}
                                         className="h-1.5 rounded-full bg-white/20"
                                         animate={{
-                                            backgroundColor: ['rgba(255,255,255,0.2)', 'rgba(16,185,129,0.8)', 'rgba(255,255,255,0.2)'],
+                                            backgroundColor: [
+                                                'rgba(255,255,255,0.2)',
+                                                'rgba(16,185,129,0.8)',
+                                                'rgba(255,255,255,0.2)',
+                                            ],
                                             scale: [1, 1.3, 1],
                                         }}
                                         transition={{
@@ -251,8 +259,9 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.4 }}
                         >
-                            <p className="text-xs text-white/50 text-center font-light leading-relaxed">
-                                Configuration sécurisée en cours. Ne fermez pas cette page.
+                            <p className="text-center text-xs leading-relaxed font-light text-white/50">
+                                Configuration sécurisée en cours. Ne fermez pas
+                                cette page.
                             </p>
                         </motion.div>
                     </div>
@@ -319,7 +328,7 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                         }}
                     />
                     <motion.div
-                        className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-teal-500/10 blur-3xl"
+                        className="absolute -right-32 -bottom-32 h-96 w-96 rounded-full bg-teal-500/10 blur-3xl"
                         animate={{
                             y: [0, -100, 0],
                             x: [0, -50, 0],
@@ -342,7 +351,7 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                         className="w-full max-w-3xl"
                     >
                         {/* Success card */}
-                        <div className="backdrop-blur-2xl rounded-3xl border border-white/10 bg-white/5 p-8 sm:p-12 shadow-2xl">
+                        <div className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-2xl sm:p-12">
                             {/* Header */}
                             <div className="mb-12 text-center">
                                 {/* Success icon - animated */}
@@ -384,12 +393,12 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
 
                                 {/* Subtitle */}
                                 <motion.p
-                                    className="mt-4 text-lg text-white/60 font-light"
+                                    className="mt-4 text-lg font-light text-white/60"
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.3 }}
                                 >
-                                    <span className="text-white font-medium">
+                                    <span className="font-medium text-white">
                                         {tenant.raison_sociale}
                                     </span>{' '}
                                     est prête
@@ -397,7 +406,7 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                             </div>
 
                             {/* Grid with info */}
-                            <div className="grid gap-6 md:grid-cols-2 mb-12">
+                            <div className="mb-12 grid gap-6 md:grid-cols-2">
                                 {/* Shop name */}
                                 <motion.div
                                     className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur"
@@ -405,9 +414,9 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.4 }}
                                 >
-                                    <div className="flex items-center gap-3 mb-3">
+                                    <div className="mb-3 flex items-center gap-3">
                                         <ShoppingBag className="h-5 w-5 text-emerald-400" />
-                                        <p className="text-xs uppercase tracking-wider text-white/50">
+                                        <p className="text-xs tracking-wider text-white/50 uppercase">
                                             Boutique
                                         </p>
                                     </div>
@@ -423,17 +432,17 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.5 }}
                                 >
-                                    <div className="flex items-center gap-3 mb-3">
+                                    <div className="mb-3 flex items-center gap-3">
                                         <Globe className="h-5 w-5 text-teal-400" />
-                                        <p className="text-xs uppercase tracking-wider text-white/50">
+                                        <p className="text-xs tracking-wider text-white/50 uppercase">
                                             Adresse
                                         </p>
                                     </div>
-                                    <p className="text-sm font-mono text-white break-all">
+                                    <p className="font-mono text-sm break-all text-white">
                                         {new URL(tenant.url).hostname}
                                     </p>
                                 </motion.div>
-                                </div>
+                            </div>
 
                             {/* CTA Buttons */}
                             <div className="space-y-3">
@@ -442,15 +451,15 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                                     href={tenant.admin_url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-4 text-white font-medium transition-all hover:from-emerald-700 hover:to-teal-700 active:scale-95"
+                                    className="group flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-4 font-medium text-white transition-all hover:from-emerald-700 hover:to-teal-700 active:scale-95"
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.6 }}
                                     whileHover={{ y: -2 }}
                                 >
-                                    <Rocket className="h-5 w-5 group-hover:-rotate-12 transition-transform" />
+                                    <Rocket className="h-5 w-5 transition-transform group-hover:-rotate-12" />
                                     Accéder au panneau
-                                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                                 </motion.a>
 
                                 {/* Secondary button */}
@@ -458,7 +467,7 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                                     href={tenant.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-4 text-white font-medium transition-all hover:bg-white/10 active:scale-95"
+                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/5 px-6 py-4 font-medium text-white transition-all hover:bg-white/10 active:scale-95"
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.7 }}
@@ -476,7 +485,8 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
                                 animate={{ opacity: 1 }}
                                 transition={{ delay: 0.8 }}
                             >
-                                Tout est sécurisé et prêt. Commencez à ajouter vos produits.
+                                Tout est sécurisé et prêt. Commencez à ajouter
+                                vos produits.
                             </motion.p>
                         </div>
                     </motion.div>

@@ -13,9 +13,10 @@ import {
 import {
     ChartContainer,
     ChartTooltip,
-    ChartTooltipContent,
-    type ChartConfig,
+    ChartTooltipContent
+    
 } from '@/components/ui/chart';
+import type {ChartConfig} from '@/components/ui/chart';
 
 export const description = 'A stacked bar chart with a legend';
 

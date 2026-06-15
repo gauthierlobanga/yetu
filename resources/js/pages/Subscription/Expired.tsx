@@ -1,6 +1,13 @@
 import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { AlertTriangle, ArrowRight, XCircle, ShieldCheck, Sparkles, Calendar } from 'lucide-react';
+import {
+    AlertTriangle,
+    ArrowRight,
+    XCircle,
+    ShieldCheck,
+    Sparkles,
+    Calendar,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface Props {
@@ -88,20 +95,32 @@ export default function SubscriptionExpired({ expiryDate }: Props) {
                                     className="relative"
                                     animate={{
                                         y: [0, -8, 0],
-                                        rotate: [0, 2, -2, 0]
+                                        rotate: [0, 2, -2, 0],
                                     }}
-                                    transition={{ duration: 3, repeat: Infinity }}
+                                    transition={{
+                                        duration: 3,
+                                        repeat: Infinity,
+                                    }}
                                 >
                                     <div className="absolute inset-0 rounded-full bg-linear-to-br from-red-400/20 to-orange-400/20 blur-2xl" />
                                     <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-red-500 to-orange-600 shadow-xl shadow-red-500/30 dark:shadow-red-900/50">
-                                        <AlertTriangle className="h-12 w-12 text-white" strokeWidth={1.5} />
+                                        <AlertTriangle
+                                            className="h-12 w-12 text-white"
+                                            strokeWidth={1.5}
+                                        />
                                     </div>
                                     <motion.div
-                                        className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/20 bg-linear-to-br from-red-400 to-orange-500 shadow-lg dark:border-slate-700"
+                                        className="absolute -right-2 -bottom-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/20 bg-linear-to-br from-red-400 to-orange-500 shadow-lg dark:border-slate-700"
                                         animate={{ scale: [1, 1.1, 1] }}
-                                        transition={{ duration: 2, repeat: Infinity }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                        }}
                                     >
-                                        <XCircle className="h-4 w-4 text-white" strokeWidth={2} />
+                                        <XCircle
+                                            className="h-4 w-4 text-white"
+                                            strokeWidth={2}
+                                        />
                                     </motion.div>
                                 </motion.div>
                             </motion.div>
@@ -127,7 +146,10 @@ export default function SubscriptionExpired({ expiryDate }: Props) {
                                 variants={itemVariants}
                                 className="mb-8 leading-relaxed text-slate-500 dark:text-slate-400"
                             >
-                                Votre abonnement a expiré et votre période de grâce est terminée. Veuillez renouveler votre abonnement pour continuer à vendre et gérer votre boutique.
+                                Votre abonnement a expiré et votre période de
+                                grâce est terminée. Veuillez renouveler votre
+                                abonnement pour continuer à vendre et gérer
+                                votre boutique.
                             </motion.p>
 
                             {/* Expiry date */}
@@ -140,7 +162,9 @@ export default function SubscriptionExpired({ expiryDate }: Props) {
                                         <Calendar className="h-4 w-4" />
                                         Expiré depuis le{' '}
                                         <span className="font-bold">
-                                            {new Date(expiryDate).toLocaleDateString('fr-FR', {
+                                            {new Date(
+                                                expiryDate,
+                                            ).toLocaleDateString('fr-FR', {
                                                 day: 'numeric',
                                                 month: 'long',
                                                 year: 'numeric',
@@ -151,12 +175,18 @@ export default function SubscriptionExpired({ expiryDate }: Props) {
                             )}
 
                             {/* Primary Button */}
-                            <motion.div variants={itemVariants} className="mb-4">
+                            <motion.div
+                                variants={itemVariants}
+                                className="mb-4"
+                            >
                                 <Button
                                     asChild
                                     className="group relative w-full overflow-hidden rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 py-3.5 text-base font-bold text-white shadow-lg transition-all duration-300 hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl dark:from-emerald-500 dark:to-teal-500 dark:hover:from-emerald-600 dark:hover:to-teal-600"
                                 >
-                                    <Link href={route('subscription.show')} className="flex items-center justify-center gap-2">
+                                    <Link
+                                        href={route('subscription.show')}
+                                        className="flex items-center justify-center gap-2"
+                                    >
                                         <Sparkles className="h-5 w-5 transition-transform group-hover:scale-110" />
                                         Renouveler l'abonnement
                                         <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />

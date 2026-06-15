@@ -3,9 +3,9 @@
 'use client';
 
 import { Head, Link } from '@inertiajs/react';
-import DOMPurify from 'dompurify';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import DOMPurify from 'dompurify';
 import {
     Calendar,
     Clock,

@@ -9,8 +9,14 @@ import PasswordInput from '@/components/password-input';
 import TwoFactorRecoveryCodes from '@/components/two-factor-recovery-codes';
 import TwoFactorSetupModal from '@/components/two-factor-setup-modal';
 import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTwoFactorAuth } from '@/hooks/use-two-factor-auth';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
@@ -56,7 +62,7 @@ export default function Security({
             <h1 className="sr-only">Paramètres de sécurité</h1>
 
             <SettingsLayout>
-                <div className="space-y-6 max-w-4xl">
+                <div className="max-w-4xl space-y-6">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-lg">
@@ -64,7 +70,8 @@ export default function Security({
                                 Mettre à jour le mot de passe
                             </CardTitle>
                             <CardDescription>
-                                Assurez-vous que votre compte utilise un mot de passe long et aléatoire pour rester sécurisé.
+                                Assurez-vous que votre compte utilise un mot de
+                                passe long et aléatoire pour rester sécurisé.
                             </CardDescription>
                         </CardHeader>
 
@@ -91,7 +98,11 @@ export default function Security({
                                 }}
                                 className="space-y-6"
                             >
-                                {({ errors, processing, recentlySuccessful }) => (
+                                {({
+                                    errors,
+                                    processing,
+                                    recentlySuccessful,
+                                }) => (
                                     <>
                                         <div className="grid gap-2">
                                             <Label htmlFor="current_password">
@@ -105,7 +116,11 @@ export default function Security({
                                                 autoComplete="current-password"
                                                 placeholder="Mot de passe actuel"
                                             />
-                                            <InputError message={errors.current_password} />
+                                            <InputError
+                                                message={
+                                                    errors.current_password
+                                                }
+                                            />
                                         </div>
 
                                         <div className="grid gap-2">
@@ -120,7 +135,9 @@ export default function Security({
                                                 autoComplete="new-password"
                                                 placeholder="Nouveau mot de passe"
                                             />
-                                            <InputError message={errors.password} />
+                                            <InputError
+                                                message={errors.password}
+                                            />
                                         </div>
 
                                         <div className="grid gap-2">
@@ -134,11 +151,18 @@ export default function Security({
                                                 autoComplete="new-password"
                                                 placeholder="Confirmer le mot de passe"
                                             />
-                                            <InputError message={errors.password_confirmation} />
+                                            <InputError
+                                                message={
+                                                    errors.password_confirmation
+                                                }
+                                            />
                                         </div>
 
                                         <div className="flex items-center gap-4 pt-4">
-                                            <Button disabled={processing} className="bg-emerald-600 hover:bg-emerald-700">
+                                            <Button
+                                                disabled={processing}
+                                                className="bg-emerald-600 hover:bg-emerald-700"
+                                            >
                                                 Enregistrer
                                             </Button>
 
@@ -168,7 +192,9 @@ export default function Security({
                                     Authentification à deux facteurs
                                 </CardTitle>
                                 <CardDescription>
-                                    Ajoutez une sécurité supplémentaire à votre compte en utilisant l'authentification à deux facteurs.
+                                    Ajoutez une sécurité supplémentaire à votre
+                                    compte en utilisant l'authentification à
+                                    deux facteurs.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -179,29 +205,46 @@ export default function Security({
                                             : "L'authentification à deux facteurs n'est pas activée."}
                                     </h3>
 
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xl">
-                                        Lorsque l'authentification à deux facteurs est activée, vous serez invité à saisir un jeton sécurisé et aléatoire lors de l'authentification. Vous pouvez récupérer ce jeton via l'application Google Authenticator sur votre téléphone.
+                                    <p className="max-w-xl text-sm text-slate-500 dark:text-slate-400">
+                                        Lorsque l'authentification à deux
+                                        facteurs est activée, vous serez invité
+                                        à saisir un jeton sécurisé et aléatoire
+                                        lors de l'authentification. Vous pouvez
+                                        récupérer ce jeton via l'application
+                                        Google Authenticator sur votre
+                                        téléphone.
                                     </p>
 
                                     {twoFactorEnabled ? (
-                                        <div className="space-y-6 pt-4 border-t border-slate-200 dark:border-slate-800">
+                                        <div className="space-y-6 border-t border-slate-200 pt-4 dark:border-slate-800">
                                             {qrCodeSvg && (
                                                 <div>
-                                                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-4">
-                                                        L'authentification à deux facteurs est maintenant activée. Scannez le code QR suivant avec votre application d'authentification ou entrez la clé de configuration.
+                                                    <p className="mb-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                                        L'authentification à
+                                                        deux facteurs est
+                                                        maintenant activée.
+                                                        Scannez le code QR
+                                                        suivant avec votre
+                                                        application
+                                                        d'authentification ou
+                                                        entrez la clé de
+                                                        configuration.
                                                     </p>
 
                                                     <div
-                                                        className="inline-block p-2 bg-white rounded-lg shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10"
-                                                        dangerouslySetInnerHTML={{ __html: qrCodeSvg }}
+                                                        className="inline-block rounded-lg bg-white p-2 shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10"
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: qrCodeSvg,
+                                                        }}
                                                     />
 
                                                     {manualSetupKey && (
                                                         <div className="mt-4">
                                                             <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                                                Clé de configuration :
+                                                                Clé de
+                                                                configuration :
                                                             </p>
-                                                            <p className="mt-1 font-mono text-sm bg-slate-100 dark:bg-slate-800 inline-block px-2 py-1 rounded">
+                                                            <p className="mt-1 inline-block rounded bg-slate-100 px-2 py-1 font-mono text-sm dark:bg-slate-800">
                                                                 {manualSetupKey}
                                                             </p>
                                                         </div>
@@ -210,9 +253,13 @@ export default function Security({
                                             )}
 
                                             <TwoFactorRecoveryCodes
-                                                recoveryCodes={recoveryCodesList}
-                                                onRegenerate={fetchRecoveryCodes}
-                                                className="border border-amber-200 bg-amber-50 dark:border-amber-900/30 dark:bg-amber-900/10 p-4 rounded-lg"
+                                                recoveryCodes={
+                                                    recoveryCodesList
+                                                }
+                                                onRegenerate={
+                                                    fetchRecoveryCodes
+                                                }
+                                                className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-900/10"
                                             />
 
                                             <div className="flex flex-wrap items-center gap-3">
@@ -221,7 +268,9 @@ export default function Security({
                                                         variant="outline"
                                                         onClick={() => {
                                                             fetchSetupData();
-                                                            setShowSetupModal(true);
+                                                            setShowSetupModal(
+                                                                true,
+                                                            );
                                                         }}
                                                     >
                                                         Afficher le code QR
@@ -231,13 +280,16 @@ export default function Security({
                                                 <Form
                                                     {...disable.form()}
                                                     options={{
-                                                        onSuccess: clearSetupData,
+                                                        onSuccess:
+                                                            clearSetupData,
                                                     }}
                                                 >
                                                     {({ processing }) => (
                                                         <Button
                                                             variant="destructive"
-                                                            disabled={processing}
+                                                            disabled={
+                                                                processing
+                                                            }
                                                         >
                                                             Désactiver
                                                         </Button>
@@ -265,7 +317,9 @@ export default function Security({
                                         qrCodeSvg={qrCodeSvg}
                                         manualSetupKey={manualSetupKey}
                                         errors={errors}
-                                        requiresConfirmation={requiresConfirmation}
+                                        requiresConfirmation={
+                                            requiresConfirmation
+                                        }
                                         onConfirm={(code) => {
                                             // Handle confirmation logic
                                         }}

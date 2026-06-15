@@ -277,6 +277,7 @@ export function usePosts({
     const bulkDelete = useCallback(async () => {
         if (selectedPosts.length === 0) {
             toast.warning('Aucun post sélectionné');
+
             return;
         }
 
@@ -314,6 +315,7 @@ export function usePosts({
         async (status: string) => {
             if (selectedPosts.length === 0) {
                 toast.warning('Aucun post sélectionné');
+
                 return;
             }
 

@@ -104,8 +104,7 @@ const images: HeroImage[] = [
 // Grille d’images premium
 // ----------------------------------------------------------------------
 function HeroImageGridPremium() {
-
-     // Variantes d'animation
+    // Variantes d'animation
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -117,9 +116,14 @@ function HeroImageGridPremium() {
         },
     };
 
-   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }};
+    const itemVariants: Variants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.4, ease: 'easeOut' },
+        },
+    };
 
     const imageVariants = {
         hidden: { opacity: 0, y: 40, scale: 0.92 },
@@ -653,14 +657,14 @@ export default function SaaSLanding({ plans, stats, testimonials }: Props) {
                             </ul>
                         </div>
                         {/* <div className="rounded-3xl border border-white/40 bg-white/40 p-6 shadow-xl shadow-slate-200/30 backdrop-blur-xl dark:border-slate-700/30 dark:bg-slate-800/30 dark:shadow-slate-900/30"> */}
-                            {/* <img
+                        {/* <img
                                 src="/storage/images/shopping-basket.jpg"
                                 alt="Shopping"
                                 className="w-full rounded-2xl object-cover shadow-md"
 
                             /> */}
                         {/* </div> */}
-                            <CobePremiumGSAP />
+                        <CobePremiumGSAP />
                     </div>
                 </div>
             </section>

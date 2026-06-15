@@ -15,10 +15,9 @@ import {
     ChartLegend,
     ChartLegendContent,
     ChartTooltip,
-    ChartTooltipContent
-
+    ChartTooltipContent,
 } from '@/components/ui/chart';
-import type {ChartConfig} from '@/components/ui/chart';
+import type { ChartConfig } from '@/components/ui/chart';
 import {
     Select,
     SelectContent,
@@ -276,7 +275,9 @@ export function ChartAreaInteractive() {
                             stroke="var(--color-desktop)"
                             stackId="a"
                         />
-                        <ChartLegend content={<ChartLegendContent payload={undefined} />} />
+                        <ChartLegend
+                            content={<ChartLegendContent payload={undefined} />}
+                        />
                     </AreaChart>
                 </ChartContainer>
             </CardContent>

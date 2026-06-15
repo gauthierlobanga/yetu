@@ -343,7 +343,6 @@ export function TenantControlPanel({ tenant, onToggleAI }: ControlPanelProps) {
                                 </motion.div>
                             </motion.button>
                         </div>
-
                     </CardContent>
                 </Card>
 

@@ -1,4 +1,4 @@
-import type { Tenant } from "../products/vendor/tenant";
+import type { Tenant } from '../products/vendor/tenant';
 
 interface TopPage {
     path: string;

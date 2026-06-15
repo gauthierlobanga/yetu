@@ -124,7 +124,7 @@ export function ChartAreaInteractive({
     // Obtenir le titre de la métrique
     const getMetricTitle = useCallback((): string => {
         const titles: Record<MetricType, string> = {
-            revenue: 'Chiffre d\'affaires',
+            revenue: "Chiffre d'affaires",
             orders: 'Commandes',
             customers: 'Clients',
         };
@@ -246,8 +246,8 @@ export function ChartAreaInteractive({
                                 {timeRange === '7d'
                                     ? '7j'
                                     : timeRange === '30d'
-                                        ? '30j'
-                                        : '90j'}
+                                      ? '30j'
+                                      : '90j'}
                             </span>
                         </CardDescription>
                     </div>
@@ -461,10 +461,11 @@ export function ChartAreaInteractive({
                 <div className="mt-4 grid grid-cols-3 gap-4 pt-4 text-center">
                     <button
                         type="button"
-                        className={`cursor-pointer rounded-lg p-2 transition-colors ${selectedMetric === 'revenue'
+                        className={`cursor-pointer rounded-lg p-2 transition-colors ${
+                            selectedMetric === 'revenue'
                                 ? 'bg-primary/10'
                                 : 'hover:bg-muted'
-                            }`}
+                        }`}
                         onClick={() => setSelectedMetric('revenue')}
                     >
                         <div className="text-2xl font-bold text-primary">
@@ -479,10 +480,11 @@ export function ChartAreaInteractive({
                     </button>
                     <button
                         type="button"
-                        className={`cursor-pointer rounded-lg p-2 transition-colors ${selectedMetric === 'orders'
+                        className={`cursor-pointer rounded-lg p-2 transition-colors ${
+                            selectedMetric === 'orders'
                                 ? 'bg-yellow-500/10'
                                 : 'hover:bg-muted'
-                            }`}
+                        }`}
                         onClick={() => setSelectedMetric('orders')}
                     >
                         <div className="text-2xl font-bold text-yellow-500">
@@ -494,10 +496,11 @@ export function ChartAreaInteractive({
                     </button>
                     <button
                         type="button"
-                        className={`cursor-pointer rounded-lg p-2 transition-colors ${selectedMetric === 'customers'
+                        className={`cursor-pointer rounded-lg p-2 transition-colors ${
+                            selectedMetric === 'customers'
                                 ? 'bg-blue-500/10'
                                 : 'hover:bg-muted'
-                            }`}
+                        }`}
                         onClick={() => setSelectedMetric('customers')}
                     >
                         <div className="text-2xl font-bold text-blue-500">

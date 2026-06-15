@@ -16,7 +16,11 @@ export default function SubscriptionNone() {
 
     const itemVariants: Variants = {
         hidden: { opacity: 0, y: 8 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: 'easeOut' },
+        },
     };
 
     return (
@@ -86,30 +90,49 @@ export default function SubscriptionNone() {
                     >
                         {/* Ligne d'accent linear animée */}
                         <motion.div
-                            className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-teal-400 via-cyan-300 to-teal-400 animate-linear-x"
+                            className="animate-linear-x absolute inset-x-0 top-0 h-1 bg-linear-to-r from-teal-400 via-cyan-300 to-teal-400"
                             initial={{ scaleX: 0 }}
                             animate={{ scaleX: 1 }}
                             transition={{ delay: 0.3, duration: 0.8 }}
                         />
 
-                        <motion.div variants={containerVariants} className="px-8 py-12 text-center sm:px-10 sm:py-14">
+                        <motion.div
+                            variants={containerVariants}
+                            className="px-8 py-12 text-center sm:px-10 sm:py-14"
+                        >
                             {/* Icône animée */}
-                            <motion.div variants={itemVariants} className="mb-8 flex justify-center">
+                            <motion.div
+                                variants={itemVariants}
+                                className="mb-8 flex justify-center"
+                            >
                                 <motion.div
                                     className="relative"
                                     animate={{ y: [0, -6, 0] }}
-                                    transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                                    transition={{
+                                        duration: 4,
+                                        repeat: Infinity,
+                                        ease: 'easeInOut',
+                                    }}
                                 >
                                     <div className="absolute inset-0 rounded-full bg-linear-to-br from-teal-400/30 to-cyan-400/20 blur-2xl" />
                                     <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-teal-500 to-cyan-600 shadow-xl shadow-teal-500/30 dark:shadow-teal-900/50">
-                                        <Package className="h-12 w-12 text-white" strokeWidth={1.5} />
+                                        <Package
+                                            className="h-12 w-12 text-white"
+                                            strokeWidth={1.5}
+                                        />
                                     </div>
                                     <motion.div
-                                        className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/30 bg-linear-to-br from-teal-400 to-cyan-500 shadow-lg dark:border-slate-700"
+                                        className="absolute -right-2 -bottom-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/30 bg-linear-to-br from-teal-400 to-cyan-500 shadow-lg dark:border-slate-700"
                                         animate={{ scale: [1, 1.15, 1] }}
-                                        transition={{ duration: 2, repeat: Infinity }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                        }}
                                     >
-                                        <Zap className="h-4 w-4 text-white" strokeWidth={2} />
+                                        <Zap
+                                            className="h-4 w-4 text-white"
+                                            strokeWidth={2}
+                                        />
                                     </motion.div>
                                 </motion.div>
                             </motion.div>
@@ -117,7 +140,7 @@ export default function SubscriptionNone() {
                             {/* Titre – typographie moderne avec dégradé animé */}
                             <motion.h1
                                 variants={itemVariants}
-                                className="mb-3 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 bg-size-[200%_auto] bg-clip-text text-4xl font-extrabold tracking-tight text-transparent animate-linear-text dark:from-white dark:via-slate-200 dark:to-white"
+                                className="animate-linear-text mb-3 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 bg-size-[200%_auto] bg-clip-text text-4xl font-extrabold tracking-tight text-transparent dark:from-white dark:via-slate-200 dark:to-white"
                             >
                                 Aucun abonnement
                             </motion.h1>
@@ -135,11 +158,16 @@ export default function SubscriptionNone() {
                                 variants={itemVariants}
                                 className="mb-8 leading-relaxed text-slate-500 dark:text-slate-400"
                             >
-                                Pour accéder à votre boutique et commencer à gérer vos produits, sélectionnez un plan d'abonnement adapté à vos besoins commerciaux.
+                                Pour accéder à votre boutique et commencer à
+                                gérer vos produits, sélectionnez un plan
+                                d'abonnement adapté à vos besoins commerciaux.
                             </motion.p>
 
                             {/* Bouton principal avec effet de brillance */}
-                            <motion.div variants={itemVariants} className="mb-4">
+                            <motion.div
+                                variants={itemVariants}
+                                className="mb-4"
+                            >
                                 <Button
                                     asChild
                                     className="group relative w-full overflow-hidden rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 py-3.5 text-base font-bold text-white shadow-lg transition-all duration-300 hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl dark:from-emerald-500 dark:to-teal-500 dark:hover:from-emerald-600 dark:hover:to-teal-600"
@@ -151,7 +179,9 @@ export default function SubscriptionNone() {
                                         {/* Effet de brillance au survol */}
                                         <span className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
                                         <Sparkles className="relative z-10 h-5 w-5 transition-transform group-hover:scale-110" />
-                                        <span className="relative z-10">Activer un abonnement</span>
+                                        <span className="relative z-10">
+                                            Activer un abonnement
+                                        </span>
                                         <ArrowRight className="relative z-10 h-5 w-5 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                 </Button>

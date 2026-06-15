@@ -31,7 +31,11 @@ export function useFlashMessages() {
 
         // Effacer les messages flash de la session via une requête silencieuse
         if (flash.success || flash.error) {
-            router.post('/flash/clear', {}, { preserveState: true, replace: true });
+            router.post(
+                '/flash/clear',
+                {},
+                { preserveState: true, replace: true },
+            );
         }
     }, [flash]);
 }

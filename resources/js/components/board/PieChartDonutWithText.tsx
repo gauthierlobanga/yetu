@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { TrendingUp } from 'lucide-react';
+import * as React from 'react';
 import { Label, Pie, PieChart } from 'recharts';
 
 import {
@@ -15,9 +15,10 @@ import {
 import {
     ChartContainer,
     ChartTooltip,
-    ChartTooltipContent,
-    type ChartConfig,
+    ChartTooltipContent
+    
 } from '@/components/ui/chart';
+import type {ChartConfig} from '@/components/ui/chart';
 
 export const description = 'A donut chart with text';
 

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 // resources/js/hooks/use-keyboard-navigation-app.ts
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // 🔥 Définir un type générique pour remplacer Hit<BaseHit>
 export interface NavigableItem {
@@ -18,7 +18,7 @@ interface UseKeyboardNavigationReturn<T = NavigableItem> {
     moveUp: () => void;
     activateSelection: () => boolean;
     hoverIndex: (index: number) => void;
-    selectionOrigin: "keyboard" | "pointer" | "init";
+    selectionOrigin: 'keyboard' | 'pointer' | 'init';
     selectedItem: T | null;
 }
 
@@ -29,8 +29,8 @@ export function useKeyboardNavigation<T extends NavigableItem = NavigableItem>(
 ): UseKeyboardNavigationReturn<T> {
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     const [selectionOrigin, setSelectionOrigin] = useState<
-        "keyboard" | "pointer" | "init"
-    >("init");
+        'keyboard' | 'pointer' | 'init'
+    >('init');
 
     const totalItems = useMemo(() => items.length, [items.length]);
 
@@ -40,7 +40,7 @@ export function useKeyboardNavigation<T extends NavigableItem = NavigableItem>(
         }
 
         setSelectedIndex((prev) => (prev + 1) % totalItems);
-        setSelectionOrigin("keyboard");
+        setSelectionOrigin('keyboard');
     }, [totalItems]);
 
     const moveUp = useCallback(() => {
@@ -49,7 +49,7 @@ export function useKeyboardNavigation<T extends NavigableItem = NavigableItem>(
         }
 
         setSelectedIndex((prev) => (prev - 1 + totalItems) % totalItems);
-        setSelectionOrigin("keyboard");
+        setSelectionOrigin('keyboard');
     }, [totalItems]);
 
     const hoverIndex = useCallback(
@@ -59,7 +59,7 @@ export function useKeyboardNavigation<T extends NavigableItem = NavigableItem>(
             }
 
             setSelectedIndex(index);
-            setSelectionOrigin("pointer");
+            setSelectionOrigin('pointer');
         },
         [totalItems],
     );
@@ -74,22 +74,22 @@ export function useKeyboardNavigation<T extends NavigableItem = NavigableItem>(
         // 🔥 Extraire l'URL selon la structure de l'item
         let url: string | undefined;
 
-        if (typeof item.url === "string") {
+        if (typeof item.url === 'string') {
             url = item.url;
-        } else if (typeof item.slug === "string") {
+        } else if (typeof item.slug === 'string') {
             // Pour les posts et catégories
-            if (item._type === "post") {
+            if (item._type === 'post') {
                 url = `/blog/${item.slug}`;
-            } else if (item._type === "category") {
+            } else if (item._type === 'category') {
                 url = `/blog/category/${item.slug}`;
-            } else if (item._type === "user") {
+            } else if (item._type === 'user') {
                 url = `/profile/${item.id}`;
             }
         }
 
         if (url) {
             if (openResultsInNewTab) {
-                window.open(url, "_blank", "noopener,noreferrer");
+                window.open(url, '_blank', 'noopener,noreferrer');
             } else {
                 window.location.assign(url);
             }
@@ -111,7 +111,7 @@ export function useKeyboardNavigation<T extends NavigableItem = NavigableItem>(
     // Reset selection when query changes
     useEffect(() => {
         setSelectedIndex(0);
-        setSelectionOrigin("init");
+        setSelectionOrigin('init');
     }, [query]);
 
     return {

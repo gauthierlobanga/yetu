@@ -1,5 +1,5 @@
 import { ArrowRight } from 'lucide-react';
-import {  FaFacebook, FaMicrosoft, FaInstagram } from 'react-icons/fa';
+import { FaFacebook, FaMicrosoft, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -30,7 +30,9 @@ const providers: Provider[] = [
     {
         name: 'microsoft',
         label: 'Microsoft',
-        icon: <FaMicrosoft className="h-10 w-10 text-[#1a7fcd] dark:text-white" />,
+        icon: (
+            <FaMicrosoft className="h-10 w-10 text-[#1a7fcd] dark:text-white" />
+        ),
     },
 ];
 
@@ -45,7 +47,7 @@ export function SocialLoginButtons() {
 
     // Filtrer les providers disponibles
     const availableProviders = providers.filter(
-        (provider) => getSocialUrl(provider.name) !== null
+        (provider) => getSocialUrl(provider.name) !== null,
     );
 
     // Si aucun provider n'est disponible, ne pas afficher les boutons
@@ -53,7 +55,8 @@ export function SocialLoginButtons() {
         return null;
     }
 
-    const gridCols = availableProviders.length <= 2 ? 'grid-cols-2' : 'grid-cols-4';
+    const gridCols =
+        availableProviders.length <= 2 ? 'grid-cols-2' : 'grid-cols-4';
 
     return (
         <div className={cn('grid gap-3', gridCols)}>
@@ -75,7 +78,7 @@ export function SocialLoginButtons() {
                                 'group relative h-12 w-full border border-slate-200/80 bg-white/80 px-1.5 transition-all duration-300',
                                 'hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-white hover:shadow-lg hover:shadow-emerald-500/10',
                                 'dark:border-slate-700/80 dark:bg-slate-900/70',
-                                'dark:hover:border-emerald-500/40 dark:hover:bg-slate-900'
+                                'dark:hover:border-emerald-500/40 dark:hover:bg-slate-900',
                             )}
                         >
                             {/* Glow subtil */}

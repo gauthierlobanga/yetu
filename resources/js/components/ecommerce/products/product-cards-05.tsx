@@ -1,8 +1,8 @@
-import Link from 'next/link';
+import { Star } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star } from 'lucide-react';
 
 const product = {
     title: 'White T-Shirt',
