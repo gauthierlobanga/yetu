@@ -160,6 +160,7 @@ Route::middleware([
 
         Route::prefix('subscription')->name('subscription.')->group(function () {
             Route::get('/', [SubscriptionController::class, 'show'])->name('show');
+            Route::get('/portal', [SubscriptionController::class, 'portal'])->name('portal');
             Route::post('/upgrade', [SubscriptionController::class, 'upgrade'])->name('upgrade');
             Route::post('/downgrade', [SubscriptionController::class, 'downgrade'])->name('downgrade');
             Route::post('/cancel', [SubscriptionController::class, 'cancel'])->name('cancel');

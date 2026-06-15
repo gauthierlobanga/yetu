@@ -17,10 +17,31 @@ use App\Notifications\PaymentFailedNotification;
 use App\Notifications\SubscriptionExpiringNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
+use Stripe\Stripe;
 use Stripe\Subscription as StripeSubscription;
+use Stripe\BillingPortal\Session as BillingPortalSession;
 
 class SubscriptionService
 {
+    public function __construct()
+    {
+        Stripe::setApiKey(config('services.stripe.secret'));
+    }
+
+    /**
+     * Créer une session du portail client Stripe
+     */
+    public function createPortalSession(Subscription $subscription): BillingPortalSession
+    {
+        return BillingPortalSession::create([
+            'customer' => $subscription->stripe_customer_id,
+            'return_url' => route('subscription.show'),
+        ]);
+    }
+
     /**
      * Créer une subscription pour un tenant
      */
@@ -30,9 +51,12 @@ class SubscriptionService
         $trialEndsAt = ($plan->trial_days ?? 0) > 0
             ? now()->addDays($plan->trial_days)
             : null;
+
+        // Note: Pour une vraie subscription Stripe, elle est créée via Checkout
+        // Ici on initialise l'enregistrement local
         $stripeId = $plan->isFree()
-            ? 'free_'.$tenant->id
-            : 'pending_'.$tenant->id;
+            ? 'free_'.Str::random(10)
+            : 'pending_'.Str::random(10);
 
         $subscription = Subscription::create([
             'user_id' => $user->id,
@@ -51,6 +75,7 @@ class SubscriptionService
 
         // Mettre à jour les dates du tenant
         $tenant->update([
+            'plan_id' => $plan->id,
             'date_activation' => now(),
             'date_expiration' => $plan->isFree() ? null : $trialEndsAt,
         ]);
@@ -59,14 +84,10 @@ class SubscriptionService
     }
 
     /**
-     * Renouveler une subscription
+     * Renouveler une subscription (Appelé par Webhook)
      */
     public function renewSubscription(Subscription $subscription): Subscription
     {
-        if (! $subscription->auto_renewal) {
-            throw new \Exception('Auto-renewal est désactivé pour cette subscription');
-        }
-
         $subscription->update([
             'stripe_status' => 'active',
             'current_period_start' => now(),
@@ -86,10 +107,19 @@ class SubscriptionService
     }
 
     /**
-     * Annuler une subscription
+     * Annuler une subscription sur Stripe
      */
     public function cancelSubscription(Subscription $subscription, ?string $reason = null): Subscription
     {
+        if ($subscription->stripe_subscription_id && !str_starts_with($subscription->stripe_subscription_id, 'free_')) {
+            try {
+                $stripeSub = StripeSubscription::retrieve($subscription->stripe_subscription_id);
+                $stripeSub->cancel();
+            } catch (\Exception $e) {
+                Log::error('Stripe cancellation failed', ['error' => $e->getMessage()]);
+            }
+        }
+
         $subscription->update([
             'stripe_status' => 'canceled',
             'canceled_at' => now(),
@@ -101,47 +131,112 @@ class SubscriptionService
     }
 
     /**
-     * Mettre en pause une subscription
+     * Mettre en pause une subscription sur Stripe
      */
     public function pauseSubscription(Subscription $subscription): Subscription
     {
+        if ($subscription->stripe_subscription_id && !str_starts_with($subscription->stripe_subscription_id, 'free_')) {
+            try {
+                $stripeSub = StripeSubscription::retrieve($subscription->stripe_subscription_id);
+                $stripeSub->pause_collection = ['behavior' => 'void'];
+                $stripeSub->save();
+            } catch (\Exception $e) {
+                Log::error('Stripe pause failed', ['error' => $e->getMessage()]);
+            }
+        }
+
         $subscription->update(['stripe_status' => 'paused']);
 
         return $subscription;
     }
 
     /**
-     * Reprendre une subscription
+     * Reprendre une subscription sur Stripe
      */
     public function resumeSubscription(Subscription $subscription): Subscription
     {
+        if ($subscription->stripe_subscription_id && !str_starts_with($subscription->stripe_subscription_id, 'free_')) {
+            try {
+                $stripeSub = StripeSubscription::retrieve($subscription->stripe_subscription_id);
+                $stripeSub->pause_collection = null;
+                $stripeSub->save();
+            } catch (\Exception $e) {
+                Log::error('Stripe resume failed', ['error' => $e->getMessage()]);
+            }
+        }
+
         $subscription->update(['stripe_status' => 'active']);
 
         return $subscription;
     }
 
     /**
-     * Mettre à niveau vers un nouveau plan
+     * Mettre à niveau vers un nouveau plan sur Stripe
      */
     public function upgradeToPlan(Subscription $subscription, Plan $newPlan): Subscription
     {
+        if ($subscription->stripe_subscription_id && !str_starts_with($subscription->stripe_subscription_id, 'free_')) {
+            try {
+                $stripeSub = StripeSubscription::retrieve($subscription->stripe_subscription_id);
+                StripeSubscription::update($subscription->stripe_subscription_id, [
+                    'cancel_at_period_end' => false,
+                    'proration_behavior' => 'always_invoice',
+                    'items' => [
+                        [
+                            'id' => $stripeSub->items->data[0]->id,
+                            'price' => $newPlan->stripe_price_id,
+                        ],
+                    ],
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Stripe upgrade failed', ['error' => $e->getMessage()]);
+                throw $e;
+            }
+        }
+
         $subscription->update([
             'plan_id' => $newPlan->id,
             'stripe_price' => $newPlan->stripe_price_id,
         ]);
+
+        if ($subscription->tenant) {
+            $subscription->tenant->update(['plan_id' => $newPlan->id]);
+        }
 
         return $subscription;
     }
 
     /**
-     * Rétrograder vers un nouveau plan
+     * Rétrograder vers un nouveau plan sur Stripe
      */
     public function downgradeToPlan(Subscription $subscription, Plan $newPlan): Subscription
     {
+        if ($subscription->stripe_subscription_id && !str_starts_with($subscription->stripe_subscription_id, 'free_')) {
+            try {
+                $stripeSub = StripeSubscription::retrieve($subscription->stripe_subscription_id);
+                StripeSubscription::update($subscription->stripe_subscription_id, [
+                    'proration_behavior' => 'create_prorations',
+                    'items' => [
+                        [
+                            'id' => $stripeSub->items->data[0]->id,
+                            'price' => $newPlan->stripe_price_id,
+                        ],
+                    ],
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Stripe downgrade failed', ['error' => $e->getMessage()]);
+                throw $e;
+            }
+        }
+
         $subscription->update([
             'plan_id' => $newPlan->id,
             'stripe_price' => $newPlan->stripe_price_id,
         ]);
+
+        if ($subscription->tenant) {
+            $subscription->tenant->update(['plan_id' => $newPlan->id]);
+        }
 
         return $subscription;
     }
@@ -207,7 +302,7 @@ class SubscriptionService
             ->get()
             ->each(function (Subscription $subscription) use ($notified) {
                 if ($subscription->user && $subscription->tenant) {
-                    \Notification::send($subscription->user, new SubscriptionExpiringNotification(
+                    Notification::send($subscription->user, new SubscriptionExpiringNotification(
                         $subscription->tenant,
                         $subscription->trial_ends_at
                     ));
@@ -350,7 +445,7 @@ class SubscriptionService
 
         // Notifier l'utilisateur
         if ($subscription->user) {
-            \Notification::send($subscription->user, new PaymentFailedNotification(
+            Notification::send($subscription->user, new PaymentFailedNotification(
                 $subscription->tenant,
                 'Votre paiement a échoué'
             ));
@@ -411,7 +506,7 @@ class SubscriptionService
 
                     $synced->push($subscription);
                 } catch (\Exception $e) {
-                    \Log::error('Subscription sync failed', [
+                    Log::error('Subscription sync failed', [
                         'subscription_id' => $subscription->id,
                         'error' => $e->getMessage(),
                     ]);

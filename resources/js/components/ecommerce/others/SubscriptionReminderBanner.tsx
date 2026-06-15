@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ArrowRight, ShieldAlert, X, Timer } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 interface Trial {
@@ -46,16 +47,67 @@ function calculateTimeLeft(endDate: string): TimeLeft {
 }
 
 export function SubscriptionReminderBanner({ trial, subscription }: Props) {
+    const { auth, tenant } = usePage().props as any;
     const [isVisible, setIsVisible] = useState(false);
     const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
 
     const shouldShow = useMemo(() => {
-        if (subscription?.is_paid && subscription?.is_active && subscription?.status === 'active') {
+        // Ne pas afficher si l'abonnement est payé et actif
+        if (
+            subscription?.is_paid &&
+            subscription?.is_active &&
+            subscription?.status === 'active'
+        ) {
             return false;
         }
 
         return true;
     }, [subscription]);
+
+    const checkFrequency = useCallback(() => {
+        if (!shouldShow) {
+            return;
+        }
+
+        const STORAGE_KEY = `subscription_reminder_${auth?.user?.id || 'guest'}`;
+        const now = Date.now();
+        const data = JSON.parse(
+            localStorage.getItem(STORAGE_KEY) ||
+                '{"count": 0, "lastShown": 0, "lastClosed": 0}',
+        );
+
+        // Réinitialiser le compteur si on change de jour
+        const lastDate = new Date(data.lastShown).toDateString();
+        const today = new Date().toDateString();
+
+        if (lastDate !== today) {
+            data.count = 0;
+        }
+
+        const fourHours = 4 * 60 * 60 * 1000;
+        const timeSinceClosed = now - data.lastClosed;
+
+        // Afficher si :
+        // 1. N'a jamais été fermé aujourd'hui
+        // 2. Ou si fermé il y a plus de 4 heures ET on a montré moins de 6 fois
+        if (
+            data.lastClosed === 0 ||
+            (timeSinceClosed > fourHours && data.count < 6)
+        ) {
+            setIsVisible(true);
+            data.lastShown = now;
+            data.count += 1;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+    }, [shouldShow, auth?.user?.id]);
+
+    const handleClose = () => {
+        setIsVisible(false);
+        const STORAGE_KEY = `subscription_reminder_${auth?.user?.id || 'guest'}`;
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        data.lastClosed = Date.now();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    };
 
     useEffect(() => {
         if (!shouldShow) {
@@ -64,123 +116,182 @@ export function SubscriptionReminderBanner({ trial, subscription }: Props) {
             return;
         }
 
-        const timer = setTimeout(() => setIsVisible(true), 600);
+        // Première vérification après un court délai
+        const initialTimer = setTimeout(checkFrequency, 1000);
+
+        // Vérifier toutes les minutes pour voir s'il faut le remontrer (sans rechargement)
+        const frequencyInterval = setInterval(checkFrequency, 60000);
+
         const endTrialDate = trial?.end || subscription?.trial_ends_at;
 
         if (endTrialDate) {
             setTimeLeft(calculateTimeLeft(endTrialDate));
-            const interval = setInterval(() => {
+            const timerInterval = setInterval(() => {
                 setTimeLeft(calculateTimeLeft(endTrialDate));
             }, 1000);
 
             return () => {
-                clearInterval(interval);
-                clearTimeout(timer);
+                clearInterval(timerInterval);
+                clearInterval(frequencyInterval);
+                clearTimeout(initialTimer);
             };
         }
 
-        return () => clearTimeout(timer);
-    }, [shouldShow, trial, subscription]);
+        return () => {
+            clearInterval(frequencyInterval);
+            clearTimeout(initialTimer);
+        };
+    }, [shouldShow, trial, subscription, checkFrequency]);
+
+    // Temps réel via Echo (si disponible)
+    useEffect(() => {
+        if (
+            typeof window !== 'undefined' &&
+            (window as any).Echo &&
+            auth?.user &&
+            tenant?.id
+        ) {
+            (window as any).Echo.private(`tenant.${tenant.id}`)
+                .listen('.TenantSubscriptionRenewed', () => {
+                    // Recharger les données ou masquer le bandeau
+                    setIsVisible(false);
+                })
+                .listen('.TenantSubscriptionBlocked', () => {
+                    setIsVisible(true);
+                });
+        }
+    }, [auth?.user, tenant?.id]);
 
     const isUrgent = trial ? trial.remaining_days <= 3 : true;
 
     return (
         <AnimatePresence>
-            {/* La condition imbriquée ici permet à l'animation d'exit de se jouer de manière fluide */}
             {isVisible && shouldShow && (
                 <motion.div
                     initial={{ y: -40, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: -40, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 30 }}
-                    className="fixed top-4 left-4 right-4 z-50 flex justify-center pointer-events-none"
+                    transition={{ type: 'spring', stiffness: 260, damping: 30 }}
+                    className="pointer-events-none fixed top-4 right-4 left-4 z-50 flex justify-center"
                 >
-                    <div className="w-full max-w-5xl pointer-events-auto">
-                        {/* Main Container */}
-                        <div className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl shadow-lg transition-colors duration-300 ${
-                            isUrgent
-                                ? 'bg-white/90 border-amber-200/60 shadow-amber-500/5 dark:bg-slate-900/90 dark:border-amber-500/20'
-                                : 'bg-white/90 border-slate-200/80 shadow-slate-950/5 dark:bg-slate-900/90 dark:border-slate-800'
-                        }`}>
+                    <div className="pointer-events-auto w-full max-w-5xl">
+                        <div
+                            className={`relative overflow-hidden rounded-2xl border shadow-lg backdrop-blur-xl transition-colors duration-300 ${
+                                isUrgent
+                                    ? 'border-amber-200/60 bg-white/95 shadow-amber-500/10 dark:border-amber-500/20 dark:bg-slate-900/95'
+                                    : 'border-slate-200/80 bg-white/95 shadow-slate-950/5 dark:border-slate-800 dark:bg-slate-900/95'
+                            }`}
+                        >
+                            <div
+                                className={`absolute top-0 right-0 left-0 h-1 w-full ${
+                                    isUrgent
+                                        ? 'bg-linear-to-r from-amber-400 via-orange-500 to-amber-400'
+                                        : 'bg-linear-to-r from-emerald-400 via-teal-500 to-emerald-400'
+                                } animate-pulse`}
+                            />
 
-                            {/* Subtle Background Glow Indicator */}
-                            <div className={`absolute top-0 left-0 right-0 h-0.5 w-full ${
-                                isUrgent ? 'bg-linear-to-r from-amber-400 to-orange-500' : 'bg-linear-to-r from-emerald-400 to-teal-500'
-                            }`} />
-
-                            <div className="px-5 py-3.5 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-
-                                {/* Left Side: Icon & Context */}
-                                <div className="flex items-center gap-4 flex-1 w-full md:w-auto">
-                                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300 ${
-                                        isUrgent
-                                            ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
-                                            : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
-                                    }`}>
+                            <div className="flex flex-col items-center justify-between gap-4 px-5 py-4 sm:px-6 md:flex-row">
+                                <div className="flex w-full flex-1 items-center gap-4 md:w-auto">
+                                    <div
+                                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-all duration-300 ${
+                                            isUrgent
+                                                ? 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400'
+                                                : 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'
+                                        }`}
+                                    >
                                         {isUrgent ? (
-                                            <ShieldAlert className="h-5 w-5 animate-pulse" />
+                                            <ShieldAlert className="h-6 w-6 animate-bounce" />
                                         ) : (
-                                            <Sparkles className="h-5 w-5 animate-[spin_6s_linear_infinite]" />
+                                            <Sparkles className="h-6 w-6 animate-[spin_6s_linear_infinite]" />
                                         )}
                                     </div>
 
-                                    <div className="space-y-0.5">
+                                    <div className="space-y-1">
                                         <div className="flex items-center gap-2.5">
-                                            <h4 className="text-sm font-semibold tracking-tight text-slate-900 dark:text-slate-50">
-                                                {isUrgent ? 'Essai bientôt expiré !' : 'Propulsez votre boutique'}
+                                            <h4 className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-50">
+                                                {isUrgent
+                                                    ? 'Action requise : Essai bientôt terminé'
+                                                    : 'Boostez votre business avec Yetu Pro'}
                                             </h4>
+                                            {isUrgent && (
+                                                <Badge className="border-amber-200 bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                                                    Urgent
+                                                </Badge>
+                                            )}
                                         </div>
-                                        <p className="text-xs font-normal text-slate-500 dark:text-slate-400 leading-normal max-w-xl">
+                                        <p className="max-w-xl text-sm leading-relaxed font-medium text-slate-500 dark:text-slate-400">
                                             {isUrgent
-                                                ? "Le temps presse. Activez un forfait pour conserver l'accès à vos outils et vos ventes en cours."
-                                                : "Votre version d'essai vous donne un aperçu de la puissance de Yetu. Ne laissez pas votre élan s'arrêter."}
+                                                ? "Votre période d'essai se termine bientôt. Activez un forfait pour ne pas perdre l'accès à vos outils."
+                                                : 'Profitez de toutes les fonctionnalités premium pour développer vos ventes et fidéliser vos clients.'}
                                         </p>
                                     </div>
                                 </div>
 
-                                {/* Right Side: Countdown + Actions */}
-                                <div className="flex flex-wrap items-center justify-end gap-4 w-full md:w-auto shrink-0">
-
-                                    {/* Countdown Timer */}
-                                    {timeLeft && (timeLeft.days > 0 || timeLeft.hours > 0 || timeLeft.minutes > 0) && (
-                                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/60">
-                                            <Timer className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-                                            <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 tabular-nums">
-                                                <span>{String(timeLeft.days).padStart(2, '0')}j</span>
-                                                <span className="text-slate-300 dark:text-slate-700">:</span>
-                                                <span>{String(timeLeft.hours).padStart(2, '0')}h</span>
-                                                <span className="text-slate-300 dark:text-slate-700">:</span>
-                                                <span>{String(timeLeft.minutes).padStart(2, '0')}m</span>
+                                <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-4 md:w-auto">
+                                    {timeLeft &&
+                                        (timeLeft.days > 0 ||
+                                            timeLeft.hours > 0 ||
+                                            timeLeft.minutes > 0) && (
+                                            <div className="flex items-center gap-2.5 rounded-2xl border border-slate-200 bg-slate-100 px-4 py-2 dark:border-slate-800 dark:bg-slate-950">
+                                                <Timer className="h-4 w-4 animate-pulse text-slate-400" />
+                                                <div className="flex items-center gap-1.5 text-sm font-bold text-slate-700 tabular-nums dark:text-slate-300">
+                                                    <span>
+                                                        {String(
+                                                            timeLeft.days,
+                                                        ).padStart(2, '0')}
+                                                        j
+                                                    </span>
+                                                    <span className="text-slate-300">
+                                                        :
+                                                    </span>
+                                                    <span>
+                                                        {String(
+                                                            timeLeft.hours,
+                                                        ).padStart(2, '0')}
+                                                        h
+                                                    </span>
+                                                    <span className="text-slate-300">
+                                                        :
+                                                    </span>
+                                                    <span>
+                                                        {String(
+                                                            timeLeft.minutes,
+                                                        ).padStart(2, '0')}
+                                                        m
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {/* Action Group */}
-                                    <div className="flex items-center gap-2">
+                                    <div className="flex items-center gap-3">
                                         <Button
                                             asChild
-                                            size="sm"
-                                            className={`group/btn h-9 rounded-xl px-4 text-xs font-medium shadow-xs transition-all duration-200 active:scale-98 ${
+                                            size="lg"
+                                            className={`group/btn h-11 rounded-2xl px-6 text-sm font-bold shadow-lg transition-all duration-300 active:scale-95 ${
                                                 isUrgent
-                                                    ? 'bg-amber-600 hover:bg-amber-500 text-white dark:bg-amber-500 dark:hover:bg-amber-400'
-                                                    : 'bg-emerald-600 hover:bg-emerald-500 text-white dark:bg-emerald-50 dark:text-slate-950 dark:hover:bg-white'
+                                                    ? 'bg-amber-600 text-white shadow-amber-500/20 hover:bg-amber-700'
+                                                    : 'bg-emerald-600 text-white shadow-emerald-500/20 hover:bg-emerald-700'
                                             }`}
                                         >
-                                            <Link href={route('subscription.show')} className="flex items-center gap-1.5">
+                                            <Link
+                                                href={route(
+                                                    'subscription.show',
+                                                )}
+                                                className="flex items-center gap-2"
+                                            >
                                                 Choisir un plan
-                                                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/btn:translate-x-0.5" />
+                                                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
                                             </Link>
                                         </Button>
 
                                         <button
-                                            onClick={() => setIsVisible(false)}
-                                            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                                            onClick={handleClose}
+                                            className="rounded-2xl p-2.5 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600 active:scale-90 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                                             title="Plus tard"
                                         >
-                                            <X className="h-4 w-4" />
+                                            <X className="h-5 w-5" />
                                         </button>
                                     </div>
-
                                 </div>
                             </div>
                         </div>

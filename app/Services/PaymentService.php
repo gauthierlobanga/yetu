@@ -103,6 +103,7 @@ class PaymentService
                 'checkout.session.completed' => $this->handleCheckoutCompleted($event->data->object),
                 'invoice.paid' => $this->handleInvoicePaid($event->data->object),
                 'invoice.payment_failed' => $this->handleInvoiceFailed($event->data->object),
+                'customer.subscription.updated' => $this->handleSubscriptionUpdated($event->data->object),
                 'customer.subscription.deleted' => $this->handleSubscriptionCancelled($event->data->object),
                 default => ['status' => 'unhandled', 'type' => $event->type],
             };
@@ -184,6 +185,41 @@ class PaymentService
         Log::warning('Paiement échoué', ['invoice_id' => $invoice->id]);
 
         return ['status' => 'failed', 'invoice_id' => $invoice->id];
+    }
+
+    /**
+     * Gérer la mise à jour d'un abonnement.
+     */
+    private function handleSubscriptionUpdated($stripeSubscription): array
+    {
+        $subscription = \App\Models\Subscription::where('stripe_subscription_id', $stripeSubscription->id)->first();
+
+        if ($subscription) {
+            $subscription->update([
+                'stripe_status' => $stripeSubscription->status,
+                'current_period_start' => \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_start),
+                'current_period_end' => \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_end),
+            ]);
+
+            // Si le prix a changé sur Stripe (via portail), mettre à jour le plan localement
+            $priceId = $stripeSubscription->items->data[0]->price->id;
+            if ($subscription->stripe_price !== $priceId) {
+                $newPlan = \App\Models\Plan::where('stripe_price_id', $priceId)->first();
+                if ($newPlan) {
+                    $subscription->update([
+                        'plan_id' => $newPlan->id,
+                        'stripe_price' => $priceId,
+                    ]);
+                    if ($subscription->tenant) {
+                        $subscription->tenant->update(['plan_id' => $newPlan->id]);
+                    }
+                }
+            }
+
+            Log::info('Abonnement mis à jour via Webhook', ['subscription_id' => $subscription->id]);
+        }
+
+        return ['status' => 'success', 'subscription_id' => $stripeSubscription->id];
     }
 
     /**

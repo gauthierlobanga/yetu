@@ -29,6 +29,32 @@ class SubscriptionController extends Controller
     }
 
     /**
+     * Rediriger vers le portail client Stripe.
+     */
+    public function portal(Request $request)
+    {
+        $tenant = tenant();
+        $subscription = $tenant->subscription;
+
+        if (! $subscription || ! $subscription->stripe_customer_id) {
+            return back()->with('error', 'Aucun compte client Stripe trouvé.');
+        }
+
+        try {
+            $session = $this->subscriptionService->createPortalSession($subscription);
+
+            return Inertia::location($session->url);
+        } catch (\Exception $e) {
+            Log::error('Error creating portal session', [
+                'tenant_id' => $tenant->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Impossible de charger le portail de paiement.');
+        }
+    }
+
+    /**
      * Afficher l'état actuel de la subscription.
      */
     public function show(Request $request)
