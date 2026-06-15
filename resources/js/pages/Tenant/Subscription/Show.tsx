@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Head, Link, router } from '@inertiajs/react';
 import {
     CreditCard,
@@ -120,6 +121,7 @@ export default function SubscriptionShow({
         if (!planModal) {
 return;
 }
+
         setLoading(true);
 
         const isUpgrade = planModal.price > plan.price;
@@ -298,6 +300,7 @@ return;
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {availablePlans.map((p) => {
                             const isUpgrade = p.price > plan.price;
+
                             return (
                                 <div key={p.id} className="group relative rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
                                     <div className="flex items-center justify-between">

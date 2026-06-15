@@ -1,3 +1,4 @@
+/* eslint-disable import/order */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/Vendor/Dashboard.tsx
@@ -59,6 +60,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { VendorSidebar } from '@/components/VendorSidebar';
 import getToastStyle from '@/lib/toast-style';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
+import { SubscriptionReminderBanner } from '@/components/ecommerce/others/SubscriptionReminderBanner';
 
 type QuickActionColor =
     | 'emerald'
@@ -159,7 +161,6 @@ interface Stats {
     growth_percent: number;
 }
 
-import { SubscriptionReminderBanner } from '@/components/ecommerce/others/SubscriptionReminderBanner';
 
 interface Trial {
     start: string;
@@ -449,6 +450,7 @@ export default function VendorDashboard({
                                                 {
                                                     preserveScroll: true,
                                                     preserveState: true,
+                                                    showProgress: false,
                                                     onSuccess: () => {
                                                         router.reload({
                                                             only: ['tenant'],

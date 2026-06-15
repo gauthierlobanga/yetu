@@ -236,8 +236,7 @@ export function TenantControlPanel({ tenant, onToggleAI }: ControlPanelProps) {
 
                     <CardContent className="space-y-5">
                         {/* Bloc statut + switch premium */}
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                            {/* Informations de statut */}
+                        {/* <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                             <div className="space-y-1">
                                 <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                                     {aiEnabled ? 'Activé' : 'Désactivé'}
@@ -249,7 +248,7 @@ export function TenantControlPanel({ tenant, onToggleAI }: ControlPanelProps) {
                                         : 'Activez l’assistant IA pour bénéficier de fonctionnalités avancées et de recommandations automatisées.'}
                                 </p>
                             </div>
-                        </div>
+                        </div> */}
                         {/* Switch premium IA */}
                         <div className="flex items-center gap-3">
                             {/* Badge de statut */}
@@ -345,13 +344,6 @@ export function TenantControlPanel({ tenant, onToggleAI }: ControlPanelProps) {
                             </motion.button>
                         </div>
 
-                        {/* Indicateur de chargement */}
-                        {loading && (
-                            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                Mise à jour des paramètres de l’assistant IA…
-                            </div>
-                        )}
                     </CardContent>
                 </Card>
 

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Switch } from '@/components/ui/switch';
 import { useForm, Head, Link, usePage } from '@inertiajs/react';
 import {
     Camera,
@@ -24,7 +23,6 @@ import { toast } from 'sonner';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
 import InputError from '@/components/input-error';
-import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,9 +41,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { getToastStyles } from '@/lib/toast-style';
+import { cn } from '@/lib/utils';
 import type { BreadcrumbItem } from '@/types';
 import type { ProfilePageProps } from '@/types/page-props';
 
@@ -123,6 +123,7 @@ export default function ClientProfile() {
 
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (file) {
             form.setData('avatar', file);
             const reader = new FileReader();
@@ -137,9 +138,11 @@ export default function ClientProfile() {
     const removeAvatar = () => {
         form.setData('avatar', null);
         setPreviewUrl(null);
+
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
+
         toast.info('Photo supprimée (à enregistrer)', {
             style: getToastStyles('info'),
         });

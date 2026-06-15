@@ -80,6 +80,7 @@ export default function CategoriesIndex() {
         return result;
     }, [categories, searchQuery, sortBy]);
 
+    console.log(categories.length);
     // Déclenchement du squelette lors d'un changement de filtre ou de mode
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -105,7 +106,7 @@ export default function CategoriesIndex() {
     }, [viewMode]);
 
     // Nombre de squelettes à afficher selon le mode
-    const skeletonCount = viewMode === 'compact' ? 6 : 8;
+    const skeletonCount = viewMode === 'compact' ? categories.length : categories.length;
 
     return (
         <MainLayout>

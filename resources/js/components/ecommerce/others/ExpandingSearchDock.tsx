@@ -111,7 +111,7 @@ export function ExpandingSearchDock({
     const [isExpanded, setIsExpanded] = useState(false);
     const [query, setQuery] = useState('');
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.SubmitEvent) => {
         e.preventDefault();
 
         if (query.trim()) {
@@ -137,7 +137,7 @@ export function ExpandingSearchDock({
                         onClick={() => setIsExpanded(true)}
                         className="group relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-2xl border border-slate-200/70 bg-white/80 text-slate-600 shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-emerald-200 hover:bg-white hover:text-emerald-600 hover:shadow-lg hover:shadow-emerald-100/50 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:border-emerald-800/60 dark:hover:text-emerald-400"
                     >
-                        <span className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                        <span className="absolute inset-0 bg-linear-to-br from-emerald-500/0 to-emerald-500/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                         <Search className="relative h-4.5 w-4.5" />
                     </motion.button>
                 ) : (
@@ -156,7 +156,7 @@ export function ExpandingSearchDock({
                     >
                         <div className="relative flex h-11 items-center overflow-hidden rounded-2xl border border-slate-200/70 bg-white/85 shadow-xl shadow-slate-900/5 backdrop-blur-2xl transition-all duration-300 focus-within:border-emerald-300 focus-within:shadow-emerald-100/50 dark:border-slate-800 dark:bg-slate-900/85 dark:focus-within:border-emerald-700 dark:focus-within:shadow-emerald-950/20">
                             {/* Glow */}
-                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-emerald-500/[0.03] via-transparent to-emerald-500/[0.03]" />
+                            <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-emerald-500/3 via-transparent to-emerald-500/3" />
 
                             <Search className="ml-4 h-4.5 w-4.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
 
