@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/Vendor/Configure.tsx
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ArrowLeft,
@@ -19,13 +19,22 @@ import {
     Lock,
     Check,
     PartyPopper,
+    ImagePlus,
+    Share2,
+    Upload,
+    Facebook,
+    Twitter,
+    Instagram,
+    Linkedin,
 } from 'lucide-react';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import React from 'react';
+import { fa } from 'zod/v4/locales';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { PremiumLoadingState } from './PremiumLoadingState';
 
 // Types inchangés...
 interface Currency {
@@ -53,12 +62,24 @@ const STEPS = [
     { id: 1, name: 'Identité', icon: Store, description: 'Nom et adresse web' },
     {
         id: 2,
+        name: 'Personnalisation',
+        icon: ImagePlus,
+        description: 'Logo de la boutique',
+    },
+    {
+        id: 3,
+        name: 'Réseaux Sociaux',
+        icon: Share2,
+        description: 'Liens et contacts',
+    },
+    {
+        id: 4,
         name: 'Contact',
         icon: Mail,
         description: 'Email et mot de passe',
     },
     {
-        id: 3,
+        id: 5,
         name: 'Validation',
         icon: ShieldCheck,
         description: 'Récapitulatif',
@@ -308,6 +329,7 @@ export default function VendorConfigure({
     languages,
     countries,
 }: Props) {
+    const { flash } = usePage().props as any;
     const detectedCountry = useMemo(
         () => detectUserCountry(countries),
         [countries],
@@ -321,22 +343,120 @@ export default function VendorConfigure({
     const [slugErrors, setSlugErrors] = useState<string[]>([]);
     const [slugSuggestions, setSlugSuggestions] = useState<string[]>([]);
     const [submitProgress, setSubmitProgress] = useState(0);
+    const [isCreating, setIsCreating] = useState(false);
+    const [pendingRequestId, setPendingRequestId] = useState<string | null>(
+        null,
+    );
+    const [targetDashboardUrl, setTargetDashboardUrl] = useState<string | null>(
+        null,
+    );
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const { data, setData, post, processing, errors, recentlySuccessful } =
-        useForm({
-            plan_id: plan.id,
-            shop_name: '',
-            shop_slug: '',
-            shop_description: '',
-            contact_email: '',
-            contact_phone: '' as string | null,
-            password: 'password',
-            phone_code: detectedCountry?.phone_code || '+243',
-            currency: 'CDF',
-            language: 'fr',
-            accept_terms: false,
-        });
+    const loadingPhrases = useMemo(() => [
+        "Préparation de votre environnement...",
+        "Configuration de votre boutique...",
+        "Mise en place de votre base de données...",
+        "Sécurisation de vos accès...",
+        "Personnalisation de votre espace...",
+        "Finalisation de la configuration..."
+    ], []);
+    const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+
+    useEffect(() => {
+        if (!isCreating) {
+return;
+}
+
+        const interval = setInterval(() => {
+            setLoadingTextIndex((current) => (current + 1) % loadingPhrases.length);
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [isCreating, loadingPhrases]);
+
+    const { data, setData, post, processing, errors } = useForm({
+        plan_id: plan.id,
+        shop_name: '',
+        shop_slug: '',
+        shop_description: '',
+        contact_email: '',
+        contact_phone: '' as string | null,
+        password: 'password',
+        phone_code: detectedCountry?.phone_code || '+243',
+        currency: 'CDF',
+        language: 'fr',
+        accept_terms: false,
+        logo: null as File | null,
+        social_links: {
+            facebook: '',
+            twitter: '',
+            instagram: '',
+            linkedin: '',
+        },
+    });
+
+    // Capture flash data on mount (in case of page reload with flash)
+    useEffect(() => {
+        if (flash?.pending_vendor_request_id && !pendingRequestId) {
+            setPendingRequestId(flash.pending_vendor_request_id);
+            setTargetDashboardUrl(flash.target_dashboard_url);
+            setIsCreating(true);
+        }
+    }, [
+        flash.pending_vendor_request_id,
+        flash.target_dashboard_url,
+        pendingRequestId,
+    ]);
+
+    // Polling Logic — uses state variables, not flash props
+    useEffect(() => {
+        if (!pendingRequestId) {
+            return;
+        }
+
+        setIsCreating(true);
+
+        const pollInterval = setInterval(async () => {
+            try {
+                const response = await fetch(
+                    `/devenir-vendeur/status/${pendingRequestId}`,
+                    {
+                        headers: {
+                            Accept: 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    },
+                );
+
+                if (!response.ok) {
+                    console.error('Polling response error:', response.status);
+
+                    return;
+                }
+
+                const statusData = await response.json();
+
+                if (statusData.status === 'approved') {
+                    clearInterval(pollInterval);
+                    // Redirection finale via SSO (token frais généré par l'API)
+                    if (statusData.sso_url) {
+                        window.location.href = statusData.sso_url;
+                    } else if (targetDashboardUrl) {
+                        window.location.href = targetDashboardUrl;
+                    }
+                } else if (statusData.status === 'rejected') {
+                    clearInterval(pollInterval);
+                    setIsCreating(false);
+                    setPendingRequestId(null);
+                    setTargetDashboardUrl(null);
+                }
+            } catch (error) {
+                console.error('Polling error:', error);
+            }
+        }, 3000);
+
+        return () => clearInterval(pollInterval);
+    }, [pendingRequestId, targetDashboardUrl]);
 
     const cleanSlug = (v: string) => v.toLowerCase().replace(/[^a-z0-9-]/g, '');
     const generateBaseSlug = (name: string) =>
@@ -455,7 +575,7 @@ export default function VendorConfigure({
         data.password.length >= 8 &&
         data.accept_terms;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (!isFormValid()) {
@@ -466,11 +586,24 @@ export default function VendorConfigure({
         post(route('vendor.store'), {
             forceFormData: true,
             preserveScroll: true,
+            showProgress: false,
+            onSuccess: (page: any) => {
+                // Capture flash data into state to trigger polling
+                const pageFlash = page?.props?.flash;
+
+                if (pageFlash?.pending_vendor_request_id) {
+                    setPendingRequestId(pageFlash.pending_vendor_request_id);
+                    setTargetDashboardUrl(pageFlash.target_dashboard_url);
+                    setIsCreating(true);
+                }
+            },
             onError: (formErrors: any) => {
                 const firstKey = Object.keys(formErrors)[0] ?? '';
 
-                if (firstKey.startsWith('shop_')) {
+                if (firstKey.startsWith('shop_') || firstKey === 'logo') {
                     setCurrentStep(1);
+                } else if (firstKey.startsWith('social_links')) {
+                    setCurrentStep(3);
                 } else if (
                     [
                         'contact_',
@@ -480,203 +613,201 @@ export default function VendorConfigure({
                         'password',
                     ].some((p) => firstKey.startsWith(p))
                 ) {
-                    setCurrentStep(2);
+                    setCurrentStep(4);
                 }
             },
         });
     };
 
-    // État de chargement / succès
-    if (processing || recentlySuccessful) {
-        const steps = [
-            { name: 'Création du tenant', duration: 2 },
-            { name: 'Configuration de la boutique', duration: 3 },
-            { name: 'Setup des permissions', duration: 2 },
-            { name: 'Finalisation', duration: 1 },
-        ];
-
-        const currentProgressStep = Math.floor(
-            (submitProgress / 100) * steps.length,
-        );
-
+    // État de chargement premium – Design moderne Light/Dark
+    if (processing || isCreating) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-white via-emerald-50 to-teal-50 p-4 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/30">
-                <div className="w-full max-w-md space-y-8">
-                    {/* Animated Icon Circle */}
+            <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 p-4 dark:bg-[#020817]">
+                {/* Dynamic Background */}
+                <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     <motion.div
-                        className="mx-auto flex h-32 w-32 items-center justify-center rounded-full bg-linear-to-br from-emerald-500 to-teal-600 shadow-2xl shadow-emerald-500/20"
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
+                        className="absolute top-[-20%] right-[-10%] h-160 w-160 rounded-full bg-emerald-200/40 blur-[100px] dark:bg-emerald-600/10"
+                        animate={{ rotate: 360, scale: [1, 1.1, 1] }}
                         transition={{
-                            type: 'spring',
-                            stiffness: 200,
-                            damping: 15,
+                            duration: 20,
+                            repeat: Infinity,
+                            ease: 'linear',
                         }}
-                    >
-                        {recentlySuccessful ? (
+                    />
+                    <motion.div
+                        className="absolute bottom-[-20%] left-[-10%] h-160 w-160 rounded-full bg-blue-200/40 blur-[100px] dark:bg-blue-600/10"
+                        animate={{ rotate: -360, scale: [1, 1.2, 1] }}
+                        transition={{
+                            duration: 25,
+                            repeat: Infinity,
+                            ease: 'linear',
+                        }}
+                    />
+                </div>
+
+                <Head
+                    title={`Création de ${data.shop_name || 'votre boutique'}...`}
+                />
+
+                {/* Main Content Card */}
+                <motion.div
+                    className="relative z-10 w-full max-w-md"
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                >
+                    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/70 px-8 py-12 shadow-2xl shadow-slate-200/50 backdrop-blur-2xl dark:border-slate-800/60 dark:bg-slate-900/60 dark:shadow-black/50">
+                        {/* Top highlight line */}
+                        <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-transparent via-emerald-500/50 to-transparent" />
+
+                        {/* Center Logo/Icon */}
+                        <div className="relative mx-auto mb-10 flex h-28 w-28 items-center justify-center">
+                            {/* Outer dashed ring */}
                             <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{ delay: 0.3 }}
-                            >
-                                <PartyPopper className="h-16 w-16 text-white" />
-                            </motion.div>
-                        ) : (
-                            <motion.div
+                                className="absolute inset-0 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-700"
                                 animate={{ rotate: 360 }}
                                 transition={{
-                                    duration: 2,
+                                    duration: 25,
                                     repeat: Infinity,
                                     ease: 'linear',
                                 }}
+                            />
+                            {/* Inner spinning ring */}
+                            <motion.div
+                                className="absolute inset-2 rounded-full border-b-2 border-l-2 border-emerald-400 dark:border-emerald-500"
+                                animate={{ rotate: -360, scale: [1, 0.95, 1] }}
+                                transition={{
+                                    rotate: {
+                                        duration: 8,
+                                        repeat: Infinity,
+                                        ease: 'linear',
+                                    },
+                                    scale: {
+                                        duration: 3,
+                                        repeat: Infinity,
+                                        ease: 'easeInOut',
+                                        delay: 0.5,
+                                    },
+                                }}
+                            />
+                            {/* Center Logo/Icon */}
+                            <motion.div
+                                className={cn(
+                                    'relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl text-white shadow-xl shadow-emerald-500/30',
+                                    data.logo
+                                        ? 'bg-white'
+                                        : 'bg-linear-to-br from-emerald-500 to-teal-600',
+                                )}
+                                animate={{ scale: [1, 1.05, 1] }}
+                                transition={{
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: 'easeInOut',
+                                }}
                             >
-                                <Loader2 className="h-16 w-16 text-white" />
+                                {data.logo ? (
+                                    <img
+                                        src={URL.createObjectURL(data.logo)}
+                                        alt={data.shop_name || 'Boutique'}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <svg
+                                        className="h-8 w-8"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                                        />
+                                    </svg>
+                                )}
                             </motion.div>
-                        )}
-                    </motion.div>
+                        </div>
 
-                    {/* Title */}
-                    <div className="space-y-2 text-center">
-                        <motion.h2
-                            className="text-3xl font-bold text-slate-900 dark:text-white"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                        >
-                            {recentlySuccessful
-                                ? '🎉 Félicitations!'
-                                : 'Création de votre boutique'}
-                        </motion.h2>
-                        <motion.p
-                            className="text-sm text-slate-500 dark:text-slate-400"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.2 }}
-                        >
-                            {recentlySuccessful
-                                ? 'Votre boutique est maintenant prête à être utilisée'
-                                : 'Veuillez patienter, nous configurons tout...'}
-                        </motion.p>
-                    </div>
+                        {/* Text Content */}
+                        <div className="space-y-3 text-center">
+                            <motion.h2
+                                className="bg-linear-to-br from-slate-900 to-slate-600 bg-clip-text text-2xl font-bold tracking-tight text-transparent dark:from-white dark:to-slate-400"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                {data.shop_name || 'Boutique'} en cours de création...
+                            </motion.h2>
 
-                    {!recentlySuccessful && (
-                        <div className="space-y-6">
-                            {/* Progress Bar */}
-                            <div className="space-y-2">
-                                <div className="h-3 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700">
+                            <div className="relative h-6 w-full overflow-hidden">
+                                <AnimatePresence mode="wait">
+                                    <motion.p
+                                        key={isCreating ? loadingTextIndex : 'done'}
+                                        className="absolute w-full text-[15px] text-slate-500 dark:text-slate-400"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        {isCreating
+                                            ? loadingPhrases[loadingTextIndex]
+                                            : 'Initialisation sécurisée en cours...'}
+                                    </motion.p>
+                                </AnimatePresence>
+                            </div>
+                        </div>
+
+                        {/* Smooth Progress Bar */}
+                        <div className="mt-12 space-y-6">
+                            {/* Barre de progression épurée à la Google/Microsoft */}
+                            <div className="mt-8">
+                                <div className="relative h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800/60">
                                     <motion.div
-                                        className="h-full rounded-full bg-linear-to-r from-emerald-500 via-teal-500 to-emerald-500 bg-size-[200%_100%]"
-                                        animate={{
-                                            backgroundPosition: [
-                                                '0% 0%',
-                                                '100% 0%',
-                                            ],
-                                            width: `${submitProgress}%`,
-                                        }}
-                                        initial={{
-                                            width: `${submitProgress}%`,
-                                        }}
+                                        className="absolute h-full rounded-full bg-linear-to-r from-emerald-500 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)] dark:from-emerald-400 dark:to-emerald-500"
+                                        initial={{ left: '-40%', width: '40%' }}
+                                        animate={{ left: ['-40%', '100%'] }}
                                         transition={{
-                                            backgroundPosition: {
-                                                duration: 2,
-                                                repeat: Infinity,
-                                            },
-                                            width: {
-                                                duration: 0.5,
-                                                ease: 'easeOut',
-                                            },
+                                            duration: 1.8,
+                                            repeat: Infinity,
+                                            ease: [0.4, 0, 0.2, 1], // Easing standard Material / Android Enterprise
                                         }}
                                     />
                                 </div>
-                                <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
-                                    <span>{Math.round(submitProgress)}%</span>
-                                    <span>
-                                        {steps[currentProgressStep]?.name}
-                                    </span>
-                                </div>
                             </div>
 
-                            {/* Steps Timeline */}
-                            <div className="space-y-3">
-                                {steps.map((step, idx) => (
+                            {/* Bouncing Dots */}
+                            <div className="flex justify-center gap-2">
+                                {[0, 1, 2].map((i) => (
                                     <motion.div
-                                        key={idx}
-                                        className="flex items-center gap-3"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
-                                    >
-                                        <div
-                                            className={cn(
-                                                'flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold transition-all',
-                                                idx < currentProgressStep
-                                                    ? 'bg-emerald-500 text-white'
-                                                    : idx ===
-                                                        currentProgressStep
-                                                      ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400'
-                                                      : 'bg-slate-200 text-slate-400 dark:bg-slate-800 dark:text-slate-600',
-                                            )}
-                                        >
-                                            {idx < currentProgressStep ? (
-                                                <Check className="h-4 w-4" />
-                                            ) : idx === currentProgressStep ? (
-                                                <motion.div
-                                                    animate={{
-                                                        rotate: 360,
-                                                    }}
-                                                    transition={{
-                                                        duration: 1.5,
-                                                        repeat: Infinity,
-                                                    }}
-                                                >
-                                                    <Loader2 className="h-4 w-4" />
-                                                </motion.div>
-                                            ) : (
-                                                idx + 1
-                                            )}
-                                        </div>
-                                        <span
-                                            className={cn(
-                                                'text-sm font-medium transition-colors',
-                                                idx <= currentProgressStep
-                                                    ? 'text-slate-900 dark:text-white'
-                                                    : 'text-slate-400 dark:text-slate-600',
-                                            )}
-                                        >
-                                            {step.name}
-                                        </span>
-                                    </motion.div>
+                                        key={i}
+                                        className="h-2 w-2 rounded-full bg-emerald-500/80"
+                                        animate={{
+                                            y: [0, -6, 0],
+                                            opacity: [0.5, 1, 0.5],
+                                        }}
+                                        transition={{
+                                            duration: 1.5,
+                                            repeat: Infinity,
+                                            delay: i * 0.2,
+                                            ease: 'easeInOut',
+                                        }}
+                                    />
                                 ))}
                             </div>
-
-                            {/* Tip */}
-                            <div className="rounded-2xl bg-blue-50 p-4 dark:bg-blue-950/20">
-                                <p className="text-xs text-blue-700 dark:text-blue-300">
-                                    <Sparkles className="mr-2 inline h-3 w-3" />
-                                    Astuce: Ne fermez pas cette page pendant la
-                                    création de votre boutique.
-                                </p>
-                            </div>
                         </div>
-                    )}
 
-                    {recentlySuccessful && (
-                        <motion.button
-                            onClick={() =>
-                                (window.location.href =
-                                    route('tenant.dashboard'))
-                            }
-                            className="w-full rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 px-6 py-3 font-semibold text-white shadow-lg shadow-emerald-500/20 transition-all hover:from-emerald-700 hover:to-teal-700"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                        >
-                            Accéder à ma boutique →
-                        </motion.button>
-                    )}
-                </div>
+                        {/* Pied informatif discret entièrement intégré */}
+                        <div className="mt-8 flex items-start gap-3 border-t border-slate-100 pt-6 text-left dark:border-slate-800/60">
+                            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" />
+                            <span className="text-[11px] leading-relaxed font-medium tracking-normal text-slate-400 dark:text-slate-500">
+                                Création des bases de données et des protocoles
+                                de sécurité. Pour garantir la stabilité,
+                                veuillez ne pas rafraîchir cette page.
+                            </span>
+                        </div>
+                    </div>
+                </motion.div>
             </div>
         );
     }
@@ -897,8 +1028,220 @@ export default function VendorConfigure({
                                 </motion.div>
                             )}
 
-                            {/* ======== ÉTAPE 2 : Contact ======== */}
+                            {/* ======== ÉTAPE 2 : Personnalisation ======== */}
                             {currentStep === 2 && (
+                                <motion.div
+                                    key="step2"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/90 shadow-xl shadow-slate-200/30 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-black/20"
+                                >
+                                    <div className="border-b border-slate-100 bg-linear-to-r from-emerald-50 via-white to-teal-50 px-6 py-6 dark:border-slate-800 dark:from-emerald-950/20 dark:via-slate-900 dark:to-teal-950/20">
+                                        <div className="flex items-start gap-4">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20">
+                                                <ImagePlus className="h-6 w-6" />
+                                            </div>
+                                            <div>
+                                                <Badge className="mb-2">
+                                                    Étape 2 sur 5 (Optionnel)
+                                                </Badge>
+                                                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                                                    Logo de la boutique
+                                                </h2>
+                                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                    Importez le logo de votre
+                                                    boutique pour vous
+                                                    démarquer.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-6 p-6">
+                                        <div className="flex flex-col items-center justify-center gap-4">
+                                            <label
+                                                htmlFor="logo-upload"
+                                                className="group relative flex h-32 w-32 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-emerald-300 bg-emerald-50 transition-all hover:bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/40"
+                                            >
+                                                {data.logo ? (
+                                                    <img
+                                                        src={URL.createObjectURL(
+                                                            data.logo,
+                                                        )}
+                                                        alt="Logo preview"
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <>
+                                                        <Upload className="mb-2 h-8 w-8 text-emerald-500 transition-transform group-hover:scale-110" />
+                                                        <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                                                            Upload Logo
+                                                        </span>
+                                                    </>
+                                                )}
+                                                <input
+                                                    id="logo-upload"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={(e) => {
+                                                        const file =
+                                                            e.target.files?.[0];
+
+                                                        if (file) {
+                                                            setData(
+                                                                'logo',
+                                                                file,
+                                                            );
+                                                        }
+                                                    }}
+                                                />
+                                            </label>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                Format recommandé : 512x512px,
+                                                PNG ou JPG (Max: 2MB)
+                                            </p>
+                                        </div>
+
+                                        <div className="flex justify-between pt-4">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="lg"
+                                                onClick={() =>
+                                                    setCurrentStep(1)
+                                                }
+                                                className="rounded-2xl"
+                                            >
+                                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                                Retour
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                size="lg"
+                                                onClick={() =>
+                                                    setCurrentStep(3)
+                                                }
+                                                className="rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
+                                            >
+                                                Continuer{' '}
+                                                <ArrowRight className="ml-2 h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* ======== ÉTAPE 3 : Réseaux Sociaux ======== */}
+                            {currentStep === 3 && (
+                                <motion.div
+                                    key="step3"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -20 }}
+                                    transition={{ duration: 0.3 }}
+                                    className="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/90 shadow-xl shadow-slate-200/30 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-black/20"
+                                >
+                                    <div className="border-b border-slate-100 bg-linear-to-r from-emerald-50 via-white to-teal-50 px-6 py-6 dark:border-slate-800 dark:from-emerald-950/20 dark:via-slate-900 dark:to-teal-950/20">
+                                        <div className="flex items-start gap-4">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20">
+                                                <Share2 className="h-6 w-6" />
+                                            </div>
+                                            <div>
+                                                <Badge className="mb-2">
+                                                    Étape 3 sur 5 (Optionnel)
+                                                </Badge>
+                                                <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                                                    Réseaux Sociaux
+                                                </h2>
+                                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                    Liez vos réseaux pour
+                                                    rassurer vos futurs clients.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4 p-6">
+                                        <FloatingLabelInput
+                                            id="facebook"
+                                            label="Page Facebook (URL)"
+                                            icon={Facebook}
+                                            placeholder="https://facebook.com/votreboutique"
+                                            value={
+                                                data.social_links?.facebook ||
+                                                ''
+                                            }
+                                            onChange={(e) =>
+                                                setData('social_links', {
+                                                    ...data.social_links,
+                                                    facebook: e.target.value,
+                                                })
+                                            }
+                                        />
+                                        <FloatingLabelInput
+                                            id="instagram"
+                                            label="Profil Instagram (URL)"
+                                            icon={Instagram}
+                                            placeholder="https://instagram.com/votreboutique"
+                                            value={
+                                                data.social_links?.instagram ||
+                                                ''
+                                            }
+                                            onChange={(e) =>
+                                                setData('social_links', {
+                                                    ...data.social_links,
+                                                    instagram: e.target.value,
+                                                })
+                                            }
+                                        />
+                                        <FloatingLabelInput
+                                            id="twitter"
+                                            label="Twitter / X (URL)"
+                                            icon={Twitter}
+                                            placeholder="https://twitter.com/votreboutique"
+                                            value={
+                                                data.social_links?.twitter || ''
+                                            }
+                                            onChange={(e) =>
+                                                setData('social_links', {
+                                                    ...data.social_links,
+                                                    twitter: e.target.value,
+                                                })
+                                            }
+                                        />
+
+                                        <div className="flex justify-between pt-4">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="lg"
+                                                onClick={() =>
+                                                    setCurrentStep(2)
+                                                }
+                                                className="rounded-2xl"
+                                            >
+                                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                                Retour
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                size="lg"
+                                                onClick={() =>
+                                                    setCurrentStep(4)
+                                                }
+                                                className="rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
+                                            >
+                                                Continuer{' '}
+                                                <ArrowRight className="ml-2 h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* ======== ÉTAPE 4 : Contact ======== */}
+                            {currentStep === 4 && (
                                 <motion.div
                                     key="step2"
                                     initial={{ opacity: 0, y: 20 }}
@@ -914,7 +1257,7 @@ export default function VendorConfigure({
                                             </div>
                                             <div>
                                                 <Badge className="mb-2">
-                                                    Étape 2 sur 3
+                                                    Étape 4 sur 5
                                                 </Badge>
                                                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                                                     Contact & Sécurité
@@ -964,7 +1307,7 @@ export default function VendorConfigure({
                                                 variant="outline"
                                                 size="lg"
                                                 onClick={() =>
-                                                    setCurrentStep(1)
+                                                    setCurrentStep(3)
                                                 }
                                                 className="rounded-2xl"
                                             >
@@ -975,7 +1318,7 @@ export default function VendorConfigure({
                                                 type="button"
                                                 size="lg"
                                                 onClick={() =>
-                                                    setCurrentStep(3)
+                                                    setCurrentStep(5)
                                                 }
                                                 className="rounded-2xl bg-linear-to-r from-emerald-600 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
                                             >
@@ -987,8 +1330,8 @@ export default function VendorConfigure({
                                 </motion.div>
                             )}
 
-                            {/* ======== ÉTAPE 3 : Validation ======== */}
-                            {currentStep === 3 && (
+                            {/* ======== ÉTAPE 5 : Validation ======== */}
+                            {currentStep === 5 && (
                                 <motion.div
                                     key="step3"
                                     initial={{ opacity: 0, y: 20 }}
@@ -1004,7 +1347,7 @@ export default function VendorConfigure({
                                             </div>
                                             <div>
                                                 <Badge className="mb-2">
-                                                    Étape 3 sur 3
+                                                    Étape 5 sur 5
                                                 </Badge>
                                                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                                                     Validation
@@ -1018,39 +1361,78 @@ export default function VendorConfigure({
                                         </div>
                                     </div>
                                     <div className="space-y-6 p-6">
-                                        <div className="grid grid-cols-2 gap-4 rounded-3xl bg-slate-50/80 p-4 dark:bg-slate-950/30">
-                                            <div>
-                                                <span className="text-sm text-slate-500 dark:text-slate-400">
-                                                    Plan
-                                                </span>
-                                                <p className="font-medium text-slate-900 dark:text-white">
-                                                    {plan.name} (
-                                                    {plan.formatted_price})
+                                        {/* Resume Header - Figma Pro Style */}
+                                        <div className="flex items-center gap-5 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-xs dark:border-slate-800/60 dark:bg-slate-900/40">
+                                            {data.logo ? (
+                                                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-slate-100 shadow-inner dark:border-slate-800">
+                                                    <img
+                                                        src={URL.createObjectURL(
+                                                            data.logo,
+                                                        )}
+                                                        alt="Logo de la boutique"
+                                                        className="h-full w-full object-cover"
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 shadow-inner dark:bg-emerald-950/30 dark:text-emerald-400">
+                                                    <Store
+                                                        className="h-10 w-10"
+                                                        strokeWidth={1.5}
+                                                    />
+                                                </div>
+                                            )}
+                                            <div className="min-w-0 flex-1">
+                                                <h3 className="truncate text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                                    {data.shop_name ||
+                                                        'Ma Boutique'}
+                                                </h3>
+                                                <div className="mt-1 flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                                                    <Globe className="h-4 w-4 shrink-0 opacity-70" />
+                                                    <span className="truncate">
+                                                        {data.shop_slug ||
+                                                            'boutique'}
+                                                        .
+                                                        {
+                                                            window.location
+                                                                .hostname
+                                                        }
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Details Cards */}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="flex flex-col gap-2 rounded-[2rem] border border-slate-100 bg-slate-50/50 p-5 dark:border-slate-800/60 dark:bg-slate-950/20">
+                                                <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                                                    <Zap className="h-4 w-4" />
+                                                    Plan Sélectionné
+                                                </div>
+                                                <p className="text-lg font-semibold text-slate-900 dark:text-white">
+                                                    {plan.name}
+                                                </p>
+                                                <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                                                    {plan.price > 0
+                                                        ? plan.formatted_price
+                                                        : 'Gratuit'}
                                                 </p>
                                             </div>
-                                            <div>
-                                                <span className="text-sm text-slate-500 dark:text-slate-400">
-                                                    Nom
-                                                </span>
-                                                <p className="font-medium text-slate-900 dark:text-white">
-                                                    {data.shop_name}
+
+                                            <div className="flex flex-col gap-2 rounded-[2rem] border border-slate-100 bg-slate-50/50 p-5 dark:border-slate-800/60 dark:bg-slate-950/20">
+                                                <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                                                    <Mail className="h-4 w-4" />
+                                                    Contact
+                                                </div>
+                                                <p
+                                                    className="truncate text-sm font-medium text-slate-900 dark:text-white"
+                                                    title={data.contact_email}
+                                                >
+                                                    {data.contact_email ||
+                                                        'Non renseigné'}
                                                 </p>
-                                            </div>
-                                            <div>
-                                                <span className="text-sm text-slate-500 dark:text-slate-400">
-                                                    Adresse
-                                                </span>
-                                                <p className="font-medium text-slate-900 dark:text-white">
-                                                    {data.shop_slug}.
-                                                    {window.location.hostname}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <span className="text-sm text-slate-500 dark:text-slate-400">
-                                                    Email
-                                                </span>
-                                                <p className="font-medium text-slate-900 dark:text-white">
-                                                    {data.contact_email}
+                                                <p className="truncate text-sm font-medium text-slate-500 dark:text-slate-400">
+                                                    {data.contact_phone ||
+                                                        'Pas de téléphone'}
                                                 </p>
                                             </div>
                                         </div>
@@ -1100,7 +1482,7 @@ export default function VendorConfigure({
                                                 variant="outline"
                                                 size="lg"
                                                 onClick={() =>
-                                                    setCurrentStep(2)
+                                                    setCurrentStep(4)
                                                 }
                                                 className="rounded-2xl"
                                             >

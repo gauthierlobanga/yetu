@@ -65,7 +65,7 @@ export default function CategoryTabs({
                         Aucune catégorie disponible
                     </h3>
                     <p className="mt-2 text-sm text-muted-foreground">
-                        Revenez bientôt, de nouveaux produits arrivent !
+                        Revenez bientôt, de nouveaux produits arrivent !
                     </p>
                 </div>
             </section>
@@ -76,7 +76,7 @@ export default function CategoryTabs({
         <section className="bg-linear-to-b from-emerald-50/40 via-white to-emerald-50/20 py-12 lg:py-16 dark:from-emerald-950/20 dark:via-gray-950 dark:to-emerald-950/10">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-8 text-center">
-                    <h2 className="font-heading text-2xl font-bold md:text-3xl">
+                    <h2 className="font-heading text-2xl font-semibold md:text-3xl">
                         Acheter par catégorie
                     </h2>
                     <p className="mt-2 text-sm text-muted-foreground">

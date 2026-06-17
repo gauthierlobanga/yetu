@@ -1,5 +1,6 @@
 // resources/js/components/home/daily-offers.tsx
 import { Link } from '@inertiajs/react';
+import type { Variants } from 'framer-motion';
 import { motion } from 'framer-motion';
 import {
     ArrowRight,
@@ -35,7 +36,7 @@ interface DailyOffersProps {
 /*                              Animation Variants                            */
 /* -------------------------------------------------------------------------- */
 
-const fadeUp = {
+const fadeUp: Variants = {
     hidden: { opacity: 0, y: 24 },
     visible: {
         opacity: 1,
@@ -57,12 +58,6 @@ export default function DailyOffers({
 }: DailyOffersProps) {
     return (
         <section className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
-            {/* Background */}
-            <div className="absolute inset-0 bg-linear-to-b from-emerald-50/70 via-white to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900" />
-            <div className="absolute top-0 left-1/4 h-96 w-96 rounded-full bg-emerald-500/8 blur-3xl dark:bg-emerald-400/10" />
-            <div className="absolute right-0 bottom-0 h-96 w-96 rounded-full bg-amber-400/8 blur-3xl dark:bg-amber-400/5" />
-            <div className="absolute inset-0 bg-[radial-linear(circle_at_1px_1px,rgba(148,163,184,0.12)_1px,transparent_0)] bg-size-[28px_28px] dark:bg-[radial-linear(circle_at_1px_1px,rgba(71,85,105,0.18)_1px,transparent_0)]" />
-
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <motion.div
@@ -80,7 +75,7 @@ export default function DailyOffers({
                         Offres exclusives
                     </Badge>
 
-                    <h2 className="mt-5 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-white">
+                    <h2 className="mt-5 text-3xl font-medium tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-white">
                         Les meilleures offres du moment
                     </h2>
 
@@ -183,9 +178,9 @@ function OfferSection({
             whileInView="visible"
             viewport={{ once: true, margin: '-100px' }}
             className={cn(
-                'relative overflow-hidden rounded-[2rem] border',
+                'relative overflow-hidden rounded-lg border',
                 'backdrop-blur-2xl',
-                'shadow-[0_24px_80px_-24px_rgba(15,23,42,0.18)]',
+                // 'shadow-[0_24px_80px_-24px_rgba(15,23,42,0.18)]',
                 highlighted
                     ? 'border-rose-200/60 bg-linear-to-br from-rose-50/80 via-white to-amber-50/70 dark:border-rose-900/30 dark:from-rose-950/20 dark:via-slate-950 dark:to-amber-950/10'
                     : 'border-slate-200/70 bg-white/90 dark:border-slate-800/70 dark:bg-slate-900/70',
@@ -218,7 +213,7 @@ function OfferSection({
                             {badge}
                         </Badge>
 
-                        <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                        <h3 className="text-xl font-medium tracking-tight text-slate-900 dark:text-white">
                             {title}
                         </h3>
 

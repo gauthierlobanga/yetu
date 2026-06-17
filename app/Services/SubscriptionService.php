@@ -20,9 +20,9 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use Stripe\BillingPortal\Session as BillingPortalSession;
 use Stripe\Stripe;
 use Stripe\Subscription as StripeSubscription;
-use Stripe\BillingPortal\Session as BillingPortalSession;
 
 class SubscriptionService
 {
@@ -48,9 +48,11 @@ class SubscriptionService
     public function createSubscription(Tenant $tenant, Plan $plan, ?User $user = null): Subscription
     {
         $user = $user ?? $tenant->users()->where('is_owner', true)->first();
-        $trialEndsAt = ($plan->trial_days ?? 0) > 0
-            ? now()->addDays($plan->trial_days)
-            : null;
+
+        // Pour le plan gratuit, on impose une expiration de 30 jours
+        // Pour les autres plans, on utilise la durée d'essai définie ou 14 jours par défaut
+        $trialDays = $plan->isFree() ? 30 : ($plan->trial_days ?? 14);
+        $trialEndsAt = now()->addDays($trialDays);
 
         // Note: Pour une vraie subscription Stripe, elle est créée via Checkout
         // Ici on initialise l'enregistrement local
@@ -64,20 +66,20 @@ class SubscriptionService
             'plan_id' => $plan->id,
             'type' => 'default',
             'stripe_id' => $stripeId,
-            'stripe_status' => $plan->isFree() ? 'active' : 'trialing',
+            'stripe_status' => 'trialing', // Toujours en essai au début, même gratuit
             'stripe_price' => $plan->stripe_price_id,
             'trial_started_at' => now(),
             'trial_ends_at' => $trialEndsAt,
             'current_period_start' => now(),
             'current_period_end' => now()->addMonths(1),
-            'auto_renewal' => true,
+            'auto_renewal' => ! $plan->isFree(), // Pas de renouvellement auto pour le gratuit
         ]);
 
         // Mettre à jour les dates du tenant
         $tenant->update([
             'plan_id' => $plan->id,
             'date_activation' => now(),
-            'date_expiration' => $plan->isFree() ? null : $trialEndsAt,
+            'date_expiration' => $trialEndsAt,
         ]);
 
         return $subscription;
@@ -111,7 +113,7 @@ class SubscriptionService
      */
     public function cancelSubscription(Subscription $subscription, ?string $reason = null): Subscription
     {
-        if ($subscription->stripe_subscription_id && !str_starts_with($subscription->stripe_subscription_id, 'free_')) {
+        if ($subscription->stripe_subscription_id && ! str_starts_with($subscription->stripe_subscription_id, 'free_')) {
             try {
                 $stripeSub = StripeSubscription::retrieve($subscription->stripe_subscription_id);
                 $stripeSub->cancel();
@@ -135,7 +137,7 @@ class SubscriptionService
      */
     public function pauseSubscription(Subscription $subscription): Subscription
     {
-        if ($subscription->stripe_subscription_id && !str_starts_with($subscription->stripe_subscription_id, 'free_')) {
+        if ($subscription->stripe_subscription_id && ! str_starts_with($subscription->stripe_subscription_id, 'free_')) {
             try {
                 $stripeSub = StripeSubscription::retrieve($subscription->stripe_subscription_id);
                 $stripeSub->pause_collection = ['behavior' => 'void'];
@@ -155,7 +157,7 @@ class SubscriptionService
      */
     public function resumeSubscription(Subscription $subscription): Subscription
     {
-        if ($subscription->stripe_subscription_id && !str_starts_with($subscription->stripe_subscription_id, 'free_')) {
+        if ($subscription->stripe_subscription_id && ! str_starts_with($subscription->stripe_subscription_id, 'free_')) {
             try {
                 $stripeSub = StripeSubscription::retrieve($subscription->stripe_subscription_id);
                 $stripeSub->pause_collection = null;
@@ -175,7 +177,7 @@ class SubscriptionService
      */
     public function upgradeToPlan(Subscription $subscription, Plan $newPlan): Subscription
     {
-        if ($subscription->stripe_subscription_id && !str_starts_with($subscription->stripe_subscription_id, 'free_')) {
+        if ($subscription->stripe_subscription_id && ! str_starts_with($subscription->stripe_subscription_id, 'free_')) {
             try {
                 $stripeSub = StripeSubscription::retrieve($subscription->stripe_subscription_id);
                 StripeSubscription::update($subscription->stripe_subscription_id, [
@@ -211,7 +213,7 @@ class SubscriptionService
      */
     public function downgradeToPlan(Subscription $subscription, Plan $newPlan): Subscription
     {
-        if ($subscription->stripe_subscription_id && !str_starts_with($subscription->stripe_subscription_id, 'free_')) {
+        if ($subscription->stripe_subscription_id && ! str_starts_with($subscription->stripe_subscription_id, 'free_')) {
             try {
                 $stripeSub = StripeSubscription::retrieve($subscription->stripe_subscription_id);
                 StripeSubscription::update($subscription->stripe_subscription_id, [

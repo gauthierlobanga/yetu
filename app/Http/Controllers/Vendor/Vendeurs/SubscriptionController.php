@@ -63,7 +63,7 @@ class SubscriptionController extends Controller
         $subscription = $tenant->subscription;
 
         if (! $subscription) {
-            return Inertia::render('Tenant/Subscription/NoSubscription');
+            return Inertia::render('Tenant/Subscription/None');
         }
 
         $plan = $subscription->plan;

@@ -311,6 +311,8 @@ class HandleInertiaRequests extends Middleware
             'error' => $request->session()->get('error'),
             'message' => $request->session()->get('message'),
             'warning' => $request->session()->get('warning'),
+            'pending_vendor_request_id' => $request->session()->get('pending_vendor_request_id'),
+            'target_dashboard_url' => $request->session()->get('target_dashboard_url'),
         ];
     }
 

@@ -11,7 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Notification;
+use Illuminate\Support\Facades\Notification;
 
 class RenewSubscriptionJob implements ShouldQueue
 {

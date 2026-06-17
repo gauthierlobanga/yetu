@@ -13,12 +13,14 @@ class PlanSeeder extends Seeder
             [
                 'name' => 'Gratuit',
                 'slug' => 'gratuit',
-                'description' => 'Idéal pour démarrer votre boutique en ligne.',
+                'description' => 'Idéal pour démarrer votre boutique en ligne. Essai de 30 jours inclus.',
                 'highlight' => null,
                 'price' => 0,
                 'currency' => 'CDF',
                 'interval' => 'month',
-                'trial_days' => 0,
+                'trial_days' => 30, // 30 jours d'essai pour le plan gratuit
+                'stripe_price_id' => null,
+                'stripe_product_id' => null,
                 'features' => $this->getFeaturesFor('Gratuit'),
                 'limits' => $this->getLimitsFor('Gratuit'),
                 'sort_order' => 0,
@@ -37,6 +39,8 @@ class PlanSeeder extends Seeder
                 'currency' => 'CDF',
                 'interval' => 'month',
                 'trial_days' => 14,
+                'stripe_price_id' => 'price_STARTER_ID_ICI', // À REMPLACER
+                'stripe_product_id' => 'prod_STARTER_ID_ICI', // À REMPLACER
                 'features' => $this->getFeaturesFor('Starter'),
                 'limits' => $this->getLimitsFor('Starter'),
                 'sort_order' => 1,
@@ -55,6 +59,8 @@ class PlanSeeder extends Seeder
                 'currency' => 'CDF',
                 'interval' => 'month',
                 'trial_days' => 14,
+                'stripe_price_id' => 'price_PRO_ID_ICI', // À REMPLACER
+                'stripe_product_id' => 'prod_PRO_ID_ICI', // À REMPLACER
                 'features' => $this->getFeaturesFor('Pro'),
                 'limits' => $this->getLimitsFor('Pro'),
                 'sort_order' => 2,
@@ -73,6 +79,8 @@ class PlanSeeder extends Seeder
                 'currency' => 'CDF',
                 'interval' => 'month',
                 'trial_days' => 14,
+                'stripe_price_id' => 'price_BUSINESS_ID_ICI', // À REMPLACER
+                'stripe_product_id' => 'prod_BUSINESS_ID_ICI', // À REMPLACER
                 'features' => $this->getFeaturesFor('Business'),
                 'limits' => $this->getLimitsFor('Business'),
                 'sort_order' => 3,
@@ -91,6 +99,8 @@ class PlanSeeder extends Seeder
                 'currency' => 'CDF',
                 'interval' => 'month',
                 'trial_days' => 14,
+                'stripe_price_id' => 'price_ENTERPRISE_ID_ICI', // À REMPLACER
+                'stripe_product_id' => 'prod_ENTERPRISE_ID_ICI', // À REMPLACER
                 'features' => $this->getFeaturesFor('Enterprise'),
                 'limits' => $this->getLimitsFor('Enterprise'),
                 'sort_order' => 4,
@@ -102,8 +112,11 @@ class PlanSeeder extends Seeder
             ],
         ];
 
-        foreach ($plans as $plan) {
-            Plan::create($plan);
+        foreach ($plans as $planData) {
+            Plan::updateOrCreate(
+                ['slug' => $planData['slug']],
+                $planData
+            );
         }
     }
 

@@ -22,6 +22,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Laravel\Cashier\Billable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
@@ -37,13 +38,13 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, HasName, HasTenants // , SyncMaster , MustVerifyEmail
 {
+    use Billable;
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
-
     use HasRoles, InteractsWithMedia;
     use HasUserPreferences;
     use HasUuids, SoftDeletes;
-    // use ResourceSyncing;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)

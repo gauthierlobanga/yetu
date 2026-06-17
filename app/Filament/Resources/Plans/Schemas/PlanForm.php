@@ -100,7 +100,9 @@ class PlanForm
                                     ->default(0)
                                     ->minValue(0)
                                     ->suffix('jours')
-                                    ->helperText('0 = pas d\'essai'),
+                                    ->helperText(fn ($get) => $get('price') == 0
+                                        ? 'Pour le plan gratuit, Yetu applique une limite de 30 jours.'
+                                        : 'Nombre de jours d\'accès gratuit avant facturation.'),
                             ]),
                     ]),
 
@@ -203,13 +205,14 @@ class PlanForm
                         TextInput::make('stripe_price_id')
                             ->label('ID du prix Stripe')
                             ->placeholder('price_xxxxxxxxxxxxx')
-                            ->disabled(fn () => app()->environment('production'))
-                            ->helperText('Laissez vide si vous gérez les prix via le Dashboard Stripe'),
+                            ->regex('/^price_/')
+                            ->helperText('Identifiant du prix sur Stripe (ex: price_1Q...). Obligatoire pour les plans payants.'),
 
                         TextInput::make('stripe_product_id')
                             ->label('ID du produit Stripe')
                             ->placeholder('prod_xxxxxxxxxxxxx')
-                            ->helperText('Un seul produit Stripe suffit généralement pour tous vos plans'),
+                            ->regex('/^prod_/')
+                            ->helperText('Identifiant du produit sur Stripe (ex: prod_...).'),
                     ]),
 
                 // ==========================================

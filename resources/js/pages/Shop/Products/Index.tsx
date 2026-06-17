@@ -246,7 +246,7 @@ export default function ProductsIndex() {
         <MainLayout>
             <Head title="Tous les produits" />
 
-            <div className="mx-auto max-w-7xl px-4 py-8">
+            <div className="mx-auto max-w-350 px-4 py-8">
                 {/* En-tête */}
                 <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <motion.div

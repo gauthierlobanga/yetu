@@ -52,17 +52,15 @@ export function SubscriptionReminderBanner({ trial, subscription }: Props) {
     const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
 
     const shouldShow = useMemo(() => {
-        // Ne pas afficher si l'abonnement est payé et actif
-        if (
-            subscription?.is_paid &&
-            subscription?.is_active &&
-            subscription?.status === 'active'
-        ) {
+        // Afficher si l'abonnement n'est pas "active" sur Stripe (donc en trialing gratuit ou payant)
+        // ou si l'utilisateur est sur un plan gratuit (ID commençant par free_)
+        if (subscription?.status === 'active' && subscription?.is_paid) {
             return false;
         }
 
         return true;
     }, [subscription]);
+
 
     const checkFrequency = useCallback(() => {
         if (!shouldShow) {

@@ -47,6 +47,7 @@ use App\Http\Controllers\Vendor\Vendeurs\VendorSettingsController;
 use App\Http\Controllers\Vendor\Vendeurs\VendorStatisticsController;
 use App\Http\Controllers\Vendor\Vendeurs\VisitorStatsController;
 use App\Http\Middleware\EnsureTenantSubscription;
+use App\Http\Middleware\InitializeTenancyForTenantDomains;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;

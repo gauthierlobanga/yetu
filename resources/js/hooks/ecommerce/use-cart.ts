@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/consistent-type-imports */
 // resources/js/hooks/ecommerce/use-cart.ts
 import { router, usePage } from '@inertiajs/react';
 import { ShoppingCart, Trash2 } from 'lucide-react';
-import { createElement } from 'react';
+import { createElement, ReactNode } from 'react';
 import { useCallback, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -12,7 +11,9 @@ interface CartItem {
     options_selectionnees: any;
     id: number;
     produit: {
-        brand: import('react/jsx-runtime').JSX.Element;
+        est_en_promotion: any;
+        reduction_pourcentage: any;
+        brand: any;
         sold_count: boolean;
         id: number;
         nom: string;

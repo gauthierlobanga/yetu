@@ -12,7 +12,7 @@ return new class extends Migration
         Schema::create('visitor_events', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('session_id')->index();
-            $table->string('visitor_id')->index();
+            $table->string('visitor_id')->nullable();
             $table->string('event_type'); // add_to_cart, begin_checkout, purchase
             $table->string('url')->nullable();
             $table->uuid('product_id')->nullable();
@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamp('occurred_at')->useCurrent();
             $table->timestamps();
 
-            $table->index(['event_type', 'occurred_at']);
+            $table->index(['event_type', 'occurred_at','visitor_id']);
         });
 
         // Table product_views (vues produits)

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\VisitorStatsController;
+use App\Http\Controllers\Api\VendorRequestStatusController;
 use App\Http\Controllers\Auth\TenantAccountController;
 use App\Http\Controllers\Auth\TenantSsoLoginController;
 use App\Http\Controllers\Central\Pages\Blog\BlogCentralController;
@@ -57,6 +58,9 @@ Route::middleware('guest')->group(function () {
 
         return redirect()->intended(route('plan.index'));
     })->middleware(['auth', 'signed'])->name('central.verification.verify');
+
+    // Note: Fortify handles POST /login, but we ensure it redirects correctly for central domain
+    // The CustomLoginResponse handles the redirect logic based on domain and user status
 
 });
 
@@ -141,6 +145,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Suggestions de domaine
         Route::post('/suggest-domain', [VendorRegistrationController::class, 'suggestDomain'])
             ->name('suggest-domain');
+
+        // Status de la demande
+        Route::get('/status/{id}', [VendorRequestStatusController::class, '__invoke'])
+            ->name('status');
 
         // Paiement
         Route::get('/paiement', [PaymentController::class, 'index'])

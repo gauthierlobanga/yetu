@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Plan;
 use App\Models\VendorRequest;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ class VendorRegistrationRequest extends FormRequest
             // Plan
             'plan_id' => [
                 'required',
-                Rule::exists(\App\Models\Plan::class, 'id')
+                Rule::exists(Plan::class, 'id'),
             ],
 
             // Informations de base
@@ -53,6 +54,14 @@ class VendorRegistrationRequest extends FormRequest
             // Localisation & préférences
             'currency' => ['nullable', 'string', 'max:3'],
             'language' => ['nullable', 'string', 'max:5'],
+
+            // Logo & Réseaux sociaux
+            'logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg,webp', 'max:2048'],
+            'social_links' => ['nullable', 'array'],
+            'social_links.facebook' => ['nullable', 'url', 'max:255'],
+            'social_links.twitter' => ['nullable', 'url', 'max:255'],
+            'social_links.instagram' => ['nullable', 'url', 'max:255'],
+            'social_links.linkedin' => ['nullable', 'url', 'max:255'],
 
             // Conditions
             'accept_terms' => ['required', 'accepted'],

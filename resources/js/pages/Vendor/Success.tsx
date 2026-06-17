@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/purity */
 // resources/js/Pages/Vendor/Success.tsx
-
 import { Head, Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import {
@@ -56,8 +55,8 @@ export default function VendorSuccess({ tenant, isCreating = false }: Props) {
     // Polling pour vérifier quand le tenant est créé
     useEffect(() => {
         if (!creationStatus) {
-return;
-}
+            return;
+        }
 
         const pollInterval = setInterval(async () => {
             try {

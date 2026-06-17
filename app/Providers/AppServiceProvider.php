@@ -15,23 +15,23 @@ use App\Models\Retour;
 use App\Models\User;
 use App\Observers\TenantRealtimeActivityObserver;
 use App\Observers\UserObserver;
+use App\Policies\MediaPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use App\Policies\MediaPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -83,7 +83,7 @@ class AppServiceProvider extends ServiceProvider
             app()->isProduction(),
         );
 
-        Model::preventLazyLoading(!app()->isProduction());
+        Model::preventLazyLoading(! app()->isProduction());
 
         Password::defaults(fn (): ?Password => app()->isProduction()
             ? Password::min(12)
@@ -115,9 +115,16 @@ class AppServiceProvider extends ServiceProvider
     {
         // Redirection quand l'utilisateur N'EST PAS connecté
         Authenticate::redirectUsing(function ($request) {
-            if (! $request->expectsJson()) {
-                return route('central.login');
+            if ($request->expectsJson()) {
+                return null;
             }
+
+            // Si on est dans un contexte tenant, rediriger vers le login tenant
+            if (function_exists('tenancy') && tenancy()->initialized) {
+                return route('tenant.login');
+            }
+
+            return route('central.login');
         });
 
         // Redirection quand l'utilisateur EST DÉJÀ connecté
@@ -125,11 +132,15 @@ class AppServiceProvider extends ServiceProvider
             $user = $request->user();
 
             if (function_exists('tenancy') && tenancy()->initialized) {
-                if ($user && $this->userOwnsCurrentTenant($user->id)) {
+                if ($user && ($user->hasRole('super_admin') || $this->userOwnsCurrentTenant($user->id))) {
                     return '/vendor/dashboard';
                 }
 
                 return route('acheteur.dashboard');
+            }
+
+            if ($user && $user->hasRole('super_admin')) {
+                return route('filament.admin.pages.dashboard');
             }
 
             if ($user && $user->tenants()->wherePivot('is_owner', true)->exists()) {

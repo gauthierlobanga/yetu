@@ -8,10 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Stancl\Tenancy\Database\Concerns\CentralConnection;
 
 class Subscription extends Model
 {
-    use HasFactory, HasUuids, SoftDeletes;
+    use CentralConnection, HasFactory, HasUuids, SoftDeletes;
+
+    protected $table = 'public.subscriptions';
 
     protected $keyType = 'string';
 
@@ -95,12 +98,10 @@ class Subscription extends Model
      */
     public function isActive(): bool
     {
-        if ($this->plan->isFree()) {
-            return true;
-        }
-
+        // Une subscription est active si elle est marquée active sur Stripe
+        // OU si elle est encore en période d'essai (incluant le plan gratuit de 30j)
         return $this->stripe_status === 'active' ||
-               (now() < $this->trial_ends_at && $this->trial_ends_at !== null);
+               ($this->trial_ends_at !== null && now() < $this->trial_ends_at);
     }
 
     /**
@@ -108,16 +109,18 @@ class Subscription extends Model
      */
     public function isExpired(): bool
     {
-        if ($this->plan->isFree()) {
+        // Si elle est active sur Stripe, elle n'est pas expirée
+        if ($this->stripe_status === 'active') {
             return false;
         }
 
+        // Si c'est annulé et que la date de fin est passée
         if ($this->stripe_status === 'canceled') {
             return $this->ends_at !== null && now() > $this->ends_at;
         }
 
-        return $this->trial_ends_at !== null && now() > $this->trial_ends_at
-               && $this->stripe_status !== 'active';
+        // Si l'essai est terminé (pour gratuit ou payant trialing)
+        return $this->trial_ends_at !== null && now() > $this->trial_ends_at;
     }
 
     /**

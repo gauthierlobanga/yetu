@@ -71,6 +71,16 @@ class PlansTable
                     ->boolean()
                     ->toggleable(),
 
+                TextColumn::make('stripe_price_id')
+                    ->label('Stripe Price')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('stripe_product_id')
+                    ->label('Stripe Product')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 // Colonne "badge" corrigée : TextColumn + badge()
                 TextColumn::make('badge')
                     ->label('Badge')

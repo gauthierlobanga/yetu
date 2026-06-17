@@ -202,11 +202,11 @@ export default function About() {
                                 label: 'Produits disponibles',
                                 icon: Package,
                             },
-                            {
-                                value: `${platformStats?.ordersProcessed ?? 0}+`,
-                                label: 'Commandes traitées',
-                                icon: Star,
-                            },
+                            // {
+                            //     value: `${platformStats?.ordersProcessed ?? 0}+`,
+                            //     label: 'Commandes traitées',
+                            //     icon: Star,
+                            // },
                             {
                                 value: `${platformStats?.countriesServed ?? 0}`,
                                 label: 'Pays livrés',
@@ -317,71 +317,6 @@ export default function About() {
             </section>
 
             {/* NOS VALEURS */}
-            {/* <section className="bg-muted/30 py-20">
-                <div className="mx-auto max-w-6xl px-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="mb-12 text-center"
-                    >
-                        <Badge className="mb-4">Nos valeurs</Badge>
-                        <h2 className="font-heading text-3xl font-bold md:text-4xl">
-                            Ce qui nous rend uniques
-                        </h2>
-                        <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-                            Des principes forts qui guident chacune de nos
-                            actions au quotidien.
-                        </p>
-                    </motion.div>
-
-                    <div className="grid gap-6 md:grid-cols-3">
-                        {[
-                            {
-                                icon: ShieldCheck,
-                                title: 'Confiance & Sécurité',
-                                description:
-                                    'Transactions 100% sécurisées et protection des données.',
-                            },
-                            {
-                                icon: Zap,
-                                title: 'Innovation permanente',
-                                description:
-                                    'Des technologies de pointe pour une expérience fluide.',
-                            },
-                            {
-                                icon: Heart,
-                                title: 'Satisfaction client',
-                                description:
-                                    'Votre bonheur est notre priorité absolue.',
-                            },
-                        ].map((value, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                            >
-                                <Card className="h-full border-0 bg-background/60 shadow-sm backdrop-blur-sm transition-all hover:-translate-y-1 hover:shadow-lg">
-                                    <CardContent className="p-6">
-                                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                                            <value.icon className="h-6 w-6" />
-                                        </div>
-                                        <h3 className="mb-2 text-lg font-semibold">
-                                            {value.title}
-                                        </h3>
-                                        <p className="text-sm text-muted-foreground">
-                                            {value.description}
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section> */}
-
             {platformStats?.values?.map((value: any, i: number) => {
                 const IconComponent = iconMap[value.icon] || ShieldCheck;
 
@@ -411,79 +346,6 @@ export default function About() {
             })}
 
             {/* TÉMOIGNAGES */}
-            {/* <section className="py-20">
-                <div className="mx-auto max-w-6xl px-4">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="mb-12 text-center"
-                    >
-                        <Badge className="mb-4">Témoignages</Badge>
-                        <h2 className="font-heading text-3xl font-bold md:text-4xl">
-                            Ce que disent nos clients
-                        </h2>
-                    </motion.div>
-
-                    <div className="grid gap-6 md:grid-cols-3">
-                        {[
-                            {
-                                text: 'Service impeccable et livraison ultra rapide. Les produits sont exactement comme décrits.',
-                                author: 'Sophie M.',
-                                role: 'Cliente fidèle',
-                                avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg',
-                            },
-                            {
-                                text: 'Une plateforme intuitive et un support client réactif. Je recommande vivement !',
-                                author: 'Thomas L.',
-                                role: 'Entrepreneur',
-                                avatar: 'https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg',
-                            },
-                            {
-                                text: 'Qualité des produits exceptionnelle. shop est devenu mon site de référence.',
-                                author: 'Marie D.',
-                                role: 'Designer',
-                                avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg',
-                            },
-                        ].map((testimonial, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: i * 0.1 }}
-                            >
-                                <Card className="h-full border-border/60 bg-card/60 backdrop-blur-sm">
-                                    <CardContent className="p-6">
-                                        <Quote className="mb-4 h-8 w-8 text-primary/40" />
-                                        <p className="mb-6 text-sm italic">
-                                            {testimonial.text}
-                                        </p>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar>
-                                                <AvatarImage
-                                                    src={testimonial.avatar}
-                                                />
-                                                <AvatarFallback>
-                                                    {testimonial.author[0]}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <p className="text-sm font-medium">
-                                                    {testimonial.author}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {testimonial.role}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section> */}
             {platformStats?.testimonials?.map((testimonial: any, i: number) => (
                 <motion.div
                     key={i}

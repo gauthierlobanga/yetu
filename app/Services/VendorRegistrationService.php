@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\VendorRequest;
 use App\Notifications\VendorApproved;
 use App\Notifications\VendorRejected;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -109,6 +110,7 @@ class VendorRegistrationService
             });
 
             $tenant->domains()->create([
+                'id' => (string) Str::orderedUuid(),
                 'domain' => str_replace('_', '-', $vendorRequest->shop_slug).'.localhost',
             ]);
 
@@ -139,23 +141,45 @@ class VendorRegistrationService
 
         $this->transferDocumentsToTenant($vendorRequest, $tenant);
 
-        // Rôles / permissions (contexte central)
-        try {
-            setPermissionsTeamId($tenant->id);
-            // 1. Créer les rôles par défaut EN PREMIER
-            $this->seedDefaultTenantRoles($tenant);
-            // 2. ENSUITE assigner le rôle à l'utilisateur
-            if (! $user->hasRole('owner')) {
-                $user->assignRole('owner');
+        // Process extra data from Cache (Logo, Social Links)
+        $extraData = Cache::get('vendor_request_extra_'.$vendorRequest->id);
+        if ($extraData) {
+            if (! empty($extraData['logo_path'])) {
+                try {
+                    $tenant->addMedia(storage_path('app/public/'.$extraData['logo_path']))
+                        ->toMediaCollection('tenant_avatar');
+                } catch (\Exception $e) {
+                    Log::error('Failed to add logo to tenant: '.$e->getMessage());
+                }
             }
+            if (! empty($extraData['social_links'])) {
+                $tenant->setConfiguration('social_links', $extraData['social_links']);
+                $tenant->save();
+            }
+            Cache::forget('vendor_request_extra_'.$vendorRequest->id);
+        }
+
+        // Synchronisation de l'utilisateur (Contexte Tenant)
+        try {
+            $tenant->run(function () use ($user) {
+                // Assurer que l'utilisateur existe dans la base du tenant
+                User::firstOrCreate(
+                    ['email' => $user->email],
+                    [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'password' => $user->password,
+                        'email_verified_at' => $user->email_verified_at,
+                        'global_id' => $user->global_id ?? $user->id,
+                    ]
+                );
+            });
         } catch (\Exception $e) {
-            Log::warning('Failed to set up permissions for tenant', [
+            Log::warning('Failed to sync user to tenant database', [
                 'tenant_id' => $tenant->id,
                 'error' => $e->getMessage(),
             ]);
         }
-
-        // Nettoyage de la session
 
         // Créer la subscription pour le plan
         $this->subscriptionService->createSubscription($tenant, $plan, $user);
@@ -351,7 +375,7 @@ class VendorRegistrationService
     /**
      * Créer les rôles par défaut pour un nouveau tenant.
      */
-    private function seedDefaultTenantRoles(Tenant $tenant): void
+    private function seedDefaultTenantRoles(): void
     {
         // Ne pas exécuter si les tables de permissions ne sont pas dans le schéma du tenant
         // (selon votre configuration stancl/tenancy)
@@ -368,27 +392,21 @@ class VendorRegistrationService
                 [
                     'name' => $name,
                     'guard_name' => 'web',
-                    'tenant_id' => $tenant->id,
                 ],
                 [
                     'name' => $name,
                     'guard_name' => 'web',
-                    'tenant_id' => $tenant->id,
                 ]
             );
         }
 
         // Donner toutes les permissions au rôle "owner"
-        $ownerRole = Role::where('name', 'owner')
-            ->where('tenant_id', $tenant->id)
-            ->first();
+        $ownerRole = Role::where('name', 'owner')->first();
 
         if ($ownerRole) {
-            $allPermissions = Permission::where('tenant_id', $tenant->id)->get();
+            $allPermissions = Permission::all();
             $ownerRole->syncPermissions($allPermissions);
         }
-
-        Log::info('Default roles seeded for tenant', ['tenant_id' => $tenant->id]);
     }
 
     /**
@@ -511,14 +529,6 @@ class VendorRegistrationService
     }
 
     /**
-     * Obtenir l'URL du panneau vendeur.
-     */
-    // public function getVendeurUrl(Tenant $tenant): string
-    // {
-    //     return $this->tenantBaseUrl($tenant).'/vendeur';
-    // }
-
-    /**
      * Obtenir l'URL publique de la boutique.
      */
     public function getShopUrl(Tenant $tenant): string
@@ -572,6 +582,24 @@ class VendorRegistrationService
     }
 
     /**
+     * Obtenir l'URL du tableau de bord vendeur par slug (sans objet Tenant).
+     */
+    public function getVendeurDashboardUrlBySlug(string $slug): string
+    {
+        $domain = str_replace('_', '-', $slug).'.localhost';
+
+        $appUrl = config('app.url', 'http://localhost');
+        $scheme = parse_url($appUrl, PHP_URL_SCHEME) ?: 'http';
+        $port = parse_url($appUrl, PHP_URL_PORT);
+
+        $portSuffix = app()->environment('local') && $port && ! str_contains($domain, ':')
+            ? ':'.$port
+            : '';
+
+        return rtrim($scheme.'://'.$domain.$portSuffix, '/').'/vendor/dashboard';
+    }
+
+    /**
      * Obtenir l'URL du tableau de bord vendeur (tenant).
      * En local : route de redirection sans sous‑domaine.
      * En production : vrai sous‑domaine.
@@ -597,7 +625,7 @@ class VendorRegistrationService
         $payload = [
             'user_id' => $user->id,
             'tenant_id' => $tenant->id,
-            'expires_at' => now()->addMinutes(5)->timestamp,
+            'expires_at' => now()->addMinutes(30)->timestamp,
         ];
         $token = Crypt::encryptString(json_encode($payload));
 
@@ -640,14 +668,20 @@ class VendorRegistrationService
         }
 
         if (! isset($payload['user_id'], $payload['tenant_id'], $payload['expires_at'])) {
+            Log::error('SSO failed: payload missing keys', ['payload' => $payload ?? null]);
+
             return null;
         }
 
         if ($payload['tenant_id'] !== $tenant->id) {
+            Log::error('SSO failed: tenant_id mismatch', ['payload_tenant' => $payload['tenant_id'], 'current_tenant' => $tenant->id]);
+
             return null;
         }
 
         if (now()->timestamp > $payload['expires_at']) {
+            Log::error('SSO failed: token expired', ['expires_at' => $payload['expires_at'], 'now' => now()->timestamp]);
+
             return null;
         }
 
@@ -662,6 +696,8 @@ class VendorRegistrationService
             ->exists();
 
         if (! $isOwner) {
+            Log::error('SSO failed: not owner', ['user_id' => $payload['user_id'], 'tenant_id' => $tenant->id]);
+
             return null;
         }
 
@@ -672,6 +708,8 @@ class VendorRegistrationService
             ->first();
 
         if (! $centralUser) {
+            Log::error('SSO failed: central user not found', ['user_id' => $payload['user_id']]);
+
             return null;
         }
 

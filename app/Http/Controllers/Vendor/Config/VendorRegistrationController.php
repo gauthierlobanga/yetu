@@ -10,6 +10,7 @@ use App\Models\Tenant;
 use App\Services\VendorRegistrationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Nnjeim\World\Models\Country;
@@ -211,49 +212,26 @@ class VendorRegistrationController extends Controller
         $vendorRequest = $this->vendorService->initiateRegistration($user, $request->validated());
         session()->forget('selected_plan_id');
 
-        // Construire l'URL temporaire du tenant
-        $appUrl = config('app.url', 'http://localhost');
-        $scheme = parse_url($appUrl, PHP_URL_SCHEME) ?: 'http';
-        $port = parse_url($appUrl, PHP_URL_PORT);
-        $domain = str_replace('_', '-', $request->shop_slug).'.localhost';
-        $portSuffix = app()->environment('local') && $port && ! str_contains($domain, ':') ? ':'.$port : '';
-        $shopUrl = rtrim($scheme.'://'.$domain.$portSuffix, '/');
-
-        // Pour les plans gratuits : approuver directement
-        // Pour les plans payants : dispatcher en background
-        if ($plan->price > 0) {
-            // Plan payant : dispatcher le job et afficher écran de progression
-            ApproveVendorRequest::dispatch($vendorRequest);
-
-            return Inertia::render('Vendor/Success', [
-                'tenant' => [
-                    'id' => $vendorRequest->id,
-                    'raison_sociale' => $request->shop_name,
-                    'slug' => $request->shop_slug,
-                    'url' => $shopUrl,
-                    'admin_url' => $shopUrl.'/vendeur',
-                    'logo_url' => null,
-                    'dashboard_url' => $shopUrl.'/vendor/dashboard',
-                ],
-                'isCreating' => true,
-            ]);
-        } else {
-            // Plan gratuit : approuver immédiatement
-            $tenant = $this->vendorService->approve($vendorRequest);
-
-            return Inertia::render('Vendor/Success', [
-                'tenant' => [
-                    'id' => $tenant->id,
-                    'raison_sociale' => $tenant->raison_sociale,
-                    'slug' => $tenant->slug,
-                    'url' => $this->vendorService->getShopUrl($tenant),
-                    'admin_url' => $this->vendorService->getVendeurUrl($tenant),
-                    'logo_url' => $tenant->logo_url,
-                    'dashboard_url' => $this->vendorService->getVendeurDashboardUrl($tenant),
-                ],
-                'isCreating' => false,
-            ]);
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('temp_logos', 'public');
         }
+
+        if ($logoPath || $request->filled('social_links')) {
+            Cache::put('vendor_request_extra_'.$vendorRequest->id, [
+                'logo_path' => $logoPath,
+                'social_links' => $request->input('social_links'),
+            ], now()->addHours(2));
+        }
+
+        // Dispatcher le job de création (processus lourd)
+        ApproveVendorRequest::dispatch($vendorRequest);
+
+        // On retourne sur la même page avec les infos pour le polling
+        return back()->with([
+            'pending_vendor_request_id' => $vendorRequest->id,
+            'target_dashboard_url' => $this->vendorService->getVendeurDashboardUrlBySlug($request->shop_slug),
+        ]);
     }
 
     /**
@@ -266,6 +244,7 @@ class VendorRegistrationController extends Controller
         if ((string) $tenant->user_id !== (string) Auth::id()) {
             abort(403);
         }
+
         return Inertia::render('Vendor/Success', [
             'tenant' => [
                 'id' => $tenant->id,

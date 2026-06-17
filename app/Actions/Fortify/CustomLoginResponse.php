@@ -13,34 +13,38 @@ class CustomLoginResponse implements LoginResponse
     public function toResponse($request)
     {
         $user = $request->user();
-        // dd('toResponse atteint', $user?->email);
 
         // Domaine central
         if ($this->isCentralDomain($request->getHost())) {
+            // Si l'utilisateur a au moins un tenant, rediriger vers la sélection de compte
             if ($user && $this->getUserTenant($user)) {
                 return redirect()->route('central.account-selection.index');
             }
 
+            // Si c'est un super admin, rediriger vers le tableau de bord admin
             if ($user?->hasRole('super_admin') && Route::has('filament.admin.pages.dashboard')) {
-                return redirect()->intended(route('filament.admin.pages.dashboard'));
+                return redirect()->route('filament.admin.pages.dashboard');
             }
 
-            return redirect()->intended(route('vendor.register'));
+            // Sinon, rediriger vers l'inscription vendeur
+            return redirect()->route('vendor.register');
         }
 
-        // Domaine tenant (ne change rien)
+        // Domaine tenant - vérifier si l'utilisateur peut accéder au dashboard vendeur
         if ($user && $this->canUseTenantDashboard($user)) {
-            return redirect()->intended('/vendor/dashboard');
+            return redirect()->to('/vendor/dashboard');
         }
+
+        // Créer un client tenant si nécessaire
         $this->ensureTenantClient($user);
 
-        return redirect()->intended(route('acheteur.dashboard'));
+        // Rediriger vers le tableau de bord acheteur
+        return redirect()->route('acheteur.dashboard');
     }
 
     private function isCentralDomain(string $host): bool
     {
         return in_array($host, config('tenancy.central_domains', []), true);
-
     }
 
     private function getUserTenant($user): ?Tenant
@@ -54,15 +58,21 @@ class CustomLoginResponse implements LoginResponse
 
     private function canUseTenantDashboard($user): bool
     {
-        if ($user->hasRole(['super_admin', 'owner', 'manager'])) {
-            return true;
-        }
-
+        // Vérifier que le contexte tenant est initialisé
         if (! function_exists('tenant') || ! tenant()) {
             return false;
         }
 
-        return DB::connection($this->centralConnection())
+        // Les super admins peuvent accéder au dashboard
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        // Vérifier si l'utilisateur est propriétaire du tenant actuel
+        // Utiliser la connection centrale pour la table pivot
+        $centralConnection = config('tenancy.database.central_connection', config('database.default'));
+
+        return DB::connection($centralConnection)
             ->table('user_tenant')
             ->where('user_id', $user->id)
             ->where('tenant_id', tenant()->id)
@@ -72,6 +82,7 @@ class CustomLoginResponse implements LoginResponse
 
     private function ensureTenantClient($user): void
     {
+        // Ne créer un client que si le contexte tenant est initialisé
         if (! $user || ! function_exists('tenancy') || ! tenancy()->initialized) {
             return;
         }
@@ -85,10 +96,5 @@ class CustomLoginResponse implements LoginResponse
                 'source' => 'connexion',
             ]
         );
-    }
-
-    private function centralConnection(): string
-    {
-        return config('tenancy.database.central_connection', config('database.default'));
     }
 }

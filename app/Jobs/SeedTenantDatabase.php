@@ -17,11 +17,11 @@ class SeedTenantDatabase implements ShouldQueue
     {
         config()->set('world.modules.geolocate', false);
 
-        $this->tenant->run(function () {
-            Artisan::call('tenants:seed', [
-                '--class' => 'TenantDatabaseSeeder',
-                '--no-interaction' => true,
-            ]);
-        });
+        Artisan::call('tenants:seed', [
+            '--tenants' => [$this->tenant->getTenantKey()],
+            '--class' => 'TenantDatabaseSeeder',
+            '--force' => true,
+            '--no-interaction' => true,
+        ]);
     }
 }

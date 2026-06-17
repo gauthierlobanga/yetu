@@ -7,6 +7,7 @@ use App\Models\Tenant;
 use App\Services\VendorRegistrationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TenantSsoLoginController extends Controller
 {
@@ -23,10 +24,25 @@ class TenantSsoLoginController extends Controller
         abort_unless($tenant, 404);
 
         $token = $request->query('token');
-        abort_unless($token, 403);
+        if (! $token) {
+            Log::warning('SSO login: no token provided', ['tenant' => $tenant->id]);
+
+            return redirect()->to($service->getVendeurDashboardUrl($tenant));
+        }
 
         $user = $service->handleSsoLogin($token, $tenant);
-        abort_unless($user, 403);
+        if (! $user) {
+            Log::warning('SSO login: invalid or expired token, attempting fresh login', ['tenant' => $tenant->id]);
+
+            // Si l'utilisateur est déjà connecté via session, rediriger directement
+            if (Auth::check()) {
+                return redirect()->to($service->getVendeurDashboardUrl($tenant));
+            }
+
+            // Sinon, rediriger vers la page de login du tenant
+            return redirect()->route('tenant.login')
+                ->with('error', 'Votre lien de connexion a expiré. Veuillez vous reconnecter.');
+        }
 
         // Vérification d'abonnement: ne bloquer l'absence d'abonnement qu'après l'essai.
         $subscription = $tenant->subscription;

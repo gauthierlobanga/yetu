@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tenant;
 use App\Models\VendorRequest;
+use App\Services\VendorRegistrationService;
 use Illuminate\Http\JsonResponse;
 
 class VendorRequestStatusController extends Controller
@@ -21,11 +23,21 @@ class VendorRequestStatusController extends Controller
             return response()->json(['error' => 'Forbidden'], 403);
         }
 
-        return response()->json([
+        $response = [
             'id' => $vendorRequest->id,
             'status' => $vendorRequest->status,
             'shop_name' => $vendorRequest->shop_name,
             'tenant_id' => $vendorRequest->tenant_id,
-        ]);
+        ];
+
+        if ($vendorRequest->status === VendorRequest::STATUS_APPROVED && $vendorRequest->tenant_id) {
+            $tenant = Tenant::find($vendorRequest->tenant_id);
+            if ($tenant) {
+                $service = app(VendorRegistrationService::class);
+                $response['sso_url'] = $service->getTenantSsoLoginUrl($tenant, request()->user());
+            }
+        }
+
+        return response()->json($response);
     }
 }

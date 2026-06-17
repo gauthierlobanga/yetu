@@ -6,7 +6,6 @@ namespace App\Providers;
 
 use App\Jobs\CreatedTenantUser;
 use App\Jobs\GenerateTenantPermissions;
-use App\Jobs\SeederTenantData;
 use App\Jobs\SeedTenantDatabase;
 use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Support\Facades\Event;
@@ -45,7 +44,6 @@ class TenancyServiceProvider extends ServiceProvider
                     app()->environment('testing') ? null : SeedTenantDatabase::class,
                     app()->environment('testing') ? null : GenerateTenantPermissions::class,
                     app()->environment('testing') ? null : CreatedTenantUser::class,
-                    app()->environment('testing') ? null : SeederTenantData::class,
                 ]))->send(function (Events\TenantCreated $event) {
                     return $event->tenant;
                 })->shouldBeQueued(false),
