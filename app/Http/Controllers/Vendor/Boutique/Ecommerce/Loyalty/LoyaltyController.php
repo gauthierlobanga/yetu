@@ -4,12 +4,29 @@ namespace App\Http\Controllers\Vendor\Boutique\Ecommerce\Loyalty;
 
 use App\Http\Controllers\Controller;
 use App\Models\ProgrammeFidelite;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Contrôleur gérant le programme de fidélité pour les clients de la boutique.
+ *
+ * Permet d'afficher les points cumulés du client, son niveau actuel,
+ * et de traiter l'échange de ses points contre des récompenses ou remises.
+ */
 class LoyaltyController extends Controller
 {
+    /**
+     * Affiche le tableau de bord de fidélité du client.
+     *
+     * Crée automatiquement un programme par défaut et un compte fidélité
+     * pour le client s'ils n'existent pas encore. Retourne la vue Inertia
+     * avec l'historique des transactions de points.
+     *
+     * @return Response
+     */
     public function loyaltyIndex()
     {
         $client = Auth::user()->client;
@@ -57,6 +74,15 @@ class LoyaltyController extends Controller
         ]);
     }
 
+    /**
+     * Traite une demande d'utilisation (échange) de points de fidélité.
+     *
+     * Vérifie la validité du solde du client et effectue la transaction
+     * d'échange. Redirige ensuite vers la page avec un message de succès ou d'erreur.
+     *
+     * @param  Request  $request  La requête HTTP contenant les points à échanger.
+     * @return RedirectResponse
+     */
     public function loyaltyRedeem(Request $request)
     {
         $client = Auth::user()->client;

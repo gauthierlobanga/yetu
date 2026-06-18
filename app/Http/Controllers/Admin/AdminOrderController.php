@@ -7,10 +7,25 @@ use App\Models\Commande;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 
+/**
+ * Contrôleur gérant les opérations d'administration liées aux commandes.
+ *
+ * Ce contrôleur fournit les fonctionnalités nécessaires pour qu'un administrateur
+ * puisse manipuler et gérer les commandes, notamment la génération et le téléchargement
+ * de factures au format PDF.
+ */
 class AdminOrderController extends Controller
 {
     /**
-     * Génère une facture PDF pour une commande.
+     * Génère et télécharge une facture PDF pour une commande spécifique.
+     *
+     * Cette méthode charge les relations nécessaires (client, adresses, lignes de produits),
+     * prépare les données de l'entreprise (nom, adresse, SIRET, TVA, etc.), et génère
+     * un document PDF structuré pour la commande fournie. Le PDF est ensuite
+     * renvoyé sous forme de téléchargement direct.
+     *
+     * @param  Commande  $commande  L'instance de la commande pour laquelle générer la facture.
+     * @return Response Le fichier PDF généré prêt à être téléchargé.
      */
     public function adminOrdersInvoice(Commande $commande): Response
     {

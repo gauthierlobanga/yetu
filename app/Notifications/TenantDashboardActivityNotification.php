@@ -6,6 +6,12 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
+/**
+ * Notification pour l'activité du dashboard tenant (Filament).
+ *
+ * Diffusée via les WebSockets (Pusher/Reverb) et sauvegardée en base de données
+ * pour remonter les événements système, de paiement ou de commande au vendeur.
+ */
 class TenantDashboardActivityNotification extends Notification
 {
     use Queueable;

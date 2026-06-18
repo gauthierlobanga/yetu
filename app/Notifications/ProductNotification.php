@@ -9,7 +9,10 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Notification de produit pour les vendeurs
+ * Notification relative aux produits pour les vendeurs.
+ *
+ * Informe le vendeur des événements critiques liés à ses produits,
+ * tels que la création, les ruptures de stock, ou les mises à jour importantes.
  */
 class ProductNotification extends Notification
 {

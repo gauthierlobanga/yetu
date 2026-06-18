@@ -7,9 +7,25 @@ use App\Models\Tenant;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Response;
 
+/**
+ * Contrôleur responsable de la génération et de l'affichage des statistiques
+ * de visites sur le panel d'administration central.
+ */
 class VisitorStatsController extends Controller
 {
+    /**
+     * Affiche les statistiques globales de visites (centrales et par tenant).
+     *
+     * Regroupe les données de visites en fonction d'une période donnée (aujourd'hui,
+     * cette semaine, ce mois, cette année) et calcule les totaux (visites totales,
+     * visiteurs uniques). Affiche également le top 10 des boutiques (tenants) ayant
+     * le plus de trafic.
+     *
+     * @param  Request  $request  Requête contenant le filtre de période ('period').
+     * @return Response Vue Inertia affichant les statistiques.
+     */
     public function index(Request $request)
     {
         $period = $request->input('period', 'week');

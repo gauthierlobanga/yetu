@@ -12,19 +12,19 @@ trait ProfileValidationRules
      *
      * @return array<string, array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>>
      */
-     protected function profileRules(int|string|null $userId = null): array
+    protected function profileRules(int|string|null $userId = null): array
     {
         return [
-            'name'    => $this->nameRules(),
-            'email'   => $this->emailRules($userId),
-            'avatar'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048'],
+            'name' => $this->nameRules(),
+            'email' => $this->emailRules($userId),
+            'avatar' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:2048'],
             // Nouveaux champs
-            'phone'   => ['nullable', 'string', 'max:20'],
-            'city'    => ['nullable', 'string', 'max:100'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'city' => ['nullable', 'string', 'max:100'],
             'country' => ['nullable', 'string', 'max:100'],
-            'locale'  => ['nullable', 'string', 'in:fr,en,es'],
-            'currency'=> ['nullable', 'string', 'in:XOF,EUR,USD'],
-            'notifications_email'  => ['nullable', 'boolean'],
+            'locale' => ['nullable', 'string', 'in:fr,en,es'],
+            'currency' => ['nullable', 'string', 'in:XOF,EUR,USD'],
+            'notifications_email' => ['nullable', 'boolean'],
             'notifications_offers' => ['nullable', 'boolean'],
         ];
     }

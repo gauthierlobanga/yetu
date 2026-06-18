@@ -9,20 +9,43 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
 
+/**
+ * Notification prévenant de l'expiration imminente d'un abonnement tenant.
+ *
+ * Incite le vendeur à renouveler son offre ou à passer à un plan payant
+ * s'il est en fin de période d'essai.
+ */
 class SubscriptionExpiringNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * Crée une nouvelle instance de la notification.
+     *
+     * @param  Tenant  $tenant  Le tenant concerné.
+     * @param  Carbon|null  $expiresAt  La date d'expiration prévue.
+     */
     public function __construct(
         private readonly Tenant $tenant,
         private readonly ?Carbon $expiresAt = null,
     ) {}
 
+    /**
+     * Détermine les canaux de distribution de la notification.
+     *
+     * @param  object  $notifiable  L'entité notifiable.
+     * @return array<int, string>
+     */
     public function via(object $notifiable): array
     {
         return ['mail', 'database'];
     }
 
+    /**
+     * Construit la représentation e-mail de la notification.
+     *
+     * @param  object  $notifiable  L'entité notifiable.
+     */
     public function toMail(object $notifiable): MailMessage
     {
         if ($this->expiresAt?->isPast()) {
@@ -30,7 +53,7 @@ class SubscriptionExpiringNotification extends Notification implements ShouldQue
                 ->subject("Passez à un plan payant pour '{$this->tenant->raison_sociale}'")
                 ->greeting("Bonjour {$notifiable->name},")
                 ->line("La période d'essai de votre boutique **{$this->tenant->raison_sociale}** est terminée.")
-                ->line("Votre boutique reste créée. Choisissez un plan payant pour continuer avec les fonctionnalités avancées.")
+                ->line('Votre boutique reste créée. Choisissez un plan payant pour continuer avec les fonctionnalités avancées.')
                 ->action('Gérer mon abonnement', route('subscription.show'))
                 ->line('Merci d\'avoir utilisé notre plateforme!');
         }
@@ -46,6 +69,12 @@ class SubscriptionExpiringNotification extends Notification implements ShouldQue
             ->line('Merci d\'avoir utilisé notre plateforme!');
     }
 
+    /**
+     * Construit la représentation en base de données de la notification.
+     *
+     * @param  object  $notifiable  L'entité notifiable.
+     * @return array<string, mixed>
+     */
     public function toDatabase(object $notifiable): array
     {
         return [

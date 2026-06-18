@@ -6,12 +6,19 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
+/**
+ * Notification de rejet d'un vendeur.
+ *
+ * Informe un utilisateur que sa demande de création de boutique (tenant) a été refusée.
+ */
 class VendorRejected extends Notification
 {
     use Queueable;
 
     /**
-     * Create a new notification instance.
+     * Crée une nouvelle instance de la notification.
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -19,8 +26,9 @@ class VendorRejected extends Notification
     }
 
     /**
-     * Get the notification's delivery channels.
+     * Détermine les canaux de distribution de la notification.
      *
+     * @param  object  $notifiable  L'entité notifiable.
      * @return array<int, string>
      */
     public function via(object $notifiable): array
@@ -29,7 +37,9 @@ class VendorRejected extends Notification
     }
 
     /**
-     * Get the mail representation of the notification.
+     * Construit la représentation e-mail de la notification.
+     *
+     * @param  object  $notifiable  L'entité notifiable.
      */
     public function toMail(object $notifiable): MailMessage
     {

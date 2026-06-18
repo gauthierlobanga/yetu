@@ -7,14 +7,33 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\PostCategory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Contrôleur responsable de la gestion de la section Blog du panel central.
+ *
+ * Il gère l'affichage de la liste des articles (avec filtres, recherche et pagination),
+ * l'affichage des détails d'un article spécifique, ainsi que les interactions
+ * utilisateur telles que les likes et l'ajout aux favoris (bookmarks).
+ */
 class BlogCentralController extends Controller
 {
     /**
-     * Affiche la liste des posts de l'utilisateur connecté.
+     * Affiche la liste des articles de blog publiés.
+     *
+     * Cette méthode gère de multiples fonctionnalités :
+     * - Redirection des anciennes requêtes de catégorie vers le format par tag.
+     * - Validation et application des filtres de recherche (recherche textuelle, statut, tag).
+     * - Tri dynamique (par date de publication, titre, nombre de vues, etc.).
+     * - Récupération paginée des articles avec leurs relations (catégories, médias, auteur).
+     *
+     * @param  Request  $request  Objet contenant les paramètres de requête (filtres, tri, pagination).
+     * @return Response Vue Inertia contenant les articles, les catégories disponibles et les filtres actuels.
      */
     public function blogIndex(Request $request)
     {
@@ -92,7 +111,7 @@ class BlogCentralController extends Controller
 
         $categories = PostCategory::select('id', 'nom', 'slug', 'color')
             ->where('est_active', true)
-            ->orderBy('nom','asc')
+            ->orderBy('nom', 'asc')
             ->get();
 
         return Inertia::render('app/blog/list/List', [
@@ -104,7 +123,16 @@ class BlogCentralController extends Controller
     }
 
     /**
-     * Affiche un post spécifique.
+     * Affiche les détails d'un article de blog spécifique.
+     *
+     * Cette méthode incrémente le compteur de vues de l'article, charge ses relations
+     * nécessaires (catégories, médias, auteur, tags) et récupère des articles connexes
+     * (article précédent, suivant, et articles liés). Elle vérifie également si l'utilisateur
+     * connecté a aimé ou mis en favori l'article.
+     *
+     * @param  Post  $post  L'article de blog à afficher.
+     * @param  Request  $request  Objet de requête courant.
+     * @return Response Vue Inertia affichant l'article en détail avec ses métadonnées.
      */
     public function blogShow(Post $post, Request $request)
     {
@@ -133,13 +161,35 @@ class BlogCentralController extends Controller
         ]);
     }
 
+    /**
+     * Redirige vers la liste des articles filtrée par une catégorie spécifique.
+     *
+     * Permet d'accéder aux articles via l'identifiant ou le slug de la catégorie.
+     *
+     * @param  PostCategory  $category  La catégorie sélectionnée.
+     * @return RedirectResponse Redirection vers la route blog.index avec le paramètre tag.
+     */
     public function blogByCategory(PostCategory $category)
     {
         return route('blog.index', ['tag' => $category->slug]);
     }
 
+    /**
+     * Gère la soumission d'un commentaire sur un article.
+     *
+     * (Méthode actuellement vide, à implémenter pour le support des commentaires)
+     */
     public function blogComment() {}
 
+    /**
+     * Ajoute ou retire un "J'aime" (Like) sur un article de blog.
+     *
+     * Action réservée aux utilisateurs authentifiés. Si l'utilisateur a déjà aimé
+     * l'article, son "Like" est supprimé (toggle). Sinon, il est ajouté.
+     *
+     * @param  Post  $post  L'article sur lequel porte l'action.
+     * @return JsonResponse Un JSON indiquant le succès, un message de confirmation, l'état actuel et le nouveau compteur.
+     */
     public function blogLike(Post $post)
     {
         $user = Auth::user();
@@ -166,6 +216,15 @@ class BlogCentralController extends Controller
         ]);
     }
 
+    /**
+     * Ajoute ou retire un article de blog des favoris (Bookmarks) de l'utilisateur.
+     *
+     * Action réservée aux utilisateurs authentifiés. Permet à un utilisateur de sauvegarder
+     * des articles pour les retrouver plus tard. Fonctionne sur un système de bascule (toggle).
+     *
+     * @param  Post  $post  L'article à ajouter ou retirer des favoris.
+     * @return JsonResponse Un JSON indiquant l'état actuel du favori et le compteur total.
+     */
     public function blogBookmark(Post $post)
     {
         $user = Auth::user();

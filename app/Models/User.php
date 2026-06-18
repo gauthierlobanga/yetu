@@ -42,6 +42,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
 
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, TwoFactorAuthenticatable;
+
     use HasRoles, InteractsWithMedia;
     use HasUserPreferences;
     use HasUuids, SoftDeletes;

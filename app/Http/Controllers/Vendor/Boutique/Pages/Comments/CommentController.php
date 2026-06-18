@@ -4,12 +4,25 @@ namespace App\Http\Controllers\Vendor\Boutique\Pages\Comments;
 
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * Contrôleur global pour la gestion des commentaires polymorphiques.
+ *
+ * Permet d'ajouter des commentaires et des réponses sur n'importe quel
+ * modèle (produit, article, etc.).
+ */
 class CommentController extends Controller
 {
+    /**
+     * Récupère et liste les commentaires approuvés d'un modèle spécifique
+     * (ex: article de blog, produit), de manière paginée.
+     *
+     * @return JsonResponse
+     */
     public function commentsIndex(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -32,6 +45,12 @@ class CommentController extends Controller
         return response()->json($comments);
     }
 
+    /**
+     * Permet à un utilisateur connecté d'ajouter un nouveau commentaire
+     * (ou une réponse) lié à une ressource spécifique.
+     *
+     * @return JsonResponse
+     */
     public function commentsStore(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -64,6 +83,12 @@ class CommentController extends Controller
         ], 201);
     }
 
+    /**
+     * Gère l'action "J'aime" ou "Je n'aime pas" sur un commentaire donné
+     * par l'utilisateur connecté.
+     *
+     * @return JsonResponse
+     */
     public function commentsLike(Comment $comment)
     {
         $result = $comment->toggleLike(Auth::user());
@@ -75,6 +100,12 @@ class CommentController extends Controller
         ]);
     }
 
+    /**
+     * Permet à un utilisateur de signaler un commentaire inapproprié,
+     * en précisant le motif et des détails pour la modération.
+     *
+     * @return JsonResponse
+     */
     public function commentsReport(Comment $comment, Request $request)
     {
         $validator = Validator::make($request->all(), [

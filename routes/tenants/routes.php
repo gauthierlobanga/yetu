@@ -273,17 +273,17 @@ Route::middleware([
         Route::get('/search', [SearchController::class, 'shopApi'])->name('api');
 
         // Route::prefix('page')->group(function () {
-            Route::get('/contact', [ContactBoutiqueController::class, 'contactIndex'])->name('page.contact');
-            Route::post('/contact', [ContactBoutiqueController::class, 'contactStore'])->name('page.contact.store');
+        Route::get('/contact', [ContactBoutiqueController::class, 'contactIndex'])->name('page.contact');
+        Route::post('/contact', [ContactBoutiqueController::class, 'contactStore'])->name('page.contact.store');
 
-            Route::get('/help', [HelpController::class, 'help'])->name('page.help');
-            Route::get('/about', [AboutController::class, 'about'])->name('page.about');
-            Route::get('/terms', [TermController::class, 'terms'])->name('page.terms');
-            Route::get('/privacy', [PrivacyController::class, 'privacy'])->name('page.privacy');
-            Route::get('/cookies', [CookieController::class, 'cookies'])->name('page.cookies');
-            Route::get('/support', [SupportController::class, 'support'])->name('page.support');
-            Route::get('/faq', [FaqController::class, 'faq'])->name('page.faq');
-            Route::get('/testimonials', [TestimonialsController::class, 'testimonials'])->name('page.testimonials');
+        Route::get('/help', [HelpController::class, 'help'])->name('page.help');
+        Route::get('/about', [AboutController::class, 'about'])->name('page.about');
+        Route::get('/terms', [TermController::class, 'terms'])->name('page.terms');
+        Route::get('/privacy', [PrivacyController::class, 'privacy'])->name('page.privacy');
+        Route::get('/cookies', [CookieController::class, 'cookies'])->name('page.cookies');
+        Route::get('/support', [SupportController::class, 'support'])->name('page.support');
+        Route::get('/faq', [FaqController::class, 'faq'])->name('page.faq');
+        Route::get('/testimonials', [TestimonialsController::class, 'testimonials'])->name('page.testimonials');
         // });
         /*
         |--------------------------------------------------------------------------

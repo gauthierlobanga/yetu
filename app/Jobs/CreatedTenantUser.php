@@ -8,12 +8,30 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Job responsable de la création de l'utilisateur central au sein du tenant (vendeur).
+ *
+ * Ce job se connecte à la base de données du tenant pour y insérer l'utilisateur
+ * correspondant et lui attribuer le rôle de super administrateur du panel vendeur.
+ */
 class CreatedTenantUser implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * Crée une nouvelle instance du job.
+     *
+     * @param  Tenant  $tenant  Le tenant (vendeur) pour lequel l'utilisateur doit être créé.
+     */
     public function __construct(protected Tenant $tenant) {}
 
+    /**
+     * Exécute le job.
+     *
+     * Cette méthode récupère l'utilisateur depuis la base de données centrale
+     * et l'insère dans la base de données du tenant, puis lance la commande Artisan
+     * pour configurer les permissions Shield.
+     */
     public function handle(): void
     {
         $this->tenant->run(function () {

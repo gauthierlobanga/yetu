@@ -5,10 +5,15 @@ namespace App\Http\Controllers\Vendor\Boutique\Ecommerce\Brand;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 
+/**
+ * Contrôleur gérant l'affichage des marques (Brands) sur la boutique.
+ */
 class BrandController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Affiche la liste de toutes les marques disponibles.
+     *
+     * @return mixed
      */
     public function brandsIndex()
     {
@@ -16,7 +21,9 @@ class BrandController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Affiche les détails d'une marque spécifique.
+     *
+     * @return mixed
      */
     public function brandsShow(Brand $brand)
     {

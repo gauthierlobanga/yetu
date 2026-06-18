@@ -10,10 +10,25 @@ use App\Models\Paiement;
 use App\Models\Produit;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Contrôleur responsable de la gestion de la page "À propos" du panel central.
+ *
+ * Il s'occupe de récupérer les statistiques globales de la plateforme
+ * (temps de réponse, nombre de produits, etc.) et de les transmettre à la vue Inertia.
+ */
 class AboutController extends Controller
 {
-
+    /**
+     * Prépare et affiche la page "À propos".
+     *
+     * Cette méthode récupère les statistiques globales de la plateforme (en utilisant
+     * le cache pour optimiser les performances) et les passe à la vue frontend
+     * via Inertia.js.
+     *
+     * @return Response La vue Inertia contenant les statistiques de la plateforme.
+     */
     public function about()
     {
         $platformStats = Cache::remember('home_platform_stats', 3600, function () {
@@ -33,5 +48,4 @@ class AboutController extends Controller
             'platformStats' => $platformStats,
         ]);
     }
-
 }

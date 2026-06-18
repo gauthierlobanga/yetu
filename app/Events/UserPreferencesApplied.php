@@ -9,6 +9,11 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Événement déclenché lors de l'application ou de la mise à jour des préférences utilisateur.
+ *
+ * Permet de diffuser un signal pour rafraîchir l'interface utilisateur en conséquence.
+ */
 class UserPreferencesApplied
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
@@ -16,7 +21,9 @@ class UserPreferencesApplied
     public User $user;
 
     /**
-     * Create a new event instance.
+     * Crée une nouvelle instance de l'événement.
+     *
+     * @param  User  $user  L'utilisateur dont les préférences ont été appliquées.
      */
     public function __construct(User $user)
     {

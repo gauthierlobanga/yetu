@@ -9,20 +9,43 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
 
+/**
+ * Notification envoyée suite à l'annulation d'un abonnement tenant.
+ *
+ * Informe le vendeur de l'annulation de son offre et précise la date
+ * limite de sa période de grâce (accès temporaire restant).
+ */
 class SubscriptionCanceledNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * Crée une nouvelle instance de la notification.
+     *
+     * @param  Tenant  $tenant  Le tenant concerné.
+     * @param  Carbon|null  $graceUntil  La date limite d'accès en lecture seule (période de grâce).
+     */
     public function __construct(
         private readonly Tenant $tenant,
         private readonly ?Carbon $graceUntil = null,
     ) {}
 
+    /**
+     * Détermine les canaux de distribution de la notification.
+     *
+     * @param  object  $notifiable  L'entité notifiable.
+     * @return array<int, string>
+     */
     public function via(object $notifiable): array
     {
         return ['mail', 'database'];
     }
 
+    /**
+     * Construit la représentation e-mail de la notification.
+     *
+     * @param  object  $notifiable  L'entité notifiable.
+     */
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
@@ -36,6 +59,12 @@ class SubscriptionCanceledNotification extends Notification implements ShouldQue
             ->line('Merci pour votre compréhension.');
     }
 
+    /**
+     * Construit la représentation en base de données de la notification.
+     *
+     * @param  object  $notifiable  L'entité notifiable.
+     * @return array<string, mixed>
+     */
     public function toDatabase(object $notifiable): array
     {
         return [

@@ -7,12 +7,28 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ProductController;
 use App\Models\Client;
 use App\Models\Produit;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Contrôleur de gestion de la liste d'envies (Wishlist).
+ *
+ * Permet au client d'ajouter, retirer ou consulter ses produits favoris.
+ * Emet également des événements WebSocket pour notifier le vendeur.
+ */
 class WishlistController extends Controller
 {
+    /**
+     * Affiche le contenu de la liste d'envies (Wishlist) du client.
+     *
+     * Crée automatiquement une liste par défaut si le client n'en possède pas encore.
+     *
+     * @return Response
+     */
     public function wishlistIndex()
     {
         $client = Auth::user()->client;
@@ -31,6 +47,13 @@ class WishlistController extends Controller
         ]);
     }
 
+    /**
+     * Affiche l'interface d'ajout explicite d'éléments à la wishlist.
+     *
+     * (Actuellement renvoie vers la même vue que l'index de la liste d'envies)
+     *
+     * @return Response
+     */
     public function wishlistAdd()
     {
         $client = Auth::user()->client;
@@ -48,6 +71,15 @@ class WishlistController extends Controller
         ]);
     }
 
+    /**
+     * Bascule l'état d'un produit dans la wishlist (Ajouter / Retirer).
+     *
+     * Méthode appelée de manière asynchrone (API/XHR). Ajoute le produit si absent,
+     * le retire si présent. Déclenche une notification en temps réel (WishlistActivity) pour le tenant.
+     *
+     * @param  Produit  $produit  Le produit cible.
+     * @return JsonResponse
+     */
     public function wishlistToggle(Request $request, Produit $produit)
     {
         $client = Auth::user()->client;
@@ -87,6 +119,14 @@ class WishlistController extends Controller
         return response()->json(['success' => true, 'message' => $message]);
     }
 
+    /**
+     * Retire explicitement un produit spécifique de la wishlist.
+     *
+     * Utilisé généralement depuis la page de gestion complète de la liste d'envies.
+     *
+     * @param  Produit  $produit  Le produit à supprimer.
+     * @return RedirectResponse
+     */
     public function wishlistRemove(Produit $produit)
     {
         $client = Auth::user()->client;

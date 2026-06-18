@@ -8,10 +8,21 @@ use App\Models\Paiement;
 use App\Models\Produit;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Contrôleur de la page 'À propos'.
+ *
+ * Gère l'affichage des informations générales de la boutique.
+ */
 class AboutController extends Controller
 {
-
+    /**
+     * Affiche la page 'À propos de nous', présentant l'histoire, la mission
+     * et les valeurs de la boutique au client.
+     *
+     * @return Response
+     */
     public function about()
     {
         $platformStats = Cache::remember('home_platform_stats', 3600, function () {
@@ -31,5 +42,4 @@ class AboutController extends Controller
             'platformStats' => $platformStats,
         ]);
     }
-
 }

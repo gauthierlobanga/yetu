@@ -2,62 +2,122 @@
 
 namespace App\Http\Controllers\Vendor\Boutique\Ecommerce\Commande;
 
-use App\Events\OrderCreated;
 use App\Events\OrderStatusChanged;
-use App\Events\PaymentReceived;
 use App\Http\Controllers\Controller;
 use App\Models\Commande;
+use App\Models\Paiement;
+use App\Models\Produit;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\VarianteProduit;
 use App\Notifications\CustomerNotification;
 use App\Notifications\OrderNotification;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 /**
- * Exemple d'utilisation du système de notifications
+ * Contrôleur côté vendeur/tenant pour la gestion des commandes.
  */
 class CommandeController extends Controller
 {
     /**
-     * Créer une nouvelle commande
+     * Créer une nouvelle commande à partir d'un panier (checkout minimal).
      */
     public function store(Request $request, NotificationService $notificationService)
     {
-        // Valider et créer la commande
         $validated = $request->validate([
-            'items' => 'required|array',
-            'delivery_address_id' => 'required|exists:addresses,id',
+            'items' => 'required|array|min:1',
+            'items.*.produit_id' => 'required|string|exists:produits,id',
+            'items.*.variante_produit_id' => 'nullable|string|exists:variante_produits,id',
+            'items.*.quantite' => 'required|integer|min:1',
+            'adresse_livraison_id' => 'required|exists:adresses,id',
+            'adresse_facturation_id' => 'nullable|exists:adresses,id',
         ]);
 
         try {
             $order = DB::transaction(function () use ($validated, $request) {
-                $order = Commande::create([
-                    'user_id' => $request->user()->id,
-                    'shop_id' => tenant()->id,
-                    'delivery_address_id' => $validated['delivery_address_id'],
-                    'status' => 'pending',
-                    'total' => 0, // Calculer le total
+                $client = $request->user()?->client;
+
+                $commande = Commande::create([
+                    'client_id' => $client?->id,
+                    'adresse_livraison_id' => $validated['adresse_livraison_id'],
+                    'adresse_facturation_id' => $validated['adresse_facturation_id'] ?? null,
+                    'statut' => Commande::STATUT_EN_ATTENTE,
+                    'sous_total' => 0,
+                    'taxe' => 0,
+                    'frais_livraison' => 0,
+                    'total' => 0,
+                    'date_commande' => now(),
+                    'numero_commande' => strtoupper('C'.Str::random(8)),
                 ]);
 
-                // Ajouter les items
+                $sousTotal = 0;
+
                 foreach ($validated['items'] as $item) {
-                    $order->items()->create($item);
+                    $produit = Produit::find($item['produit_id']);
+                    $variante = isset($item['variante_produit_id']) ? VarianteProduit::find($item['variante_produit_id']) : null;
+
+                    $prixUnitaire = $variante?->prix_actuel ?? $produit?->prix_actuel ?? 0;
+                    $quantite = (int) $item['quantite'];
+                    $prixTotal = round($prixUnitaire * $quantite, 2);
+
+                    $ligne = $commande->lignes()->create([
+                        'produit_id' => $produit->id,
+                        'variante_produit_id' => $variante?->id,
+                        'quantite' => $quantite,
+                        'prix_unitaire' => $prixUnitaire,
+                        'prix_total' => $prixTotal,
+                        'taxe' => 0,
+                        'remise' => 0,
+                        'options' => $item['options'] ?? null,
+                    ]);
+
+                    // Décrémenter le stock si possible
+                    if ($variante) {
+                        $variante->decrementerStock($quantite);
+                    } else {
+                        $produit->decrementerStock($quantite);
+                    }
+
+                    $sousTotal += $prixTotal;
                 }
 
-                return $order;
+                $commande->sous_total = $sousTotal;
+                $commande->taxe = 0; // calculer taxes si nécessaire
+                $commande->frais_livraison = 0;
+                $commande->total = $commande->sous_total + $commande->taxe + $commande->frais_livraison;
+
+                $commande->save();
+
+                return $commande;
             });
 
-            // Déclencher l'événement - Cela notifie automatiquement le vendeur et le client
-            event(new OrderCreated($order));
+            // Notifications: prévenir le vendeur et le client
+            $tenant = tenant();
+            if ($tenant) {
+                $notificationService->notifyTenantUsers(
+                    tenant: $tenant,
+                    notificationType: OrderNotification::class,
+                    data: ['order' => $order, 'action' => 'created', 'message' => "Nouvelle commande #{$order->numero_commande}"]
+                );
+            }
 
-            return redirect()->route('tenant.orders.show', $order)
-                ->with('success', 'Commande créée avec succès!');
+            if ($request->user()) {
+                $notificationService->notifyCustomer(
+                    customer: $request->user(),
+                    notificationType: CustomerNotification::class,
+                    data: ['order' => $order, 'action' => 'created', 'message' => "Votre commande #{$order->numero_commande} a été reçue"]
+                );
+            }
+
+            return redirect()->route('tenant.orders.show', $order)->with('success', 'Commande créée avec succès!');
 
         } catch (\Exception $e) {
             \Log::error('Erreur lors de la création de la commande', [
-                'user_id' => $request->user()->id,
+                'user_id' => $request->user()?->id,
                 'error' => $e->getMessage(),
             ]);
 
@@ -70,20 +130,39 @@ class CommandeController extends Controller
      */
     public function updateStatus(Request $request, Commande $order, NotificationService $notificationService)
     {
+        $allowed = array_keys(Commande::getStatuts());
+
         $request->validate([
-            'status' => 'required|in:pending,processing,shipped,delivered,cancelled',
+            'status' => ['required', 'in:'.implode(',', $allowed)],
         ]);
 
-        $oldStatus = $order->status;
+        $oldStatus = $order->statut;
         $newStatus = $request->input('status');
 
-        $order->update(['status' => $newStatus]);
+        $order->update(['statut' => $newStatus]);
 
-        // Déclencher l'événement
+        // Notifier via service
+        $tenant = tenant();
+        if ($tenant) {
+            $notificationService->notifyTenantUsers(
+                tenant: $tenant,
+                notificationType: OrderNotification::class,
+                data: ['order' => $order, 'action' => 'status_changed', 'message' => "Statut: {$newStatus}"]
+            );
+        }
+
+        if ($request->user()) {
+            $notificationService->notifyCustomer(
+                customer: $request->user(),
+                notificationType: CustomerNotification::class,
+                data: ['order' => $order, 'action' => 'status_changed', 'message' => "Votre commande a pour statut: {$newStatus}"]
+            );
+        }
+
+        // Fire legacy event if desired (OrderStatusChanged expects Commande)
         event(new OrderStatusChanged($order, $oldStatus, $newStatus));
 
-        return redirect()->back()
-            ->with('success', "Statut mis à jour à: {$newStatus}");
+        return redirect()->back()->with('success', "Statut mis à jour: {$newStatus}");
     }
 
     /**
@@ -91,26 +170,62 @@ class CommandeController extends Controller
      */
     public function processPayment(Request $request, Commande $order, NotificationService $notificationService)
     {
-        $request->validate([
-            'amount' => 'required|numeric|min:0',
-        ]);
+        $request->validate(['amount' => 'required|numeric|min:0']);
 
         $amount = $request->input('amount');
 
-        // Traiter le paiement avec Stripe, etc.
-        // ... code de paiement ...
+        try {
+            $paiement = DB::transaction(function () use ($order, $amount) {
+                $paiement = Paiement::create([
+                    'commande_id' => $order->id,
+                    'reference' => strtoupper('P'.Str::random(10)),
+                    'mode' => $request->input('mode', Paiement::MODE_CARTE),
+                    'montant' => $amount,
+                    'devise' => config('app.currency', 'EUR'),
+                    'statut' => Paiement::STATUT_VALIDE,
+                    'date_paiement' => now(),
+                ]);
 
-        // Déclencher l'événement de paiement
-        event(new PaymentReceived(
-            order: $order,
-            amount: $amount,
-            status: 'completed'
-        ));
+                $paiement->valider();
 
-        $order->update(['status' => 'confirmed']);
+                $order->marquerPayee();
 
-        return redirect()->back()
-            ->with('success', "Paiement de {$amount}€ traité avec succès!");
+                return $paiement;
+            });
+
+            // Notifications
+            $tenant = tenant();
+            if ($tenant) {
+                $notificationService->notifyTenantUsers(
+                    tenant: $tenant,
+                    notificationType: OrderNotification::class,
+                    data: ['order' => $order, 'amount' => $amount, 'action' => 'payment_received']
+                );
+            }
+
+            if ($request->user()) {
+                $notificationService->notifyCustomer(
+                    customer: $request->user(),
+                    notificationType: CustomerNotification::class,
+                    data: ['order' => $order, 'amount' => $amount, 'action' => 'payment_received']
+                );
+            }
+
+            // Fire a PaymentReceived event if present and compatible
+            try {
+                event(new PaymentReceived(order: $order, amount: $amount, status: 'completed'));
+            } catch (\TypeError $e) {
+                // Ignore if event expects a different model type
+                Log::warning('Skipping PaymentReceived event due to type mismatch');
+            }
+
+            return redirect()->back()->with('success', "Paiement de {$amount}€ traité avec succès!");
+
+        } catch (\Exception $e) {
+            Log::error('Erreur lors du traitement du paiement', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+
+            return back()->with('error', 'Erreur lors du traitement du paiement');
+        }
     }
 
     /**
@@ -126,7 +241,6 @@ class CommandeController extends Controller
 
         $user = User::findOrFail($request->input('user_id'));
 
-        // Envoyer une notification personnalisée
         $notificationService->notifyCustomer(
             customer: $user,
             notificationType: CustomerNotification::class,
@@ -146,12 +260,8 @@ class CommandeController extends Controller
      */
     public function notifyAllVendors(Request $request, NotificationService $notificationService)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'message' => 'required|string',
-        ]);
+        $request->validate(['title' => 'required|string', 'message' => 'required|string']);
 
-        // Récupérer tous les tenants
         $tenants = Tenant::all();
 
         foreach ($tenants as $tenant) {

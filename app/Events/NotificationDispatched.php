@@ -11,10 +11,23 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Événement déclenché lors de l'envoi d'une notification.
+ *
+ * Cet événement gère la diffusion (broadcast) en temps réel d'une notification
+ * vers un canal privé spécifique de l'utilisateur.
+ */
 class NotificationDispatched implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    /**
+     * Crée une nouvelle instance de l'événement.
+     *
+     * @param  User  $user  L'utilisateur destinataire de la notification.
+     * @param  Notification  $notification  L'instance de la notification.
+     * @param  string  $channel  Le nom du canal de diffusion.
+     */
     public function __construct(
         public User $user,
         public Notification $notification,

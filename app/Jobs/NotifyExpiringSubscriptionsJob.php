@@ -10,10 +10,21 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Job responsable de la notification des abonnements expirant prochainement.
+ *
+ * Ce job utilise le service d'abonnement pour envoyer des rappels
+ * aux utilisateurs dont l'abonnement expire bientôt.
+ */
 class NotifyExpiringSubscriptionsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Exécute le job.
+     *
+     * @param  SubscriptionService  $subscriptionService  Le service gérant les abonnements.
+     */
     public function handle(SubscriptionService $subscriptionService): void
     {
         try {

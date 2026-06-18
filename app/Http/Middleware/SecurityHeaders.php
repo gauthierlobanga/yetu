@@ -36,19 +36,19 @@ class SecurityHeaders
             "media-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
-            "form-action 'self'"
+            "form-action 'self'",
         ];
 
         if (app()->environment('local')) {
             // Dans l'environnement local, on relaxe la politique pour ne pas bloquer Vite (et éviter les bugs IPv6 CSP)
             $csp[1] = "script-src * 'unsafe-inline' 'unsafe-eval'";
             $csp[2] = "style-src * 'unsafe-inline'";
-            $csp[5] = "connect-src * ws: wss:";
-            $csp[3] = "img-src * data: blob:";
-            $csp[4] = "font-src * data:";
+            $csp[5] = 'connect-src * ws: wss:';
+            $csp[3] = 'img-src * data: blob:';
+            $csp[4] = 'font-src * data:';
         }
 
-        $response->headers->set('Content-Security-Policy', implode('; ', $csp) . ';');
+        $response->headers->set('Content-Security-Policy', implode('; ', $csp).';');
 
         return $response;
     }

@@ -5,12 +5,19 @@ namespace App\Jobs;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
+/**
+ * Job responsable de la génération d'une facture.
+ *
+ * Ce job traite la création de factures en arrière-plan.
+ */
 class GenerateInvoice implements ShouldQueue
 {
     use Queueable;
 
     /**
-     * Create a new job instance.
+     * Crée une nouvelle instance du job.
+     *
+     * @return void
      */
     public function __construct()
     {
@@ -18,7 +25,7 @@ class GenerateInvoice implements ShouldQueue
     }
 
     /**
-     * Execute the job.
+     * Exécute le job.
      */
     public function handle(): void
     {

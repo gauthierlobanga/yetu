@@ -15,7 +15,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class VendorRequest extends Model implements HasMedia
 {
-    use HasFactory, HasUuids, SoftDeletes, InteractsWithMedia;
+    use HasFactory, HasUuids, InteractsWithMedia, SoftDeletes;
 
     protected $keyType = 'string';
 

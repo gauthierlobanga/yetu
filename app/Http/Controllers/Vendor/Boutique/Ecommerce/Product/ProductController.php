@@ -8,11 +8,20 @@ use App\Models\ProductCategory;
 use App\Models\ProductView;
 use App\Models\Produit;
 use App\Support\Search\ProductIntelligentSearch;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Contrôleur d'affichage et de recherche des produits de la boutique.
+ *
+ * Permet au client de consulter le catalogue, chercher des produits (recherche classique
+ * ou sémantique) avec filtres, consulter le détail d'un produit et d'obtenir des vues rapides.
+ */
 class ProductController extends Controller
 {
     public function __construct(
@@ -67,6 +76,15 @@ class ProductController extends Controller
         }
     }
 
+    /**
+     * Affiche la liste des produits du catalogue avec filtres et recherche.
+     *
+     * Gère la recherche sémantique via Redisearch (si activé), les filtres
+     * par catégorie, marque, tranche de prix, et le tri dynamique.
+     *
+     * @param  Request  $request  La requête HTTP contenant les filtres et paramètres de recherche.
+     * @return Response
+     */
     public function productsIndex(Request $request)
     {
         $query = $this->buildProductQuery();
@@ -152,6 +170,15 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * Affiche la page de détails d'un produit complet.
+     *
+     * Charge toutes les relations nécessaires (variantes, images, avis, catégories),
+     * enregistre la vue (statistiques) et propose des produits similaires.
+     *
+     * @param  Produit  $produit  Le modèle de produit à afficher.
+     * @return Response
+     */
     public function productsShow(Produit $produit)
     {
         $produit->load(['media', 'brand', 'categories', 'variantes', 'approvedAvis.client']);
@@ -173,11 +200,27 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * Renvoie les informations d'un produit pour une modale (Aperçu rapide).
+     *
+     * @param  Produit  $produit  Le produit à consulter.
+     * @return JsonResponse
+     */
     public function productsQuickView(Produit $produit)
     {
         return response()->json($this->formatProduct($produit, true));
     }
 
+    /**
+     * Formate un modèle Produit en tableau pour les réponses JSON / Inertia.
+     *
+     * Permet un contrôle strict sur les champs renvoyés au frontend, en gérant
+     * les prix de promotion, les badges, l'image par défaut, et les relations.
+     *
+     * @param  Produit  $product  Le modèle de produit à formater.
+     * @param  bool  $withDetails  Indique s'il faut inclure les informations détaillées.
+     * @return array<string, mixed> Les données structurées du produit.
+     */
     public function formatProduct(Produit $product, $withDetails = false): array
     {
         $primary = $product->getPrimaryImage();
@@ -226,6 +269,14 @@ class ProductController extends Controller
         return $data;
     }
 
+    /**
+     * Prépare une requête de base pour la récupération des produits.
+     *
+     * Assure que seuls les produits en stock et publiés soient récupérés,
+     * en eager-loadant les relations fréquentes (media, brand, categories).
+     *
+     * @return Builder
+     */
     protected function buildProductQuery()
     {
         return Produit::published()->inStock()->with(['media', 'brand', 'categories']);

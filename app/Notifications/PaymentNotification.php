@@ -8,8 +8,10 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Notification de paiement
- * Pour les vendeurs et administrateurs
+ * Notification relative aux paiements.
+ *
+ * Utilisée pour notifier les vendeurs et les administrateurs des encaissements
+ * ou des mises à jour liées à un paiement.
  */
 class PaymentNotification extends Notification
 {

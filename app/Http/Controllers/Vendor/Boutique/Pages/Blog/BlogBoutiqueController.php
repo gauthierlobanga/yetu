@@ -7,14 +7,30 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\PostCategory;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Contrôleur gérant la section Blog de la boutique.
+ *
+ * Fournit aux visiteurs les articles, catégories, et interactions sociales (likes, favoris).
+ */
 class BlogBoutiqueController extends Controller
 {
     /**
      * Affiche la liste des posts de l'utilisateur connecté.
+     */
+    /**
+     * Affiche la liste des articles de blog.
+     *
+     * Gère les filtres par catégorie, tag, et recherche textuelle,
+     * avec un système de pagination.
+     *
+     * @return Response
      */
     public function blogIndex(Request $request)
     {
@@ -106,6 +122,15 @@ class BlogBoutiqueController extends Controller
     /**
      * Affiche un post spécifique.
      */
+    /**
+     * Affiche les détails complets d'un article de blog spécifique.
+     *
+     * Charge le contenu de l'article, ses statistiques (vues, likes, partages)
+     * et transmet également les articles suggérés.
+     *
+     * @param  Post  $post  L'article à afficher.
+     * @return Response
+     */
     public function blogShow(Post $post, Request $request)
     {
         $user = Auth::user();
@@ -133,13 +158,31 @@ class BlogBoutiqueController extends Controller
         ]);
     }
 
+    /**
+     * Redirige l'utilisateur vers l'index du blog avec un filtre actif pour
+     * la catégorie sélectionnée.
+     *
+     * @param  PostCategory  $category  La catégorie.
+     * @return RedirectResponse
+     */
     public function blogByCategory(PostCategory $category)
     {
         return route('tenant.blog.index', ['tag' => $category->slug]);
     }
 
+    /**
+     * Gère l'ajout de commentaire sur le blog.
+     * (Actuellement vide ou non implémenté)
+     */
     public function blogComment() {}
 
+    /**
+     * Permet à un utilisateur authentifié d'aimer ou de retirer un "J'aime"
+     * sur un article.
+     *
+     * @param  Post  $post  L'article concerné.
+     * @return JsonResponse
+     */
     public function blogLike(Post $post)
     {
         $user = Auth::user();
@@ -166,6 +209,13 @@ class BlogBoutiqueController extends Controller
         ]);
     }
 
+    /**
+     * Permet à un utilisateur de sauvegarder un article dans ses favoris
+     * ou de l'en retirer.
+     *
+     * @param  Post  $post  L'article concerné.
+     * @return JsonResponse
+     */
     public function blogBookmark(Post $post)
     {
         $user = Auth::user();

@@ -13,14 +13,30 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
+/**
+ * Job responsable du renouvellement d'un abonnement.
+ *
+ * Ce job vérifie si l'abonnement est configuré pour un renouvellement automatique,
+ * effectue le renouvellement via le service dédié, et notifie l'utilisateur.
+ */
 class RenewSubscriptionJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * Crée une nouvelle instance du job.
+     *
+     * @param  Subscription  $subscription  L'abonnement à renouveler.
+     */
     public function __construct(
         private readonly Subscription $subscription
     ) {}
 
+    /**
+     * Exécute le job.
+     *
+     * @param  SubscriptionService  $subscriptionService  Le service gérant les abonnements.
+     */
     public function handle(SubscriptionService $subscriptionService): void
     {
         try {

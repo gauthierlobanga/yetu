@@ -11,7 +11,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Contrôleur gérant le processus de passage en caisse (Checkout).
+ *
+ * S'occupe de la validation du panier, des adresses, du calcul des frais
+ * de livraison, et du choix du mode de paiement avant validation finale.
+ */
 class CheckoutController extends Controller
 {
     protected CartController $cartController;
@@ -22,7 +29,12 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Page de checkout enrichie avec les options de livraison et de paiement.
+     * Affiche la page de checkout (caisse).
+     *
+     * Rendu de la vue Inertia contenant les étapes finales de la commande
+     * pour l'utilisateur, après vérification du panier courant.
+     *
+     * @return Response
      */
     public function checkoutIndex(Request $request)
     {

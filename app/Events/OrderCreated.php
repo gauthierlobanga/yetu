@@ -8,16 +8,28 @@ use App\Services\NotificationService;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
+/**
+ * Événement déclenché lors de la création d'une nouvelle commande.
+ *
+ * Gère l'envoi des notifications respectives au vendeur (boutique) et au client.
+ */
 class OrderCreated
 {
     use Dispatchable, SerializesModels;
 
+    /**
+     * Crée une nouvelle instance de l'événement.
+     *
+     * @param  Order  $order  La commande nouvellement créée.
+     */
     public function __construct(
         public Order $order
     ) {}
 
     /**
-     * Handle the event - Notifier le vendeur et le client
+     * Traite l'événement : notifie le vendeur et le client.
+     *
+     * @param  NotificationService  $notificationService  Service de gestion des notifications.
      */
     public function handle(NotificationService $notificationService): void
     {

@@ -7,10 +7,27 @@ use App\Models\Plan;
 use App\Models\Produit;
 use App\Models\Tenant;
 use Inertia\Inertia;
+use Inertia\Response;
 use Nnjeim\World\Models\Country;
 
+/**
+ * Contrôleur gérant la page d'accueil (Hero Central) de la plateforme.
+ *
+ * Il compile les données nécessaires à la présentation de la landing page,
+ * notamment les plans d'abonnement, les statistiques globales et les témoignages.
+ */
 class HeroCentralController extends Controller
 {
+    /**
+     * Affiche la page d'accueil principale du site vitrine.
+     *
+     * Rassemble les données dynamiques :
+     * - Les plans actifs et triés, formatés pour l'affichage frontend.
+     * - Les statistiques globales (boutiques créées, produits, pays).
+     * - Une liste de témoignages clients.
+     *
+     * @return Response Vue Inertia contenant les données d'accueil.
+     */
     public function Index()
     {
         $plans = Plan::active()->ordered()->get()->map(fn ($plan) => [
@@ -40,13 +57,13 @@ class HeroCentralController extends Controller
             [
                 'name' => 'Marie K.',
                 'store' => 'Les Pépites de Marie',
-                'quote' => 'Grâce à Yetu, j’ai pu lancer ma boutique en un week-end. Les outils sont incroyablement simples.',
+                'quote' => 'Grâce à Yetu, j\'ai pu lancer ma boutique en un week-end. Les outils sont incroyablement simples.',
                 'avatar' => 'https://randomuser.me/api/portraits/women/1.jpg',
             ],
             [
                 'name' => 'Jean-Paul M.',
                 'store' => 'Artisanat du Kivu',
-                'quote' => 'J’ai triplé mes ventes depuis que je suis passé sur Yetu. Le support est réactif et efficace.',
+                'quote' => 'J\'ai triplé mes ventes depuis que je suis passé sur Yetu. Le support est réactif et efficace.',
                 'avatar' => 'https://randomuser.me/api/portraits/men/1.jpg',
             ],
         ];

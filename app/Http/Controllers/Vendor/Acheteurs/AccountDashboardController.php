@@ -8,9 +8,28 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
+/**
+ * Contrôleur gérant le tableau de bord des acheteurs.
+ *
+ * Ce contrôleur fournit les statistiques et informations nécessaires
+ * pour l'affichage du tableau de bord d'un compte acheteur, incluant
+ * ses commandes, sa fidélité, et ses listes de souhaits.
+ */
 class AccountDashboardController extends Controller
 {
+    /**
+     * Affiche l'index du tableau de bord de l'acheteur.
+     *
+     * Cette méthode récupère et structure toutes les données associées
+     * à l'acheteur connecté : commandes récentes, points de fidélité,
+     * listes de souhaits, statistiques d'achat et retours en attente.
+     *
+     * @return Response Vue Inertia contenant les données du tableau de bord.
+     *
+     * @throws HttpException Si le client n'est pas trouvé (404).
+     */
     public function AccountDashboardIndex(): Response
     {
         $client = Auth::user()?->client;

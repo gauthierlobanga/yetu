@@ -24,7 +24,7 @@ class SubscriptionController extends Controller
         return [
             'required',
             'uuid',
-            Rule::exists(Plan::class, 'id')->where('is_active', true)
+            Rule::exists(Plan::class, 'id')->where('is_active', true),
         ];
     }
 

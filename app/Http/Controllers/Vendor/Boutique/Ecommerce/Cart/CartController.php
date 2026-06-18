@@ -12,15 +12,28 @@ use App\Models\User;
 use App\Models\VarianteProduit;
 use App\Models\VisitorEvent;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
+/**
+ * Contrôleur gérant le panier d'achat de la boutique.
+ * Permet d'ajouter, modifier, supprimer des articles, et appliquer des codes promo.
+ */
 class CartController extends Controller
 {
+    /**
+     * Affiche la page du panier avec les articles et totaux.
+     *
+     * @return Response
+     */
     public function cartIndex(Request $request)
     {
         $cart = $this->getOrCreateCart($request);
@@ -30,6 +43,11 @@ class CartController extends Controller
         ]);
     }
 
+    /**
+     * Ajoute un produit (et éventuellement une variante) au panier.
+     *
+     * @return RedirectResponse|JsonResponse
+     */
     public function cartAdd(Request $request, Produit $produit)
     {
         $validated = $request->validate([
@@ -51,6 +69,11 @@ class CartController extends Controller
         return redirect()->route('tenant.cart.index')->with('success', 'Produit ajouté au panier');
     }
 
+    /**
+     * Met à jour la quantité d'un article spécifique dans le panier.
+     *
+     * @return RedirectResponse|JsonResponse
+     */
     public function cartUpdate(Request $request, ItemPanier $item)
     {
         $this->authorizeCartItemAccess($request, $item);
@@ -72,6 +95,11 @@ class CartController extends Controller
         return back()->with('success', 'Panier mis à jour');
     }
 
+    /**
+     * Retire un article du panier.
+     *
+     * @return RedirectResponse
+     */
     public function cartRemove(Request $request, ItemPanier $item)
     {
         $this->authorizeCartItemAccess($request, $item);
@@ -82,6 +110,11 @@ class CartController extends Controller
         return back()->with('success', 'Article retiré du panier');
     }
 
+    /**
+     * Vide intégralement le panier.
+     *
+     * @return RedirectResponse
+     */
     public function cartClear(Request $request)
     {
         $cart = $this->getOrCreateCart($request);
@@ -90,6 +123,11 @@ class CartController extends Controller
         return back()->with('success', 'Panier vidé');
     }
 
+    /**
+     * Applique un code promo au panier.
+     *
+     * @return RedirectResponse
+     */
     public function cartApplyCoupon(Request $request)
     {
         $request->validate(['code' => 'required|string']);
@@ -118,6 +156,11 @@ class CartController extends Controller
         return back()->with('success', 'Code promo appliqué');
     }
 
+    /**
+     * Retire le code promo actuellement appliqué au panier.
+     *
+     * @return RedirectResponse
+     */
     public function cartRemoveCoupon(Request $request)
     {
         $cart = $this->getOrCreateCart($request);
@@ -128,6 +171,9 @@ class CartController extends Controller
         return back()->with('success', 'Code promo retiré');
     }
 
+    /**
+     * Récupère le panier actif de l'utilisateur ou de la session, sinon le crée.
+     */
     public function getOrCreateCart(Request $request): Panier
     {
         if (Auth::check()) {
@@ -148,6 +194,9 @@ class CartController extends Controller
         return $cart;
     }
 
+    /**
+     * Formate les données du panier pour les renvoyer en JSON ou à la vue Inertia.
+     */
     public function formatCart(Panier $cart): array
     {
         // Optimisation : eager loading pour éviter un LazyLoadingViolation sur l'accès aux relations de l'item du panier
@@ -181,6 +230,9 @@ class CartController extends Controller
         ];
     }
 
+    /**
+     * Retourne l'instance du panier actif courant.
+     */
     public function getCart(Request $request): Panier
     {
         return $this->getOrCreateCart($request);
@@ -188,6 +240,8 @@ class CartController extends Controller
 
     /**
      * Vérifie que l'item du panier appartient bien au panier de l'utilisateur/session courant.
+     *
+     * @throws HttpException
      */
     private function authorizeCartItemAccess(Request $request, ItemPanier $item): void
     {
@@ -198,6 +252,11 @@ class CartController extends Controller
         }
     }
 
+    /**
+     * Calcule le total du panier basé sur une sélection spécifique d'articles.
+     *
+     * @return JsonResponse
+     */
     public function cartCalculate(Request $request)
     {
         $request->validate([
@@ -243,6 +302,9 @@ class CartController extends Controller
         ]);
     }
 
+    /**
+     * Récupère ou crée un profil client rattaché à l'utilisateur.
+     */
     private function getOrCreateClientForUser(User $user): Client
     {
         return $user->client()->firstOrCreate(
@@ -257,6 +319,9 @@ class CartController extends Controller
         );
     }
 
+    /**
+     * Enregistre un événement de type 'add_to_cart' pour les statistiques/visiteurs.
+     */
     private function recordCartEvent(Request $request, Produit $produit): void
     {
         try {

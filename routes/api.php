@@ -30,4 +30,3 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/vendor-request/{id}/status', [VendorRequestStatusController::class, '__invoke'])->name('vendor-request.status');
 });
-

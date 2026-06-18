@@ -7,14 +7,28 @@ use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Contrôleur gérant l'API des notifications de l'utilisateur.
+ *
+ * Fournit les endpoints nécessaires pour lister, lire, marquer comme lu
+ * et supprimer les notifications du système (base de données).
+ */
 class NotificationController extends Controller
 {
+    /**
+     * Crée une nouvelle instance du contrôleur.
+     *
+     * @param  NotificationService  $notificationService  Service gérant la logique métier des notifications.
+     */
     public function __construct(
         private readonly NotificationService $notificationService
     ) {}
 
     /**
-     * Récupérer les notifications non lues
+     * Récupère la liste des notifications non lues.
+     *
+     * @param  Request  $request  La requête HTTP entrante.
+     * @return JsonResponse Une réponse JSON contenant les données et le nombre de notifications.
      */
     public function unread(Request $request): JsonResponse
     {
@@ -32,7 +46,10 @@ class NotificationController extends Controller
     }
 
     /**
-     * Récupérer toutes les notifications
+     * Récupère toutes les notifications (lues et non lues) avec pagination basique.
+     *
+     * @param  Request  $request  La requête HTTP entrante.
+     * @return JsonResponse Une réponse JSON contenant la liste globale des notifications.
      */
     public function index(Request $request): JsonResponse
     {
@@ -53,7 +70,11 @@ class NotificationController extends Controller
     }
 
     /**
-     * Marquer une notification comme lue
+     * Marque une notification spécifique comme lue.
+     *
+     * @param  Request  $request  La requête HTTP entrante.
+     * @param  string  $id  L'identifiant unique (UUID) de la notification.
+     * @return JsonResponse Une réponse JSON indiquant le succès de l'opération.
      */
     public function markAsRead(Request $request, string $id): JsonResponse
     {
@@ -66,7 +87,10 @@ class NotificationController extends Controller
     }
 
     /**
-     * Marquer toutes les notifications comme lues
+     * Marque toutes les notifications de l'utilisateur comme lues.
+     *
+     * @param  Request  $request  La requête HTTP entrante.
+     * @return JsonResponse Une réponse JSON confirmant la mise à jour globale.
      */
     public function markAllAsRead(Request $request): JsonResponse
     {
@@ -79,7 +103,11 @@ class NotificationController extends Controller
     }
 
     /**
-     * Supprimer une notification
+     * Supprime définitivement une notification spécifique.
+     *
+     * @param  Request  $request  La requête HTTP entrante.
+     * @param  string  $id  L'identifiant unique de la notification.
+     * @return JsonResponse Une réponse JSON confirmant ou non la suppression.
      */
     public function delete(Request $request, string $id): JsonResponse
     {
@@ -92,7 +120,10 @@ class NotificationController extends Controller
     }
 
     /**
-     * Supprimer toutes les notifications lues
+     * Supprime toutes les notifications ayant déjà été lues.
+     *
+     * @param  Request  $request  La requête HTTP entrante.
+     * @return JsonResponse Une réponse JSON incluant le nombre de notifications supprimées.
      */
     public function deleteRead(Request $request): JsonResponse
     {
@@ -106,7 +137,10 @@ class NotificationController extends Controller
     }
 
     /**
-     * Compter les notifications non lues
+     * Compte le nombre total de notifications non lues.
+     *
+     * @param  Request  $request  La requête HTTP entrante.
+     * @return JsonResponse Une réponse JSON contenant uniquement le compteur (unread_count).
      */
     public function unreadCount(Request $request): JsonResponse
     {

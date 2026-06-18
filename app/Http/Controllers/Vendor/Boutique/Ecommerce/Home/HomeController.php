@@ -12,9 +12,25 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use Inertia\Response;
 
+/**
+ * Contrôleur de la page d'accueil de la boutique.
+ *
+ * Agrège les produits phares, les tendances, les catégories, les meilleures ventes
+ * et les promotions pour construire la vitrine principale de la boutique.
+ */
 class HomeController extends Controller
 {
+    /**
+     * Prépare et retourne toutes les données de la page d'accueil (Inertia).
+     *
+     * Lance les requêtes optimisées (eager loading) pour les bannières,
+     * les produits (par catégories, trending, promo) afin d'alimenter la vue.
+     *
+     * @param  Request  $request  La requête courante.
+     * @return Response
+     */
     public function homeIndex(Request $request)
     {
         $productsCount = Produit::published()->count();
@@ -197,6 +213,17 @@ class HomeController extends Controller
         ]);
     }
 
+    /**
+     * Formate un objet produit pour sa présentation sur l'accueil.
+     *
+     * Construit le dictionnaire de propriétés, incluant prix remisés, statuts
+     * promotionnels, image principale et la marque (brand). Optionnellement
+     * les détails complets (images multiples, stock, avis).
+     *
+     * @param  Produit  $product  Le modèle de produit à formater.
+     * @param  bool  $withDetails  Indique si les détails avancés doivent être inclus.
+     * @return array<string, mixed> Les données du produit formattées.
+     */
     private function formatProduct(Produit $product, bool $withDetails = false): array
     {
         $primaryImage = $product->getPrimaryImage();
@@ -282,6 +309,15 @@ class HomeController extends Controller
         return $data;
     }
 
+    /**
+     * Formate une catégorie de produit pour l'accueil.
+     *
+     * Récupère le nom, le slug, la description, et gère
+     * récursivement le formatage des sous-catégories (children).
+     *
+     * @param  ProductCategory  $category  La catégorie.
+     * @return array<string, mixed> Données formatées.
+     */
     private function formatCategory(ProductCategory $category): array
     {
         return [
@@ -298,6 +334,12 @@ class HomeController extends Controller
         ];
     }
 
+    /**
+     * Formate une marque (Brand) pour l'affichage de la galerie des marques.
+     *
+     * @param  Brand  $brand  Le modèle de marque.
+     * @return array<string, mixed> Données de la marque formatées.
+     */
     private function formatBrand(Brand $brand): array
     {
         $logo = $brand->getFirstMediaUrl('logo') ?: Storage::url('images/');

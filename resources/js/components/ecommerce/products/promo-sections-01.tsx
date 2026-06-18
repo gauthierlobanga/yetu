@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/purity */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// resources/js/components/home/promo-section.tsx
 import { Link } from '@inertiajs/react';
+import type { Variants } from 'framer-motion';
 import { motion } from 'framer-motion';
 import {
     ArrowRight,
@@ -13,7 +12,7 @@ import {
     Ticket,
     Zap,
 } from 'lucide-react';
-import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -39,18 +38,16 @@ function formatDate(date: Date): string {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
     });
 }
 
-function CountdownItem({ label, value }: { label: string; value: number }) {
+function CountdownUnit({ label, value }: { label: string; value: number }) {
     return (
-        <div className="flex flex-col items-center">
-            <span className="text-2xl font-black text-slate-900 tabular-nums dark:text-white">
+        <div className="flex min-w-9.5 flex-col items-center">
+            <span className="text-lg font-bold tracking-tight text-slate-900 tabular-nums md:text-xl dark:text-white">
                 {formatNumber(value)}
             </span>
-            <span className="text-[10px] font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
+            <span className="mt-0 text-[9px] font-medium tracking-wider text-slate-400 uppercase dark:text-slate-500">
                 {label}
             </span>
         </div>
@@ -93,171 +90,183 @@ export default function PromoSection({ promo }: PromoSectionProps) {
         }
     }, []);
 
+    // Animation variants
+    const container: Variants = {
+        hidden: { opacity: 0 },
+        show: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2,
+            },
+        },
+    };
+
+    const item: Variants = {
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+    };
+
     return (
-        <section className="relative overflow-hidden py-12 md:py-16">
-            {/* Fond épuré */}
-            <div className="absolute inset-0 bg-linear-to-br from-emerald-50/80 via-white to-slate-50/80 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20" />
-            <div className="absolute top-0 left-0 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl dark:bg-emerald-400/5" />
-            <div className="absolute right-0 bottom-0 h-64 w-64 rounded-full bg-slate-400/10 blur-3xl dark:bg-slate-500/5" />
-
-            <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <section className="relative w-full overflow-hidden border-y border-slate-100 bg-white py-10 md:py-12 dark:border-slate-900 dark:bg-slate-950">
+            {/* Arrière-plan diagonal - image fixe avec fondu */}
+            {promo.image && (
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="overflow-hidden rounded-3xl border border-white/80 bg-white/80 shadow-2xl shadow-slate-200/50 backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/80 dark:shadow-black/30"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.6 }}
+                    className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-7/12 select-none md:block lg:w-1/2"
+                    style={{
+                        clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)',
+                    }}
                 >
-                    <div className="grid items-center gap-8 p-6 md:p-10 lg:grid-cols-5 lg:gap-12 lg:p-12">
-                        {/* Contenu principal (3/5) */}
-                        <div className="space-y-6 lg:col-span-3">
-                            {/* Badges */}
-                            <div className="flex flex-wrap items-center gap-2">
-                                <Badge className="gap-1 bg-emerald-600 text-white hover:bg-emerald-700">
-                                    <Sparkles className="h-3 w-3" /> Offre
-                                    exclusive
-                                </Badge>
-                                <Badge variant="secondary">
-                                    <Calendar className="mr-1 h-3 w-3" />
-                                    Jusqu’au {formatDate(targetDate)}
-                                </Badge>
-                            </div>
+                    <img
+                        src={promo.image}
+                        alt=""
+                        className="h-full w-full object-cover object-center opacity-40 dark:opacity-25"
+                        loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-linear-to-r from-white via-white/30 to-transparent dark:from-slate-950 dark:via-slate-950/30" />
+                </motion.div>
+            )}
 
-                            {/* Titre et réduction */}
-                            <div>
-                                <h2 className="text-2xl leading-tight font-extrabold text-slate-900 md:text-3xl dark:text-white">
+            <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <motion.div
+                    variants={container}
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, margin: '-50px' }}
+                    className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+                >
+                    {/* Colonne gauche */}
+                    <div className="w-full space-y-4 lg:max-w-4xl">
+                        {/* Titre + badges */}
+                        <motion.div variants={item} className="flex flex-wrap items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                <h2 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl dark:text-white">
                                     {promo.title}
                                 </h2>
                                 {promo.discount_percentage && (
-                                    <div className="mt-3 inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-emerald-600 to-emerald-500 px-4 py-2 text-white shadow-lg shadow-emerald-500/20">
-                                        <Zap className="h-4 w-4" />
-                                        <span className="text-lg font-bold">
-                                            -{promo.discount_percentage}%
-                                        </span>
-                                    </div>
-                                )}
-                                {promo.description && (
-                                    <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                                        {promo.description}
-                                    </p>
+                                    <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white">
+                                        <Zap className="h-2.5 w-2.5 fill-current" />
+                                        -{promo.discount_percentage}%
+                                    </span>
                                 )}
                             </div>
+                            <div className="ml-0 flex items-center gap-1.5 sm:ml-2">
+                                <Badge className="h-5 gap-1 border border-emerald-500/15 bg-emerald-500/10 text-[10px] text-emerald-700 shadow-none hover:bg-emerald-500/15 dark:bg-emerald-500/5 dark:text-emerald-400">
+                                    <Sparkles className="h-2.5 w-2.5" /> Exclusif
+                                </Badge>
+                                <Badge
+                                    variant="outline"
+                                    className="h-5 gap-1 border-slate-200 text-[10px] font-normal text-slate-400 dark:border-slate-800 dark:text-slate-500"
+                                >
+                                    <Calendar className="h-2.5 w-2.5" />
+                                    Fin : {formatDate(targetDate)}
+                                </Badge>
+                            </div>
+                        </motion.div>
 
-                            {/* Compteur */}
-                            {!isExpired && (
-                                <div>
-                                    <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                        {/* Description */}
+                        {promo.description && (
+                            <motion.p variants={item} className="line-clamp-1 max-w-3xl text-xs text-slate-500 dark:text-slate-400">
+                                {promo.description}
+                            </motion.p>
+                        )}
+
+                        {/* Timer + Codes promo */}
+                        {!isExpired && (
+                            <motion.div
+                                variants={item}
+                                className="inline-flex max-w-full flex-col gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 backdrop-blur-xs sm:flex-row sm:items-center dark:border-slate-900/60 dark:bg-slate-900/20"
+                            >
+                                {/* Timer */}
+                                <div className="flex items-center gap-3">
+                                    <div className="flex shrink-0 items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                                         <Clock3
                                             className={cn(
-                                                'h-4 w-4',
-                                                isAlmostExpired
-                                                    ? 'animate-pulse text-red-500'
-                                                    : 'text-emerald-500',
+                                                'h-3.5 w-3.5',
+                                                isAlmostExpired ? 'animate-pulse text-rose-500' : 'text-emerald-500',
                                             )}
                                         />
                                         Fin de l’offre :
                                     </div>
-                                    <div className="flex gap-4">
-                                        <CountdownItem
-                                            label="Jours"
-                                            value={timeLeft.days}
-                                        />
-                                        <CountdownItem
-                                            label="Heures"
-                                            value={timeLeft.hours}
-                                        />
-                                        <CountdownItem
-                                            label="Min"
-                                            value={timeLeft.minutes}
-                                        />
-                                        <CountdownItem
-                                            label="Sec"
-                                            value={timeLeft.seconds}
-                                        />
+                                    <div className="flex items-center gap-1.5">
+                                        <CountdownUnit label="j" value={timeLeft.days} />
+                                        <span className="-mt-2 font-light text-slate-300 dark:text-slate-800">:</span>
+                                        <CountdownUnit label="h" value={timeLeft.hours} />
+                                        <span className="-mt-2 font-light text-slate-300 dark:text-slate-800">:</span>
+                                        <CountdownUnit label="m" value={timeLeft.minutes} />
+                                        <span className="-mt-2 font-light text-slate-300 dark:text-slate-800">:</span>
+                                        <CountdownUnit label="s" value={timeLeft.seconds} />
                                     </div>
                                 </div>
-                            )}
 
-                            {/* Coupons */}
-                            {coupons.length > 0 && (
-                                <div>
-                                    <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
-                                        <Ticket className="h-4 w-4 text-emerald-500" />
-                                        Codes promo
-                                    </div>
-                                    <div className="flex flex-wrap gap-3">
-                                        {coupons.map((coupon, idx) => (
-                                            <motion.div
-                                                key={`${coupon.code}-${idx}`}
-                                                whileHover={{ y: -2 }}
-                                                className="flex items-center gap-3 rounded-xl border border-dashed border-emerald-300 bg-emerald-50/60 px-3 py-2 backdrop-blur dark:border-emerald-800 dark:bg-emerald-950/20"
-                                            >
-                                                <div className="text-sm font-bold text-emerald-700 dark:text-emerald-300">
-                                                    {coupon.code}
-                                                </div>
-                                                <Button
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="h-7 w-7 rounded-lg text-emerald-600 hover:bg-emerald-200 dark:hover:bg-emerald-800"
-                                                    onClick={() =>
-                                                        copyCode(coupon.code)
-                                                    }
+                                {/* Séparateur */}
+                                <div className="hidden h-6 w-px bg-slate-200 sm:block dark:bg-slate-800" />
+
+                                {/* Codes promo */}
+                                {coupons.length > 0 && (
+                                    <div className="flex min-w-50 items-center gap-2">
+                                        <div className="flex shrink-0 items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                                            <Ticket className="h-3.5 w-3.5 text-emerald-500" />
+                                            Codes :
+                                        </div>
+                                        <div className="flex flex-wrap gap-1">
+                                            {coupons.map((coupon, idx) => (
+                                                <motion.div
+                                                    key={`${coupon.code}-${idx}`}
+                                                    whileHover={{ y: -0.5 }}
+                                                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white py-0.5 pr-0.5 pl-2 text-xs shadow-2xs dark:border-slate-800 dark:bg-slate-950"
                                                 >
-                                                    {copiedCode ===
-                                                    coupon.code ? (
-                                                        <Check className="h-3.5 w-3.5" />
-                                                    ) : (
-                                                        <Copy className="h-3.5 w-3.5" />
-                                                    )}
-                                                </Button>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* CTA */}
-                            <div className="flex flex-wrap items-center gap-3">
-                                <Button
-                                    asChild
-                                    className="bg-emerald-600 hover:bg-emerald-700"
-                                >
-                                    <Link
-                                        href={route('tenant.promotions.index')}
-                                    >
-                                        Profiter de l’offre
-                                        <ArrowRight className="ml-2 h-4 w-4" />
-                                    </Link>
-                                </Button>
-                                {isExpired && (
-                                    <span className="text-sm font-medium text-red-600 dark:text-red-400">
-                                        Offre expirée
-                                    </span>
-                                )}
-                                {isAlmostExpired && !isExpired && (
-                                    <span className="text-sm font-medium text-amber-600 dark:text-amber-400">
-                                        ⏰ Plus que quelques heures !
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Image (2/5) */}
-                        <div className="relative hidden lg:col-span-2 lg:block">
-                            <div className="relative mx-auto max-w-xs overflow-hidden rounded-2xl shadow-2xl">
-                                <img
-                                    src={promo.image || undefined}
-                                    alt={promo.title}
-                                    className="aspect-3/4 w-full object-cover transition-transform duration-700 hover:scale-105"
-                                />
-                                <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
-                                {promo.discount_percentage && (
-                                    <div className="absolute top-3 right-3 rounded-xl bg-white/90 px-3 py-1.5 text-sm font-bold text-emerald-700 shadow backdrop-blur dark:bg-slate-900/80 dark:text-emerald-300">
-                                        -{promo.discount_percentage}%
+                                                    <span className="font-mono font-bold tracking-wide text-slate-700 dark:text-slate-300">
+                                                        {coupon.code}
+                                                    </span>
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="h-5 w-5 rounded-md text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-950/50"
+                                                        onClick={() => copyCode(coupon.code)}
+                                                    >
+                                                        {copiedCode === coupon.code ? (
+                                                            <Check className="h-3 w-3 text-emerald-500" />
+                                                        ) : (
+                                                            <Copy className="h-3 w-3" />
+                                                        )}
+                                                    </Button>
+                                                </motion.div>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
-                            </div>
-                        </div>
+                            </motion.div>
+                        )}
                     </div>
+
+                    {/* Bloc CTA + éventuels indicateurs */}
+                    <motion.div
+                        variants={item}
+                        className="flex shrink-0 items-center gap-3 pt-1 lg:pt-0"
+                    >
+                        <Link
+                            href={route('tenant.promotions.index')}
+                            className="group inline-flex h-14 items-center gap-2 rounded-lg bg-emerald-600 px-8 text-base font-semibold text-white shadow-sm transition-all duration-300 ease-out hover:bg-emerald-700 hover:shadow-md focus-visible:outline focus-visible:outline-emerald-600 active:scale-[0.98]"
+                        >
+                            Profiter de l’offre
+                            <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                        </Link>
+
+                        {isExpired && (
+                            <span className="rounded border border-rose-500/10 bg-rose-500/5 px-2 py-0.5 text-[10px] font-bold tracking-wider text-rose-500 uppercase">
+                                Expiré
+                            </span>
+                        )}
+                        {isAlmostExpired && !isExpired && (
+                            <span className="animate-pulse text-[11px] font-medium text-amber-500 dark:text-amber-400">
+                                ⏰ Fin imminente !
+                            </span>
+                        )}
+                    </motion.div>
                 </motion.div>
             </div>
         </section>

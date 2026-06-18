@@ -40,38 +40,8 @@ class ContactStatsWidget extends StatsOverviewWidget
                 ->description('Traités avec succès')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
-            Stat::make('Temps moyen réponse', function () {
-                // Récupérer les paires created_at / repondu_at pour les contacts répondus
-                $times = Contact::whereNotNull('repondu_at')
-                    ->select(['created_at', 'repondu_at'])
-                    ->get();
 
-                if ($times->isEmpty()) {
-                    return 'N/A';
-                }
-
-                // Calculer la moyenne des différences en secondes
-                $totalSeconds = 0;
-                $count = 0;
-
-                foreach ($times as $time) {
-                    $created = Carbon::parse($time->created_at);
-                    $repondu = Carbon::parse($time->repondu_at);
-                    $totalSeconds += $created->diffInSeconds($repondu);
-                    $count++;
-                }
-
-                $avgSeconds = $totalSeconds / $count;
-
-                $hours = floor($avgSeconds / 3600);
-                $minutes = floor(($avgSeconds % 3600) / 60);
-
-                if ($hours > 0) {
-                    return "{$hours}h {$minutes}min";
-                }
-
-                return "{$minutes}min";
-            })
+            Stat::make('Temps moyen réponse', $this->averageResponseTime())
                 ->description('Délai moyen de réponse')
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('success'),
@@ -81,5 +51,39 @@ class ContactStatsWidget extends StatsOverviewWidget
     protected function getColumns(): int
     {
         return 3;
+    }
+
+    private function averageResponseTime(): string
+    {
+        // Inclut les contacts soft-deleted pour ne pas fausser la moyenne historique
+        $times = Contact::withTrashed()
+            ->whereNotNull('repondu_at')
+            ->select(['created_at', 'repondu_at'])
+            ->get();
+
+        // Si aucun contact répondu, on regarde s'il existe au moins un contact global
+        if ($times->isEmpty()) {
+            return Contact::count() > 0 ? '0 min' : 'N/A';
+        }
+
+        $totalSeconds = 0;
+        $count = 0;
+
+        foreach ($times as $time) {
+            $created = Carbon::parse($time->created_at);
+            $repondu = Carbon::parse($time->repondu_at);
+            $totalSeconds += $created->diffInSeconds($repondu);
+            $count++;
+        }
+
+        $avgSeconds = $totalSeconds / $count;
+        $hours = floor($avgSeconds / 3600);
+        $minutes = floor(($avgSeconds % 3600) / 60);
+
+        if ($hours > 0) {
+            return "{$hours}h {$minutes}min";
+        }
+
+        return "{$minutes}min";
     }
 }

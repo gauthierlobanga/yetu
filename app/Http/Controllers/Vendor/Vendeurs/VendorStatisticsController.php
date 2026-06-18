@@ -43,7 +43,7 @@ class VendorStatisticsController extends Controller
 
         $planAllowsAdvanced = $tenant->plan && $tenant->plan->price > 0;
 
-        $stats = Cache::remember('vendor_stats_' . $tenant->id, now()->addMinutes(15), function () use ($tenant, $planAllowsAdvanced) {
+        $stats = Cache::remember('vendor_stats_'.$tenant->id, now()->addMinutes(15), function () use ($tenant, $planAllowsAdvanced) {
             return $tenant->run(function () use ($planAllowsAdvanced) {
                 return [
                     // -- Évolution du chiffre d’affaires et des commandes --

@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Nnjeim\World\Models\Currency;
-use Override;
 use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -757,5 +756,4 @@ class Produit extends Model implements HasMedia, Sitemapable
             $produit->clearCache();
         });
     }
-
 }

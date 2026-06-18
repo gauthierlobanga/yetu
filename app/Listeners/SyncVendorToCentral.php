@@ -5,8 +5,20 @@ namespace App\Listeners;
 use App\Events\VendorProfileUpdated;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Synchronise les informations du vendeur vers la base de données centrale.
+ *
+ * Similaire à SyncCentralUserProfile, ce listener écoute les mises à jour
+ * de profil et applique les changements (nom, email, mot de passe, avatar)
+ * sur la connexion de la base de données centrale.
+ */
 class SyncVendorToCentral
 {
+    /**
+     * Gère l'événement de mise à jour du profil.
+     *
+     * @param  VendorProfileUpdated  $event  L'événement contenant les informations modifiées.
+     */
     public function handle(VendorProfileUpdated $event): void
     {
         $user = $event->user;

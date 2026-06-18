@@ -7,14 +7,25 @@ use App\Http\Requests\Address\AddressFormRequest;
 use App\Models\Adresse;
 use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
+use Inertia\Response;
 use Nnjeim\World\Models\Country;
 
+/**
+ * Contrôleur gérant les adresses des utilisateurs pour la boutique.
+ * Permet de lister, ajouter, modifier, supprimer et définir des adresses par défaut.
+ */
 class AddressController extends Controller
 {
+    /**
+     * Affiche la liste des adresses de l'utilisateur avec détection du pays par défaut.
+     *
+     * @return Response
+     */
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -60,6 +71,11 @@ class AddressController extends Controller
         ]);
     }
 
+    /**
+     * Enregistre une nouvelle adresse pour l'utilisateur connecté.
+     *
+     * @return RedirectResponse
+     */
     public function store(AddressFormRequest $request)
     {
         $user = Auth::user();
@@ -72,6 +88,11 @@ class AddressController extends Controller
         return back()->with('success', 'Adresse ajoutée');
     }
 
+    /**
+     * Met à jour une adresse existante appartenant à l'utilisateur.
+     *
+     * @return RedirectResponse
+     */
     public function update(AddressFormRequest $request, Adresse $address)
     {
         // Vérifier que l'adresse appartient bien à l'utilisateur
@@ -85,6 +106,11 @@ class AddressController extends Controller
         return back()->with('success', 'Adresse mise à jour');
     }
 
+    /**
+     * Supprime une adresse appartenant à l'utilisateur.
+     *
+     * @return RedirectResponse
+     */
     public function destroy(Adresse $address)
     {
         if ($address->addressable_type !== User::class ||
@@ -97,6 +123,11 @@ class AddressController extends Controller
         return back()->with('success', 'Adresse supprimée');
     }
 
+    /**
+     * Définit une adresse spécifique comme adresse par défaut pour l'utilisateur.
+     *
+     * @return RedirectResponse
+     */
     public function addressesSetDefault(Adresse $address)
     {
         if ($address->addressable_type !== User::class ||

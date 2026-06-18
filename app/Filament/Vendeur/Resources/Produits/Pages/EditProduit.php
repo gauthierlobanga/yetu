@@ -20,5 +20,4 @@ class EditProduit extends EditRecord
             RestoreAction::make(),
         ];
     }
-
 }

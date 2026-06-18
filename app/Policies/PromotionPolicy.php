@@ -12,7 +12,7 @@ class PromotionPolicy
 {
     use HandlesAuthorization;
 
-     /**
+    /**
      * Perform pre-authorization checks.
      */
     public function before(AuthUser $user, string $ability): ?bool

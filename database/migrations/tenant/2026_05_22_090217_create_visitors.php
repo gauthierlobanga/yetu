@@ -22,7 +22,7 @@ return new class extends Migration
             $table->timestamp('occurred_at')->useCurrent();
             $table->timestamps();
 
-            $table->index(['event_type', 'occurred_at','visitor_id']);
+            $table->index(['event_type', 'occurred_at', 'visitor_id']);
         });
 
         // Table product_views (vues produits)

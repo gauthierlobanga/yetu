@@ -4,47 +4,75 @@ namespace App\Http\Controllers\Vendor\Boutique\Ecommerce\Commande;
 
 use App\Http\Controllers\Controller;
 use App\Models\Commande;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
+/**
+ * Contrôleur de gestion des commandes côté boutique (client).
+ */
 class OrderController extends Controller
 {
     public function ordersIndex()
     {
-        $client = Auth::user()->client;
-        $orders = $client->commandes()->with('lignes.produit')->latest()->paginate(10);
+        $user = Auth::user();
+        $client = $user?->client;
+
+        $orders = $client
+            ? $client->commandes()->with(['lignes.produit', 'lignes.variante'])->latest()->paginate(10)
+            : collect();
 
         return Inertia::render('Vendor/boutique/Orders/Index', ['orders' => $orders]);
     }
 
     public function ordersShow(Commande $commande)
     {
-        /** @var AuthorizesRequests $this */
         $this->authorize('view', $commande);
-        $commande->load(['lignes.produit', 'adresseFacturation', 'adresseLivraison', 'paiements']);
+        $commande->load(['lignes.produit', 'lignes.variante', 'adresseFacturation', 'adresseLivraison', 'paiements']);
 
         return Inertia::render('Vendor/boutique/Orders/Show', ['order' => $commande]);
     }
 
     public function ordersCancel(Commande $commande)
     {
-        /** @var AuthorizesRequests $this */
         $this->authorize('cancel', $commande);
+
         $commande->annuler();
+
         foreach ($commande->lignes as $ligne) {
-            $ligne->produit->incrementerStock($ligne->quantite);
+            if ($ligne->variante) {
+                $ligne->variante->incrementerStock($ligne->quantite);
+            } else {
+                $ligne->produit->incrementerStock($ligne->quantite);
+            }
         }
 
-        return back()->with('success', 'Commande annulée');
+        return back()->with('success', 'Commande annulée et stocks réajustés.');
     }
 
     public function ordersInvoice(Commande $commande)
     {
-        /** @var AuthorizesRequests $this */
         $this->authorize('view', $commande);
 
-        // À implémenter avec un package PDF (ex: barryvdh/laravel-dompdf)
-        return back()->with('info', 'Facture en cours de génération');
+        $commande->load(['client', 'lignes.produit', 'lignes.variante', 'adresseFacturation', 'adresseLivraison']);
+
+        $pdf = Pdf::loadView('pdf.invoice', [
+            'commande' => $commande,
+            'company' => [
+                'name' => config('app.name'),
+                'address' => config('company_address', ''),
+                'email' => config('company_email', ''),
+                'phone' => config('company_phone', ''),
+                'siret' => config('company_siret', ''),
+                'tva' => config('company_tva', ''),
+            ],
+        ]);
+
+        $pdf->setPaper('A4', 'portrait');
+        $pdf->setOptions(['defaultFont' => 'sans-serif', 'isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true]);
+
+        $filename = sprintf('facture-%s.pdf', $commande->numero_commande ?? $commande->id);
+
+        return $pdf->download($filename);
     }
 }

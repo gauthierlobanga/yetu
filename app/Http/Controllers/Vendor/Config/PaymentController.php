@@ -7,21 +7,42 @@ use App\Models\Plan;
 use App\Models\VendorRequest;
 use App\Services\PaymentService;
 use App\Services\VendorRegistrationService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Inertia\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
+/**
+ * Contrôleur gérant les processus de paiement pour l'inscription des vendeurs.
+ *
+ * Gère les redirections vers Stripe, le traitement après le paiement,
+ * l'annulation et la réception des webhooks de paiement.
+ */
 class PaymentController extends Controller
 {
+    /**
+     * Constructeur du contrôleur.
+     *
+     * @param  PaymentService  $paymentService  Service gérant la logique de paiement avec Stripe.
+     * @param  VendorRegistrationService  $vendorService  Service gérant l'enregistrement des vendeurs.
+     */
     public function __construct(
         private readonly PaymentService $paymentService,
         private readonly VendorRegistrationService $vendorService
     ) {}
 
     /**
-     * Rediriger vers Stripe Checkout.
+     * Redirige l'utilisateur vers Stripe Checkout pour payer son plan.
+     *
+     * Vérifie les droits de l'utilisateur sur la demande en cours
+     * et s'assure que le plan nécessite un paiement.
+     *
+     * @param  Request  $request  La requête HTTP entrante.
+     * @return Response|RedirectResponse Redirection vers la session Stripe ou retour en cas d'erreur.
      */
     public function checkout(Request $request)
     {
@@ -58,7 +79,11 @@ class PaymentController extends Controller
     }
 
     /**
-     * Page intermédiaire avant paiement.
+     * Affiche la page intermédiaire de résumé avant de procéder au paiement.
+     *
+     * Valide que la requête de vendeur appartient à l'utilisateur connecté.
+     *
+     * @return Response Vue Inertia du résumé du paiement.
      */
     public function index()
     {
@@ -81,7 +106,16 @@ class PaymentController extends Controller
     }
 
     /**
-     * Succès du paiement.
+     * Traite le retour réussi après un paiement sur Stripe.
+     *
+     * Vérifie le statut de la session de paiement. En cas de succès, met à jour
+     * la demande d'enregistrement, configure la souscription du tenant, et redirige
+     * vers le tableau de bord du vendeur via SSO.
+     *
+     * @param  Request  $request  La requête contenant l'identifiant de la session Stripe.
+     * @return RedirectResponse Redirection vers le tableau de bord SSO ou retour en arrière avec erreur.
+     *
+     * @throws HttpException Exceptions HTTP potentielles.
      */
     public function success(Request $request)
     {
@@ -138,7 +172,9 @@ class PaymentController extends Controller
     }
 
     /**
-     * Annulation du paiement.
+     * Traite l'annulation d'un paiement en cours par l'utilisateur.
+     *
+     * @return RedirectResponse Redirection vers la configuration avec un message d'erreur.
      */
     public function cancel()
     {
@@ -147,7 +183,13 @@ class PaymentController extends Controller
     }
 
     /**
-     * Webhook Stripe (pour les notifications asynchrones).
+     * Gère les requêtes webhook asynchrones envoyées par Stripe.
+     *
+     * Analyse la charge utile et valide la signature. Si le paiement est réussi,
+     * approuve la demande d'enregistrement de boutique si elle existe.
+     *
+     * @param  Request  $request  La requête HTTP entrante contenant la charge utile du webhook.
+     * @return JsonResponse Statut de la réception du webhook.
      */
     public function webhook(Request $request)
     {

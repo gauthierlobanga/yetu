@@ -3,6 +3,7 @@
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -30,7 +31,7 @@ beforeEach(function () {
     tenancy()->initialize($this->tenant);
 
     // Migration de la base de données du locataire
-    \Illuminate\Support\Facades\Artisan::call('tenants:migrate', ['--tenants' => ['test-shop']]);
+    Artisan::call('tenants:migrate', ['--tenants' => ['test-shop']]);
 });
 
 afterEach(function () {
