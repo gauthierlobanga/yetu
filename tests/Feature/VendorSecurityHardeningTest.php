@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Plan;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\VendorRequest;
@@ -45,6 +46,35 @@ test('vendor request status endpoint returns owner request data', function () {
             'shop_name' => $vendorRequest->shop_name,
             'tenant_id' => $vendorRequest->tenant_id,
         ]);
+});
+
+test('vendor request status endpoint waits until subscription exists before returning sso url', function () {
+    $owner = User::factory()->create();
+    $plan = Plan::factory()->create([
+        'name' => 'Status Plan '.uniqid(),
+        'slug' => 'status-plan-'.uniqid(),
+    ]);
+    $tenant = Tenant::factory()->create([
+        'plan_id' => $plan->id,
+        'user_id' => $owner->id,
+    ]);
+
+    $vendorRequest = VendorRequest::factory()->create([
+        'plan_id' => $plan->id,
+        'user_id' => $owner->id,
+        'tenant_id' => $tenant->id,
+        'status' => VendorRequest::STATUS_APPROVED,
+    ]);
+
+    $this->actingAs($owner)
+        ->getJson(route('vendor.status', ['id' => $vendorRequest->id]))
+        ->assertOk()
+        ->assertJson([
+            'id' => $vendorRequest->id,
+            'status' => VendorRequest::STATUS_PENDING,
+            'tenant_id' => $tenant->id,
+        ])
+        ->assertJsonMissingPath('sso_url');
 });
 
 test('vendor success page is forbidden for non owner', function () {

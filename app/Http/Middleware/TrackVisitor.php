@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Services\VisitorTrackingService;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class TrackVisitor
 {
@@ -23,8 +24,15 @@ class TrackVisitor
         if ($response->isOk()) {
             // Déterminer l'entité visitable (tenant ou null pour central)
             $visitable = tenancy()->initialized ? tenant() : null;
-            $this->tracker->track($request, $visitable);
-            $this->tracker->addVisitorCookie($response, $request);
+            try {
+                $this->tracker->track($request, $visitable);
+                $this->tracker->addVisitorCookie($response, $request);
+            } catch (\Throwable $e) {
+                Log::debug('Visitor tracking middleware skipped.', [
+                    'tenant_id' => function_exists('tenant') ? tenant()?->id : null,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         return $response;

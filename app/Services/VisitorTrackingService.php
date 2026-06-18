@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Visit;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 
@@ -26,77 +28,91 @@ class VisitorTrackingService
         $visitorId = $this->getVisitorId($request);
         $sessionId = $request->session()->getId();
 
-        // Éviter les doublons sur la même page dans les 30 secondes
-        $recent = Visit::where('visitor_id', $visitorId)
-            ->where('path', $request->path())
-            ->where('visited_at', '>', now()->subSeconds(30))
-            ->exists();
-        if ($recent) {
+        if (! $this->visitsTableExists()) {
             return;
         }
 
-        $utmParams = array_filter([
-            'utm_source' => $request->query('utm_source'),
-            'utm_medium' => $request->query('utm_medium'),
-            'utm_campaign' => $request->query('utm_campaign'),
-            'utm_term' => $request->query('utm_term'),
-            'utm_content' => $request->query('utm_content'),
-        ]);
-
-        // === Correction des valeurs d'appareil, navigateur, plateforme ===
-        $rawDevice = $this->agent->device();
-        $rawBrowser = $this->agent->browser();
-        $rawPlatform = $this->agent->platform();
-
-        // Appareil
-        if (empty($rawDevice) || $rawDevice === 'WebKit' || $rawDevice === '0') {
-            if ($this->agent->isMobile()) {
-                $device = 'Mobile';
-            } elseif ($this->agent->isTablet()) {
-                $device = 'Tablet';
-            } else {
-                $device = 'Desktop';
+        // Éviter les doublons sur la même page dans les 30 secondes
+        try {
+            $recent = Visit::where('visitor_id', $visitorId)
+                ->where('path', $request->path())
+                ->where('visited_at', '>', now()->subSeconds(30))
+                ->exists();
+            if ($recent) {
+                return;
             }
-        } else {
-            $device = $rawDevice;
+        } catch (QueryException $e) {
+            $this->logSkippedTracking($e);
+
+            return;
         }
 
-        // Navigateur
-        if (empty($rawBrowser) || $rawBrowser === '0') {
-            $browser = 'Autre';
-        } else {
-            $browser = $rawBrowser;
+        try {
+            $utmParams = array_filter([
+                'utm_source' => $request->query('utm_source'),
+                'utm_medium' => $request->query('utm_medium'),
+                'utm_campaign' => $request->query('utm_campaign'),
+                'utm_term' => $request->query('utm_term'),
+                'utm_content' => $request->query('utm_content'),
+            ]);
+
+            // === Correction des valeurs d'appareil, navigateur, plateforme ===
+            $rawDevice = $this->agent->device();
+            $rawBrowser = $this->agent->browser();
+            $rawPlatform = $this->agent->platform();
+
+            // Appareil
+            if (empty($rawDevice) || $rawDevice === 'WebKit' || $rawDevice === '0') {
+                if ($this->agent->isMobile()) {
+                    $device = 'Mobile';
+                } elseif ($this->agent->isTablet()) {
+                    $device = 'Tablet';
+                } else {
+                    $device = 'Desktop';
+                }
+            } else {
+                $device = $rawDevice;
+            }
+
+            // Navigateur
+            if (empty($rawBrowser) || $rawBrowser === '0') {
+                $browser = 'Autre';
+            } else {
+                $browser = $rawBrowser;
+            }
+
+            // Plateforme (OS)
+            if (empty($rawPlatform) || $rawPlatform === '0') {
+                $platform = 'Inconnu';
+            } else {
+                $platform = $rawPlatform;
+            }
+
+            $visit = new Visit([
+                'visitor_id' => $visitorId,
+                'session_id' => $sessionId,
+                'url' => $request->fullUrl(),
+                'path' => $request->path(),
+                'method' => $request->method(),
+                'referrer' => $request->headers->get('referer'),
+                'ip' => $request->ip(),
+                'device' => $device,
+                'platform' => $platform,
+                'browser' => $browser,
+                'language' => $request->getPreferredLanguage(),
+                'utm_params' => $utmParams,
+                'visited_at' => now(),
+            ]);
+
+            if ($visitable) {
+                $visit->visitable_type = get_class($visitable);
+                $visit->visitable_id = $visitable->getKey();
+            }
+
+            $visit->save();
+        } catch (QueryException $e) {
+            $this->logSkippedTracking($e);
         }
-
-        // Plateforme (OS)
-        if (empty($rawPlatform) || $rawPlatform === '0') {
-            $platform = 'Inconnu';
-        } else {
-            $platform = $rawPlatform;
-        }
-
-        $visit = new Visit([
-            'visitor_id' => $visitorId,
-            'session_id' => $sessionId,
-            'url' => $request->fullUrl(),
-            'path' => $request->path(),
-            'method' => $request->method(),
-            'referrer' => $request->headers->get('referer'),
-            'ip' => $request->ip(),
-            'device' => $device,
-            'platform' => $platform,
-            'browser' => $browser,
-            'language' => $request->getPreferredLanguage(),
-            'utm_params' => $utmParams,
-            'visited_at' => now(),
-        ]);
-
-        if ($visitable) {
-            $visit->visitable_type = get_class($visitable);
-            $visit->visitable_id = $visitable->getKey();
-        }
-
-        $visit->save();
     }
 
     protected function getVisitorId(Request $request): string
@@ -129,5 +145,28 @@ class VisitorTrackingService
         }
 
         return false;
+    }
+
+    private function visitsTableExists(): bool
+    {
+        try {
+            $visit = new Visit;
+
+            return $visit->getConnection()
+                ->getSchemaBuilder()
+                ->hasTable($visit->getTable());
+        } catch (QueryException $e) {
+            $this->logSkippedTracking($e);
+
+            return false;
+        }
+    }
+
+    private function logSkippedTracking(QueryException $e): void
+    {
+        Log::debug('Visitor tracking skipped because the visits table is unavailable.', [
+            'tenant_id' => function_exists('tenant') ? tenant()?->id : null,
+            'error' => $e->getMessage(),
+        ]);
     }
 }

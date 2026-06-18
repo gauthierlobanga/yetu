@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Models\VendorRequest;
 use App\Notifications\VendorApproved;
 use App\Notifications\VendorRejected;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +15,6 @@ use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Stancl\Tenancy\Events\TenantCreated;
-use Stancl\Tenancy\Tenancy;
 
 class VendorRegistrationService
 {
@@ -81,7 +79,11 @@ class VendorRegistrationService
     {
         $vendorRequest->loadMissing(['tenant', 'plan', 'user']);
 
-        if ($vendorRequest->tenant) {
+        if (
+            $vendorRequest->tenant
+            && $vendorRequest->status === VendorRequest::STATUS_APPROVED
+            && $vendorRequest->tenant->subscription
+        ) {
             return $vendorRequest->tenant;
         }
 
@@ -90,8 +92,9 @@ class VendorRegistrationService
         // Mot de passe par défaut sécurisé : forcer l'utilisateur à le changer via reset password
         $password = Str::password(16);
 
-        // 1ère phase : créer le tenant (sans événements) et le domaine
-        $tenant = DB::transaction(function () use ($vendorRequest, $plan, $user, $password) {
+        // 1ère phase : créer le tenant (sans événements) et le domaine.
+        // La demande n'est marquée approuvée qu'une fois la base tenant prête.
+        $tenant = $vendorRequest->tenant ?: DB::transaction(function () use ($vendorRequest, $plan, $user, $password) {
             $tenantId = (string) Str::orderedUuid();
             $tenant = Tenant::withoutEvents(function () use ($vendorRequest, $plan, $password, $tenantId, $user) {
                 return Tenant::create([
@@ -115,20 +118,22 @@ class VendorRegistrationService
             ]);
 
             $vendorRequest->update([
-                'status' => VendorRequest::STATUS_APPROVED,
-                'approved_at' => now(),
                 'tenant_id' => $tenant->id,
             ]);
 
             return $tenant;
         });
 
+        $this->ensureOwnerPivot($user, $tenant);
+
         // 2ème phase : créer la base de données du tenant
-        event(new TenantCreated($tenant));
+        if ($vendorRequest->status !== VendorRequest::STATUS_APPROVED) {
+            event(new TenantCreated($tenant));
+        }
 
         // 3ème phase : attacher l'utilisateur et le reste (maintenant la base existe)
         $user = $vendorRequest->user; // rafraîchir si besoin
-        $user->tenants()->attach($tenant->id, ['is_owner' => true]);
+        $this->ensureOwnerPivot($user, $tenant);
 
         if (! $plan->isFree() && $plan->trial_days > 0) {
             $tenant->update([
@@ -141,22 +146,12 @@ class VendorRegistrationService
 
         $this->transferDocumentsToTenant($vendorRequest, $tenant);
 
-        // Process extra data from Cache (Logo, Social Links)
-        $extraData = Cache::get('vendor_request_extra_'.$vendorRequest->id);
-        if ($extraData) {
-            if (! empty($extraData['logo_path'])) {
-                try {
-                    $tenant->addMedia(storage_path('app/public/'.$extraData['logo_path']))
-                        ->toMediaCollection('tenant_avatar');
-                } catch (\Exception $e) {
-                    Log::error('Failed to add logo to tenant: '.$e->getMessage());
-                }
+        // Transférer le logo (si présent)
+        if ($vendorRequest->hasMedia('tenant_avatar')) {
+            $media = $vendorRequest->getFirstMedia('tenant_avatar');
+            if ($media) {
+                $media->move($tenant, 'tenant_avatar');
             }
-            if (! empty($extraData['social_links'])) {
-                $tenant->setConfiguration('social_links', $extraData['social_links']);
-                $tenant->save();
-            }
-            Cache::forget('vendor_request_extra_'.$vendorRequest->id);
         }
 
         // Synchronisation de l'utilisateur (Contexte Tenant)
@@ -184,6 +179,11 @@ class VendorRegistrationService
         // Créer la subscription pour le plan
         $this->subscriptionService->createSubscription($tenant, $plan, $user);
 
+        $vendorRequest->update([
+            'status' => VendorRequest::STATUS_APPROVED,
+            'approved_at' => $vendorRequest->approved_at ?? now(),
+        ]);
+
         Log::info('Vendor approved', [
             'vendor_request_id' => $vendorRequest->id,
             'user_id' => $user->id,
@@ -201,6 +201,23 @@ class VendorRegistrationService
         }
 
         return $tenant;
+    }
+
+    private function ensureOwnerPivot(User $user, Tenant $tenant): void
+    {
+        DB::connection($this->centralConnection())
+            ->table('user_tenant')
+            ->updateOrInsert(
+                [
+                    'user_id' => $user->id,
+                    'tenant_id' => $tenant->id,
+                ],
+                [
+                    'is_owner' => true,
+                    'updated_at' => now(),
+                    'created_at' => now(),
+                ]
+            );
     }
 
     /**
@@ -696,6 +713,10 @@ class VendorRegistrationService
             ->exists();
 
         if (! $isOwner) {
+            $isOwner = $this->repairOwnerPivotFromApprovedRequest((string) $payload['user_id'], $tenant);
+        }
+
+        if (! $isOwner) {
             Log::error('SSO failed: not owner', ['user_id' => $payload['user_id'], 'tenant_id' => $tenant->id]);
 
             return null;
@@ -726,6 +747,37 @@ class VendorRegistrationService
         );
 
         return $user;
+    }
+
+    private function repairOwnerPivotFromApprovedRequest(string $userId, Tenant $tenant): bool
+    {
+        $centralConnection = $this->centralConnection();
+
+        $hasApprovedRequest = VendorRequest::on($centralConnection)
+            ->where('user_id', $userId)
+            ->where('tenant_id', $tenant->id)
+            ->where('status', VendorRequest::STATUS_APPROVED)
+            ->exists();
+
+        if (! $hasApprovedRequest) {
+            return false;
+        }
+
+        DB::connection($centralConnection)
+            ->table('user_tenant')
+            ->updateOrInsert(
+                [
+                    'user_id' => $userId,
+                    'tenant_id' => $tenant->id,
+                ],
+                [
+                    'is_owner' => true,
+                    'updated_at' => now(),
+                    'created_at' => now(),
+                ]
+            );
+
+        return true;
     }
 
     private function centralConnection(): string

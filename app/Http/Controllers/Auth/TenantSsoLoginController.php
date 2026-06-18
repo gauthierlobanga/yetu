@@ -27,19 +27,14 @@ class TenantSsoLoginController extends Controller
         if (! $token) {
             Log::warning('SSO login: no token provided', ['tenant' => $tenant->id]);
 
-            return redirect()->to($service->getVendeurDashboardUrl($tenant));
+            return redirect()->route('tenant.login')
+                ->with('error', 'Lien de connexion manquant. Veuillez vous reconnecter.');
         }
 
         $user = $service->handleSsoLogin($token, $tenant);
         if (! $user) {
-            Log::warning('SSO login: invalid or expired token, attempting fresh login', ['tenant' => $tenant->id]);
+            Log::warning('SSO login: invalid or expired token', ['tenant' => $tenant->id]);
 
-            // Si l'utilisateur est déjà connecté via session, rediriger directement
-            if (Auth::check()) {
-                return redirect()->to($service->getVendeurDashboardUrl($tenant));
-            }
-
-            // Sinon, rediriger vers la page de login du tenant
             return redirect()->route('tenant.login')
                 ->with('error', 'Votre lien de connexion a expiré. Veuillez vous reconnecter.');
         }

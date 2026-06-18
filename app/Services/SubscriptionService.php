@@ -19,7 +19,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Str;
 use Stripe\BillingPortal\Session as BillingPortalSession;
 use Stripe\Stripe;
 use Stripe\Subscription as StripeSubscription;
@@ -47,35 +46,47 @@ class SubscriptionService
      */
     public function createSubscription(Tenant $tenant, Plan $plan, ?User $user = null): Subscription
     {
-        $user = $user ?? $tenant->users()->where('is_owner', true)->first();
+        $user = $user ?? $tenant->users()->wherePivot('is_owner', true)->first();
+        $user = $user ?? User::on(config('tenancy.database.central_connection', config('database.default')))
+            ->find($tenant->user_id);
 
-        // Pour le plan gratuit, on impose une expiration de 30 jours
-        // Pour les autres plans, on utilise la durée d'essai définie ou 14 jours par défaut
-        $trialDays = $plan->isFree() ? 30 : ($plan->trial_days ?? 14);
+        if (! $user) {
+            throw new \InvalidArgumentException('Unable to create a subscription without a tenant owner.');
+        }
+
+        $trialDays = $plan->trial_days > 0 ? $plan->trial_days : ($plan->isFree() ? 30 : 14);
         $trialEndsAt = now()->addDays($trialDays);
-
-        // Note: Pour une vraie subscription Stripe, elle est créée via Checkout
-        // Ici on initialise l'enregistrement local
         $stripeId = $plan->isFree()
-            ? 'free_'.Str::random(10)
-            : 'pending_'.Str::random(10);
+            ? 'free_'.$tenant->id
+            : 'pending_'.$tenant->id;
 
-        $subscription = Subscription::create([
-            'user_id' => $user->id,
+        $subscription = Subscription::firstOrNew([
             'tenant_id' => $tenant->id,
-            'plan_id' => $plan->id,
             'type' => 'default',
-            'stripe_id' => $stripeId,
-            'stripe_status' => 'trialing', // Toujours en essai au début, même gratuit
-            'stripe_price' => $plan->stripe_price_id,
-            'trial_started_at' => now(),
-            'trial_ends_at' => $trialEndsAt,
-            'current_period_start' => now(),
-            'current_period_end' => now()->addMonths(1),
-            'auto_renewal' => ! $plan->isFree(), // Pas de renouvellement auto pour le gratuit
         ]);
 
-        // Mettre à jour les dates du tenant
+        if (! $subscription->exists || blank($subscription->stripe_id)) {
+            $subscription->stripe_id = $stripeId;
+        }
+
+        if (! $subscription->exists || blank($subscription->stripe_status)) {
+            $subscription->stripe_status = 'trialing';
+        }
+
+        $subscription->fill([
+            'user_id' => $user->id,
+            'plan_id' => $plan->id,
+            'stripe_price' => $plan->stripe_price_id,
+            'auto_renewal' => ! $plan->isFree(), // Pas de renouvellement auto pour le gratuit
+            'is_blocked' => false,
+        ]);
+
+        $subscription->trial_started_at ??= now();
+        $subscription->trial_ends_at ??= $trialEndsAt;
+        $subscription->current_period_start ??= now();
+        $subscription->current_period_end ??= now()->addMonths(1);
+        $subscription->save();
+
         $tenant->update([
             'plan_id' => $plan->id,
             'date_activation' => now(),

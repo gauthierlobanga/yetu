@@ -35,21 +35,25 @@ class SubscriptionSystemTest extends TestCase
     /**
      * Test 1: Free plan subscription creation
      */
-    public function test_free_plan_subscription_is_created_immediately_active(): void
+    public function test_free_plan_subscription_is_created_with_trial_period(): void
     {
         $tenant = Tenant::factory()->create();
+        $user = User::factory()->make();
+        $user->setConnection(config('tenancy.database.central_connection', 'central'));
+        $user->save();
 
         $subscription = $this->subscriptionService->createSubscription(
             $tenant,
             $this->freePlan,
-            $this->user
+            $user
         );
 
         $this->assertNotNull($subscription);
         $this->assertEquals($tenant->id, $subscription->tenant_id);
         $this->assertEquals($this->freePlan->id, $subscription->plan_id);
-        $this->assertEquals('active', $subscription->stripe_status);
-        $this->assertNull($subscription->trial_ends_at);
+        $this->assertEquals('trialing', $subscription->stripe_status);
+        $this->assertNotNull($subscription->trial_ends_at);
+        $this->assertTrue($subscription->trial_ends_at->greaterThan(now()));
         $this->assertFalse($subscription->is_blocked);
         $this->assertTrue($subscription->isActive());
     }
@@ -94,8 +98,8 @@ class SubscriptionSystemTest extends TestCase
             'current_period_end' => now()->addMonths(1),
         ]);
 
-        $this->assertFalse($subscription->refresh()->isActive()); // Because trial ended
-        $this->assertTrue($subscription->isExpired());
+        $this->assertTrue($subscription->refresh()->isActive());
+        $this->assertFalse($subscription->isExpired());
     }
 
     /**

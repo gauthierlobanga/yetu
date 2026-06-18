@@ -32,9 +32,11 @@ class VendorRequestStatusController extends Controller
 
         if ($vendorRequest->status === VendorRequest::STATUS_APPROVED && $vendorRequest->tenant_id) {
             $tenant = Tenant::find($vendorRequest->tenant_id);
-            if ($tenant) {
+            if ($tenant && $tenant->subscription) {
                 $service = app(VendorRegistrationService::class);
                 $response['sso_url'] = $service->getTenantSsoLoginUrl($tenant, request()->user());
+            } else {
+                $response['status'] = VendorRequest::STATUS_PENDING;
             }
         }
 

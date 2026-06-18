@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PaymentController extends Controller
 {
@@ -100,14 +101,9 @@ class PaymentController extends Controller
                     abort(403);
                 }
 
-                // Approuver le vendeur et créer le tenant + subscription (via PaymentService webhook)
-                // Note: Le webhook Stripe se déclenche asynchrone et appelle approve()
-                // On vérifie ici que l'approbation a bien eu lieu
-                $tenant = $vendorRequest->tenant;
-                if (! $tenant) {
-                    // Fallback si le webhook n'a pas eu le temps de se déclencher
-                    $tenant = $this->vendorService->approve($vendorRequest);
-                }
+                // Fallback idempotent si le webhook n'a pas encore créé le tenant/subscription.
+                $tenant = $this->vendorService->approve($vendorRequest);
+                $tenant->load('subscription');
 
                 if ($tenant->subscription) {
                     $tenant->subscription->update([
@@ -120,15 +116,15 @@ class PaymentController extends Controller
                 // Nettoyer la session
                 session()->forget('vendor_request_id');
 
-                // Rediriger vers le dashboard du tenant
-                $dashboardUrl = $this->vendorService->getVendeurDashboardUrl($tenant);
+                // Rediriger via SSO pour créer la session dans le contexte tenant.
+                $dashboardUrl = $this->vendorService->getTenantSsoLoginUrl($tenant, Auth::user());
 
                 return redirect($dashboardUrl);
             }
 
             return redirect()->route('vendor.register')
                 ->with('error', 'Le paiement n\'a pas abouti. Veuillez réessayer.');
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+        } catch (HttpException $e) {
             throw $e;
         } catch (\Exception $e) {
             Log::error('Erreur vérification paiement', [
@@ -164,7 +160,7 @@ class PaymentController extends Controller
             // Approuver le vendeur si ce n'est pas déjà fait
             if (isset($result['vendor_request_id'])) {
                 $vendorRequest = VendorRequest::find($result['vendor_request_id']);
-                if ($vendorRequest && $vendorRequest->status !== VendorRequest::STATUS_APPROVED) {
+                if ($vendorRequest) {
                     $this->vendorService->approve($vendorRequest);
                 }
             }

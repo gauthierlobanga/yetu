@@ -8,11 +8,13 @@ use App\Models\Coupon;
 use App\Models\ItemPanier;
 use App\Models\Panier;
 use App\Models\Produit;
+use App\Models\User;
 use App\Models\VarianteProduit;
 use App\Models\VisitorEvent;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Auth as FacadesAuth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -40,13 +42,7 @@ class CartController extends Controller
 
         $cart->ajouterItem($produit, $validated['quantite'] ?? 1, $variante);
 
-        VisitorEvent::create([
-            'session_id' => Session::getId(),
-            'visitor_id' => $request->cookie('y_visitor'),
-            'event_type' => 'add_to_cart',
-            'product_id' => $produit->id,
-            'occurred_at' => now(),
-        ]);
+        $this->recordCartEvent($request, $produit);
 
         if ($request->wantsJson()) {
             return response()->json(['success' => true, 'cart' => $this->formatCart($cart)]);
@@ -136,19 +132,10 @@ class CartController extends Controller
     {
         if (Auth::check()) {
             $user = Auth::user();
-            $client = $user->client;
-            if (! $client) {
-                $client = $user->client()->create([
-                    'nom' => $user->name ?? 'Client',
-                    'prenom' => '',
-                    'email' => $user->email,
-                    'type' => Client::TYPE_PARTICULIER,
-                    'statut' => Client::STATUT_ACTIF,
-                ]);
-            }
+            $client = $this->getOrCreateClientForUser($user);
             $cart = Panier::firstOrCreate(
                 ['client_id' => $client->id, 'statut' => Panier::STATUT_ACTIF],
-                ['date_creation' => now(), 'expires_at' => now()->addDays(7)]
+                ['user_id' => $user->id, 'date_creation' => now(), 'expires_at' => now()->addDays(7)]
             );
         } else {
             $sessionId = $request->session()->getId();
@@ -196,24 +183,7 @@ class CartController extends Controller
 
     public function getCart(Request $request): Panier
     {
-        if (FacadesAuth::check()) {
-            $client = FacadesAuth::user()->client;
-            if (! $client) {
-                $client = FacadesAuth::user()->client()->create();
-            }
-            $cart = Panier::firstOrCreate(
-                ['client_id' => $client->id, 'statut' => Panier::STATUT_ACTIF],
-                ['date_creation' => now(), 'expires_at' => now()->addDays(7)]
-            );
-        } else {
-            $sessionId = $request->session()->getId();
-            $cart = Panier::firstOrCreate(
-                ['session_id' => $sessionId, 'statut' => Panier::STATUT_ACTIF],
-                ['date_creation' => now(), 'expires_at' => now()->addDays(7)]
-            );
-        }
-
-        return $cart;
+        return $this->getOrCreateCart($request);
     }
 
     /**
@@ -271,5 +241,43 @@ class CartController extends Controller
                 'selected_count' => $selectedItems->sum('quantite'),
             ],
         ]);
+    }
+
+    private function getOrCreateClientForUser(User $user): Client
+    {
+        return $user->client()->firstOrCreate(
+            [],
+            [
+                'nom' => $user->name ?? 'Client',
+                'prenom' => '',
+                'email' => $user->email,
+                'type' => Client::TYPE_PARTICULIER,
+                'statut' => Client::STATUT_ACTIF,
+            ]
+        );
+    }
+
+    private function recordCartEvent(Request $request, Produit $produit): void
+    {
+        try {
+            $event = new VisitorEvent;
+            if (! $event->getConnection()->getSchemaBuilder()->hasTable($event->getTable())) {
+                return;
+            }
+
+            VisitorEvent::create([
+                'session_id' => Session::getId(),
+                'visitor_id' => $request->cookie('y_visitor'),
+                'event_type' => 'add_to_cart',
+                'product_id' => $produit->id,
+                'occurred_at' => now(),
+            ]);
+        } catch (QueryException $e) {
+            Log::debug('Add-to-cart visitor event skipped.', [
+                'tenant_id' => function_exists('tenant') ? tenant()?->id : null,
+                'product_id' => $produit->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 }

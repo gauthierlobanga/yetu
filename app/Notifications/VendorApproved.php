@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Tenant;
+use App\Services\VendorRegistrationService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -20,7 +21,8 @@ class VendorApproved extends Notification
 
     public function toMail($notifiable): MailMessage
     {
-        $shopUrl = 'http://'.$this->tenant->slug.'.'.config('app.domain').'/vendeur';
+        $shopUrl = app(VendorRegistrationService::class)
+            ->getTenantSsoLoginUrl($this->tenant, $notifiable);
 
         return (new MailMessage)
             ->subject('Votre boutique est prête !')

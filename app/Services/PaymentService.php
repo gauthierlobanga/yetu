@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Models\VendorRequest;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
@@ -142,13 +144,23 @@ class PaymentService
 
             // Approuver la demande de vendeur et créer le tenant + subscription
             $tenant = app(VendorRegistrationService::class)->approve($vendorRequest);
+            $tenant->load('subscription');
 
             if ($tenant->subscription) {
-                $tenant->subscription->update([
-                    'stripe_id' => $session->subscription ?? $tenant->subscription->stripe_id,
-                    'stripe_customer_id' => $session->customer ?? null,
-                    'stripe_subscription_id' => $session->subscription ?? null,
-                ]);
+                $updates = [];
+
+                if ($session->subscription) {
+                    $updates['stripe_id'] = $session->subscription;
+                    $updates['stripe_subscription_id'] = $session->subscription;
+                }
+
+                if ($session->customer) {
+                    $updates['stripe_customer_id'] = $session->customer;
+                }
+
+                if ($updates !== []) {
+                    $tenant->subscription->update($updates);
+                }
             }
 
             Log::info('Vendor payment completed and approved', [
@@ -192,19 +204,19 @@ class PaymentService
      */
     private function handleSubscriptionUpdated($stripeSubscription): array
     {
-        $subscription = \App\Models\Subscription::where('stripe_subscription_id', $stripeSubscription->id)->first();
+        $subscription = Subscription::where('stripe_subscription_id', $stripeSubscription->id)->first();
 
         if ($subscription) {
             $subscription->update([
                 'stripe_status' => $stripeSubscription->status,
-                'current_period_start' => \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_start),
-                'current_period_end' => \Carbon\Carbon::createFromTimestamp($stripeSubscription->current_period_end),
+                'current_period_start' => Carbon::createFromTimestamp($stripeSubscription->current_period_start),
+                'current_period_end' => Carbon::createFromTimestamp($stripeSubscription->current_period_end),
             ]);
 
             // Si le prix a changé sur Stripe (via portail), mettre à jour le plan localement
             $priceId = $stripeSubscription->items->data[0]->price->id;
             if ($subscription->stripe_price !== $priceId) {
-                $newPlan = \App\Models\Plan::where('stripe_price_id', $priceId)->first();
+                $newPlan = Plan::where('stripe_price_id', $priceId)->first();
                 if ($newPlan) {
                     $subscription->update([
                         'plan_id' => $newPlan->id,

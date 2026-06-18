@@ -10,7 +10,6 @@ use App\Models\Tenant;
 use App\Services\VendorRegistrationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Nnjeim\World\Models\Country;
@@ -212,16 +211,9 @@ class VendorRegistrationController extends Controller
         $vendorRequest = $this->vendorService->initiateRegistration($user, $request->validated());
         session()->forget('selected_plan_id');
 
-        $logoPath = null;
+        // Sauvegarder le logo temporairement dans la VendorRequest
         if ($request->hasFile('logo')) {
-            $logoPath = $request->file('logo')->store('temp_logos', 'public');
-        }
-
-        if ($logoPath || $request->filled('social_links')) {
-            Cache::put('vendor_request_extra_'.$vendorRequest->id, [
-                'logo_path' => $logoPath,
-                'social_links' => $request->input('social_links'),
-            ], now()->addHours(2));
+            $vendorRequest->addMediaFromRequest('logo')->toMediaCollection('tenant_avatar');
         }
 
         // Dispatcher le job de création (processus lourd)
