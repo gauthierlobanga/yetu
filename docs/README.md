@@ -29,6 +29,7 @@ Yetufy est une plateforme e-commerce multi-tenant complète avec:
 | **SOCIALITE_DEBUGGING.md**     | Debugging et tests                         |
 | **SOCIALITE_ADD_PROVIDERS.md** | Ajouter de nouveaux providers              |
 | **SOCIALITE_INDEX.md**         | Index complet Socialite                    |
+| **VENDOR_REGISTRATION_SSO.md** | Authentification Multi-Tenant (SSO)        |
 
 ### 📂 Structure du Projet
 
