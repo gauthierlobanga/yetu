@@ -24,6 +24,7 @@
         "definition-list": "off",
         "dlitem": "off"
       }
-    ]
+    ],
+    "axe/text-alternatives": "off"
   }
 }

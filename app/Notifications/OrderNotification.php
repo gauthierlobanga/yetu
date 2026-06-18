@@ -138,9 +138,9 @@ class OrderNotification extends Notification
         }
 
         if ($this->userType === 'vendor' && $this->tenantId) {
-            return route('vendor.orders.show', $order->id);
+            return route('tenant.orders.show', $order->id);
         }
 
-        return route('orders.show', $order->id);
+        return route('tenant.orders.show', $order->id);
     }
 }

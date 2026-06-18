@@ -6,11 +6,18 @@ use App\Http\Controllers\Admin\VisitorStatsController;
 use App\Http\Controllers\Api\VendorRequestStatusController;
 use App\Http\Controllers\Auth\TenantAccountController;
 use App\Http\Controllers\Auth\TenantSsoLoginController;
+use App\Http\Controllers\Central\Pages\About\AboutController;
 use App\Http\Controllers\Central\Pages\Blog\BlogCentralController;
 use App\Http\Controllers\Central\Pages\Contact\ContactCentralController;
+use App\Http\Controllers\Central\Pages\Cookie\CookieController;
 use App\Http\Controllers\Central\Pages\Entreprises\EntrepriseController;
+use App\Http\Controllers\Central\Pages\Faq\FaqController;
+use App\Http\Controllers\Central\Pages\Help\HelpController;
 use App\Http\Controllers\Central\Pages\Home\HeroCentralController;
-use App\Http\Controllers\Central\Pages\PageController;
+use App\Http\Controllers\Central\Pages\Privacy\PrivacyController;
+use App\Http\Controllers\Central\Pages\Support\SupportController;
+use App\Http\Controllers\Central\Pages\Term\TermController;
+use App\Http\Controllers\Central\Pages\Testimonials\TestimonialsController;
 use App\Http\Controllers\Vendor\Config\PaymentController;
 use App\Http\Controllers\Vendor\Config\VendorRegistrationController;
 use App\Models\Visit;
@@ -113,16 +120,16 @@ Route::prefix('blog')->group(function () {
     Route::post('/{post}/like', [BlogCentralController::class, 'blogLike'])->middleware('auth')->name('blog.like');
 });
 
-Route::get('/contact', [ContactCentralController::class, 'contactIndex'])->name('page.contact');
-Route::post('/contact', [ContactCentralController::class, 'contactStore'])->name('page.contact.store');
-Route::get('/help', [PageController::class, 'pageHelp'])->name('page.help');
-Route::get('/about', [PageController::class, 'pageAbout'])->name('page.about');
-Route::get('/terms', [PageController::class, 'pageTerms'])->name('page.terms');
-Route::get('/privacy', [PageController::class, 'pagePrivacy'])->name('page.privacy');
-Route::get('/cookies', [PageController::class, 'pageCookies'])->name('page.cookies');
-Route::get('/support', [PageController::class, 'pageSupport'])->name('page.support');
-Route::get('/faq', [PageController::class, 'pageFaq'])->name('page.faq');
-Route::get('/testimonials', [PageController::class, 'pageTestimonials'])->name('page.testimonials');
+Route::get('/contact', [ContactCentralController::class, 'contactIndex'])->name('contact');
+Route::post('/contact', [ContactCentralController::class, 'contactStore'])->name('contact.store');
+Route::get('/help', [HelpController::class, 'help'])->name('help');
+Route::get('/about', [AboutController::class, 'about'])->name('about');
+Route::get('/terms', [TermController::class, 'terms'])->name('terms');
+Route::get('/privacy', [PrivacyController::class, 'privacy'])->name('privacy');
+Route::get('/cookies', [CookieController::class, 'cookie'])->name('cookies');
+Route::get('/support', [SupportController::class, 'support'])->name('support');
+Route::get('/faq', [FaqController::class, 'faq'])->name('faq');
+Route::get('/testimonials', [TestimonialsController::class, 'testimonials'])->name('testimonials');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Devenir vendeur

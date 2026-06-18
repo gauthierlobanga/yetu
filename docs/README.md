@@ -75,20 +75,15 @@ composer run dev
 
 ### Premier Administrateur
 
-```php
-php artisan tinker
->>> App\Models\User::create([
-    'name' => 'Admin',
-    'email' => 'admin@example.com',
-    'password' => bcrypt('password'),
-])->assignRole('super_admin');
+```bash
+    php artisan db:seed --class=CreateAdminUserCentralSeeder
 ```
 
 ### Accès
 
 - 🌐 Application: `http://localhost:8000`
 - 🔐 Admin: `http://localhost:8000/admin`
-- Email: `admin@example.com`
+- Email: `yetufy@gmail.com`
 - Mot de passe: `password`
 
 ## 📊 Architecture
@@ -292,7 +287,6 @@ php artisan queue:restart
 ### Base de Données
 
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [MySQL Documentation](https://dev.mysql.com/doc/)
 - [Eloquent ORM](https://laravel.com/docs/eloquent)
 
 ### Outils

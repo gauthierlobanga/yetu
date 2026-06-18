@@ -52,10 +52,10 @@ function CountdownUnit({ value, label }: { value: number; label: string }) {
         <motion.div layout className="group flex flex-col items-center gap-2">
             <div className="relative">
                 {/* Glow */}
-                <div className="absolute inset-0 rounded-3xl bg-emerald-500/20 blur-xl transition-all duration-500 group-hover:bg-emerald-500/30 dark:bg-emerald-400/10" />
+                <div className="absolute inset-0 rounded-3xl bg-emerald-500/20 transition-all duration-500 group-hover:bg-emerald-500/30 dark:bg-emerald-400/10" />
 
                 {/* Box */}
-                <div className="relative flex h-18 w-18 items-center justify-center rounded-3xl border border-white/70 bg-white/90 shadow-[0_10px_30px_rgba(16,185,129,0.15)] backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/90 dark:shadow-[0_10px_30px_rgba(16,185,129,0.08)]">
+                <div className="relative flex h-18 w-18 items-center justify-center rounded-3xl border border-white/70 bg-white/90 dark:border-slate-700/70 dark:bg-slate-900/90">
                     <span className="bg-linear-to-br from-emerald-500 to-emerald-600 bg-clip-text text-2xl font-black tracking-tight text-transparent">
                         {String(value).padStart(2, '0')}
                     </span>
@@ -124,7 +124,7 @@ export function TrialCountdown({ trial }: { trial: Trial | null }) {
             transition={{ duration: 0.45, ease: 'easeOut' }}
             className="mb-8"
         >
-            <Card className="group relative overflow-hidden rounded-3xl border border-emerald-200/70 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-emerald-900/40 dark:bg-slate-950/80 dark:shadow-[0_20px_60px_rgba(0,0,0,0.45)]">
+            <Card className="group relative overflow-hidden rounded-3xl border border-emerald-200/70 bg-white/90 dark:border-emerald-900/40 dark:bg-slate-950/80">
                 {/* Decorative background */}
                 <div className="absolute inset-0 bg-linear-to-br from-emerald-50/80 via-white to-slate-50 dark:from-emerald-950/20 dark:via-slate-950 dark:to-slate-900" />
 

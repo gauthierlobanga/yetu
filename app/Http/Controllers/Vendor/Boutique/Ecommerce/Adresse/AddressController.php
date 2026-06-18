@@ -53,7 +53,7 @@ class AddressController extends Controller
         $defaultCountry = $country->name ?? 'République Démocratique du Congo';
         $defaultPhoneCode = $country->phone_code ?? '+243';
 
-        return Inertia::render('Shop/Addresses/Index', [
+        return Inertia::render('Vendor/boutique/Addresses/Index', [
             'addresses' => $addresses,
             'defaultCountry' => $defaultCountry,
             'defaultPhoneCode' => $defaultPhoneCode,

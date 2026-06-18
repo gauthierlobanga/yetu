@@ -38,7 +38,7 @@ class PaymentNotification extends Notification
             ->subject($this->getMailSubject($status))
             ->greeting("Bonjour {$notifiable->name},")
             ->line($this->getMailLine($status, $amount, $order))
-            ->action('Voir les détails', route('orders.show', $order?->id ?? '#'))
+            ->action('Voir les détails', route('tenant.orders.show', $order?->id ?? '#'))
             ->line('Merci!');
     }
 

@@ -95,7 +95,7 @@ class BlogBoutiqueController extends Controller
             ->orderBy('nom')
             ->get();
 
-        return Inertia::render('main/blog/list/List', [
+        return Inertia::render('Vendor/pages/blog/list/List', [
             'posts' => PostResource::collection($posts),
             'categories' => CategoryResource::collection($categories),
             'filters' => $filters,
@@ -106,26 +106,6 @@ class BlogBoutiqueController extends Controller
     /**
      * Affiche un post spécifique.
      */
-    // public function blogShow(Post $post, Request $request)
-    // {
-    //     $post->incrementViews();
-    //     $post->load(['categories', 'media', 'user', 'tags']);
-
-    //     $previousPost = $post->getPreviousPublished();
-    //     $nextPost = $post->getNextPublished();
-    //     $relatedPosts = $post->getRelatedPosts(3);
-
-    //     $data = [
-    //         'post' => new PostResource($post),
-    //         'previousPost' => $previousPost ? new PostResource($previousPost) : null,
-    //         'nextPost' => $nextPost ? new PostResource($nextPost) : null,
-    //         'relatedPosts' => PostResource::collection($relatedPosts),
-    //     ];
-
-    //     Log::info('Données envoyées à Inertia', $data);
-
-    //     return Inertia::render('main/blog/show/Show', $data);
-    // }
     public function blogShow(Post $post, Request $request)
     {
         $user = Auth::user();
@@ -138,7 +118,7 @@ class BlogBoutiqueController extends Controller
 
         $postResource = (new PostResource($post))->resolve();
 
-        return Inertia::render('main/blog/show/Show', [
+        return Inertia::render('Vendor/pages/blog/show/Show', [
             'post' => [
                 'data' => array_merge($postResource, [
                     'is_liked' => $post->isLikedBy($user),

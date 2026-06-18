@@ -18,7 +18,7 @@ class ReturnController extends Controller
         $returns = Retour::whereHas('commande', fn ($q) => $q->where('client_id', $client->id))
             ->with('commande')->latest()->paginate(10);
 
-        return Inertia::render('Shop/Returns/Index', ['returns' => $returns]);
+        return Inertia::render('Vendor/boutique/Returns/Index', ['returns' => $returns]);
     }
 
     public function returnsCreate(Commande $commande)
@@ -27,7 +27,7 @@ class ReturnController extends Controller
         $this->authorize('return', $commande);
         $commande->load('lignes.produit');
 
-        return Inertia::render('Shop/Returns/Create', ['commande' => $commande]);
+        return Inertia::render('Vendor/boutique/Returns/Create', ['commande' => $commande]);
     }
 
     public function returnsStore(Request $request)
@@ -70,6 +70,6 @@ class ReturnController extends Controller
         $this->authorize('view', $retour);
         $retour->load(['lignes.ligneCommande.produit', 'commande']);
 
-        return Inertia::render('Shop/Returns/Show', ['return' => $retour]);
+        return Inertia::render('Vendor/boutique/Returns/Show', ['return' => $retour]);
     }
 }

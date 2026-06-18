@@ -183,7 +183,7 @@ class HomeController extends Controller
                 ->map(fn ($brand) => $this->formatBrand($brand))
             : collect();
 
-        return Inertia::render('main/home/Home', [
+        return Inertia::render('Vendor/pages/home/Home', [
             'featuredProducts' => $featuredProducts,
             'trendingProducts' => $trendingProducts,
             'categories' => $categories,

@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner';
 import AppLayoutTemplate from '@/layouts/app/app-header-layout';
 import type { AppLayoutProps } from '@/types';
 import FooterSection from './app/app-footer';
+import FooterSectionVendeur from './Vendor/app/app-footer';
 
 export default function MainLayout({
     children,
@@ -29,7 +30,7 @@ export default function MainLayout({
                 expand={true}
                 duration={5000}
             />
-            <FooterSection />
+            {isTenant ? <FooterSectionVendeur /> : <FooterSection />}
         </AppLayoutTemplate>
     );
 }

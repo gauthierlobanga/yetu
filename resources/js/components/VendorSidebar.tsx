@@ -217,42 +217,32 @@ export function VendorSidebar({ tenant }: { tenant: Tenant }) {
                     <div className="relative">
                         {tenant.logo_url ? (
                             <div className="relative">
-                                <div className="absolute inset-0 rounded-2xl bg-emerald-500/30 blur-md transition-opacity group-hover:opacity-100" />
                                 <img
                                     src={tenant.logo_url}
                                     alt={tenant.raison_sociale}
                                     className={cn(
                                         'relative h-11 w-11 rounded-2xl object-cover',
                                         'border border-white/80 dark:border-slate-700/70',
-                                        'shadow-[0_8px_24px_rgba(16,185,129,0.15)]',
-                                        'transition-all duration-300 hover:scale-105 hover:shadow-[0_12px_28px_rgba(16,185,129,0.25)]',
+                                        'transition-all duration-300 hover:scale-105',
                                     )}
                                 />
                             </div>
                         ) : (
                             <div className="relative">
-                                <div className="absolute inset-0 rounded-2xl bg-emerald-500/30 blur-md" />
-                                <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 via-emerald-600 to-emerald-700 text-white shadow-[0_10px_30px_rgba(16,185,129,0.25)] transition-all duration-300 hover:scale-105">
+                                <div className="absolute inset-0 rounded-2xl bg-emerald-500/30" />
+                                <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-linear-to-br from-emerald-500 via-emerald-600 to-emerald-700 text-white transition-all duration-300 hover:scale-105">
                                     <div className="absolute inset-0 rounded-2xl bg-white/10" />
                                     <ShoppingBag className="relative h-5 w-5" />
                                 </div>
                             </div>
                         )}
-                        {/* Indicateur de statut (en ligne / hors ligne) - optionnel */}
-                        <div className="absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
                     </div>
 
                     {/* Informations texte */}
                     <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                        <p className="truncate text-sm font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+                        <p className="truncate text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
                             {tenant.raison_sociale}
                         </p>
-                        <div className="mt-0.5 flex items-center gap-1.5">
-                            <div className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            <p className="truncate text-xs font-medium text-slate-500 dark:text-slate-400">
-                                {tenant.plan?.name ?? 'Plan Gratuit'}
-                            </p>
-                        </div>
                     </div>
 
                     {/* Icône de notification ou de paramètres rapides (optionnel) */}

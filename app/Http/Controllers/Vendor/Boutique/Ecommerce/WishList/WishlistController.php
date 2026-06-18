@@ -20,7 +20,7 @@ class WishlistController extends Controller
         // Optimisation : eager loading de produit.media pour éviter un LazyLoadingViolation
         $items = $wishlist->items()->with('produit.media')->get();
 
-        return Inertia::render('Shop/Wishlist/Index', [
+        return Inertia::render('Vendor/boutique/Wishlist/Index', [
             'wishlist' => $wishlist,
             'items' => $items->map(fn ($i) => [
                 'id' => $i->id,
@@ -37,7 +37,7 @@ class WishlistController extends Controller
         $wishlist = $client->wishlists()->firstOrCreate(['nom' => 'Ma liste'], ['est_publique' => false]);
         $items = $wishlist->items()->with('produit.media')->get();
 
-        return Inertia::render('Shop/Wishlist/Index', [
+        return Inertia::render('Vendor/boutique/Wishlist/Index', [
             'wishlist' => $wishlist,
             'items' => $items->map(fn ($i) => [
                 'id' => $i->id,

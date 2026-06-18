@@ -8,7 +8,6 @@ use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionContro
 use App\Http\Controllers\Admin\VisitorAnalyticsController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\TenantSsoLoginController;
-use App\Http\Controllers\Central\Pages\PageController;
 use App\Http\Controllers\Others\SearchController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
@@ -28,9 +27,17 @@ use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ReviewController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Promotion\PromotionController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Return\ReturnController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\WishList\WishlistController;
+use App\Http\Controllers\Vendor\Boutique\Pages\About\AboutController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Blog\BlogBoutiqueController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Comments\CommentController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Contact\ContactBoutiqueController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Cookie\CookieController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Faq\FaqController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Help\HelpController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Privacy\PrivacyController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Support\SupportController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Term\TermController;
+use App\Http\Controllers\Vendor\Boutique\Pages\Testimonials\TestimonialsController;
 use App\Http\Controllers\Vendor\Config\LocationController;
 use App\Http\Controllers\Vendor\Settings\ParametresController;
 use App\Http\Controllers\Vendor\Settings\ParametresSecurityController;
@@ -47,7 +54,6 @@ use App\Http\Controllers\Vendor\Vendeurs\VendorSettingsController;
 use App\Http\Controllers\Vendor\Vendeurs\VendorStatisticsController;
 use App\Http\Controllers\Vendor\Vendeurs\VisitorStatsController;
 use App\Http\Middleware\EnsureTenantSubscription;
-use App\Http\Middleware\InitializeTenancyForTenantDomains;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -266,19 +272,19 @@ Route::middleware([
         Route::get('/api/search', [SearchController::class, 'shopSearch'])->name('search');
         Route::get('/search', [SearchController::class, 'shopApi'])->name('api');
 
-        Route::prefix('page')->group(function () {
+        // Route::prefix('page')->group(function () {
             Route::get('/contact', [ContactBoutiqueController::class, 'contactIndex'])->name('page.contact');
             Route::post('/contact', [ContactBoutiqueController::class, 'contactStore'])->name('page.contact.store');
 
-            Route::get('/help', [PageController::class, 'pageHelp'])->name('page.help');
-            Route::get('/about', [PageController::class, 'pageAbout'])->name('page.about');
-            Route::get('/terms', [PageController::class, 'pageTerms'])->name('page.terms');
-            Route::get('/privacy', [PageController::class, 'pagePrivacy'])->name('page.privacy');
-            Route::get('/cookies', [PageController::class, 'pageCookies'])->name('page.cookies');
-            Route::get('/support', [PageController::class, 'pageSupport'])->name('page.support');
-            Route::get('/faq', [PageController::class, 'pageFaq'])->name('page.faq');
-            Route::get('/testimonials', [PageController::class, 'pageTestimonials'])->name('page.testimonials');
-        });
+            Route::get('/help', [HelpController::class, 'help'])->name('page.help');
+            Route::get('/about', [AboutController::class, 'about'])->name('page.about');
+            Route::get('/terms', [TermController::class, 'terms'])->name('page.terms');
+            Route::get('/privacy', [PrivacyController::class, 'privacy'])->name('page.privacy');
+            Route::get('/cookies', [CookieController::class, 'cookies'])->name('page.cookies');
+            Route::get('/support', [SupportController::class, 'support'])->name('page.support');
+            Route::get('/faq', [FaqController::class, 'faq'])->name('page.faq');
+            Route::get('/testimonials', [TestimonialsController::class, 'testimonials'])->name('page.testimonials');
+        // });
         /*
         |--------------------------------------------------------------------------
         | ROUTES BLOG PUBLIQUES

@@ -16,7 +16,7 @@ class PaymentController extends Controller
         $this->authorize('pay', $commande);
 
         // Simuler une intégration Stripe
-        return Inertia::render('Shop/Payment/Pay', [
+        return Inertia::render('Vendor/boutique/Payment/Pay', [
             'commande' => $commande,
             'clientSecret' => 'pi_dummy_secret',
         ]);

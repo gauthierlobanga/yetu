@@ -84,7 +84,7 @@ class CheckoutController extends Controller
             'occurred_at' => now(),
         ]);
 
-        return Inertia::render('Shop/Checkout/Index', [
+        return Inertia::render('Vendor/boutique/Checkout/Index', [
             'cart' => $this->cartController->formatCart($cart),
             'addresses' => $addresses,
             'shippingMethods' => $shippingMethods,
@@ -210,7 +210,7 @@ class CheckoutController extends Controller
             'occurred_at' => now(),
         ]);
 
-        return Inertia::render('Shop/Checkout/Success', [
+        return Inertia::render('Vendor/boutique/Checkout/Success', [
             'commande' => $commande->load('lignes.produit'),
         ]);
     }

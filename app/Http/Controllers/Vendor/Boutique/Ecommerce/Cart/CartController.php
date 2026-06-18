@@ -25,7 +25,7 @@ class CartController extends Controller
     {
         $cart = $this->getOrCreateCart($request);
 
-        return Inertia::render('Shop/Carts/Index', [
+        return Inertia::render('Vendor/boutique/Carts/Index', [
             'cart' => $this->formatCart($cart),
         ]);
     }

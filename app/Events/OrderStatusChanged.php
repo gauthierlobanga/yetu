@@ -2,7 +2,7 @@
 
 namespace App\Events;
 
-use App\Models\Order;
+use App\Models\Commande;
 use App\Notifications\OrderNotification;
 use App\Services\NotificationService;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -13,7 +13,7 @@ class OrderStatusChanged
     use Dispatchable, SerializesModels;
 
     public function __construct(
-        public Order $order,
+        public Commande $order,
         public string $oldStatus,
         public string $newStatus,
     ) {}

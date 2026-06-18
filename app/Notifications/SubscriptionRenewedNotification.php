@@ -30,7 +30,7 @@ class SubscriptionRenewedNotification extends Notification implements ShouldQueu
             ->greeting("Bonjour {$notifiable->name},")
             ->line("Votre subscription pour **{$this->tenant->raison_sociale}** a été renouvelée avec succès!")
             ->line("Votre accès est valide jusqu'au {$this->renewedUntil?->format('d/m/Y')}.")
-            ->action('Accéder à mon dashboard', route('tenant.dashboard'))
+            ->action('Accéder à mon dashboard', route('vendor.dashboard'))
             ->line('Merci de votre confiance!');
     }
 

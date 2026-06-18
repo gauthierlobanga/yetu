@@ -9,6 +9,6 @@ class EntrepriseController extends Controller
 {
     public function entrepriseIndex()
     {
-        return Inertia::render('SaaSLanding/entreprise/Index');
+        return Inertia::render('app/entreprise/Index');
     }
 }

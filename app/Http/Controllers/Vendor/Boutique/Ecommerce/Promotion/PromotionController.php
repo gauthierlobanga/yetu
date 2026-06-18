@@ -20,7 +20,7 @@ class PromotionController extends Controller
             })
             ->get();
 
-        return Inertia::render('Shop/Promotions/Index', [
+        return Inertia::render('Vendor/boutique/Promotions/Index', [
             'promotions' => $promotions,
         ]);
     }

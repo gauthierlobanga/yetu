@@ -15,7 +15,7 @@ class OrderController extends Controller
         $client = Auth::user()->client;
         $orders = $client->commandes()->with('lignes.produit')->latest()->paginate(10);
 
-        return Inertia::render('Shop/Orders/Index', ['orders' => $orders]);
+        return Inertia::render('Vendor/boutique/Orders/Index', ['orders' => $orders]);
     }
 
     public function ordersShow(Commande $commande)
@@ -24,7 +24,7 @@ class OrderController extends Controller
         $this->authorize('view', $commande);
         $commande->load(['lignes.produit', 'adresseFacturation', 'adresseLivraison', 'paiements']);
 
-        return Inertia::render('Shop/Orders/Show', ['order' => $commande]);
+        return Inertia::render('Vendor/boutique/Orders/Show', ['order' => $commande]);
     }
 
     public function ordersCancel(Commande $commande)

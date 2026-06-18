@@ -14,12 +14,12 @@ class ContactBoutiqueController extends Controller
 {
     public function contactIndex(): Response
     {
-        return Inertia::render('main/contact/Contact', $this->getPageProps());
+        return Inertia::render('Vendor/pages/contact-us/Contact', $this->getPageProps());
     }
 
     public function contactCreate(): Response
     {
-        return Inertia::render('main/contact/Contact', $this->getPageProps());
+        return Inertia::render('Vendor/pages/contact-us/Contact', $this->getPageProps());
     }
 
     public function contactStore(StoreContactRequest $request): RedirectResponse

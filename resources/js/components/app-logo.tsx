@@ -36,7 +36,7 @@ export default function AppLogo() {
                 </div>
             )}
             <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="bg-linear-to-r from-primary to-primary bg-clip-text text-2xl font-semibold text-transparent">
+                <span className="text-slate-900 dark:text-slate-100 bg-clip-text text-2xl font-medium">
                     {displayName}
                 </span>
             </div>

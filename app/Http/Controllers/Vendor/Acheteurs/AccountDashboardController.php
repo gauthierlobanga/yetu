@@ -285,7 +285,7 @@ class AccountDashboardController extends Controller
         |--------------------------------------------------------------------------
         */
         return Inertia::render(
-            'Shop/Acheteur/Dashboard/dashboard-acheteurs',
+            'Vendor/boutique/Acheteur/Dashboard/dashboard-acheteurs',
             [
                 'stats' => [
                     'orders_count' => $totalOrders,

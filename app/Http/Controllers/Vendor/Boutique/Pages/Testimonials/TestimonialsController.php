@@ -8,6 +8,6 @@ class TestimonialsController extends Controller
 {
     public function index()
     {
-        return inertia('Shop/Testimonials/Index', []);
+        return inertia('Vendor/pages/testimonials/Testimonials', []);
     }
 }

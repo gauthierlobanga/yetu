@@ -55,6 +55,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 /*                                  Helpers                                   */
 /* -------------------------------------------------------------------------- */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const formatPrice = (price: number) =>
     new Intl.NumberFormat('fr-CD', {
         style: 'currency',

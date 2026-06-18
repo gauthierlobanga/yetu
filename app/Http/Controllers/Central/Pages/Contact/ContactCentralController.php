@@ -14,12 +14,12 @@ class ContactCentralController extends Controller
 {
     public function contactIndex(): Response
     {
-        return Inertia::render('main/contact/Contact', $this->getPageProps());
+        return Inertia::render('app/contact-us/Contact', $this->getPageProps());
     }
 
     public function contactCreate(): Response
     {
-        return Inertia::render('main/contact/Contact', $this->getPageProps());
+        return Inertia::render('app/contact-us/Contact', $this->getPageProps());
     }
 
     public function contactStore(StoreContactRequest $request): RedirectResponse
@@ -45,7 +45,7 @@ class ContactCentralController extends Controller
             ]),
         ]);
 
-        return to_route('tenant.page.contact')->with('success', 'Votre message a bien ete envoye. Notre equipe vous recontactera tres vite.');
+        return to_route('contact')->with('success', 'Votre message a bien ete envoye. Notre equipe vous recontactera tres vite.');
     }
 
     private function getPageProps(): array

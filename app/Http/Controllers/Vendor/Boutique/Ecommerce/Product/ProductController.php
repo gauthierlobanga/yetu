@@ -135,7 +135,7 @@ class ProductController extends Controller
         ')
             ->first();
 
-        return Inertia::render('Shop/Products/Index', [
+        return Inertia::render('Vendor/boutique/Products/Index', [
             'products' => $products,
             'categories' => $categories,
             'brands' => $brands,
@@ -167,7 +167,7 @@ class ProductController extends Controller
             'viewed_at' => now(),
         ]);
 
-        return Inertia::render('Shop/Products/Show', [
+        return Inertia::render('Vendor/boutique/Products/Show', [
             'product' => $this->formatProduct($produit, true),
             'relatedProducts' => $related,
         ]);

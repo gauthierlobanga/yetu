@@ -1,6 +1,6 @@
 // resources/js/components/navigation/ProductsMenuContent.tsx
 import { Link } from '@inertiajs/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
     ArrowRight,
     Building2,

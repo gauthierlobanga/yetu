@@ -33,19 +33,19 @@ const resources = [
         icon: HelpCircle,
         label: "Centre d'aide",
         description: 'Réponses à vos questions',
-        href: route('page.help'),
+        href: route('help'),
     },
     {
         icon: HelpCircle,
         label: 'À propos',
         description: 'Découvrez notre mission',
-        href: route('page.about'),
+        href: route('about'),
     },
     {
         icon: Mail,
         label: 'Contact',
         description: 'Notre équipe vous répond',
-        href: route('page.contact'),
+        href: route('contact'),
     },
 ];
 

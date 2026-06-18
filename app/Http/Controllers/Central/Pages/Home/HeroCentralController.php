@@ -31,9 +31,9 @@ class HeroCentralController extends Controller
         ]);
 
         $stats = [
-            'stores_created' => Tenant::count(),
-            'products_listed' => Produit::published()->count(),
-            'countries_served' => Country::count(),
+            'stores_created' => Tenant::count('id'),
+            'products_listed' => Produit::published()->count('id'),
+            'countries_served' => Country::count('id'),
         ];
 
         $testimonials = [
@@ -51,7 +51,7 @@ class HeroCentralController extends Controller
             ],
         ];
 
-        return Inertia::render('SaaSLanding/Home', [
+        return Inertia::render('app/home/Home', [
             'plans' => $plans,
             'stats' => $stats,
             'testimonials' => $testimonials,

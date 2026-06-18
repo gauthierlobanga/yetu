@@ -52,7 +52,7 @@ class LoyaltyController extends Controller
             'niveau' => 'bronze',
         ]);
 
-        return Inertia::render('Shop/Loyalty/Index', [
+        return Inertia::render('Vendor/boutique/Loyalty/Index', [
             'compte' => $compte->load('transactions'),
         ]);
     }

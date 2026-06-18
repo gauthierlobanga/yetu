@@ -14,7 +14,7 @@ class CategoryController extends Controller
         $categories = ProductCategory::active()->ordered()->with('media')->get()
             ->map(fn ($c) => $this->formatCategory($c));
 
-        return Inertia::render('Shop/Categories/Index', ['categories' => $categories]);
+        return Inertia::render('Vendor/boutique/Categories/Index', ['categories' => $categories]);
     }
 
     public function categoriesShow(ProductCategory $category)
@@ -27,7 +27,7 @@ class CategoryController extends Controller
         $subcategories = $category->children()->active()->ordered()->get()->map(fn ($c) => $this->formatCategory($c));
         $breadcrumb = $category->getBreadcrumb();
 
-        return Inertia::render('Shop/Categories/Show', [
+        return Inertia::render('Vendor/boutique/Categories/Show', [
             'category' => $this->formatCategory($category),
             'products' => $products,
             'subcategories' => $subcategories,
