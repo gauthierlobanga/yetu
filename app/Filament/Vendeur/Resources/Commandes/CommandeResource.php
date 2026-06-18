@@ -10,7 +10,6 @@ use App\Filament\Vendeur\Resources\Commandes\Pages\ViewCommande;
 use App\Filament\Vendeur\Resources\Commandes\Schemas\CommandeForm;
 use App\Filament\Vendeur\Resources\Commandes\Tables\CommandesTable;
 use App\Models\Commande;
-use BackedEnum;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
@@ -18,7 +17,6 @@ use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -26,8 +24,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class CommandeResource extends Resource
 {
     protected static ?string $model = Commande::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingCart;
 
     protected static ?string $recordTitleAttribute = 'numero_commande';
 

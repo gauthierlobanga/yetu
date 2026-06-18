@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Promotions\Pages\ListPromotions;
 use App\Filament\Vendeur\Resources\Promotions\Schemas\PromotionForm;
 use App\Filament\Vendeur\Resources\Promotions\Tables\PromotionsTable;
 use App\Models\Promotion;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -21,15 +19,11 @@ class PromotionResource extends Resource
 {
     protected static ?string $model = Promotion::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
-
     protected static ?string $recordTitleAttribute = 'code';
 
     protected static ?string $cluster = PromotionsCluster::class;
 
     protected static ?int $navigationSort = 1;
-
-    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Entrepots\Pages\ListEntrepots;
 use App\Filament\Vendeur\Resources\Entrepots\Schemas\EntrepotForm;
 use App\Filament\Vendeur\Resources\Entrepots\Tables\EntrepotsTable;
 use App\Models\Entrepot;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -21,13 +19,9 @@ class EntrepotResource extends Resource
 {
     protected static ?string $model = Entrepot::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
-
     protected static ?string $cluster = InventorCluster::class;
 
     protected static ?string $recordTitleAttribute = 'nom';
-
-    protected static bool $isScopedToTenant = false;
 
     public static function getNavigationBadge(): ?string
     {

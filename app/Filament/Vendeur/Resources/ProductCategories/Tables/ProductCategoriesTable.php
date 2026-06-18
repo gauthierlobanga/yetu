@@ -272,6 +272,7 @@ class ProductCategoriesTable
             ->paginated([10, 25, 50, 100, 'all'])
             ->persistFiltersInSession()
             ->persistSearchInSession()
-            ->defaultSort('order');
+            ->defaultSort('order')
+            ->modifyQueryUsing(fn ($query) => $query->with('parent')); // <= Ajout
     }
 }

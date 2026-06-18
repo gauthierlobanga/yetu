@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Produits\Pages\ListProduits;
 use App\Filament\Vendeur\Resources\Produits\Schemas\ProduitForm;
 use App\Filament\Vendeur\Resources\Produits\Tables\ProduitsTable;
 use App\Models\Produit;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ProduitResource extends Resource
 {
     protected static ?string $model = Produit::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
 
     protected static ?string $cluster = ProductsCluster::class;
 

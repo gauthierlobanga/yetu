@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\CampagneMarketings\Pages\ListCampagneMarketin
 use App\Filament\Vendeur\Resources\CampagneMarketings\Schemas\CampagneMarketingForm;
 use App\Filament\Vendeur\Resources\CampagneMarketings\Tables\CampagneMarketingsTable;
 use App\Models\Marketing;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -22,8 +20,6 @@ class CampagneMarketingResource extends Resource
     protected static ?string $model = Marketing::class;
 
     protected static ?string $navigationLabel = 'Marketing';
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMegaphone;
 
     protected static ?string $recordTitleAttribute = 'nom';
 

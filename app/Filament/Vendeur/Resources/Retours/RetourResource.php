@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Retours\Pages\ListRetours;
 use App\Filament\Vendeur\Resources\Retours\Schemas\RetourForm;
 use App\Filament\Vendeur\Resources\Retours\Tables\RetoursTable;
 use App\Models\Retour;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class RetourResource extends Resource
 {
     protected static ?string $model = Retour::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUturnLeft;
 
     protected static ?string $recordTitleAttribute = 'reference';
 

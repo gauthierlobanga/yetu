@@ -259,7 +259,7 @@ export default function VendorDashboard({
 
     return (
         <SidebarProvider
-            className="dark:bg-slate-900"
+            className="bg-slate-950/94 p-0"
             style={
                 {
                     '--sidebar-width': 'calc(var(--spacing) * 72)',

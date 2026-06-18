@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\PromotionPaniers\Pages\ListPromotionPaniers;
 use App\Filament\Vendeur\Resources\PromotionPaniers\Schemas\PromotionPanierForm;
 use App\Filament\Vendeur\Resources\PromotionPaniers\Tables\PromotionPaniersTable;
 use App\Models\PromotionPanier;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class PromotionPanierResource extends Resource
 {
     protected static ?string $model = PromotionPanier::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingCart;
 
     protected static ?string $recordTitleAttribute = 'promotion_id';
 

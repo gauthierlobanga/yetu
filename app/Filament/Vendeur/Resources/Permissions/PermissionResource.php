@@ -9,18 +9,14 @@ use App\Filament\Vendeur\Resources\Permissions\Pages\ListPermissions;
 use App\Filament\Vendeur\Resources\Permissions\Schemas\PermissionForm;
 use App\Filament\Vendeur\Resources\Permissions\Tables\PermissionsTable;
 use App\Models\Permission;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
 class PermissionResource extends Resource
 {
     protected static ?string $model = Permission::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Shield;
 

@@ -10,10 +10,8 @@ use App\Filament\Vendeur\Resources\Comments\Schemas\CommentForm;
 use App\Filament\Vendeur\Resources\Comments\Tables\CommentsTable;
 use App\Models\Comment;
 use App\Models\Post;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -22,8 +20,6 @@ use UnitEnum;
 class CommentResource extends Resource
 {
     protected static ?string $model = Comment::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'user_id';
 

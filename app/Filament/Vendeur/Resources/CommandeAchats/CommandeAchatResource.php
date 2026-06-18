@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\CommandeAchats\Pages\ListCommandeAchats;
 use App\Filament\Vendeur\Resources\CommandeAchats\Schemas\CommandeAchatForm;
 use App\Filament\Vendeur\Resources\CommandeAchats\Tables\CommandeAchatsTable;
 use App\Models\CommandeAchat;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class CommandeAchatResource extends Resource
 {
     protected static ?string $model = CommandeAchat::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShoppingBag;
 
     protected static ?string $recordTitleAttribute = 'numero_commande';
 

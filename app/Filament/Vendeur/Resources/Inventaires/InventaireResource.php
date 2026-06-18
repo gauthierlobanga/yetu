@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Inventaires\Pages\ListInventaires;
 use App\Filament\Vendeur\Resources\Inventaires\Schemas\InventaireForm;
 use App\Filament\Vendeur\Resources\Inventaires\Tables\InventairesTable;
 use App\Models\Inventaire;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class InventaireResource extends Resource
 {
     protected static ?string $model = Inventaire::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
 
     protected static ?string $cluster = InventorCluster::class;
 

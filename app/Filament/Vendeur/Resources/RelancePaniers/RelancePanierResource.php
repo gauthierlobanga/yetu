@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\RelancePaniers\Pages\ListRelancePaniers;
 use App\Filament\Vendeur\Resources\RelancePaniers\Schemas\RelancePanierForm;
 use App\Filament\Vendeur\Resources\RelancePaniers\Tables\RelancePaniersTable;
 use App\Models\RelancePanier;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -21,15 +19,11 @@ class RelancePanierResource extends Resource
 {
     protected static ?string $model = RelancePanier::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChatBubbleLeft;
-
     protected static ?string $recordTitleAttribute = 'canal';
 
     protected static ?string $cluster = PaniersCluster::class;
 
     protected static ?int $navigationSort = 4;
-
-    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

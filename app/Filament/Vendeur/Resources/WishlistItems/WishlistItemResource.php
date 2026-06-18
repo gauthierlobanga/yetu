@@ -9,25 +9,19 @@ use App\Filament\Vendeur\Resources\WishlistItems\Pages\ListWishlistItems;
 use App\Filament\Vendeur\Resources\WishlistItems\Schemas\WishlistItemForm;
 use App\Filament\Vendeur\Resources\WishlistItems\Tables\WishlistItemsTable;
 use App\Models\WishlistItem;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class WishlistItemResource extends Resource
 {
     protected static ?string $model = WishlistItem::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquaresPlus;
-
     protected static ?string $recordTitleAttribute = 'wishlist_id';
 
     protected static ?int $navigationSort = 2;
 
     protected static ?string $cluster = WishlistsCluster::class;
-
-    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

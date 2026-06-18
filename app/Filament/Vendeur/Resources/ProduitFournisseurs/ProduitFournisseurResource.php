@@ -9,17 +9,13 @@ use App\Filament\Vendeur\Resources\ProduitFournisseurs\Pages\ListProduitFourniss
 use App\Filament\Vendeur\Resources\ProduitFournisseurs\Schemas\ProduitFournisseurForm;
 use App\Filament\Vendeur\Resources\ProduitFournisseurs\Tables\ProduitFournisseursTable;
 use App\Models\ProduitFournisseur;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
 class ProduitFournisseurResource extends Resource
 {
     protected static ?string $model = ProduitFournisseur::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
     protected static ?string $cluster = ProductsCluster::class;
 

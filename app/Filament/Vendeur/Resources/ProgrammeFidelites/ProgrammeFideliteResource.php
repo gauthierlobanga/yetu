@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\ProgrammeFidelites\Pages\ListProgrammeFidelit
 use App\Filament\Vendeur\Resources\ProgrammeFidelites\Schemas\ProgrammeFideliteForm;
 use App\Filament\Vendeur\Resources\ProgrammeFidelites\Tables\ProgrammeFidelitesTable;
 use App\Models\ProgrammeFidelite;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ProgrammeFideliteResource extends Resource
 {
     protected static ?string $model = ProgrammeFidelite::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedStar;
 
     protected static ?string $recordTitleAttribute = 'nom';
 

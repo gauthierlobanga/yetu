@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\LigneRetours\Pages\ListLigneRetours;
 use App\Filament\Vendeur\Resources\LigneRetours\Schemas\LigneRetourForm;
 use App\Filament\Vendeur\Resources\LigneRetours\Tables\LigneRetoursTable;
 use App\Models\LigneRetour;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class LigneRetourResource extends Resource
 {
     protected static ?string $model = LigneRetour::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentArrowUp;
 
     protected static ?string $recordTitleAttribute = 'retour_id';
 

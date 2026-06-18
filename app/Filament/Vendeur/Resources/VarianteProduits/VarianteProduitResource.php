@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\VarianteProduits\Pages\ListVarianteProduits;
 use App\Filament\Vendeur\Resources\VarianteProduits\Schemas\VarianteProduitForm;
 use App\Filament\Vendeur\Resources\VarianteProduits\Tables\VarianteProduitsTable;
 use App\Models\VarianteProduit;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -21,13 +19,9 @@ class VarianteProduitResource extends Resource
 {
     protected static ?string $model = VarianteProduit::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquare3Stack3d;
-
     protected static ?string $cluster = ProductsCluster::class;
 
     protected static ?string $recordTitleAttribute = 'nom';
-
-    protected static bool $isScopedToTenant = false;
 
     protected static ?int $navigationSort = 3;
 

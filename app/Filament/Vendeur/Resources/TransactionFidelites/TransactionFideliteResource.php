@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\TransactionFidelites\Pages\ListTransactionFid
 use App\Filament\Vendeur\Resources\TransactionFidelites\Schemas\TransactionFideliteForm;
 use App\Filament\Vendeur\Resources\TransactionFidelites\Tables\TransactionFidelitesTable;
 use App\Models\TransactionFidelite;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -20,15 +18,11 @@ class TransactionFideliteResource extends Resource
 {
     protected static ?string $model = TransactionFidelite::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
     protected static ?string $recordTitleAttribute = 'compte_fidelite_id';
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Shop;
 
     protected static ?int $navigationSort = 10;
-
-    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

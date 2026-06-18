@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\AvisClients\Pages\ListAvisClients;
 use App\Filament\Vendeur\Resources\AvisClients\Schemas\AvisClientForm;
 use App\Filament\Vendeur\Resources\AvisClients\Tables\AvisClientsTable;
 use App\Models\AvisClient;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -22,11 +20,7 @@ class AvisClientResource extends Resource
 {
     protected static ?string $model = AvisClient::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Shop;
-
-    protected static bool $isScopedToTenant = false;
 
     protected static ?int $navigationSort = 9;
 

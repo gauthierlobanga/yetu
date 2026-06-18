@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Remboursements\Pages\ListRemboursements;
 use App\Filament\Vendeur\Resources\Remboursements\Schemas\RemboursementForm;
 use App\Filament\Vendeur\Resources\Remboursements\Tables\RemboursementsTable;
 use App\Models\Remboursement;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -21,13 +19,9 @@ class RemboursementResource extends Resource
 {
     protected static ?string $model = Remboursement::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyEuro;
-
     protected static ?string $recordTitleAttribute = 'reference';
 
     protected static ?string $cluster = CommandesCluster::class;
-
-    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

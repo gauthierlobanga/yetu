@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Coupons\Pages\ListCoupons;
 use App\Filament\Vendeur\Resources\Coupons\Schemas\CouponForm;
 use App\Filament\Vendeur\Resources\Coupons\Tables\CouponsTable;
 use App\Models\Coupon;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class CouponResource extends Resource
 {
     protected static ?string $model = Coupon::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;
 
     protected static ?string $cluster = InventorCluster::class;
 

@@ -333,14 +333,32 @@ class ProductCategory extends Model implements HasMedia, Sitemapable
     public function getLevelAttribute(): int
     {
         $level = 0;
-        $parent = $this->parent;
+        $parent = $this->parent()->first(); // pas de lazy loading ici
 
         while ($parent) {
             $level++;
-            $parent = $parent->parent;
+            $parent = $parent->parent()->first(); // récursion explicite
         }
 
         return $level;
+    }
+
+    public function getBreadcrumb(): array
+    {
+        $breadcrumb = [];
+        $current = $this;
+
+        while ($current) {
+            array_unshift($breadcrumb, [
+                'id' => $current->id,
+                'name' => $current->nom,
+                'slug' => $current->slug,
+                'url' => $current->url,
+            ]);
+            $current = $current->parent()->first(); // idem
+        }
+
+        return $breadcrumb;
     }
 
     public function getSeoTitleAttribute($value): string
@@ -425,24 +443,6 @@ class ProductCategory extends Model implements HasMedia, Sitemapable
         }
 
         return $ids;
-    }
-
-    public function getBreadcrumb(): array
-    {
-        $breadcrumb = [];
-        $current = $this;
-
-        while ($current) {
-            array_unshift($breadcrumb, [
-                'id' => $current->id,
-                'name' => $current->nom,
-                'slug' => $current->slug,
-                'url' => $current->url,
-            ]);
-            $current = $current->parent;
-        }
-
-        return $breadcrumb;
     }
 
     public function clearCache(): void

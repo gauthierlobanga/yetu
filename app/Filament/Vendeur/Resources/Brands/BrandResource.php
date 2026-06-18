@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Brands\Pages\ListBrands;
 use App\Filament\Vendeur\Resources\Brands\Schemas\BrandForm;
 use App\Filament\Vendeur\Resources\Brands\Tables\BrandsTable;
 use App\Models\Brand;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class BrandResource extends Resource
 {
     protected static ?string $model = Brand::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
 
     protected static ?string $cluster = ProductsCluster::class;
 

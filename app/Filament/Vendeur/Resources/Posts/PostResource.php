@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Posts\Pages\ListPosts;
 use App\Filament\Vendeur\Resources\Posts\Schemas\PostForm;
 use App\Filament\Vendeur\Resources\Posts\Tables\PostsTable;
 use App\Models\Post;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -22,10 +20,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class PostResource extends Resource
 {
     protected static ?string $model = Post::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
-
-    protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::DocumentText;
 
     protected static ?int $navigationSort = 1;
 

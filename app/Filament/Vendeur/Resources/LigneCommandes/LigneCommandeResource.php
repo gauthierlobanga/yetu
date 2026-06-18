@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\LigneCommandes\Pages\ListLigneCommandes;
 use App\Filament\Vendeur\Resources\LigneCommandes\Schemas\LigneCommandeForm;
 use App\Filament\Vendeur\Resources\LigneCommandes\Tables\LigneCommandesTable;
 use App\Models\LigneCommande;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class LigneCommandeResource extends Resource
 {
     protected static ?string $model = LigneCommande::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static ?string $recordTitleAttribute = 'commande_id';
 

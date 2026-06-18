@@ -9,12 +9,10 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Navigation\NavigationGroup;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -50,52 +48,6 @@ class VendeurPanelProvider extends PanelProvider
             ->login()
             ->sidebarWidth('16rem')
             ->profile()
-            ->navigationGroups(groups: [
-                NavigationGroup::make()
-                    ->label('Market')
-                    ->icon(Heroicon::ShoppingBag),
-                NavigationGroup::make()
-                    ->label('Blog')
-                    ->icon(Heroicon::Newspaper),
-                NavigationGroup::make()
-                    ->label('Contact')
-                    ->icon(Heroicon::Inbox),
-                NavigationGroup::make()
-                    ->label('About')
-                    ->icon(Heroicon::OutlinedInformationCircle),
-                NavigationGroup::make()
-                    ->label('Help')
-                    ->icon(Heroicon::InformationCircle),
-                NavigationGroup::make()
-                    ->label('Parametrises')
-                    ->icon(Heroicon::Cog8Tooth),
-                NavigationGroup::make()
-                    ->label('Comptes')
-                    ->icon(Heroicon::UserGroup),
-                NavigationGroup::make()
-                    ->label('Organisation')
-                    ->icon(Heroicon::BuildingOffice),
-                NavigationGroup::make()
-                    ->label('Tenants')
-                    ->icon(Heroicon::BuildingOffice),
-                NavigationGroup::make()
-                    ->label('Clients')
-                    ->icon(Heroicon::UserGroup),
-                NavigationGroup::make()
-                    ->label('Fournisseurs')
-                    ->icon(Heroicon::Truck),
-                NavigationGroup::make()
-                    ->label('Core')
-                    ->icon(Heroicon::Cog6Tooth),
-                NavigationGroup::make()
-                    ->label('Filament Shield')
-                    ->icon(Heroicon::ShieldCheck),
-                NavigationGroup::make()
-                    ->label('Notifications')
-                    ->icon(Heroicon::Bell),
-            ])
-            ->sidebarCollapsibleOnDesktop()
-            ->collapsedSidebarWidth('9rem')
             ->colors([
                 'danger' => Color::Rose,
                 'gray' => Color::Slate,

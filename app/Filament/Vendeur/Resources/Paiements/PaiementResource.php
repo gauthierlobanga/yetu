@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Paiements\Pages\ListPaiements;
 use App\Filament\Vendeur\Resources\Paiements\Schemas\PaiementForm;
 use App\Filament\Vendeur\Resources\Paiements\Tables\PaiementsTable;
 use App\Models\Paiement;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class PaiementResource extends Resource
 {
     protected static ?string $model = Paiement::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
 
     protected static ?string $cluster = InventorCluster::class;
 

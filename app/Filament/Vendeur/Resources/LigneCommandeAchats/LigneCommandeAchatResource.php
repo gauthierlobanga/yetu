@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\LigneCommandeAchats\Pages\ListLigneCommandeAc
 use App\Filament\Vendeur\Resources\LigneCommandeAchats\Schemas\LigneCommandeAchatForm;
 use App\Filament\Vendeur\Resources\LigneCommandeAchats\Tables\LigneCommandeAchatsTable;
 use App\Models\LigneCommandeAchat;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class LigneCommandeAchatResource extends Resource
 {
     protected static ?string $model = LigneCommandeAchat::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static ?string $cluster = AchatsCluster::class;
 

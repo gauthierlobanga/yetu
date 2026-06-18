@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\ItemPaniers\Pages\ListItemPaniers;
 use App\Filament\Vendeur\Resources\ItemPaniers\Schemas\ItemPanierForm;
 use App\Filament\Vendeur\Resources\ItemPaniers\Tables\ItemPaniersTable;
 use App\Models\ItemPanier;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class ItemPanierResource extends Resource
 {
     protected static ?string $model = ItemPanier::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquaresPlus;
 
     protected static ?string $cluster = PaniersCluster::class;
 

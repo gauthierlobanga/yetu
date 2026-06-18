@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Wishlists\Pages\ListWishlists;
 use App\Filament\Vendeur\Resources\Wishlists\Schemas\WishlistForm;
 use App\Filament\Vendeur\Resources\Wishlists\Tables\WishlistsTable;
 use App\Models\Wishlist;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -21,15 +19,11 @@ class WishlistResource extends Resource
 {
     protected static ?string $model = Wishlist::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookmark;
-
     protected static ?string $recordTitleAttribute = 'nom';
 
     protected static ?int $navigationSort = 1;
 
     protected static ?string $cluster = WishlistsCluster::class;
-
-    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

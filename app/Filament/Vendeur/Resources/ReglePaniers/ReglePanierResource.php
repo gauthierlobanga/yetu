@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\ReglePaniers\Pages\ListReglePaniers;
 use App\Filament\Vendeur\Resources\ReglePaniers\Schemas\ReglePanierForm;
 use App\Filament\Vendeur\Resources\ReglePaniers\Tables\ReglePaniersTable;
 use App\Models\ReglePanier;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -21,15 +19,11 @@ class ReglePanierResource extends Resource
 {
     protected static ?string $model = ReglePanier::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
-
     protected static ?string $recordTitleAttribute = 'type';
 
     protected static ?string $cluster = PaniersCluster::class;
 
     protected static ?int $navigationSort = 3;
-
-    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

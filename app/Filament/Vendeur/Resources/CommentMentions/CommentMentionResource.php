@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\CommentMentions\Pages\ListCommentMentions;
 use App\Filament\Vendeur\Resources\CommentMentions\Schemas\CommentMentionForm;
 use App\Filament\Vendeur\Resources\CommentMentions\Tables\CommentMentionsTable;
 use App\Models\CommentMention;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use UnitEnum;
 
@@ -20,15 +18,11 @@ class CommentMentionResource extends Resource
 {
     protected static ?string $model = CommentMention::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
     protected static ?string $recordTitleAttribute = 'comment_id';
 
     protected static ?string $navigationLabel = 'Mentions';
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Share;
-
-    protected static bool $isScopedToTenant = false;
 
     public static function getNavigationBadge(): ?string
     {

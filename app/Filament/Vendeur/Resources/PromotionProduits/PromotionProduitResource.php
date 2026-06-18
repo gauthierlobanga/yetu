@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\PromotionProduits\Pages\ListPromotionProduits
 use App\Filament\Vendeur\Resources\PromotionProduits\Schemas\PromotionProduitForm;
 use App\Filament\Vendeur\Resources\PromotionProduits\Tables\PromotionProduitsTable;
 use App\Models\PromotionProduit;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class PromotionProduitResource extends Resource
 {
     protected static ?string $model = PromotionProduit::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
 
     protected static ?string $recordTitleAttribute = 'promotion_id';
 

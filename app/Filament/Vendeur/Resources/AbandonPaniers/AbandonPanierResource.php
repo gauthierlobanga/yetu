@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\AbandonPaniers\Pages\ListAbandonPaniers;
 use App\Filament\Vendeur\Resources\AbandonPaniers\Schemas\AbandonPanierForm;
 use App\Filament\Vendeur\Resources\AbandonPaniers\Tables\AbandonPaniersTable;
 use App\Models\AbandonPanier;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,8 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class AbandonPanierResource extends Resource
 {
     protected static ?string $model = AbandonPanier::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedXCircle;
 
     protected static ?string $recordTitleAttribute = 'raison';
 

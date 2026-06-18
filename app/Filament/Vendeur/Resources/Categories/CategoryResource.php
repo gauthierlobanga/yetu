@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Categories\Pages\ListCategories;
 use App\Filament\Vendeur\Resources\Categories\Schemas\CategoryForm;
 use App\Filament\Vendeur\Resources\Categories\Tables\CategoriesTable;
 use App\Models\PostCategory;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -20,10 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class CategoryResource extends Resource
 {
     protected static ?string $model = PostCategory::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
-
-    protected static string|BackedEnum|null $activeNavigationIcon = Heroicon::Tag;
 
     protected static ?string $cluster = PostsCluster::class;
 

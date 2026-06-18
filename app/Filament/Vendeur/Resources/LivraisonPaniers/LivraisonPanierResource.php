@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\LivraisonPaniers\Pages\ListLivraisonPaniers;
 use App\Filament\Vendeur\Resources\LivraisonPaniers\Schemas\LivraisonPanierForm;
 use App\Filament\Vendeur\Resources\LivraisonPaniers\Tables\LivraisonPaniersTable;
 use App\Models\LivraisonPanier;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -21,11 +19,7 @@ class LivraisonPanierResource extends Resource
 {
     protected static ?string $model = LivraisonPanier::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
-
     protected static ?string $recordTitleAttribute = 'panier_id';
-
-    protected static bool $isScopedToTenant = false;
 
     protected static ?string $cluster = CommandesCluster::class;
 

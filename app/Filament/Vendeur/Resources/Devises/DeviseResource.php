@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Devises\Pages\ListDevises;
 use App\Filament\Vendeur\Resources\Devises\Schemas\DeviseForm;
 use App\Filament\Vendeur\Resources\Devises\Tables\DevisesTable;
 use App\Models\Devise;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -22,13 +20,9 @@ class DeviseResource extends Resource
 {
     protected static ?string $model = Devise::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Settings;
 
     protected static ?string $recordTitleAttribute = 'symbole';
-
-    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {

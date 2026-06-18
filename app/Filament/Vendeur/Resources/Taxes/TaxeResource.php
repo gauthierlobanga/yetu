@@ -9,10 +9,8 @@ use App\Filament\Vendeur\Resources\Taxes\Pages\ListTaxes;
 use App\Filament\Vendeur\Resources\Taxes\Schemas\TaxeForm;
 use App\Filament\Vendeur\Resources\Taxes\Tables\TaxesTable;
 use App\Models\Taxe;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -22,13 +20,9 @@ class TaxeResource extends Resource
 {
     protected static ?string $model = Taxe::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Settings;
 
     protected static ?string $recordTitleAttribute = 'taux';
-
-    protected static bool $isScopedToTenant = false;
 
     public static function form(Schema $schema): Schema
     {
