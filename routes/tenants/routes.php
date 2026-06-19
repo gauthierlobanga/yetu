@@ -43,6 +43,7 @@ use App\Http\Controllers\Vendor\Settings\ParametresController;
 use App\Http\Controllers\Vendor\Settings\ParametresSecurityController;
 use App\Http\Controllers\Vendor\Vendeurs\AnalyticsController;
 use App\Http\Controllers\Vendor\Vendeurs\ShopThemeController;
+use App\Http\Controllers\Vendor\Vendeurs\StatsBlogController;
 use App\Http\Controllers\Vendor\Vendeurs\SubscriptionController;
 use App\Http\Controllers\Vendor\Vendeurs\TenantAiController;
 use App\Http\Controllers\Vendor\Vendeurs\TenantDashboardNotificationController;
@@ -165,6 +166,21 @@ Route::middleware([
         Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])
             ->name('vendor.dashboard');
 
+        // Newsletter Vendor Admin Routes
+        Route::prefix('vendor/newsletters')->name('vendor.newsletters.')->group(function () {
+            Route::get('/subscribers', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterSubscriberController::class, 'index'])->name('subscribers.index');
+            Route::delete('/subscribers/{id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterSubscriberController::class, 'destroy'])->name('subscribers.destroy');
+
+            Route::get('/campaigns', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'index'])->name('campaigns.index');
+            Route::get('/campaigns/create', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'create'])->name('campaigns.create');
+            Route::post('/campaigns', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'store'])->name('campaigns.store');
+            Route::get('/campaigns/{id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'show'])->name('campaigns.show');
+            Route::get('/campaigns/{id}/edit', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'edit'])->name('campaigns.edit');
+            Route::put('/campaigns/{id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'update'])->name('campaigns.update');
+            Route::delete('/campaigns/{id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'destroy'])->name('campaigns.destroy');
+            Route::post('/campaigns/{id}/send-test', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'sendTest'])->name('campaigns.send-test');
+        });
+
         Route::prefix('subscription')->name('subscription.')->group(function () {
             Route::get('/', [SubscriptionController::class, 'show'])->name('show');
             Route::get('/portal', [SubscriptionController::class, 'portal'])->name('portal');
@@ -232,6 +248,7 @@ Route::middleware([
         Route::get('/products', [TenantProductController::class, 'index'])->name('dashboard.products.index');
 
         Route::get('/vendor/stats/visitors', [VisitorStatsController::class, 'index'])->name('vendor.stats.visitors');
+        Route::get('/blog/stats', [StatsBlogController::class, 'stats'])->name('blog.stats');
     });
 
     Route::middleware(['auth', 'verified'])->prefix('analytics')->name('tenant.analytics.')->group(function () {
@@ -456,6 +473,10 @@ Route::middleware([
     Route::get('/subscription/required', function () {
         return inertia('Subscription/Required');
     })->name('tenant.subscription.required');
+
+    // Newsletter Tracking (Public)
+    Route::get('/newsletter/track/open/{send_id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterTrackingController::class, 'trackOpen'])->name('tenant.newsletter.track.open');
+    Route::get('/newsletter/track/click/{send_id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterTrackingController::class, 'trackClick'])->name('tenant.newsletter.track.click');
 
     Route::get('/required', function () {
         return inertia('Subscription/None');

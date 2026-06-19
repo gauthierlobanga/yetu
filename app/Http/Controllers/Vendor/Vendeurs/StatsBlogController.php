@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Vendor\Acheteurs;
+namespace App\Http\Controllers\Vendor\Vendeurs;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
@@ -20,7 +20,7 @@ class StatsBlogController extends Controller
     public function stats(Request $request)
     {
         if (! $this->hasDashboardSchema()) {
-            return Inertia::render('Vendor/Dashboard', $this->emptyDashboardPayload($request));
+            return Inertia::render('Vendor/blog-stats', $this->emptyDashboardPayload($request));
         }
 
         $user = Auth::user();

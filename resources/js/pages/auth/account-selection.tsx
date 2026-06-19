@@ -8,7 +8,6 @@ import {
     PanelTopOpen,
     Plus,
     ShieldCheck,
-    Sparkles,
     Store,
 } from 'lucide-react';
 
@@ -77,7 +76,7 @@ function QuickAccess({
             href={disabled ? undefined : href}
             aria-disabled={disabled}
             className={cn(
-                'group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-white/20 bg-white/30 p-5 shadow-sm backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/60 hover:shadow-xl hover:shadow-emerald-500/10 dark:border-slate-800/40 dark:bg-slate-900/40 dark:hover:border-emerald-800/40 dark:hover:bg-slate-900/60',
+                'group relative flex items-center gap-4 overflow-hidden rounded-2xl border border-white/20 bg-white/30 p-5 backdrop-blur-xl transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300/40 hover:bg-white/60  dark:border-slate-800/40 dark:bg-slate-900/40 dark:hover:border-emerald-800/40 dark:hover:bg-slate-900/60',
                 disabled && 'pointer-events-none opacity-50',
             )}
         >
@@ -147,9 +146,6 @@ export default function AccountSelection({
                                 {initials(account.name, account.email)}
                             </AvatarFallback>
                         </Avatar>
-                        <span className="absolute -right-1 -bottom-1 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 dark:border-slate-950">
-                            <Sparkles className="h-3.5 w-3.5" />
-                        </span>
                     </div>
 
                     <h1 className="mt-5 max-w-full truncate text-2xl font-bold tracking-tight text-slate-900 dark:text-white">

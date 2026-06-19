@@ -656,7 +656,7 @@ return;
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 >
-                    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/70 px-8 py-12 shadow-2xl shadow-slate-200/50 backdrop-blur-2xl dark:border-slate-800/60 dark:bg-slate-900/60 dark:shadow-black/50">
+                    <div className="relative overflow-hidden rounded border border-white/60 bg-white/70 px-8 py-12 shadow shadow-slate-200/50 backdrop-blur-2xl dark:border-slate-800/60 dark:bg-slate-900/60 dark:shadow-black/50">
                         {/* Top highlight line */}
                         <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-transparent via-emerald-500/50 to-transparent" />
 
@@ -761,7 +761,7 @@ return;
                         {/* Smooth Progress Bar */}
                         <div className="mt-12 space-y-6">
                             {/* Barre de progression épurée à la Google/Microsoft */}
-                            <div className="mt-8">
+                            {/* <div className="mt-8">
                                 <div className="relative h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800/60">
                                     <motion.div
                                         className="absolute h-full rounded-full bg-linear-to-r from-emerald-500 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)] dark:from-emerald-400 dark:to-emerald-500"
@@ -774,7 +774,7 @@ return;
                                         }}
                                     />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Bouncing Dots */}
                             <div className="flex justify-center gap-2">

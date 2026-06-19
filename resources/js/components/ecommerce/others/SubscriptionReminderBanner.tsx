@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 import { Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -61,8 +62,7 @@ export function SubscriptionReminderBanner({ trial, subscription }: Props) {
         return true;
     }, [subscription]);
 
-
-    const checkFrequency = useCallback(() => {
+    const checkFrequencyHours = useCallback(() => {
         if (!shouldShow) {
             return;
         }
@@ -99,6 +99,40 @@ export function SubscriptionReminderBanner({ trial, subscription }: Props) {
         }
     }, [shouldShow, auth?.user?.id]);
 
+    const checkFrequencyMinutes = useCallback(() => {
+        if (!shouldShow) {
+            return;
+        }
+
+        const STORAGE_KEY = `subscription_reminder_${auth?.user?.id || 'guest'}`;
+        const now = Date.now();
+        const data = JSON.parse(
+            localStorage.getItem(STORAGE_KEY) ||
+                '{"count": 0, "lastShown": 0, "lastClosed": 0}',
+        );
+
+        // Réinitialiser le compteur si on change de jour
+        const lastDate = new Date(data.lastShown).toDateString();
+        const today = new Date().toDateString();
+
+        if (lastDate !== today) {
+            data.count = 0;
+        }
+
+        const uneMinute = 60 * 1000;
+        const timeSinceClosed = now - data.lastClosed;
+
+        if (
+            data.lastClosed === 0 ||
+            (timeSinceClosed > uneMinute && data.count < 6)
+        ) {
+            setIsVisible(true);
+            data.lastShown = now;
+            data.count += 1;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+    }, [shouldShow, auth?.user?.id]);
+
     const handleClose = () => {
         setIsVisible(false);
         const STORAGE_KEY = `subscription_reminder_${auth?.user?.id || 'guest'}`;
@@ -115,10 +149,10 @@ export function SubscriptionReminderBanner({ trial, subscription }: Props) {
         }
 
         // Première vérification après un court délai
-        const initialTimer = setTimeout(checkFrequency, 1000);
+        const initialTimer = setTimeout(checkFrequencyMinutes, 1000);
 
         // Vérifier toutes les minutes pour voir s'il faut le remontrer (sans rechargement)
-        const frequencyInterval = setInterval(checkFrequency, 60000);
+        const frequencyInterval = setInterval(checkFrequencyMinutes, 60000);
 
         const endTrialDate = trial?.end || subscription?.trial_ends_at;
 
@@ -139,7 +173,7 @@ export function SubscriptionReminderBanner({ trial, subscription }: Props) {
             clearInterval(frequencyInterval);
             clearTimeout(initialTimer);
         };
-    }, [shouldShow, trial, subscription, checkFrequency]);
+    }, [shouldShow, trial, subscription, checkFrequencyMinutes]);
 
     // Temps réel via Echo (si disponible)
     useEffect(() => {

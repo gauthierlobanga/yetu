@@ -918,7 +918,7 @@ function PostTableCellViewer({ post }: { post: Post }) {
                 <DrawerHeader className="gap-1">
                     <DrawerTitle>{post.title.slice(0, 40)}</DrawerTitle>
                     <DrawerDescription>
-                        {post.excerpt?.slice(0, 40) ||
+                        {(typeof post.excerpt === 'string' ? post.excerpt.slice(0, 40) : null) ||
                             'Aucun extrait disponible'}
                     </DrawerDescription>
                 </DrawerHeader>

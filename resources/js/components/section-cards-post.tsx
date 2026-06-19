@@ -52,7 +52,7 @@ interface EcommerceStats {
 }
 
 interface PageProps {
-    stats: EcommerceStats;
+    stats: Partial<EcommerceStats>;
     [key: string]: unknown;
 }
 
@@ -84,26 +84,26 @@ export function SectionCards() {
     const cards = [
         {
             title: 'Total des produits',
-            value: stats.total_products,
+            value: stats.total_products ?? 0,
             description: 'Tous statuts confondus',
-            trend: stats.orders_change,
+            trend: stats.orders_change ?? 0,
             icon: <IconFileText className="size-6" />,
-            subText: `${stats.published_products} publiés, ${stats.draft_products} brouillons`,
-            trendUp: stats.orders_change >= 0,
+            subText: `${stats.published_products ?? 0} publiés, ${stats.draft_products ?? 0} brouillons`,
+            trendUp: (stats.orders_change ?? 0) >= 0,
         },
         {
             title: 'Produits publiés',
-            value: stats.published_products.toLocaleString(),
+            value: stats.published_products ?? 0,
             description: 'Accessibles au public',
             trend:
-                stats.published_products > 0
+                (stats.published_products ?? 0) > 0 && (stats.total_products ?? 0) > 0
                     ? Math.round(
-                          (stats.published_products / stats.total_products) *
+                          ((stats.published_products ?? 0) / (stats.total_products ?? 1)) *
                               100,
                       )
                     : 0,
             icon: <IconFileText className="size-6 text-primary" />,
-            subText: `${stats.low_stock_count} en stock faible`,
+            subText: `${stats.low_stock_count ?? 0} en stock faible`,
             trendUp: true,
         },
         {
@@ -111,45 +111,45 @@ export function SectionCards() {
             value: new Intl.NumberFormat('fr-CD', {
                 style: 'currency',
                 currency: 'CDF',
-            }).format(stats.total_revenue),
+            }).format(stats.total_revenue ?? 0),
             description: 'Revenu total',
-            trend: stats.revenue_change,
+            trend: stats.revenue_change ?? 0,
             icon: <IconChartBar className="size-6" />,
             subText: 'Performance des ventes',
-            trendUp: stats.revenue_change >= 0,
+            trendUp: (stats.revenue_change ?? 0) >= 0,
         },
         {
             title: 'Commandes totales',
-            value: stats.total_orders,
+            value: stats.total_orders ?? 0,
             description: 'Commandes reçues',
-            trend: stats.orders_change,
+            trend: stats.orders_change ?? 0,
             icon: <IconRocket className="size-6 text-primary" />,
-            subText: `${stats.completed_orders} complétées, ${stats.pending_orders} en attente`,
-            trendUp: stats.orders_change >= 0,
+            subText: `${stats.completed_orders ?? 0} complétées, ${stats.pending_orders ?? 0} en attente`,
+            trendUp: (stats.orders_change ?? 0) >= 0,
         },
         {
             title: 'Clients',
-            value: stats.total_customers.toLocaleString(),
+            value: (stats.total_customers ?? 0).toLocaleString(),
             description: 'Clients enregistrés',
-            trend: stats.customers_change,
+            trend: stats.customers_change ?? 0,
             icon: <IconUser className="size-6 text-primary" />,
             subText: 'Base de clients',
-            trendUp: stats.customers_change >= 0,
+            trendUp: (stats.customers_change ?? 0) >= 0,
         },
         {
             title: 'Paniers actifs',
-            value: stats.active_carts.toLocaleString(),
+            value: stats.active_carts ?? 0,
             description: 'Paniers en cours',
-            trend: stats.abandoned_carts,
+            trend: stats.abandoned_carts ?? 0,
             icon: <IconShoppingCart className="size-6 text-primary" />,
-            subText: `${stats.abandoned_carts} abandonnés`,
+            subText: `${stats.abandoned_carts ?? 0} abandonnés`,
             trendUp: false,
         },
         {
             title: 'Paniers abandonnés',
-            value: stats.abandoned_carts.toLocaleString(),
+            value: (stats.abandoned_carts ?? 0).toLocaleString(),
             description: 'Paniers non finalisés',
-            trend: stats.return_rate,
+            trend: stats.return_rate ?? 0,
             icon: <IconClock className="size-6 text-destructive" />,
             subText: "Taux d'abandon",
             trendUp: false,
@@ -159,51 +159,51 @@ export function SectionCards() {
             value: new Intl.NumberFormat('fr-CD', {
                 style: 'currency',
                 currency: 'CDF',
-            }).format(stats.avg_order_value),
+            }).format(stats.avg_order_value ?? 0),
             description: 'Valeur moyenne par commande',
-            trend: stats.revenue_change,
+            trend: stats.revenue_change ?? 0,
             icon: <IconChartBar className="size-6 text-primary" />,
             subText: 'vs période précédente',
-            trendUp: stats.revenue_change >= 0,
+            trendUp: (stats.revenue_change ?? 0) >= 0,
         },
         {
             title: 'Taux de conversion',
-            value: `${stats.conversion_rate}%`,
+            value: `${stats.conversion_rate ?? 0}%`,
             description: 'Visiteurs → Clients',
-            trend: stats.conversion_rate,
+            trend: stats.conversion_rate ?? 0,
             icon: <IconRocket className="size-6 text-primary" />,
             subText: 'Performance de conversion',
-            trendUp: stats.conversion_rate >= 0,
+            trendUp: (stats.conversion_rate ?? 0) >= 0,
         },
         {
             title: 'Taux de retour',
-            value: `${stats.return_rate}%`,
+            value: `${stats.return_rate ?? 0}%`,
             description: 'Produits retournés',
-            trend: stats.return_rate,
+            trend: stats.return_rate ?? 0,
             icon: <IconClock className="size-6 text-destructive" />,
             subText: 'vs période précédente',
-            trendUp: stats.return_rate <= 0,
+            trendUp: (stats.return_rate ?? 0) <= 0,
         },
         {
             title: 'Stock total',
-            value: stats.inventory_count.toLocaleString(),
+            value: (stats.inventory_count ?? 0).toLocaleString(),
             description: 'Unités en stock',
-            trend: stats.out_of_stock_count,
+            trend: stats.out_of_stock_count ?? 0,
             icon: <IconFileText className="size-6 text-primary" />,
-            subText: `${stats.out_of_stock_count} rupture de stock`,
-            trendUp: stats.out_of_stock_count === 0,
+            subText: `${stats.out_of_stock_count ?? 0} rupture de stock`,
+            trendUp: (stats.out_of_stock_count ?? 0) === 0,
         },
         {
             title: 'Revenu ce mois',
             value: new Intl.NumberFormat('fr-CD', {
                 style: 'currency',
                 currency: 'CDF',
-            }).format(stats.revenue_this_month),
+            }).format(stats.revenue_this_month ?? 0),
             description: 'Revenu mensuel',
-            trend: stats.revenue_this_month_change,
+            trend: stats.revenue_this_month_change ?? 0,
             icon: <IconCalendar className="size-6 text-primary" />,
             subText: 'vs mois précédent',
-            trendUp: stats.revenue_this_month_change >= 0,
+            trendUp: (stats.revenue_this_month_change ?? 0) >= 0,
         },
     ];
 

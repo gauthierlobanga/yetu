@@ -41,7 +41,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useInitials } from '@/hooks/use-initials';
-import NewsletterSection from '@/layouts/app/app-newsletters-footer';
+import NewsletterSectionCentral from '@/layouts/app/app-newsletters';
 import MainLayout from '@/layouts/main-layout';
 import { home } from '@/routes';
 import blog from '@/routes/blog';
@@ -243,6 +243,29 @@ const ScrollToTop = () => {
     );
 };
 
+// Fonction utilitaire pour extraire du texte de manière sécurisée depuis un champ (string ou objet)
+const extractText = (data: any, preferredField: 'text' | 'body' | 'excerpt' = 'text'): string => {
+    if (!data) {
+        return '';
+    }
+
+    let parsedData = data;
+    if (typeof data === 'string') {
+        try {
+            parsedData = JSON.parse(data);
+        } catch (e) {
+            // Not JSON, return as is
+            return data;
+        }
+    }
+
+    if (typeof parsedData === 'object' && parsedData !== null) {
+        return parsedData[preferredField] || parsedData.text || parsedData.body || parsedData.excerpt || JSON.stringify(parsedData);
+    }
+
+    return String(parsedData);
+};
+
 // Composant contenu riche avec style amélioré
 const RichContentText = ({ content }: { content: string }) => {
     return (
@@ -437,9 +460,7 @@ export default function Show({
                         {showMobileToc && (
                             <div className="mt-3">
                                 <TableOfContents
-                                    content={
-                                        JSON.stringify(post.data.content) || ''
-                                    }
+                                    content={extractText(post.data.content)}
                                 />
                             </div>
                         )}
@@ -528,14 +549,7 @@ export default function Show({
                             <div ref={contentRef}>
                                 {post.data.content && (
                                     <RichContentText
-                                        content={
-                                            typeof post.data.content ===
-                                            'string'
-                                                ? post.data.content
-                                                : JSON.stringify(
-                                                      post.data.content,
-                                                  )
-                                        }
+                                        content={extractText(post.data.content)}
                                     />
                                 )}
                             </div>
@@ -602,9 +616,7 @@ export default function Show({
                         <aside className="hidden lg:col-span-4 lg:block">
                             <div className="sticky top-24 max-h-[calc(100vh-8rem)] space-y-6 overflow-y-auto">
                                 <TableOfContents
-                                    content={
-                                        JSON.stringify(post.data.content) || ''
-                                    }
+                                    content={extractText(post.data.content)}
                                 />
 
                                 {post.data.user && (
@@ -741,7 +753,7 @@ export default function Show({
                     </div>
                 </div>
             </article>
-            <NewsletterSection />
+            <NewsletterSectionCentral />
         </MainLayout>
     );
 }

@@ -41,7 +41,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useInitials } from '@/hooks/use-initials';
-import NewsletterSection from '@/layouts/app/app-newsletters-footer';
+import NewsletterSectionVendeur from '@/layouts/app/app-newsletters';
 import MainLayout from '@/layouts/main-layout';
 import { home } from '@/routes';
 import blog from '@/routes/tenant/blog';
@@ -243,11 +243,34 @@ const ScrollToTop = () => {
     );
 };
 
+// Fonction utilitaire pour extraire du texte de manière sécurisée depuis un champ (string ou objet)
+const extractText = (data: any, preferredField: 'text' | 'body' | 'excerpt' = 'text'): string => {
+    if (!data) {
+        return '';
+    }
+
+    let parsedData = data;
+    if (typeof data === 'string') {
+        try {
+            parsedData = JSON.parse(data);
+        } catch (e) {
+            // Not JSON, return as is
+            return data;
+        }
+    }
+
+    if (typeof parsedData === 'object' && parsedData !== null) {
+        return parsedData[preferredField] || parsedData.text || parsedData.body || parsedData.excerpt || JSON.stringify(parsedData);
+    }
+
+    return String(parsedData);
+};
+
 // Composant contenu riche avec style amélioré
 const RichContentText = ({ content }: { content: string }) => {
     return (
         <div
-            className="prose prose-sm max-w-none dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight prose-h1:mt-4 prose-h1:mb-4 prose-h1:text-2xl prose-h1:text-slate-900 dark:prose-h1:text-white prose-h2:mt-8 prose-h2:mb-4 prose-h2:border-b prose-h2:border-emerald-100 prose-h2:pb-2 prose-h2:text-xl dark:prose-h2:border-emerald-900/40 prose-h3:mt-6 prose-h3:mb-3 prose-h3:text-lg prose-h3:text-slate-800 dark:prose-h3:text-slate-200 prose-p:mt-3 prose-p:mb-3 prose-p:leading-relaxed prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-a:text-emerald-600 prose-a:no-underline hover:prose-a:underline dark:prose-a:text-emerald-400 prose-blockquote:my-6 prose-blockquote:rounded-r-lg prose-blockquote:border-l-4 prose-blockquote:border-emerald-400 prose-blockquote:bg-slate-50 prose-blockquote:py-2 prose-blockquote:pl-4 prose-blockquote:text-slate-600 prose-blockquote:italic dark:prose-blockquote:border-emerald-600 dark:prose-blockquote:bg-slate-900/30 dark:prose-blockquote:text-slate-300 prose-code:rounded-md prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:text-emerald-700 dark:prose-code:bg-slate-800 dark:prose-code:text-emerald-400 prose-pre:my-6 prose-pre:rounded-xl prose-pre:border prose-pre:border-slate-200 prose-pre:bg-slate-50 dark:prose-pre:border-slate-800 dark:prose-pre:bg-slate-900/60 prose-li:text-slate-600 dark:prose-li:text-slate-300 prose-img:rounded-xl prose-img:shadow-md"
+            className="prose prose-sm max-w-none whitespace-pre-wrap dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight prose-h1:mt-4 prose-h1:mb-4 prose-h1:text-2xl prose-h1:text-slate-900 dark:prose-h1:text-white prose-h2:mt-8 prose-h2:mb-4 prose-h2:border-b prose-h2:border-emerald-100 prose-h2:pb-2 prose-h2:text-xl dark:prose-h2:border-emerald-900/40 prose-h3:mt-6 prose-h3:mb-3 prose-h3:text-lg prose-h3:text-slate-800 dark:prose-h3:text-slate-200 prose-p:mt-3 prose-p:mb-3 prose-p:leading-relaxed prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-a:text-emerald-600 prose-a:no-underline hover:prose-a:underline dark:prose-a:text-emerald-400 prose-blockquote:my-6 prose-blockquote:rounded-r-lg prose-blockquote:border-l-4 prose-blockquote:border-emerald-400 prose-blockquote:bg-slate-50 prose-blockquote:py-2 prose-blockquote:pl-4 prose-blockquote:text-slate-600 prose-blockquote:italic dark:prose-blockquote:border-emerald-600 dark:prose-blockquote:bg-slate-900/30 dark:prose-blockquote:text-slate-300 prose-code:rounded-md prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:text-emerald-700 dark:prose-code:bg-slate-800 dark:prose-code:text-emerald-400 prose-pre:my-6 prose-pre:rounded-xl prose-pre:border prose-pre:border-slate-200 prose-pre:bg-slate-50 dark:prose-pre:border-slate-800 dark:prose-pre:bg-slate-900/60 prose-li:text-slate-600 dark:prose-li:text-slate-300 prose-img:rounded-xl prose-img:shadow-md"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
         />
     );
@@ -303,7 +326,7 @@ export default function Show({
     const breadcrumbs: BreadcrumbItemType[] = [
         { title: 'Accueil', href: home() },
         { title: 'Blog', href: blog.index().url },
-        { title: post.data.title, href: blog.show(post.data.slug) },
+        { title: post.data.title, href: post.data.slug ? blog.show(post.data.slug).url : '#' },
     ];
 
     const handleLike = async () => {
@@ -437,9 +460,7 @@ export default function Show({
                         {showMobileToc && (
                             <div className="mt-3">
                                 <TableOfContents
-                                    content={
-                                        JSON.stringify(post.data.content) || ''
-                                    }
+                                    content={extractText(post.data.content, 'body')}
                                 />
                             </div>
                         )}
@@ -517,9 +538,7 @@ export default function Show({
                             {post.data.excerpt && (
                                 <div className="mb-8 rounded-2xl border-l-4 border-emerald-400 bg-white p-5 shadow-sm dark:border-emerald-600 dark:bg-slate-900/60">
                                     <p className="leading-relaxed text-slate-600 italic dark:text-slate-300">
-                                        {typeof post.data.excerpt === 'string'
-                                            ? post.data.excerpt
-                                            : JSON.stringify(post.data.excerpt)}
+                                        {extractText(post.data.excerpt, 'text')}
                                     </p>
                                 </div>
                             )}
@@ -528,14 +547,7 @@ export default function Show({
                             <div ref={contentRef}>
                                 {post.data.content && (
                                     <RichContentText
-                                        content={
-                                            typeof post.data.content ===
-                                            'string'
-                                                ? post.data.content
-                                                : JSON.stringify(
-                                                      post.data.content,
-                                                  )
-                                        }
+                                        content={extractText(post.data.content, 'body')}
                                     />
                                 )}
                             </div>
@@ -567,7 +579,7 @@ export default function Show({
                                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         {previousPost && (
                                             <Link
-                                                href={`/blog/${previousPost.slug}`}
+                                                href={previousPost.slug ? blog.show(previousPost.slug).url : '#'}
                                                 className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-emerald-700"
                                             >
                                                 <span className="mb-1 text-xs text-slate-400 dark:text-slate-500">
@@ -581,7 +593,7 @@ export default function Show({
                                         {nextPost && (
                                             <Link
                                                 href={
-                                                    blog.show(nextPost.slug).url
+                                                    nextPost.slug ? blog.show(nextPost.slug).url : '#'
                                                 }
                                                 className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 text-right transition-all hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-emerald-700"
                                             >
@@ -602,9 +614,7 @@ export default function Show({
                         <aside className="hidden lg:col-span-4 lg:block">
                             <div className="sticky top-24 max-h-[calc(100vh-8rem)] space-y-6 overflow-y-auto">
                                 <TableOfContents
-                                    content={
-                                        JSON.stringify(post.data.content) || ''
-                                    }
+                                    content={extractText(post.data.content, 'body')}
                                 />
 
                                 {post.data.user && (
@@ -659,7 +669,7 @@ export default function Show({
                                 {relatedPosts.map((relatedPost) => (
                                     <Link
                                         key={relatedPost.id}
-                                        href={blog.show(relatedPost.slug).url}
+                                        href={relatedPost.slug ? blog.show(relatedPost.slug).url : '#'}
                                         className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60"
                                     >
                                         {relatedPost.featured_image_url && (
@@ -680,7 +690,7 @@ export default function Show({
                                                     {relatedPost.title}
                                                 </h3>
                                                 <p className="line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
-                                                    {relatedPost.excerpt}
+                                                    {extractText(relatedPost.excerpt, 'text')}
                                                 </p>
                                             </div>
                                             <div className="mt-3 flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
@@ -741,7 +751,7 @@ export default function Show({
                     </div>
                 </div>
             </article>
-            <NewsletterSection />
+            <NewsletterSectionVendeur />
         </MainLayout>
     );
 }

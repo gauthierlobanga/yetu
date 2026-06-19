@@ -17,8 +17,11 @@ import { DataTable } from '@/components/data-table-post';
 import { SectionCards } from '@/components/section-cards-post';
 import { SiteHeader } from '@/components/site-header';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { VendorSidebar } from '@/components/VendorSidebar';
+import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 
 interface DashboardProps {
+    tenant: Tenant;
     posts: {
         data: any[];
         current_page: number;
@@ -141,7 +144,8 @@ interface DashboardProps {
     is_super_admin: boolean;
 }
 
-export default function Dashboard({
+export default function StatsBlog({
+    tenant,
     posts,
     stats,
     chartStats,
@@ -174,6 +178,7 @@ export default function Dashboard({
 
     return (
         <SidebarProvider
+            className="dark:bg-slate-950/94"
             style={
                 {
                     '--sidebar-width': 'calc(var(--spacing) * 72)',
@@ -181,11 +186,12 @@ export default function Dashboard({
                 } as React.CSSProperties
             }
         >
-            <AppSidebar />
+            <VendorSidebar tenant={tenant} />
+
             <SidebarInset>
                 <SiteHeader />
                 {/* Hero Section moderne */}
-                <div className="flex flex-1 flex-col">
+                <div className="relative flex min-h-screen flex-1 flex-col overflow-hidden bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.08),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(20,184,166,0.08),transparent_25%)] dark:bg-slate-950">
                     <div className="@container/main flex flex-1 flex-col gap-4">
                         {/* Filtres globaux */}
                         <div className="py-4 lg:py-6">
@@ -244,7 +250,7 @@ export default function Dashboard({
     );
 }
 
-Dashboard.layout = {
+StatsBlog.layout = {
     breadcrumbs: [
         {
             title: 'Dashboard',

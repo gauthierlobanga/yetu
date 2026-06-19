@@ -17,6 +17,7 @@ import {
     ShoppingBag,
     Crown,
     Eye,
+    ListTodo,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -130,6 +131,10 @@ export function VendorSidebar({ tenant }: { tenant: Tenant }) {
                     title: 'Wishlist',
                     href: `${tenant.admin_url}/wishlists/wishlists`,
                 },
+                {
+                    title: 'Newsletters',
+                    href: route('vendor.newsletters.campaigns.index'),
+                },
             ],
         },
         {
@@ -162,6 +167,11 @@ export function VendorSidebar({ tenant }: { tenant: Tenant }) {
             title: 'Analytique',
             icon: BarChart3,
             href: route('vendor.statistics'),
+        },
+        {
+            title: 'Blog analytique',
+            icon: ListTodo,
+            href: route('blog.stats'),
         },
         {
             title: 'Vue en direct',

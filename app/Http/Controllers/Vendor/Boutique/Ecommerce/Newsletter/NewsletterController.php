@@ -27,7 +27,16 @@ class NewsletterController extends Controller
     public function newsletterSubscribe(Request $request)
     {
         $request->validate(['email' => 'required|email|unique:newsletters,email']);
-        Newsletter::create(['email' => $request->email, 'is_subscribed' => true]);
+        
+        $newsletter = new Newsletter();
+        $newsletter->email = $request->email;
+        $newsletter->is_active = true;
+        $newsletter->confirmed_at = now();
+        $newsletter->token_confirmation = \Illuminate\Support\Str::random(60);
+        $newsletter->source = 'formulaire';
+        $newsletter->ip_address = $request->ip();
+        $newsletter->user_agent = $request->userAgent();
+        $newsletter->save();
 
         return back()->with('success', 'Inscription réussie');
     }
@@ -35,7 +44,7 @@ class NewsletterController extends Controller
     /**
      * Désinscrit un visiteur de la newsletter.
      *
-     * Recherche l'e-mail dans la base et met à jour son statut 'is_subscribed' à false.
+     * Recherche l'e-mail dans la base et met à jour son statut 'is_active' à false.
      *
      * @param  Request  $request  La requête HTTP contenant le champ 'email'.
      * @return RedirectResponse
@@ -43,7 +52,7 @@ class NewsletterController extends Controller
     public function newsletterUnsubscribe(Request $request)
     {
         $request->validate(['email' => 'required|email']);
-        Newsletter::where('email', $request->email)->update(['is_subscribed' => false]);
+        Newsletter::where('email', $request->email)->update(['is_active' => false]);
 
         return back()->with('success', 'Désinscription réussie');
     }
