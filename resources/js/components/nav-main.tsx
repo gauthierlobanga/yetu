@@ -53,9 +53,13 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                     if (!hrefStr) {
                         return (
                             <SidebarMenuItem key={item.title}>
-                                <SidebarMenuButton disabled size="lg">
+                                <SidebarMenuButton
+                                    className="h-11 rounded-xl px-3 transition-all duration-200 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+                                    disabled
+                                    size="lg"
+                                >
                                     {item.icon && (
-                                        <item.icon className="h-5 w-5" />
+                                        <item.icon className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                                     )}
                                     <span>{item.title}</span>
                                 </SidebarMenuButton>
@@ -70,18 +74,27 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                 isActive={active}
                                 tooltip={{ children: item.title }}
                                 size="lg"
-                                className={cn(active && 'font-semibold')}
+                                className={cn(
+                                    'h-11 rounded-xl px-3 transition-all duration-200',
+                                    'hover:bg-emerald-50 dark:text-slate-400 dark:hover:bg-slate-800/60 hover:text-emerald-700 ',
+                                    active &&
+                                        'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
+                                )}
+
                             >
-                                <Link href={hrefStr} prefetch>
+                                <Link
+                                    className={cn(
+                                        'group flex items-center rounded-lg px-3 py-2 text-sm transition-all duration-200',
+                                        ' hover:bg-slate-100 ',
+                                        'dark:hover:text-emerald-300',
+                                    )}
+                                    href={hrefStr}
+                                    prefetch
+                                >
                                     {item.icon && (
                                         <item.icon className="h-5 w-5" />
                                     )}
                                     <span>{item.title}</span>
-                                    {item.badge && (
-                                        <span className="ml-auto flex h-5 items-center rounded-full bg-emerald-100 px-2 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                            {item.badge}
-                                        </span>
-                                    )}
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>

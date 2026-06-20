@@ -61,6 +61,7 @@ import { VendorSidebar } from '@/components/VendorSidebar';
 import getToastStyle from '@/lib/toast-style';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 import { SubscriptionReminderBanner } from '@/components/ecommerce/others/SubscriptionReminderBanner';
+import { cn } from '@/lib/utils';
 
 type QuickActionColor =
     | 'emerald'
@@ -259,7 +260,12 @@ export default function VendorDashboard({
 
     return (
         <SidebarProvider
-            className="bg-slate-950/94 p-0"
+            className={cn(
+                'border-r border-slate-200/70',
+                'bg-white/92 backdrop-blur-3xl supports-backdrop-filter:bg-white/88',
+                'dark:border-transparent',
+                'dark:bg-slate-950/94 dark:supports-backdrop-filter:bg-slate-950/88',
+            )}
             style={
                 {
                     '--sidebar-width': 'calc(var(--spacing) * 72)',

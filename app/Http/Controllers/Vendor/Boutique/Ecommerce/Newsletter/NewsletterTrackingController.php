@@ -11,11 +11,11 @@ class NewsletterTrackingController extends Controller
     public function trackOpen($send_id)
     {
         $send = NewsletterSend::with('campaign')->find($send_id);
-        if ($send && !$send->opened_at) {
+        if ($send && ! $send->opened_at) {
             $send->opened_at = now();
             $send->status = 'ouvert';
             $send->save();
-            
+
             if ($send->campaign) {
                 $send->campaign->increment('total_ouverts');
             }
@@ -32,7 +32,7 @@ class NewsletterTrackingController extends Controller
         $url = $request->query('url');
 
         if ($send && $url) {
-            if (!$send->clicked_at) {
+            if (! $send->clicked_at) {
                 $send->clicked_at = now();
                 if ($send->status !== 'clique') {
                     $send->status = 'clique';
@@ -42,6 +42,7 @@ class NewsletterTrackingController extends Controller
                 }
                 $send->save();
             }
+
             return redirect()->away($url);
         }
 

@@ -20,6 +20,8 @@ class TransactionFideliteResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'compte_fidelite_id';
 
+    protected static ?string $navigationLabel = 'Fidélité';
+
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Shop;
 
     protected static ?int $navigationSort = 10;

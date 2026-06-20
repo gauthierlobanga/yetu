@@ -352,23 +352,28 @@ export default function VendorConfigure({
     );
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const loadingPhrases = useMemo(() => [
-        "Préparation de votre environnement...",
-        "Configuration de votre boutique...",
-        "Mise en place de votre base de données...",
-        "Sécurisation de vos accès...",
-        "Personnalisation de votre espace...",
-        "Finalisation de la configuration..."
-    ], []);
+    const loadingPhrases = useMemo(
+        () => [
+            'Préparation de votre environnement...',
+            'Configuration de votre boutique...',
+            'Mise en place de votre base de données...',
+            'Sécurisation de vos accès...',
+            'Personnalisation de votre espace...',
+            'Finalisation de la configuration...',
+        ],
+        [],
+    );
     const [loadingTextIndex, setLoadingTextIndex] = useState(0);
 
     useEffect(() => {
         if (!isCreating) {
-return;
-}
+            return;
+        }
 
         const interval = setInterval(() => {
-            setLoadingTextIndex((current) => (current + 1) % loadingPhrases.length);
+            setLoadingTextIndex(
+                (current) => (current + 1) % loadingPhrases.length,
+            );
         }, 3000);
 
         return () => clearInterval(interval);
@@ -439,6 +444,7 @@ return;
                 if (statusData.status === 'approved') {
                     clearInterval(pollInterval);
                     // Redirection finale via SSO (token frais généré par l'API)
+
                     if (statusData.sso_url) {
                         window.location.href = statusData.sso_url;
                     } else if (targetDashboardUrl) {
@@ -656,112 +662,152 @@ return;
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 >
-                    <div className="relative overflow-hidden rounded border border-white/60 bg-white/70 px-8 py-12 shadow shadow-slate-200/50 backdrop-blur-2xl dark:border-slate-800/60 dark:bg-slate-900/60 dark:shadow-black/50">
-                        {/* Top highlight line */}
-                        <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-transparent via-emerald-500/50 to-transparent" />
-
-                        {/* Center Logo/Icon */}
-                        <div className="relative mx-auto mb-10 flex h-28 w-28 items-center justify-center">
-                            {/* Outer dashed ring */}
+                    <div className="relative overflow-hidden rounded-2xl p-0.5 shadow-2xl shadow-emerald-500/10">
+                        {/* Animated Rotating Border */}
+                        <motion.div
+                            className="absolute -inset-full z-0"
+                            animate={{ rotate: 360 }}
+                            transition={{
+                                duration: 4,
+                                repeat: Infinity,
+                                ease: 'linear',
+                            }}
+                        >
                             <motion.div
-                                className="absolute inset-0 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-700"
-                                animate={{ rotate: 360 }}
+                                className="h-full w-full"
+                                animate={{
+                                    background: [
+                                        'conic-gradient(from 0deg, transparent 0 280deg, #10b981 360deg)', // emerald
+                                        'conic-gradient(from 0deg, transparent 0 280deg, #3b82f6 360deg)', // blue
+                                        'conic-gradient(from 0deg, transparent 0 280deg, #8b5cf6 360deg)', // violet
+                                        'conic-gradient(from 0deg, transparent 0 280deg, #ec4899 360deg)', // pink
+                                        'conic-gradient(from 0deg, transparent 0 280deg, #10b981 360deg)', // emerald
+                                    ],
+                                }}
                                 transition={{
-                                    duration: 25,
+                                    duration: 8,
                                     repeat: Infinity,
                                     ease: 'linear',
                                 }}
                             />
-                            {/* Inner spinning ring */}
-                            <motion.div
-                                className="absolute inset-2 rounded-full border-b-2 border-l-2 border-emerald-400 dark:border-emerald-500"
-                                animate={{ rotate: -360, scale: [1, 0.95, 1] }}
-                                transition={{
-                                    rotate: {
-                                        duration: 8,
+                        </motion.div>
+
+                        <div className="relative z-10 overflow-hidden rounded-xl border border-white/20 bg-white/95 px-8 py-12 backdrop-blur-3xl dark:border-slate-800/40 dark:bg-slate-900/95">
+                            {/* Top highlight line (Optional, kept for extra polish) */}
+                            <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/50 to-transparent dark:via-emerald-500/20" />
+
+                            {/* Center Logo/Icon */}
+                            <div className="relative mx-auto mb-10 flex h-28 w-28 items-center justify-center">
+                                {/* Outer dashed ring */}
+                                <motion.div
+                                    className="absolute inset-0 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-700"
+                                    animate={{ rotate: 360 }}
+                                    transition={{
+                                        duration: 25,
                                         repeat: Infinity,
                                         ease: 'linear',
-                                    },
-                                    scale: {
-                                        duration: 3,
+                                    }}
+                                />
+                                {/* Inner spinning ring */}
+                                <motion.div
+                                    className="absolute inset-2 rounded-full border-b-2 border-l-2 border-emerald-400 dark:border-emerald-500"
+                                    animate={{
+                                        rotate: -360,
+                                        scale: [1, 0.95, 1],
+                                    }}
+                                    transition={{
+                                        rotate: {
+                                            duration: 8,
+                                            repeat: Infinity,
+                                            ease: 'linear',
+                                        },
+                                        scale: {
+                                            duration: 3,
+                                            repeat: Infinity,
+                                            ease: 'easeInOut',
+                                            delay: 0.5,
+                                        },
+                                    }}
+                                />
+                                {/* Center Logo/Icon */}
+                                <motion.div
+                                    className={cn(
+                                        'relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl text-white shadow-xl shadow-emerald-500/30',
+                                        data.logo
+                                            ? 'bg-white'
+                                            : 'bg-linear-to-br from-emerald-500 to-teal-600',
+                                    )}
+                                    animate={{ scale: [1, 1.05, 1] }}
+                                    transition={{
+                                        duration: 2,
                                         repeat: Infinity,
                                         ease: 'easeInOut',
-                                        delay: 0.5,
-                                    },
-                                }}
-                            />
-                            {/* Center Logo/Icon */}
-                            <motion.div
-                                className={cn(
-                                    'relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl text-white shadow-xl shadow-emerald-500/30',
-                                    data.logo
-                                        ? 'bg-white'
-                                        : 'bg-linear-to-br from-emerald-500 to-teal-600',
-                                )}
-                                animate={{ scale: [1, 1.05, 1] }}
-                                transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    ease: 'easeInOut',
-                                }}
-                            >
-                                {data.logo ? (
-                                    <img
-                                        src={URL.createObjectURL(data.logo)}
-                                        alt={data.shop_name || 'Boutique'}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <svg
-                                        className="h-8 w-8"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        strokeWidth={2}
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                                    }}
+                                >
+                                    {data.logo ? (
+                                        <img
+                                            src={URL.createObjectURL(data.logo)}
+                                            alt={data.shop_name || 'Boutique'}
+                                            className="h-full w-full object-cover"
                                         />
-                                    </svg>
-                                )}
-                            </motion.div>
-                        </div>
-
-                        {/* Text Content */}
-                        <div className="space-y-3 text-center">
-                            <motion.h2
-                                className="bg-linear-to-br from-slate-900 to-slate-600 bg-clip-text text-2xl font-bold tracking-tight text-transparent dark:from-white dark:to-slate-400"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.2 }}
-                            >
-                                {data.shop_name || 'Boutique'} en cours de création...
-                            </motion.h2>
-
-                            <div className="relative h-6 w-full overflow-hidden">
-                                <AnimatePresence mode="wait">
-                                    <motion.p
-                                        key={isCreating ? loadingTextIndex : 'done'}
-                                        className="absolute w-full text-[15px] text-slate-500 dark:text-slate-400"
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        {isCreating
-                                            ? loadingPhrases[loadingTextIndex]
-                                            : 'Initialisation sécurisée en cours...'}
-                                    </motion.p>
-                                </AnimatePresence>
+                                    ) : (
+                                        <svg
+                                            className="h-8 w-8"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            strokeWidth={2}
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M13 10V3L4 14h7v7l9-11h-7z"
+                                            />
+                                        </svg>
+                                    )}
+                                </motion.div>
                             </div>
-                        </div>
 
-                        {/* Smooth Progress Bar */}
-                        <div className="mt-12 space-y-6">
-                            {/* Barre de progression épurée à la Google/Microsoft */}
-                            {/* <div className="mt-8">
+                            {/* Text Content */}
+                            <div className="space-y-3 text-center">
+                                <motion.h2
+                                    className="bg-linear-to-br from-slate-900 to-slate-600 bg-clip-text text-2xl font-bold tracking-tight text-transparent dark:from-white dark:to-slate-400"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.2 }}
+                                >
+                                    {data.shop_name || 'Boutique'} en cours de
+                                    création...
+                                </motion.h2>
+
+                                <div className="relative h-6 w-full overflow-hidden">
+                                    <AnimatePresence mode="wait">
+                                        <motion.p
+                                            key={
+                                                isCreating
+                                                    ? loadingTextIndex
+                                                    : 'done'
+                                            }
+                                            className="absolute w-full text-[15px] text-slate-500 dark:text-slate-400"
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            transition={{ duration: 0.3 }}
+                                        >
+                                            {isCreating
+                                                ? loadingPhrases[
+                                                      loadingTextIndex
+                                                  ]
+                                                : 'Initialisation sécurisée en cours...'}
+                                        </motion.p>
+                                    </AnimatePresence>
+                                </div>
+                            </div>
+
+                            {/* Smooth Progress Bar */}
+                            <div className="mt-12 space-y-6">
+                                {/* Barre de progression épurée à la Google/Microsoft */}
+                                {/* <div className="mt-8">
                                 <div className="relative h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800/60">
                                     <motion.div
                                         className="absolute h-full rounded-full bg-linear-to-r from-emerald-500 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)] dark:from-emerald-400 dark:to-emerald-500"
@@ -776,35 +822,37 @@ return;
                                 </div>
                             </div> */}
 
-                            {/* Bouncing Dots */}
-                            <div className="flex justify-center gap-2">
-                                {[0, 1, 2].map((i) => (
-                                    <motion.div
-                                        key={i}
-                                        className="h-2 w-2 rounded-full bg-emerald-500/80"
-                                        animate={{
-                                            y: [0, -6, 0],
-                                            opacity: [0.5, 1, 0.5],
-                                        }}
-                                        transition={{
-                                            duration: 1.5,
-                                            repeat: Infinity,
-                                            delay: i * 0.2,
-                                            ease: 'easeInOut',
-                                        }}
-                                    />
-                                ))}
+                                {/* Bouncing Dots */}
+                                <div className="flex justify-center gap-2">
+                                    {[0, 1, 2].map((i) => (
+                                        <motion.div
+                                            key={i}
+                                            className="h-2 w-2 rounded-full bg-emerald-500/80"
+                                            animate={{
+                                                y: [0, -6, 0],
+                                                opacity: [0.5, 1, 0.5],
+                                            }}
+                                            transition={{
+                                                duration: 1.5,
+                                                repeat: Infinity,
+                                                delay: i * 0.2,
+                                                ease: 'easeInOut',
+                                            }}
+                                        />
+                                    ))}
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Pied informatif discret entièrement intégré */}
-                        <div className="mt-8 flex items-start gap-3 border-t border-slate-100 pt-6 text-left dark:border-slate-800/60">
-                            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" />
-                            <span className="text-[11px] leading-relaxed font-medium tracking-normal text-slate-400 dark:text-slate-500">
-                                Création des bases de données et des protocoles
-                                de sécurité. Pour garantir la stabilité,
-                                veuillez ne pas rafraîchir cette page.
-                            </span>
+                            {/* Pied informatif discret entièrement intégré */}
+                            <div className="mt-8 flex items-start gap-3 border-t border-slate-100 pt-6 text-left dark:border-slate-800/60">
+                                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-500" />
+                                <span className="text-[11px] leading-relaxed font-medium tracking-normal text-slate-400 dark:text-slate-500">
+                                    Création des bases de données et des
+                                    protocoles de sécurité. Pour garantir la
+                                    stabilité, veuillez ne pas rafraîchir cette
+                                    page.
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </motion.div>

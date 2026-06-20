@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Newsletter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 /**
  * Contrôleur de gestion de la newsletter côté boutique.
@@ -27,12 +28,12 @@ class NewsletterController extends Controller
     public function newsletterSubscribe(Request $request)
     {
         $request->validate(['email' => 'required|email|unique:newsletters,email']);
-        
-        $newsletter = new Newsletter();
+
+        $newsletter = new Newsletter;
         $newsletter->email = $request->email;
         $newsletter->is_active = true;
         $newsletter->confirmed_at = now();
-        $newsletter->token_confirmation = \Illuminate\Support\Str::random(60);
+        $newsletter->token_confirmation = Str::random(60);
         $newsletter->source = 'formulaire';
         $newsletter->ip_address = $request->ip();
         $newsletter->user_agent = $request->userAgent();

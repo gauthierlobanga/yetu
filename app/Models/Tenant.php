@@ -65,6 +65,7 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         'data',
         'plan_id',
         'description',
+        'ai_enabled',
     ];
 
     /**
@@ -92,6 +93,7 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
             'date_activation',
             'date_expiration',
             'configuration',
+            'ai_enabled',
         ];
     }
 
@@ -99,6 +101,7 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
     {
         return [
             'is_active' => 'boolean',
+            'ai_enabled' => 'boolean',
             'configuration' => 'array',
             'metadata' => 'array',
             'data' => 'array',

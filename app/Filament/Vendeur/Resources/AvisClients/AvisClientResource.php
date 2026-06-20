@@ -26,6 +26,8 @@ class AvisClientResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'note';
 
+    protected static ?string $navigationLabel = 'Avis';
+
     public static function form(Schema $schema): Schema
     {
         return AvisClientForm::configure($schema);

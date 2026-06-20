@@ -15,6 +15,7 @@ class CartReminderMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public RelancePanier $relance;
+
     public string $recoverUrl;
 
     /**

@@ -140,6 +140,6 @@ class WishlistItemsTable
             ->striped()
             ->paginated([10, 25, 50, 100])
             ->persistFiltersInSession()
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('added_at', 'desc');
     }
 }

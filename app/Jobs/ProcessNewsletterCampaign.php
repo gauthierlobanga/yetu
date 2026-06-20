@@ -31,7 +31,7 @@ class ProcessNewsletterCampaign implements ShouldQueue
 
         // Marquer la campagne comme envoyée en cours (ou juste envoyé)
         $this->campaign->status = 'envoye';
-        if (!$this->campaign->sent_at) {
+        if (! $this->campaign->sent_at) {
             $this->campaign->sent_at = now();
         }
         $this->campaign->save();
@@ -40,19 +40,19 @@ class ProcessNewsletterCampaign implements ShouldQueue
         $query = Newsletter::actifs();
 
         // Appliquer la segmentation d'audience
-        if (!empty($this->campaign->segments_cibles)) {
+        if (! empty($this->campaign->segments_cibles)) {
             $segments = $this->campaign->segments_cibles;
-            
+
             // Filtrer par source d'inscription
-            if (!empty($segments['source'])) {
+            if (! empty($segments['source'])) {
                 $query->where('source', $segments['source']);
             }
-            
+
             // Filtrer par date d'inscription
-            if (!empty($segments['date_after'])) {
+            if (! empty($segments['date_after'])) {
                 $query->where('created_at', '>=', $segments['date_after']);
             }
-            if (!empty($segments['date_before'])) {
+            if (! empty($segments['date_before'])) {
                 $query->where('created_at', '<=', $segments['date_before']);
             }
         }
@@ -69,7 +69,7 @@ class ProcessNewsletterCampaign implements ShouldQueue
 
             // Dispatcher le job individuel pour éviter les time-out sur de grandes listes
             SendIndividualNewsletter::dispatch($this->campaign, $send, $subscriber);
-            
+
             // Increment compteur localement
             $this->campaign->increment('total_envoyes');
         }

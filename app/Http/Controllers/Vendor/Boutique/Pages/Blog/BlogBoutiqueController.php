@@ -223,9 +223,9 @@ class BlogBoutiqueController extends Controller
             return response()->json(['message' => 'Authentification requise'], 401);
         }
 
-        $existing = $post->bookmarkedBy()->where('user_id', $user->id)->first();
+        $existing = $post->bookmarkedBy()->where('user_id', $user->id)->exists();
         if ($existing) {
-            $existing->delete();
+            $post->bookmarkedBy()->detach($user->id);
             $message = 'Favori retiré';
             $isBookmarked = false;
         } else {

@@ -47,8 +47,7 @@ class VendeurForm
                             ->label('Type d\'entité')
                             ->options(Tenant::getTypesEntite())
                             ->preload()
-                            ->searchable()
-                            ->required(),
+                            ->searchable(),
 
                         TextInput::make('email')
                             ->email()
@@ -61,6 +60,16 @@ class VendeurForm
                             ->minLength(8)
                             ->dehydrated(fn ($state) => filled($state)) // ne pas écraser avec une chaîne vide
                             ->required(fn (string $operation): bool => $operation === 'create'),
+
+                        Toggle::make('ai_enabled')
+                            ->label('Activation ai')
+                            ->inline(false)
+                            ->onIcon(Heroicon::OutlinedSparkles)
+                            ->offIcon(Heroicon::OutlinedSparkles)
+                            ->onColor('success')
+                            ->offColor('gray')
+                            ->helperText('Activation de la fonctionnalité de l\'ia pour le vendeur'),
+
                     ])
                     ->columns(2),
                 Section::make('Informations générales')

@@ -4,9 +4,11 @@ namespace App\Filament\Vendeur\Resources\Newsletters\Pages;
 
 use App\Filament\Vendeur\Resources\Newsletters\NewsletterResource;
 use App\Filament\Vendeur\Resources\Newsletters\Widgets\NewslettersStatsWidget;
+use App\Models\Newsletter;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Support\Enums\IconPosition;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListNewsletters extends ListRecords
@@ -38,6 +40,29 @@ class ListNewsletters extends ListRecords
             'inactive' => Tab::make('Inactifs')
                 ->icon('heroicon-m-x-circle')
                 ->modifyQueryUsing(fn (Builder $query) => $query->where('is_active', false)),
+            // Posts de cette semaine
+            'this_week' => Tab::make('Cette semaine')
+                ->badge(Newsletter::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count())
+                ->badgeColor('info')
+                ->icon('heroicon-m-calendar')
+                ->iconPosition(IconPosition::Before)
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])),
+
+            // Newsletters du mois dernier
+            'last_month' => Tab::make('Mois dernier')
+                ->badge(Newsletter::whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])->count())
+                ->badgeColor('info')
+                ->icon('heroicon-m-calendar-days')
+                ->iconPosition(IconPosition::Before)
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])),
+
+            // Newsletters des 30 derniers jours
+            'last_30_days' => Tab::make('30 derniers jours')
+                ->badge(Newsletter::where('created_at', '>=', now()->subDays(30))->count())
+                ->badgeColor('info')
+                ->icon('heroicon-m-calendar')
+                ->iconPosition(IconPosition::Before)
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('created_at', '>=', now()->subDays(30))),
         ];
     }
 }

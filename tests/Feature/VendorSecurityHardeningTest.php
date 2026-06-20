@@ -11,7 +11,7 @@ use Mockery\MockInterface;
 test('vendor request status endpoint requires authentication', function () {
     $vendorRequest = VendorRequest::factory()->create();
 
-    $this->getJson(route('vendor-request.status', ['id' => $vendorRequest->id]))
+    $this->getJson(route('vendor.status', ['id' => $vendorRequest->id]))
         ->assertUnauthorized();
 });
 
@@ -25,7 +25,7 @@ test('vendor request status endpoint forbids access to another users request', f
 
     Sanctum::actingAs($intruder);
 
-    $this->getJson(route('vendor-request.status', ['id' => $vendorRequest->id]))
+    $this->getJson(route('vendor.status', ['id' => $vendorRequest->id]))
         ->assertForbidden();
 });
 
@@ -38,7 +38,7 @@ test('vendor request status endpoint returns owner request data', function () {
 
     Sanctum::actingAs($owner);
 
-    $this->getJson(route('vendor-request.status', ['id' => $vendorRequest->id]))
+    $this->getJson(route('vendor.status', ['id' => $vendorRequest->id]))
         ->assertOk()
         ->assertJson([
             'id' => $vendorRequest->id,

@@ -12,6 +12,22 @@ class MediaPolicy
 {
     use HandlesAuthorization;
 
+    /**
+     * Perform pre-authorization checks.
+     */
+    public function before(AuthUser $user, string $ability): ?bool
+    {
+        if ($user->hasRole('super_admin') || $user->hasRole('vendeur')) {
+            return true;
+        }
+
+        if (function_exists('tenant') && tenant() && $user->canAccessTenant(tenant())) {
+            return true;
+        }
+
+        return null;
+    }
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny Media');

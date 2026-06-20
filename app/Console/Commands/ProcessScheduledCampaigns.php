@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ProcessNewsletterCampaign;
+use App\Models\NewsletterCampaign;
 use Illuminate\Console\Command;
 
 class ProcessScheduledCampaigns extends Command
@@ -25,20 +27,21 @@ class ProcessScheduledCampaigns extends Command
      */
     public function handle()
     {
-        $campaigns = \App\Models\NewsletterCampaign::where('status', 'programme')
+        $campaigns = NewsletterCampaign::where('status', 'programme')
             ->whereNotNull('scheduled_at')
             ->where('scheduled_at', '<=', now())
             ->get();
 
         if ($campaigns->isEmpty()) {
             $this->info('No scheduled campaigns to process at this time.');
+
             return;
         }
 
         foreach ($campaigns as $campaign) {
             $this->info("Dispatching campaign ID: {$campaign->id}");
             // ProcessNewsletterCampaign marks it as "envoye", so it won't be processed again
-            \App\Jobs\ProcessNewsletterCampaign::dispatch($campaign);
+            ProcessNewsletterCampaign::dispatch($campaign);
         }
 
         $this->info("Successfully processed {$campaigns->count()} campaigns.");

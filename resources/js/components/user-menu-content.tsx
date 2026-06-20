@@ -48,7 +48,7 @@ const menuLinks = {
     customer: [
         {
             icon: LayoutDashboard,
-            label: 'Mon tableau de bord',
+            label: 'Tableau de bord',
             href: route('acheteur.dashboard'),
         },
         {
@@ -103,7 +103,7 @@ function MenuLink({
                 }
                 onClick={onNavigate}
                 className={cn(
-                    'group mx-2 my-0.5 flex items-center gap-3 rounded-xl px-3 py-2.5',
+                    // 'group mx-2 my-0.5 flex items-center gap-3 rounded-xl px-3 py-1',
                     'transition-all duration-200',
                     'hover:bg-emerald-50/80 hover:text-emerald-700',
                     'dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400',
@@ -163,9 +163,9 @@ export function UserMenuContent({ user }: Props) {
             </DropdownMenuLabel>
 
             {/* Section Vendeur (propriétaire / manager) */}
-            <CanRole roles={['owner', 'manager', 'super_admin']}>
+            <CanRole roles={['manager', 'super_admin']}>
                 <DropdownMenuSeparator className="mx-4 bg-slate-200/70 dark:bg-slate-800/70" />
-                <DropdownMenuGroup className="py-2">
+                <DropdownMenuGroup className="py-1">
                     <div className="px-4 pb-1">
                         <p className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
                             Ma boutique
@@ -214,25 +214,6 @@ export function UserMenuContent({ user }: Props) {
                     />
                 ))}
             </DropdownMenuGroup>
-
-            {/* Section Administration (super_admin) */}
-            <CanRole roles={['super_admin']}>
-                <DropdownMenuSeparator className="mx-4 bg-slate-200/70 dark:bg-slate-800/70" />
-                <DropdownMenuGroup className="py-2">
-                    <div className="px-4 pb-1">
-                        <p className="text-xs font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-500">
-                            Administration
-                        </p>
-                    </div>
-                    {menuLinks.admin.map((item) => (
-                        <MenuLink
-                            key={`admin-${item.label}`}
-                            item={item}
-                            onNavigate={cleanup}
-                        />
-                    ))}
-                </DropdownMenuGroup>
-            </CanRole>
 
             {/* Déconnexion */}
             <DropdownMenuSeparator className="mx-4 bg-slate-200/70 dark:bg-slate-800/70" />

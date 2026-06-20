@@ -21,7 +21,7 @@ class ReglePaniersStatsWidget extends BaseWidget
             Stat::make('Règles appliquées', number_format($appliedRules))
                 ->icon('heroicon-o-check-badge')
                 ->color('success'),
-            Stat::make('Total réductions accordées', number_format($totalDiscount, 2) . ' €')
+            Stat::make('Total réductions accordées', number_format($totalDiscount, 2).' €')
                 ->icon('heroicon-o-banknotes')
                 ->color('warning'),
         ];

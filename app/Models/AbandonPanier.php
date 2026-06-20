@@ -4,12 +4,14 @@
 
 namespace App\Models;
 
+use App\Mail\CartReminderMail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Mail;
 
 class AbandonPanier extends Model
 {
@@ -199,8 +201,8 @@ class AbandonPanier extends Model
 
         if ($canal === 'email' && $this->panier->client && $this->panier->client->email) {
             $recoverUrl = route('tenant.cart.recover', ['relance' => $relance->id]);
-            \Illuminate\Support\Facades\Mail::to($this->panier->client->email)
-                ->send(new \App\Mail\CartReminderMail($relance, $recoverUrl));
+            Mail::to($this->panier->client->email)
+                ->send(new CartReminderMail($relance, $recoverUrl));
         }
 
         return $relance;

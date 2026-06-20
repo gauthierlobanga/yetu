@@ -244,7 +244,10 @@ const ScrollToTop = () => {
 };
 
 // Fonction utilitaire pour extraire du texte de manière sécurisée depuis un champ (string ou objet)
-const extractText = (data: any, preferredField: 'text' | 'body' | 'excerpt' = 'text'): string => {
+const extractText = (
+    data: any,
+    preferredField: 'text' | 'body' | 'excerpt' = 'text',
+): string => {
     if (!data) {
         return '';
     }
@@ -261,7 +264,13 @@ const extractText = (data: any, preferredField: 'text' | 'body' | 'excerpt' = 't
     }
 
     if (typeof parsedData === 'object' && parsedData !== null) {
-        return parsedData[preferredField] || parsedData.text || parsedData.body || parsedData.excerpt || JSON.stringify(parsedData);
+        return (
+            parsedData[preferredField] ||
+            parsedData.text ||
+            parsedData.body ||
+            parsedData.excerpt ||
+            JSON.stringify(parsedData)
+        );
     }
 
     return String(parsedData);
@@ -327,39 +336,175 @@ export default function Show({
     const breadcrumbs: BreadcrumbItemType[] = [
         { title: 'Accueil', href: home() },
         { title: 'Blog', href: blog.index().url },
-        { title: post.data.title, href: post.data.slug ? blog.show(post.data.slug).url : '#' },
+        {
+            title: post.data.title,
+            href: post.data.slug ? blog.show(post.data.slug).url : '#',
+        },
     ];
 
     const handleLike = async () => {
-        /* ... identique ... */
+        try {
+            const response = await fetch(blog.like(post.data.slug).url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setIsLiked(data.is_liked);
+                setLikesCount(data.likes_count);
+                if (data.message === 'Authentification requise') {
+                    toast.error(
+                        'Vous devez être connecté pour aimer un article',
+                    );
+                } else {
+                    toast.success(
+                        data.is_liked ? 'Article aimé' : "J'aime retiré",
+                    );
+                }
+            } else if (response.status === 401) {
+                toast.error('Vous devez être connecté pour aimer un article');
+            }
+        } catch (error) {
+            toast.error('Une erreur est survenue');
+        }
     };
     const handleBookmark = async () => {
-        /* ... identique ... */
+        try {
+            const response = await fetch(blog.bookmark(post.data.slug).url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setIsBookmarked(data.is_bookmarked);
+                setBookmarksCount(data.bookmarks_count);
+                if (data.message === 'Authentification requise') {
+                    toast.error(
+                        'Vous devez être connecté pour sauvegarder un article',
+                    );
+                } else {
+                    toast.success(
+                        data.is_bookmarked
+                            ? 'Article sauvegardé'
+                            : 'Article retiré des favoris',
+                    );
+                }
+            } else if (response.status === 401) {
+                toast.error(
+                    'Vous devez être connecté pour sauvegarder un article',
+                );
+            }
+        } catch (error) {
+            toast.error('Une erreur est survenue');
+        }
     };
     const handleShare = async () => {
-        /* ... identique ... */
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: post.data.title,
+                    text:
+                        extractText(post.data.excerpt) ||
+                        'Découvrez cet article !',
+                    url: window.location.href,
+                });
+            } catch (error) {
+                console.log('Erreur lors du partage', error);
+            }
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            toast.success('Lien copié dans le presse-papiers');
+        }
     };
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <Head title={post.data.title}>{/* ... meta identiques ... */}</Head>
+            <Head title={post.data.title}>
+                <meta
+                    name="description"
+                    content={
+                        extractText(post.data.excerpt, 'text') ||
+                        post.data.meta_description ||
+                        ''
+                    }
+                />
+                {post.data.meta_keywords && (
+                    <meta
+                        name="keywords"
+                        content={post.data.meta_keywords.join(', ')}
+                    />
+                )}
+                <meta property="og:title" content={post.data.title} />
+                <meta
+                    property="og:description"
+                    content={
+                        extractText(post.data.excerpt, 'text') ||
+                        post.data.meta_description ||
+                        ''
+                    }
+                />
+                {post.data.featured_image_url && (
+                    <meta
+                        property="og:image"
+                        content={post.data.featured_image_url}
+                    />
+                )}
+                <meta property="og:type" content="article" />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta name="twitter:title" content={post.data.title} />
+                <meta
+                    name="twitter:description"
+                    content={
+                        extractText(post.data.excerpt, 'text') ||
+                        post.data.meta_description ||
+                        ''
+                    }
+                />
+                {post.data.featured_image_url && (
+                    <meta
+                        name="twitter:image"
+                        content={post.data.featured_image_url}
+                    />
+                )}
+            </Head>
 
             <ReadingProgressBar />
             <ScrollToTop />
 
-            <article className="min-h-screen bg-linear-to-b from-white via-emerald-50/30 to-slate-50/50 dark:from-slate-950 dark:via-emerald-950/10 dark:to-slate-950">
-                {/* Hero section avec fond émeraude léger */}
-                <div className="relative overflow-hidden border-b border-emerald-100 bg-linear-to-br from-white via-emerald-50/50 to-slate-50 dark:border-emerald-900/30 dark:from-slate-950 dark:via-emerald-950/20 dark:to-slate-950">
-                    {/* Décoration d'arrière-plan */}
-                    <div className="pointer-events-none absolute inset-0">
-                        <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-emerald-200/30 blur-3xl dark:bg-emerald-500/10" />
-                        <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-64 w-64 rounded-full bg-slate-200/30 blur-3xl dark:bg-slate-700/10" />
-                    </div>
+            <article className="min-h-screen bg-slate-50 dark:bg-slate-950">
+                {/* Hero section avec image de fond moderne */}
+                <div className="relative flex min-h-[60vh] flex-col items-center justify-center overflow-hidden border-b border-slate-200/50 bg-slate-800 dark:border-slate-800/50 dark:bg-slate-900">
+                    {/* Background Image with Overlay */}
+                    {post.data.featured_image_url ? (
+                        <>
+                            <div className="absolute inset-0">
+                                <img
+                                    src={post.data.featured_image_url}
+                                    alt={post.data.title}
+                                    className="h-full w-full object-cover opacity-90 dark:opacity-80"
+                                />
+                            </div>
+                            {/* Gradient overlays for readability */}
+                            <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px] dark:bg-slate-950/40" />
+                            <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 via-slate-900/20 to-transparent dark:from-slate-950/90 dark:via-slate-950/40" />
+                        </>
+                    ) : (
+                        <div className="absolute inset-0 bg-linear-to-br from-emerald-900 via-slate-900 to-slate-950 dark:from-emerald-950/50 dark:via-slate-900 dark:to-slate-950">
+                            <div className="absolute top-0 right-0 -mt-20 -mr-20 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl" />
+                            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl" />
+                        </div>
+                    )}
 
-                    <div className="relative container mx-auto max-w-6xl px-4 py-12 md:py-16">
+                    <div className="relative z-10 w-full max-w-4xl px-4 py-20 text-center">
                         {post.data.categories &&
                             post.data.categories.length > 0 && (
-                                <div className="mb-4 flex flex-wrap gap-2">
+                                <div className="mb-6 flex flex-wrap justify-center gap-2">
                                     {post.data.categories.map((category) => (
                                         <Link
                                             key={category.id}
@@ -370,43 +515,41 @@ export default function Show({
                                                     },
                                                 }).url
                                             }
-                                            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-medium text-emerald-700 backdrop-blur-sm transition-all hover:border-emerald-300 hover:bg-emerald-50 dark:border-emerald-800 dark:bg-slate-900/80 dark:text-emerald-400 dark:hover:border-emerald-700 dark:hover:bg-emerald-950/30"
+                                            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-md transition-all hover:bg-white/20 hover:text-emerald-300"
                                         >
-                                            <Folder className="h-3 w-3" />
+                                            <Folder className="h-3.5 w-3.5" />
                                             {category.nom}
                                         </Link>
                                     ))}
                                 </div>
                             )}
 
-                        <h1 className="mb-6 max-w-4xl text-3xl font-bold tracking-tight text-slate-900 md:text-4xl lg:text-5xl dark:text-white">
+                        <h1 className="mb-8 text-4xl font-extrabold tracking-tight text-balance text-white sm:text-5xl lg:text-6xl">
                             {post.data.title}
                         </h1>
 
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
+                        <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium text-slate-200">
                             {post.data.user && (
-                                <div className="flex items-center gap-2">
-                                    <Avatar className="h-8 w-8 ring-2 ring-white dark:ring-slate-800">
+                                <div className="flex items-center gap-2.5">
+                                    <Avatar className="h-10 w-10 border-2 border-white/20">
                                         {post.data.user.avatar_url ? (
                                             <AvatarImage
                                                 src={post.data.user.avatar_url}
                                                 alt={post.data.user.name}
                                             />
                                         ) : (
-                                            <AvatarFallback className="bg-emerald-100 text-xs text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                                            <AvatarFallback className="bg-emerald-600 text-white">
                                                 {getInitials(
                                                     post.data.user.name,
                                                 )}
                                             </AvatarFallback>
                                         )}
                                     </Avatar>
-                                    <span className="font-medium text-slate-700 dark:text-slate-300">
-                                        {post.data.user.name}
-                                    </span>
+                                    <span>{post.data.user.name}</span>
                                 </div>
                             )}
-                            <div className="flex items-center gap-1.5">
-                                <Calendar className="h-4 w-4 text-emerald-500" />
+                            <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-emerald-400" />
                                 <span>
                                     {post.data.published_at
                                         ? format(
@@ -417,31 +560,17 @@ export default function Show({
                                         : ''}
                                 </span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <Clock className="h-4 w-4 text-emerald-500" />
-                                <span>{readingTime} min de lecture</span>
+                            <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-emerald-400" />
+                                <span>{readingTime} min</span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <Eye className="h-4 w-4 text-emerald-500" />
+                            <div className="flex items-center gap-2">
+                                <Eye className="h-4 w-4 text-emerald-400" />
                                 <span>{post.data.views_count} vues</span>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                {/* Image à la une */}
-                {post.data.featured_image_url && (
-                    <div className="relative z-10 container mx-auto -mt-4 max-w-6xl px-4 md:-mt-8">
-                        <div className="overflow-hidden rounded-2xl border border-white/50 shadow-xl shadow-emerald-500/10 dark:border-slate-800/50 dark:shadow-emerald-500/5">
-                            <img
-                                src={post.data.featured_image_url}
-                                alt={post.data.title}
-                                className="h-64 w-full object-cover md:h-96"
-                                loading="lazy"
-                            />
-                        </div>
-                    </div>
-                )}
 
                 {/* Layout deux colonnes */}
                 <div className="container mx-auto max-w-6xl px-4 py-8 md:py-12">
@@ -461,7 +590,10 @@ export default function Show({
                         {showMobileToc && (
                             <div className="mt-3">
                                 <TableOfContents
-                                    content={extractText(post.data.content, 'body')}
+                                    content={extractText(
+                                        post.data.content,
+                                        'body',
+                                    )}
                                 />
                             </div>
                         )}
@@ -548,7 +680,10 @@ export default function Show({
                             <div ref={contentRef}>
                                 {post.data.content && (
                                     <RichContentText
-                                        content={extractText(post.data.content, 'body')}
+                                        content={extractText(
+                                            post.data.content,
+                                            'body',
+                                        )}
                                     />
                                 )}
                             </div>
@@ -580,7 +715,13 @@ export default function Show({
                                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                         {previousPost && (
                                             <Link
-                                                href={previousPost.slug ? blog.show(previousPost.slug).url : '#'}
+                                                href={
+                                                    previousPost.slug
+                                                        ? blog.show(
+                                                              previousPost.slug,
+                                                          ).url
+                                                        : '#'
+                                                }
                                                 className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-emerald-700"
                                             >
                                                 <span className="mb-1 text-xs text-slate-400 dark:text-slate-500">
@@ -594,7 +735,11 @@ export default function Show({
                                         {nextPost && (
                                             <Link
                                                 href={
-                                                    nextPost.slug ? blog.show(nextPost.slug).url : '#'
+                                                    nextPost.slug
+                                                        ? blog.show(
+                                                              nextPost.slug,
+                                                          ).url
+                                                        : '#'
                                                 }
                                                 className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 text-right transition-all hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-emerald-700"
                                             >
@@ -615,7 +760,10 @@ export default function Show({
                         <aside className="hidden lg:col-span-4 lg:block">
                             <div className="sticky top-24 max-h-[calc(100vh-8rem)] space-y-6 overflow-y-auto">
                                 <TableOfContents
-                                    content={extractText(post.data.content, 'body')}
+                                    content={extractText(
+                                        post.data.content,
+                                        'body',
+                                    )}
                                 />
 
                                 {post.data.user && (
@@ -670,7 +818,12 @@ export default function Show({
                                 {relatedPosts.map((relatedPost) => (
                                     <Link
                                         key={relatedPost.id}
-                                        href={relatedPost.slug ? blog.show(relatedPost.slug).url : '#'}
+                                        href={
+                                            relatedPost.slug
+                                                ? blog.show(relatedPost.slug)
+                                                      .url
+                                                : '#'
+                                        }
                                         className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60"
                                     >
                                         {relatedPost.featured_image_url && (
@@ -691,7 +844,10 @@ export default function Show({
                                                     {relatedPost.title}
                                                 </h3>
                                                 <p className="line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
-                                                    {extractText(relatedPost.excerpt, 'text')}
+                                                    {extractText(
+                                                        relatedPost.excerpt,
+                                                        'text',
+                                                    )}
                                                 </p>
                                             </div>
                                             <div className="mt-3 flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">

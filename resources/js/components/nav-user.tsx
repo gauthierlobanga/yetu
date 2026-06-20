@@ -14,6 +14,7 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 export function NavUser() {
     const { auth } = usePage().props;
@@ -31,7 +32,12 @@ export function NavUser() {
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"
-                            className="group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent"
+                            className={cn(
+                                'h-11 rounded px-3 transition-all duration-200',
+                                'group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent',
+                                'hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-400 dark:hover:bg-slate-800/60',
+                                // 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
+                            )}
                             data-test="sidebar-menu-button"
                         >
                             <UserInfo user={auth.user} />

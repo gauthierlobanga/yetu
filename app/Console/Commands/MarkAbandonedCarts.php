@@ -50,10 +50,10 @@ class MarkAbandonedCarts extends Command
 
                 $cart->marquerAbandonne($etape, 'Inactivité > 24h');
                 $count++;
-                
+
                 $this->line("Cart {$cart->id} marked as abandoned.");
             } catch (\Exception $e) {
-                Log::error("Failed to mark cart {$cart->id} as abandoned: " . $e->getMessage());
+                Log::error("Failed to mark cart {$cart->id} as abandoned: ".$e->getMessage());
                 $this->error("Failed to mark cart {$cart->id}.");
             }
         }

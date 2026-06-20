@@ -8,6 +8,7 @@ use App\Models\Coupon;
 use App\Models\ItemPanier;
 use App\Models\Panier;
 use App\Models\Produit;
+use App\Models\RelancePanier;
 use App\Models\User;
 use App\Models\VarianteProduit;
 use App\Models\VisitorEvent;
@@ -349,7 +350,7 @@ class CartController extends Controller
     /**
      * Récupère un panier abandonné via un lien de relance.
      */
-    public function cartRecover(Request $request, \App\Models\RelancePanier $relance)
+    public function cartRecover(Request $request, RelancePanier $relance)
     {
         $relance->marquerClique();
 
@@ -365,9 +366,9 @@ class CartController extends Controller
             }
             $panier->statut = Panier::STATUT_ACTIF;
             $panier->save();
-            
+
             $relance->abandonPanier->marquerRecupere();
-            
+
             return redirect()->route('tenant.cart.index')
                 ->with('success', 'Votre panier a été récupéré avec succès.');
         }

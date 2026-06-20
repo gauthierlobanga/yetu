@@ -66,6 +66,15 @@ class VendeursTable
                     ->boolean()
                     ->label('Actif'),
 
+                IconColumn::make('ai_enabled')
+                    ->boolean()
+                    ->trueIcon(Heroicon::OutlinedSparkles)
+                    ->falseIcon(Heroicon::OutlinedSparkles)
+                    ->trueColor('success')
+                    ->falseColor('warning')
+                    ->sortable()
+                    ->label('AI'),
+
                 TextColumn::make('documents_legaux_count')
                     ->label('Docs')
                     ->counts('documentsLegaux')

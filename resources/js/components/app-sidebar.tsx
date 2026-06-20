@@ -9,7 +9,6 @@ import {
     Gift,
     MapPin,
     RotateCcw,
-    CircleHelp,
     Store,
 } from 'lucide-react';
 import * as React from 'react';
@@ -25,13 +24,13 @@ import {
     SidebarMenuItem,
     SidebarSeparator,
 } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes/acheteur';
 import { edit } from '@/routes/acheteur/profile';
 import tenant from '@/routes/tenant';
 import addresses from '@/routes/tenant/addresses';
 import loyalty from '@/routes/tenant/loyalty';
 import orders from '@/routes/tenant/orders';
-import { help } from '@/routes/tenant/page';
 import wishlist from '@/routes/tenant/wishlist';
 import vendor from '@/routes/vendor';
 import type { NavItem } from '@/types';
@@ -62,7 +61,7 @@ export function AppSidebar() {
     const isVendor =
         user?.tenants?.length > 0 ||
         user?.roles?.some(
-            (r: any) => r.name === 'owner' || r.name === 'manager',
+            (r: any) => r.name === 'super_admin' || r.name === 'manager',
         );
 
     // Fonction pour déterminer l'état actif
@@ -132,11 +131,6 @@ export function AppSidebar() {
                     href: edit(),
                     icon: IconSettings,
                 },
-                {
-                    title: 'Centre d’aide',
-                    href: help().url,
-                    icon: CircleHelp,
-                },
             ]),
         },
     ];
@@ -155,9 +149,17 @@ export function AppSidebar() {
         : null;
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar
+            variant="inset"
+            className={cn(
+                'border-r border-slate-200/70',
+                'bg-white/92 backdrop-blur-3xl supports-backdrop-filter:bg-white/88',
+                'dark:border-transparent',
+                'dark:bg-slate-950/94 dark:supports-backdrop-filter:bg-slate-950/88',
+            )}
+        >
             {/* Logo */}
-            <SidebarHeader className="pb-2">
+            <SidebarHeader className="relative border-b border-slate-200/60 px-3 py-4 pb-2 dark:border-slate-800/70 dark:bg-slate-900">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton
@@ -165,7 +167,15 @@ export function AppSidebar() {
                             size="lg"
                             className="data-[slot=sidebar-menu-button]:p-1.5!"
                         >
-                            <Link href={dashboard()} prefetch>
+                            <Link
+                                className={cn(
+                                    'group flex items-center rounded-lg px-3 py-2 text-sm transition-all duration-200',
+                                    'text-slate-600 hover:bg-slate-100 hover:text-emerald-700',
+                                    'dark:text-slate-400 dark:hover:bg-slate-800/60 dark:hover:text-emerald-300',
+                                )}
+                                href={dashboard()}
+                                prefetch
+                            >
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -174,7 +184,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             {/* Navigation */}
-            <SidebarContent className="gap-6 px-3 py-4">
+            <SidebarContent className="gap-6 px-3 py-4 dark:bg-slate-900">
                 {navigationSections.map((section, index) => (
                     <div key={section.title}>
                         {index > 0 && <SidebarSeparator className="my-3" />}
@@ -196,7 +206,9 @@ export function AppSidebar() {
             </SidebarContent>
 
             {/* Footer utilisateur */}
-            <SidebarFooter className="pt-2">
+            <SidebarFooter   className={cn(
+                'border-t border-slate-200/60 px-3 py-4 pb-2 dark:border-slate-800/70 dark:bg-slate-900'
+            )} >
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

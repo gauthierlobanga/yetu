@@ -45,6 +45,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 import tenant from '@/routes/tenant';
 /* ---------- Types ---------- */
 interface OrderItem {
@@ -242,6 +243,12 @@ export default function DashboardCustomerBuyer() {
 
     return (
         <SidebarProvider
+            className={cn(
+                'border-r border-slate-200/70',
+                'bg-white/92 backdrop-blur-3xl supports-backdrop-filter:bg-white/88',
+                'dark:border-transparent',
+                'dark:bg-slate-950/94 dark:supports-backdrop-filter:bg-slate-950/88',
+            )}
             style={
                 {
                     '--sidebar-width': 'calc(var(--spacing) * 72)',

@@ -13,6 +13,7 @@ class CampaignMailable extends Mailable
     use Queueable, SerializesModels;
 
     public $campaign;
+
     public $send;
 
     public function __construct(NewsletterCampaign $campaign, NewsletterSend $send)
@@ -24,11 +25,11 @@ class CampaignMailable extends Mailable
     public function build()
     {
         $trackingPixel = route('tenant.newsletter.track.open', ['send_id' => $this->send->id]);
-        
+
         // Wrap links? (For a full implementation, you'd parse DOM and replace hrefs)
         // For simplicity, we just append tracking pixel.
         $htmlContent = $this->campaign->contenu_html;
-        $htmlContent .= '<img src="' . $trackingPixel . '" width="1" height="1" style="display:none;" />';
+        $htmlContent .= '<img src="'.$trackingPixel.'" width="1" height="1" style="display:none;" />';
 
         // Remplace tags variables like {{prenom}}
         if ($this->send->subscriber) {
@@ -37,6 +38,6 @@ class CampaignMailable extends Mailable
         }
 
         return $this->subject($this->campaign->sujet)
-                    ->html($htmlContent);
+            ->html($htmlContent);
     }
 }

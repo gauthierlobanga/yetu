@@ -18,7 +18,9 @@ class SendIndividualNewsletter implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $campaign;
+
     public $send;
+
     public $subscriber;
 
     public function __construct(NewsletterCampaign $campaign, NewsletterSend $send, Newsletter $subscriber)
