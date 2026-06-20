@@ -47,7 +47,7 @@ export default function NewsletterSectionCentral() {
                 transition={{ duration: 0.6, ease: 'easeOut' }}
                 className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
             >
-                <div className="grid items-center gap-12 overflow-hidden rounded-3xl border border-white/20 bg-white/70 p-8 shadow-2xl shadow-slate-200/30 backdrop-blur-xl md:grid-cols-5 md:p-12 lg:p-16 dark:border-slate-800/50 dark:bg-slate-900/60 dark:shadow-slate-900/40">
+                <div className="grid items-center gap-12 overflow-hidden rounded-3xl border border-white/20 bg-white/70 p-8 md:grid-cols-5 md:p-12 lg:p-16 dark:border-slate-800/50 dark:bg-slate-900/60">
                     {/* Colonne texte (3/5) */}
                     <div className="space-y-6 md:col-span-3">
                         <motion.div

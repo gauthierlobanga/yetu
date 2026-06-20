@@ -345,4 +345,33 @@ class CartController extends Controller
             ]);
         }
     }
+
+    /**
+     * Récupère un panier abandonné via un lien de relance.
+     */
+    public function cartRecover(Request $request, \App\Models\RelancePanier $relance)
+    {
+        $relance->marquerClique();
+
+        $panier = $relance->abandonPanier->panier;
+
+        if ($panier) {
+            // Set the session ID to the recovered cart's session or link it to the user
+            if (Auth::check()) {
+                $panier->user_id = Auth::id();
+                $panier->client_id = $this->getOrCreateClientForUser(Auth::user())->id;
+            } else {
+                $panier->session_id = $request->session()->getId();
+            }
+            $panier->statut = Panier::STATUT_ACTIF;
+            $panier->save();
+            
+            $relance->abandonPanier->marquerRecupere();
+            
+            return redirect()->route('tenant.cart.index')
+                ->with('success', 'Votre panier a été récupéré avec succès.');
+        }
+
+        return redirect()->route('tenant.home')->withErrors('Impossible de récupérer ce panier.');
+    }
 }

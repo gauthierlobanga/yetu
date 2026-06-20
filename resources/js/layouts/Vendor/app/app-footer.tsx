@@ -133,11 +133,6 @@ export default function FooterSectionVendeur() {
             ref={ref}
             className="relative w-full overflow-hidden border-t border-slate-200/70 bg-white dark:border-slate-800/70 dark:bg-slate-950"
         >
-            {/* Background effects */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                <div className="absolute top-0 left-1/4 h-72 w-72 rounded-full bg-emerald-500/5 blur-3xl dark:bg-emerald-400/8" />
-                <div className="absolute right-0 bottom-0 h-72 w-72 rounded-full bg-slate-400/5 blur-3xl dark:bg-slate-200/5" />
-            </div>
 
             {/* Guarantees – pleine largeur, contenu centré */}
             <motion.div
@@ -154,10 +149,9 @@ export default function FooterSectionVendeur() {
                             whileHover={{ y: -2 }}
                             transition={{ duration: 0.2 }}
                             className={cn(
-                                'group relative overflow-hidden rounded-3xl border p-4',
+                                'group relative overflow-hidden rounded p-4',
                                 'border-slate-200/70 bg-white/80 backdrop-blur-xl',
                                 'shadow-[0_10px_30px_-18px_rgba(15,23,42,0.18)]',
-                                'transition-all duration-300',
                                 'hover:border-emerald-200 hover:shadow-emerald-500/10',
                                 'dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-emerald-800/50',
                             )}

@@ -250,6 +250,7 @@ const extractText = (data: any, preferredField: 'text' | 'body' | 'excerpt' = 't
     }
 
     let parsedData = data;
+
     if (typeof data === 'string') {
         try {
             parsedData = JSON.parse(data);

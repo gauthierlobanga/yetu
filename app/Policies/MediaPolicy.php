@@ -4,33 +4,13 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Models\Media;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class MediaPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Perform pre-authorization checks.
-     */
-    public function before(AuthUser $user, string $ability): ?bool
-    {
-        if ($user->hasRole('super_admin') || $user->hasRole('vendeur')) {
-            return true;
-        }
-
-        if (function_exists('tenant') && tenant() && $user->canAccessTenant(tenant())) {
-            return true;
-        }
-
-        if (function_exists('tenant') && tenant() && $user->canAccessTenant(tenant())) {
-            return true;
-        }
-
-        return null;
-    }
 
     public function viewAny(AuthUser $authUser): bool
     {

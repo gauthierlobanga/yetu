@@ -9,6 +9,7 @@ use App\Models\ItemPanier;
 use App\Models\MouvementStock;
 use App\Models\Paiement;
 use App\Models\Panier;
+use App\Models\Post;
 use App\Models\Produit;
 use App\Models\Promotion;
 use App\Models\Retour;
@@ -70,6 +71,14 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::policy(Media::class, MediaPolicy::class);
+
+        Model::retrieved(function ($model) {
+            if ($model instanceof Post) {
+                // Force la normalisation immédiate
+                $model->setAttribute('content', $model->content);
+                $model->setAttribute('excerpt', $model->excerpt);
+            }
+        });
     }
 
     /**

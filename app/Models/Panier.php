@@ -256,8 +256,13 @@ class Panier extends Model
     {
         $this->sous_total = $this->items->sum('prix_total');
         $this->total_taxes = $this->items->sum('taxe_unitaire') * $this->items->sum('quantite');
-        $this->total_remises = $this->regles->where('appliquee', true)->sum('resultat.montant');
-        $this->total_general = $this->sous_total + $this->total_taxes + $this->total_livraison - $this->total_remises;
+        
+        $totalRemisesRegles = $this->regles->where('appliquee', true)->sum('resultat.montant');
+        $totalRemisesPromotions = $this->getTotalReductionsPromotions();
+        
+        $this->total_remises = $totalRemisesRegles + $totalRemisesPromotions;
+        
+        $this->total_general = max(0, $this->sous_total + $this->total_taxes + $this->total_livraison - $this->total_remises);
         $this->date_modification = now();
         $this->save();
     }

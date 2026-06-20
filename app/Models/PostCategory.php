@@ -65,7 +65,7 @@ class PostCategory extends Model
 
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(PostCategory::class, 'parent_id');
+        return $this->belongsTo(PostCategory::class, 'parent_id')->with('parent');
     }
 
     public function enfants(): HasMany

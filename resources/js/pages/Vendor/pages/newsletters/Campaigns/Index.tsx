@@ -4,11 +4,11 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { SiteHeader } from '@/components/site-header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { VendorSidebar } from '@/components/VendorSidebar';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 
@@ -40,7 +40,6 @@ export default function CampaignsIndex({ tenant, campaigns }: CampaignsIndexProp
 
     const handleDelete = (id: string) => {
         if (confirm('Êtes-vous sûr de vouloir supprimer cette campagne ?')) {
-            // @ts-ignore
             router.delete(route('vendor.newsletters.campaigns.destroy', { id }), {
                 onSuccess: () => toast.success('Campagne supprimée.'),
             });

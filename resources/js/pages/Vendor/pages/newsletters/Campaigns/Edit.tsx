@@ -1,16 +1,16 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Save, Send } from 'lucide-react';
+import { toast } from 'sonner';
 import { SiteHeader } from '@/components/site-header';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { Textarea } from '@/components/ui/textarea';
 import { VendorSidebar } from '@/components/VendorSidebar';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
-import { toast } from 'sonner';
 
 interface Campaign {
     id: string;
@@ -38,7 +38,7 @@ export default function CampaignEdit({ tenant, campaign }: CampaignEditProps) {
         segments_cibles: undefined,
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         put(route('vendor.newsletters.campaigns.update', { id: campaign.id }), {
             onSuccess: () => toast.success('Campagne mise à jour avec succès.')
@@ -133,8 +133,8 @@ export default function CampaignEdit({ tenant, campaign }: CampaignEditProps) {
                                         <CardContent className="space-y-4">
                                             <div className="space-y-2">
                                                 <Label htmlFor="status">Statut de la campagne</Label>
-                                                <Select 
-                                                    value={data.status} 
+                                                <Select
+                                                    value={data.status}
                                                     onValueChange={(val) => setData('status', val)}
                                                     disabled={campaign.status === 'envoye'}
                                                 >

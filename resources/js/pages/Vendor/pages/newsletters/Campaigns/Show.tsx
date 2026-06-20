@@ -1,12 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Play, Pause, Trash2, Edit, Users, Eye, MousePointerClick, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { SiteHeader } from '@/components/site-header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { VendorSidebar } from '@/components/VendorSidebar';
@@ -30,7 +31,7 @@ interface Campaign {
 interface CampaignShowProps {
     tenant: Tenant;
     campaign: Campaign;
-    recentSends: any[]; 
+    recentSends: any[];
 }
 
 export default function CampaignShow({ tenant, campaign, recentSends }: CampaignShowProps) {
@@ -228,9 +229,9 @@ export default function CampaignShow({ tenant, campaign, recentSends }: Campaign
                                         <form onSubmit={handleSendTest} className="space-y-4">
                                             <div className="space-y-2">
                                                 <Label htmlFor="test-email">Adresse e-mail</Label>
-                                                <Input 
-                                                    id="test-email" 
-                                                    type="email" 
+                                                <Input
+                                                    id="test-email"
+                                                    type="email"
                                                     placeholder="test@example.com"
                                                     value={testData.email}
                                                     onChange={(e) => setTestData('email', e.target.value)}
@@ -259,7 +260,7 @@ export default function CampaignShow({ tenant, campaign, recentSends }: Campaign
                                                     const isOpened = send.status === 'ouvert' || send.status === 'clique';
                                                     const isClicked = send.status === 'clique';
                                                     const date = send.clicked_at || send.opened_at || send.created_at;
-                                                    
+
                                                     return (
                                                     <div key={i} className="flex items-start gap-3 text-sm">
                                                         <div className="mt-0.5">
@@ -279,7 +280,8 @@ export default function CampaignShow({ tenant, campaign, recentSends }: Campaign
                                                             </div>
                                                         </div>
                                                     </div>
-                                                )})}
+                                                )
+})}
                                             </div>
                                         ) : (
                                             <div className="text-sm text-slate-500 text-center py-4">

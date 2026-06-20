@@ -1,17 +1,13 @@
 // resources/js/layouts/FooterSection.tsx
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { motion, useInView } from 'framer-motion';
 import {
     ChevronRight,
     CreditCard,
     Globe,
-    RefreshCw,
-    ShieldCheck,
-    Truck,
     ArrowUpRight,
     Building2,
     HeartHandshake,
-    Headphones,
 } from 'lucide-react';
 import { useRef } from 'react';
 
@@ -27,37 +23,6 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 
-const socialLinks = [
-    { name: 'Facebook', href: '#', icon: FaFacebook },
-    { name: 'Instagram', href: '#', icon: FaInstagram },
-    { name: 'X', href: '#', icon: FaTwitter },
-    { name: 'LinkedIn', href: '#', icon: FaLinkedin },
-    { name: 'YouTube', href: '#', icon: FaYoutube },
-];
-
-const guarantees = [
-    {
-        icon: ShieldCheck,
-        title: 'Paiement sécurisé',
-        desc: 'Transactions chiffrées SSL/TLS',
-    },
-    {
-        icon: Truck,
-        title: 'Livraison rapide',
-        desc: 'Expédition fiable partout',
-    },
-    {
-        icon: RefreshCw,
-        title: 'Retours simplifiés',
-        desc: '30 jours pour changer d’avis',
-    },
-    {
-        icon: Headphones,
-        title: 'Support réactif',
-        desc: 'Assistance disponible 7j/7',
-    },
-];
-
 const footerSections = [
     {
         title: 'Explorer',
@@ -65,43 +30,41 @@ const footerSections = [
             { name: 'Produits', href: route('tenant.product.index') },
             {
                 name: 'Promotions',
-                href: route('tenant.promotions.index'),
+                href: '#',
                 badge: 'Hot',
             },
             {
                 name: 'Nouveautés',
-                href: route('tenant.product.index', { sort: 'newest' }),
+                href: '#',
                 badge: 'New',
             },
             {
                 name: 'Meilleures ventes',
-                href: route('tenant.product.index', { sort: 'bestseller' }),
+                href: '#',
             },
         ],
     },
     {
         title: 'Entreprise',
         links: [
-            { name: 'À propos', href: route('tenant.page.about') },
-            { name: 'Blog', href: route('tenant.blog.index') },
+            { name: 'À propos', href: route('about') },
+            { name: 'Blog', href: route('blog.index') },
             { name: 'Devenir vendeur', href: route('vendor.register') },
         ],
     },
     {
         title: 'Support',
         links: [
-            { name: 'Contact', href: route('tenant.page.contact') },
-            { name: 'FAQ', href: route('tenant.page.faq') },
-            { name: 'Suivi de commande', href: route('tenant.orders.index') },
-            { name: 'Retours', href: route('tenant.return.index') },
+            { name: 'Contact', href: route('contact') },
+            { name: 'FAQ', href: route('faq') },
         ],
     },
     {
         title: 'Légal',
         links: [
-            { name: 'Conditions', href: route('tenant.page.terms') },
-            { name: 'Confidentialité', href: route('tenant.page.privacy') },
-            { name: 'Cookies', href: route('tenant.page.cookies') },
+            { name: 'Conditions', href: route('terms') },
+            { name: 'Confidentialité', href: route('privacy') },
+            { name: 'Cookies', href: route('cookies') },
         ],
     },
 ];
@@ -128,61 +91,28 @@ export default function FooterSection() {
     const isInView = useInView(ref, { once: true, margin: '-80px' });
     const currentYear = new Date().getFullYear();
 
+    const { socialLinks: rawSocialLinks } = usePage().props as any;
+
+    const socialLinks = [
+        { name: 'Facebook', href: rawSocialLinks?.facebook, icon: FaFacebook },
+        {
+            name: 'Instagram',
+            href: rawSocialLinks?.instagram,
+            icon: FaInstagram,
+        },
+        { name: 'X', href: rawSocialLinks?.x, icon: FaTwitter },
+        { name: 'LinkedIn', href: rawSocialLinks?.linkedin, icon: FaLinkedin },
+        { name: 'YouTube', href: rawSocialLinks?.youtube, icon: FaYoutube },
+    ].filter((link) => link.href); // n'affiche que ceux qui ont un lien
+
+    // Récupération des données de contact depuis le partage global (si configuré dans HandleInertiaRequests)
+    const { name } = usePage().props as any;
+
     return (
         <footer
             ref={ref}
             className="relative w-full overflow-hidden border-t border-slate-200/70 bg-white dark:border-slate-800/70 dark:bg-slate-950"
         >
-            {/* Background effects */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                <div className="absolute top-0 left-1/4 h-72 w-72 rounded-full bg-emerald-500/5 blur-3xl dark:bg-emerald-400/8" />
-                <div className="absolute right-0 bottom-0 h-72 w-72 rounded-full bg-slate-400/5 blur-3xl dark:bg-slate-200/5" />
-            </div>
-
-            {/* Guarantees – pleine largeur, contenu centré */}
-            <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate={isInView ? 'visible' : 'hidden'}
-                className="mx-auto w-full max-w-7xl px-4 pt-10 pb-8 sm:px-6 lg:px-8"
-            >
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {guarantees.map((item) => (
-                        <motion.div
-                            key={item.title}
-                            variants={itemVariants}
-                            whileHover={{ y: -2 }}
-                            transition={{ duration: 0.2 }}
-                            className={cn(
-                                'group relative overflow-hidden rounded-3xl border p-4',
-                                'border-slate-200/70 bg-white/80 backdrop-blur-xl',
-                                'shadow-[0_10px_30px_-18px_rgba(15,23,42,0.18)]',
-                                'transition-all duration-300',
-                                'hover:border-emerald-200 hover:shadow-emerald-500/10',
-                                'dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-emerald-800/50',
-                            )}
-                        >
-                            <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-500/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                            <div className="flex items-start gap-3">
-                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/10 dark:text-emerald-400">
-                                    <item.icon className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                                        {item.title}
-                                    </p>
-                                    <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                                        {item.desc}
-                                    </p>
-                                </div>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
-            </motion.div>
-
-            <Separator className="bg-slate-200/70 dark:bg-slate-800/70" />
-
             {/* Main Footer – pleine largeur, contenu centré */}
             <motion.div
                 variants={containerVariants}
@@ -207,6 +137,8 @@ export default function FooterSection() {
                             une expérience d’achat rapide, sécurisée et
                             élégante.
                         </p>
+
+                        {/* Coordonnées – bloc premium */}
                         <div className="mt-6 grid gap-3 sm:grid-cols-2">
                             <div className="rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60">
                                 <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -231,6 +163,8 @@ export default function FooterSection() {
                                 </p>
                             </div>
                         </div>
+
+                        {/* Les liens socials*/}
                         <div className="mt-6 flex flex-wrap gap-2">
                             {socialLinks.map((social) => (
                                 <motion.a
@@ -311,7 +245,7 @@ export default function FooterSection() {
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                         <span>
-                            © {currentYear} {import.meta.env.VITE_APP_NAME}.
+                            © {currentYear} {name}.
                         </span>
                         <span className="hidden md:inline">•</span>
                         <span>Tous droits réservés.</span>

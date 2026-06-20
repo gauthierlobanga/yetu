@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\Traits\HasTiptapContent;
 use App\Traits\HasComments;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -46,7 +47,7 @@ use Spatie\Tags\HasTags;
 class Post extends Model implements HasMedia
 {
     use HasComments, HasFactory, HasTags, InteractsWithMedia , SoftDeletes;
-    use HasUuids;
+    use HasTiptapContent,HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -66,10 +67,10 @@ class Post extends Model implements HasMedia
     {
         return [
             // 'embedding' => 'array',
-            'content' => 'array',
-            'excerpt' => 'array',
             'metadata' => 'array',
             'meta_keywords' => 'array',
+            'published_at' => 'datetime',
+            'scheduled_for' => 'datetime',
             'is_pinned' => 'boolean',
             'views_count' => 'integer',
             'likes_count' => 'integer',
@@ -83,6 +84,11 @@ class Post extends Model implements HasMedia
             'deleted_at' => 'datetime',
         ];
     }
+
+    protected $attributes = [
+        'content' => '{"type":"doc","content":[]}',
+        'excerpt' => '{"type":"doc","content":[]}',
+    ];
 
     // Constantes de statut
     public const string STATUS_DRAFT = 'draft';
@@ -518,39 +524,88 @@ class Post extends Model implements HasMedia
 
     public function getMetaDescriptionAttribute($value): string
     {
-        return $value ?? ($this->excerpt['text'] ?? '');
+        // Extraction sécurisée du texte depuis l'excerpt Tiptap
+        $text = $value;
+        if (empty($text)) {
+            $text = $this->getPlainTextContent(160) ?: $this->title;
+        }
+
+        return (string) $text;
     }
 
     /**
      * Get the excerpt attribute.
      * Ensures a valid Tiptap document structure is always returned.
      */
-    // public function getExcerptAttribute($value): array
+    // public function getExcerptAttribute($value)
     // {
     //     if (is_string($value)) {
     //         $decoded = json_decode($value, true);
-    //     } else {
-    //         $decoded = $value;
+    //         if (json_last_error() === JSON_ERROR_NONE) {
+    //             if (is_array($decoded) && isset($decoded['type']) && ! isset($decoded['content'])) {
+    //                 $decoded['content'] = [];
+    //             }
+
+    //             return $decoded;
+    //         }
+
+    //         return $value;
     //     }
 
-    //     if (! is_array($decoded) || ! isset($decoded['type'])) {
-    //         return [
-    //             'type' => 'doc',
-    //             'content' => [],
-    //         ];
+    //     if (is_array($value) && isset($value['type']) && ! isset($value['content'])) {
+    //         $value['content'] = [];
     //     }
 
-    //     return $decoded;
+    //     return $value;
     // }
 
-    public function setContentAttribute($value): void
-    {
-        if (is_array($value)) {
-            $this->attributes['content'] = json_encode($value);
-        } else {
-            $this->attributes['content'] = $value;
-        }
-    }
+    // public function setContentAttribute($value): void
+    // {
+    //     if (is_null($value) || $value === '') {
+    //         $value = ['type' => 'doc', 'content' => []];
+    //     }
+
+    //     if (is_array($value)) {
+    //         $this->attributes['content'] = json_encode($value);
+    //     } else {
+    //         $this->attributes['content'] = $value;
+    //     }
+    // }
+
+    // public function setExcerptAttribute($value): void
+    // {
+    //     if (is_null($value) || $value === '') {
+    //         $value = ['type' => 'doc', 'content' => []];
+    //     }
+
+    //     if (is_array($value)) {
+    //         $this->attributes['excerpt'] = json_encode($value);
+    //     } else {
+    //         $this->attributes['excerpt'] = $value;
+    //     }
+    // }
+
+    // public function getContentAttribute($value)
+    // {
+    //     if (is_string($value)) {
+    //         $decoded = json_decode($value, true);
+    //         if (json_last_error() === JSON_ERROR_NONE) {
+    //             if (is_array($decoded) && isset($decoded['type']) && ! isset($decoded['content'])) {
+    //                 $decoded['content'] = [];
+    //             }
+
+    //             return $decoded;
+    //         }
+
+    //         return $value;
+    //     }
+
+    //     if (is_array($value) && isset($value['type']) && ! isset($value['content'])) {
+    //         $value['content'] = [];
+    //     }
+
+    //     return $value;
+    // }
 
     public function getContentPlainTextAttribute()
     {
@@ -797,25 +852,6 @@ class Post extends Model implements HasMedia
      * Get the content attribute.
      * Ensures a valid Tiptap document structure is always returned.
      */
-    // public function getContentAttribute($value): array
-    // {
-    //     if (is_string($value)) {
-    //         $decoded = json_decode($value, true);
-    //     } else {
-    //         $decoded = $value;
-    //     }
-
-    //     // Si la valeur est null, vide, ou n'a pas la structure attendue
-    //     if (! is_array($decoded) || ! isset($decoded['type'])) {
-    //         return [
-    //             'type' => 'doc',
-    //             'content' => [],
-    //         ];
-    //     }
-
-    //     return $decoded;
-    // }
-
     public function getPlainTextContent(?int $limit = null): string
     {
         $content = $this->content; // déjà un tableau grâce à l'accesseur

@@ -20,7 +20,10 @@ use App\Http\Controllers\Vendor\Boutique\Ecommerce\Checkout\CheckoutController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Commande\OrderController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Home\HomeController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Loyalty\LoyaltyController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterSubscriberController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterTrackingController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Payment\PaymentController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ProductController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ReviewController;
@@ -168,17 +171,17 @@ Route::middleware([
 
         // Newsletter Vendor Admin Routes
         Route::prefix('vendor/newsletters')->name('vendor.newsletters.')->group(function () {
-            Route::get('/subscribers', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterSubscriberController::class, 'index'])->name('subscribers.index');
-            Route::delete('/subscribers/{id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterSubscriberController::class, 'destroy'])->name('subscribers.destroy');
+            Route::get('/subscribers', [NewsletterSubscriberController::class, 'index'])->name('subscribers.index');
+            Route::delete('/subscribers/{id}', [NewsletterSubscriberController::class, 'destroy'])->name('subscribers.destroy');
 
-            Route::get('/campaigns', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'index'])->name('campaigns.index');
-            Route::get('/campaigns/create', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'create'])->name('campaigns.create');
-            Route::post('/campaigns', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'store'])->name('campaigns.store');
-            Route::get('/campaigns/{id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'show'])->name('campaigns.show');
-            Route::get('/campaigns/{id}/edit', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'edit'])->name('campaigns.edit');
-            Route::put('/campaigns/{id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'update'])->name('campaigns.update');
-            Route::delete('/campaigns/{id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'destroy'])->name('campaigns.destroy');
-            Route::post('/campaigns/{id}/send-test', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterCampaignController::class, 'sendTest'])->name('campaigns.send-test');
+            Route::get('/campaigns', [NewsletterCampaignController::class, 'index'])->name('campaigns.index');
+            Route::get('/campaigns/create', [NewsletterCampaignController::class, 'create'])->name('campaigns.create');
+            Route::post('/campaigns', [NewsletterCampaignController::class, 'store'])->name('campaigns.store');
+            Route::get('/campaigns/{id}', [NewsletterCampaignController::class, 'show'])->name('campaigns.show');
+            Route::get('/campaigns/{id}/edit', [NewsletterCampaignController::class, 'edit'])->name('campaigns.edit');
+            Route::put('/campaigns/{id}', [NewsletterCampaignController::class, 'update'])->name('campaigns.update');
+            Route::delete('/campaigns/{id}', [NewsletterCampaignController::class, 'destroy'])->name('campaigns.destroy');
+            Route::post('/campaigns/{id}/send-test', [NewsletterCampaignController::class, 'sendTest'])->name('campaigns.send-test');
         });
 
         Route::prefix('subscription')->name('subscription.')->group(function () {
@@ -389,6 +392,7 @@ Route::middleware([
             Route::post('/apply-coupon', [CartController::class, 'cartApplyCoupon'])->name('cart.apply-coupon');
             Route::delete('/remove-coupon', [CartController::class, 'cartRemoveCoupon'])->name('cart.remove-coupon');
             Route::post('/calculate', [CartController::class, 'cartCalculate'])->name('cart.calculate');
+            Route::get('/recover/{relance}', [CartController::class, 'cartRecover'])->name('cart.recover');
         });
 
         // Wishlist
@@ -475,8 +479,8 @@ Route::middleware([
     })->name('tenant.subscription.required');
 
     // Newsletter Tracking (Public)
-    Route::get('/newsletter/track/open/{send_id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterTrackingController::class, 'trackOpen'])->name('tenant.newsletter.track.open');
-    Route::get('/newsletter/track/click/{send_id}', [\App\Http\Controllers\Vendor\Boutique\Ecommerce\Newsletter\NewsletterTrackingController::class, 'trackClick'])->name('tenant.newsletter.track.click');
+    Route::get('/newsletter/track/open/{send_id}', [NewsletterTrackingController::class, 'trackOpen'])->name('tenant.newsletter.track.open');
+    Route::get('/newsletter/track/click/{send_id}', [NewsletterTrackingController::class, 'trackClick'])->name('tenant.newsletter.track.click');
 
     Route::get('/required', function () {
         return inertia('Subscription/None');

@@ -38,8 +38,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import MainLayout from '@/layouts/main-layout';
 import { cn } from '@/lib/utils';
-import BentoGrids from '@/pages/Shop/Products/bento-grids-01';
 import type { PageProps } from '@/types/ecommerce/products';
+import BentoGrids from '../boutique/Products/bento-grids-01';
 
 export default function About() {
     const { props } = usePage<PageProps>();

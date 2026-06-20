@@ -16,7 +16,7 @@ import {
     CheckCircle,
     Sparkles,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { div } from 'three/src/nodes/math/OperatorNode.js';
 import CobePremiumGSAP from '@/components/eldoraui/cobe-globe';
 import { IntegrationProduct } from '@/components/eldoraui/IntegrationProduit';
@@ -24,7 +24,18 @@ import AnimatedCtaButton from '@/components/hero/AnimatedCtaButton';
 import { Button } from '@/components/ui/button';
 import MainLayout from '@/layouts/main-layout';
 import { duration } from '@/routes/track';
+import type {
+    GlobePoint,
+    GlobeArc,
+    GlobeStats,
+} from '@/types/Admin/Statistics/globe';
 
+// Chargement dynamique
+const GlobeSection = lazy(() =>
+    import('./globe-moderne').then((module) => ({
+        default: module.GlobeSection,
+    })),
+);
 gsap.registerPlugin(ScrollTrigger);
 
 // ----------------------------------------------------------------------
@@ -60,6 +71,9 @@ interface Props {
         countries_served: number;
     };
     testimonials?: Testimonial[];
+    globeData?: GlobePoint[];
+    arcsData?: GlobeArc[];
+    globeStats?: GlobeStats;
 }
 
 interface HeroImage {
@@ -527,7 +541,14 @@ function FadeInSection({
 // ----------------------------------------------------------------------
 // Page principale
 // ----------------------------------------------------------------------
-export default function SaaSLanding({ plans, stats, testimonials }: Props) {
+export default function SaaSLanding({
+    plans,
+    stats,
+    testimonials,
+    globeData,
+    arcsData,
+    globeStats,
+}: Props) {
     return (
         <MainLayout>
             <Head title="Yetu – Créez votre boutique en ligne" />
@@ -656,18 +677,26 @@ export default function SaaSLanding({ plans, stats, testimonials }: Props) {
                                 ))}
                             </ul>
                         </div>
-                        {/* <div className="rounded-3xl border border-white/40 bg-white/40 p-6 shadow-xl shadow-slate-200/30 backdrop-blur-xl dark:border-slate-700/30 dark:bg-slate-800/30 dark:shadow-slate-900/30"> */}
-                        {/* <img
-                                src="/storage/images/shopping-basket.jpg"
-                                alt="Shopping"
-                                className="w-full rounded-2xl object-cover shadow-md"
-
-                            /> */}
-                        {/* </div> */}
-                        <CobePremiumGSAP />
                     </div>
                 </div>
             </section>
+
+            {/* Section Globe 3D */}
+            <Suspense
+                fallback={
+                    <div className="relative overflow-hidden bg-white py-32 dark:bg-slate-950">
+                        <div className="flex h-96 items-center justify-center">
+                            <div className="h-12 w-12 animate-spin rounded-full border-4 border-teal-600 border-t-transparent"></div>
+                        </div>
+                    </div>
+                }
+            >
+                {/* <GlobeSection
+                    globeData={globeData}
+                    arcsData={arcsData}
+                    globeStats={globeStats}
+                /> */}
+            </Suspense>
 
             {/* Pour Tous */}
             <PourTousSection />

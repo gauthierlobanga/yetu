@@ -9,6 +9,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class EditPost extends EditRecord
@@ -42,5 +43,23 @@ class EditPost extends EditRecord
                     ->close(),
             ])
             ->broadcast(Auth::user());
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with('categories');
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        // Forcer la structure Tiptap sur les champs sensibles
+        if (empty($data['content'])) {
+            $data['content'] = '{"type":"doc","content":[]}';
+        }
+        if (empty($data['excerpt'])) {
+            $data['excerpt'] = '{"type":"doc","content":[]}';
+        }
+
+        return $data;
     }
 }

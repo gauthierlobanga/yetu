@@ -42,6 +42,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import MainLayout from '@/layouts/main-layout';
+import NewsletterSectionVendeur from '@/layouts/Vendor/app/app-newsletters';
 import getToastStyle from '@/lib/toast-style';
 import { cn } from '@/lib/utils';
 
@@ -163,7 +164,7 @@ export default function Contacts({ categories, contactMeta = {} }: Props) {
     const SelectedCategoryIcon = categoryDetails[data.categorie]?.icon || Globe;
 
     return (
-       <MainLayout>
+        <MainLayout>
             <Head title={`Contactez ${meta.appName}`} />
 
             {/* HERO SECTION – fond dégradé emerald/slate */}
@@ -817,6 +818,7 @@ export default function Contacts({ categories, contactMeta = {} }: Props) {
                     </div>
                 </div>
             </section>
-      </MainLayout>
+            <NewsletterSectionVendeur />
+        </MainLayout>
     );
 }

@@ -19,7 +19,7 @@ class ManageAppSettings extends SettingsPage
 
     protected static string|UnitEnum|null $navigationGroup = NavigationGroup::Profile;
 
-    protected static ?string $navigationLabel = 'Paramètres généraux';
+    protected static ?string $navigationLabel = 'Paramètres';
 
     protected static ?string $title = 'Paramètres de l’application';
 

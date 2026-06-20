@@ -197,6 +197,12 @@ class AbandonPanier extends Model
         $this->derniere_relance = now();
         $this->save();
 
+        if ($canal === 'email' && $this->panier->client && $this->panier->client->email) {
+            $recoverUrl = route('tenant.cart.recover', ['relance' => $relance->id]);
+            \Illuminate\Support\Facades\Mail::to($this->panier->client->email)
+                ->send(new \App\Mail\CartReminderMail($relance, $recoverUrl));
+        }
+
         return $relance;
     }
 

@@ -5,6 +5,7 @@ import type { SubmitEventHandler } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import getToastStyles from '@/lib/toast-style';
 import { cn } from '@/lib/utils';
 
 export default function NewsletterSectionVendeur() {
@@ -20,12 +21,14 @@ export default function NewsletterSectionVendeur() {
             onSuccess: () => {
                 toast.success('Subscription successful!', {
                     description: 'You are now part of our community.',
+                    style: getToastStyles()
                 });
                 reset('email');
             },
             onError: () => {
                 toast.error(errors.email || 'Error during subscription.', {
                     description: errors.email || 'Please try again.',
+                     style: getToastStyles('error')
                 });
             },
         });
@@ -47,7 +50,7 @@ export default function NewsletterSectionVendeur() {
                 transition={{ duration: 0.6, ease: 'easeOut' }}
                 className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
             >
-                <div className="grid items-center gap-12 overflow-hidden rounded border border-white/20 bg-white/70 p-8 shadow-2xl shadow-slate-200/30 backdrop-blur-xl md:grid-cols-5 md:p-12 lg:p-16 dark:border-slate-800/50 dark:bg-slate-900/60 dark:shadow-slate-900/40">
+                <div className="grid items-center gap-12 overflow-hidden rounded border border-white/20 bg-white/70 p-8 md:grid-cols-5 md:p-12 lg:p-16 dark:border-slate-800/50 dark:bg-slate-900/60 dark:shadow-slate-900/40">
                     {/* Colonne texte (3/5) */}
                     <div className="space-y-6 md:col-span-3">
                         <motion.div
@@ -137,17 +140,17 @@ export default function NewsletterSectionVendeur() {
                                             }
                                             placeholder="you@example.com"
                                             className={cn(
-                                                'h-12 rounded border px-3 pl-10 text-base transition-all duration-200',
+                                                'h-12 rounded px-3 pl-10 text-base transition-all duration-200',
                                                 'border-slate-200 bg-white/80 text-slate-900 placeholder:text-slate-400',
                                                 'hover:border-emerald-300 hover:bg-white',
-                                                // 'focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20',
+                                                // 'focus:border-emerald-500 focus:ring-0 focus:ring-emerald-500/20',
                                                 'dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:placeholder:text-slate-500',
                                                 'dark:hover:border-emerald-700 dark:hover:bg-slate-900',
                                                 'dark:focus:border-emerald-400 dark:focus:ring-emerald-400/20',
                                                 errors.email
                                                     ? 'border-red-400 focus-visible:ring-red-400'
                                                     : 'border-slate-200 focus-visible:ring-emerald-500 dark:border-slate-800',
-                                                'dark:bg-slate-900 dark:text-white',
+                                                // 'dark:bg-slate-900 dark:text-white',
                                             )}
                                             disabled={processing}
                                             required
