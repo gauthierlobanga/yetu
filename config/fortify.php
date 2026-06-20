@@ -74,15 +74,7 @@ return [
     |
     */
 
-    'home' => function () {
-        // Si on est dans un contexte de tenancy, rediriger vers la page d'accueil du tenant
-        if (function_exists('tenancy') && tenancy()->initialized) {
-            return '/';
-        }
-
-        // Sinon, rediriger vers le dashboard central
-        return '/dashboard';
-    },
+    'home' => env('FORTIFY_HOME', '/dashboard'),
 
     'redirects' => [
         'logout' => '/',

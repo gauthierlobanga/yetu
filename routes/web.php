@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
+// use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\VisitorStatsController;
 use App\Http\Controllers\Api\VendorRequestStatusController;
 use App\Http\Controllers\Auth\TenantAccountController;
@@ -20,7 +20,7 @@ use App\Http\Controllers\Central\Pages\Term\TermController;
 use App\Http\Controllers\Central\Pages\Testimonials\TestimonialsController;
 use App\Http\Controllers\Vendor\Config\PaymentController;
 use App\Http\Controllers\Vendor\Config\VendorRegistrationController;
-use App\Models\Visit;
+// use App\Models\Visit;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -85,17 +85,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('admin.dashboard');
 
-    Route::prefix('subscriptions')->name('admin.subscriptions.')->group(function () {
-        Route::get('/', [AdminSubscriptionController::class, 'index'])->name('index');
-        Route::get('/{subscription}', [AdminSubscriptionController::class, 'show'])->name('show');
-        Route::post('/{subscription}/block', [AdminSubscriptionController::class, 'block'])->name('block');
-        Route::post('/{subscription}/unblock', [AdminSubscriptionController::class, 'unblock'])->name('unblock');
-        Route::post('/{subscription}/renew', [AdminSubscriptionController::class, 'renew'])->name('renew');
-        Route::post('/{subscription}/add-grace-period', [AdminSubscriptionController::class, 'addGracePeriod'])->name('add-grace-period');
-        Route::post('/batch/expired-to-block', [AdminSubscriptionController::class, 'expiredToBlock'])->name('expired-to-block');
-        Route::post('/batch/notify-expiring', [AdminSubscriptionController::class, 'notifyExpiring'])->name('notify-expiring');
-        Route::post('/batch/sync-stripe', [AdminSubscriptionController::class, 'syncWithStripe'])->name('sync-stripe');
-    });
+    // Route::prefix('subscriptions')->name('admin.subscriptions.')->group(function () {
+    //     Route::get('/', [AdminSubscriptionController::class, 'index'])->name('index');
+    //     Route::get('/{subscription}', [AdminSubscriptionController::class, 'show'])->name('show');
+    //     Route::post('/{subscription}/block', [AdminSubscriptionController::class, 'block'])->name('block');
+    //     Route::post('/{subscription}/unblock', [AdminSubscriptionController::class, 'unblock'])->name('unblock');
+    //     Route::post('/{subscription}/renew', [AdminSubscriptionController::class, 'renew'])->name('renew');
+    //     Route::post('/{subscription}/add-grace-period', [AdminSubscriptionController::class, 'addGracePeriod'])->name('add-grace-period');
+    //     Route::post('/batch/expired-to-block', [AdminSubscriptionController::class, 'expiredToBlock'])->name('expired-to-block');
+    //     Route::post('/batch/notify-expiring', [AdminSubscriptionController::class, 'notifyExpiring'])->name('notify-expiring');
+    //     Route::post('/batch/sync-stripe', [AdminSubscriptionController::class, 'syncWithStripe'])->name('sync-stripe');
+    // });
 });
 
 Route::get('/auth/tenant-sso', [TenantSsoLoginController::class, '__invoke'])
@@ -199,14 +199,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/stats/visitors', [VisitorStatsController::class, 'index'])->name('admin.stats.visitors');
 });
 
-Route::post('/track-duration', function (Request $request) {
-    $sessionId = session()->getId();
-    $lastVisit = Visit::where('session_id', $sessionId)
-        ->orderBy('visited_at', 'desc')
-        ->first();
-    if ($lastVisit && $lastVisit->duration == 0) {
-        $lastVisit->update(['duration' => $request->input('duration')]);
-    }
+// Route::post('/track-duration', function (Request $request) {
+//     $sessionId = session()->getId();
+//     $lastVisit = Visit::where('session_id', $sessionId)
+//         ->orderBy('visited_at', 'desc')
+//         ->first();
+//     if ($lastVisit && $lastVisit->duration == 0) {
+//         $lastVisit->update(['duration' => $request->input('duration')]);
+//     }
 
-    return response()->noContent();
-})->name('track.duration')->middleware('web');
+//     return response()->noContent();
+// })->name('track.duration')->middleware('web');

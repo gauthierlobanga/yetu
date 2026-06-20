@@ -44,6 +44,16 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureViews();
         $this->configureRateLimiting();
 
+        Fortify::redirects('login', function () {
+            if (function_exists('tenancy') && tenancy()->initialized) {
+                return '/';
+            }
+
+            return '/dashboard';
+        });
+
+        // Pour l'enregistrement, si nécessaire
+        Fortify::redirects('register', '/dashboard');
     }
 
     /**
