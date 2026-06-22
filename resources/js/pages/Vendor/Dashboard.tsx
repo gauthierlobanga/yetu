@@ -56,6 +56,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { VendorSidebar } from '@/components/VendorSidebar';
 import getToastStyle from '@/lib/toast-style';
@@ -261,6 +262,7 @@ export default function VendorDashboard({
     return (
         <SidebarProvider
             className={cn(
+                'h-screen overflow-hidden',
                 'border-r border-slate-200/70',
                 'bg-white/92 backdrop-blur-3xl supports-backdrop-filter:bg-white/88',
                 'dark:border-transparent',
@@ -274,8 +276,9 @@ export default function VendorDashboard({
             }
         >
             <VendorSidebar tenant={tenant} />
-            <SidebarInset>
+            <SidebarInset className="flex flex-col min-h-0">
                 <SiteHeader />
+                <ScrollArea className="flex-1 min-h-0">
                 <div ref={containerRef} className="bg-white dark:bg-slate-950">
                     <Head title={`Gérer ${tenant.raison_sociale}`} />
                     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -706,6 +709,7 @@ export default function VendorDashboard({
                         </AlertDialogContent>
                     </AlertDialog>
                 </div>
+                </ScrollArea>
             </SidebarInset>
         </SidebarProvider>
     );

@@ -1,5 +1,6 @@
 import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import type { AppLayoutProps } from '@/types';
 
 export default function AppHeaderTenantLayout({
@@ -12,7 +13,9 @@ export default function AppHeaderTenantLayout({
                 breadcrumbs={breadcrumbs}
                 children={undefined}
             />
-            <AppContent variant="header">{children}</AppContent>
+            <ScrollArea className="flex-1 min-h-0">
+                <AppContent variant="header">{children}</AppContent>
+            </ScrollArea>
         </AppShell>
     );
 }

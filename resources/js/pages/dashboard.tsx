@@ -16,6 +16,7 @@ import { ChartPieInteractive } from '@/components/board/PieChartInteractivePost'
 import { DataTable } from '@/components/data-table-post';
 import { SectionCards } from '@/components/section-cards-post';
 import { SiteHeader } from '@/components/site-header';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 
 interface DashboardProps {
@@ -174,6 +175,7 @@ export default function Dashboard({
 
     return (
         <SidebarProvider
+            className="h-screen overflow-hidden"
             style={
                 {
                     '--sidebar-width': 'calc(var(--spacing) * 72)',
@@ -182,8 +184,9 @@ export default function Dashboard({
             }
         >
             <AppSidebar />
-            <SidebarInset>
+            <SidebarInset className="flex flex-col min-h-0">
                 <SiteHeader />
+                <ScrollArea className="flex-1 min-h-0">
                 {/* Hero Section moderne */}
                 <div className="flex flex-1 flex-col">
                     <div className="@container/main flex flex-1 flex-col gap-4">
@@ -239,6 +242,7 @@ export default function Dashboard({
                         </div>
                     </div>
                 </div>
+                </ScrollArea>
             </SidebarInset>
         </SidebarProvider>
     );

@@ -261,7 +261,7 @@ export function CommentSection({
                     <div
                         className={`space-y-4 ${
                             comments.length > 5
-                                ? 'max-h-[600px] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400 dark:scrollbar-thumb-slate-600 dark:hover:scrollbar-thumb-slate-500'
+                                ? 'max-h-150 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400 dark:scrollbar-thumb-slate-600 dark:hover:scrollbar-thumb-slate-500'
                                 : ''
                         }`}
                         style={comments.length > 5 ? {
@@ -279,7 +279,7 @@ export function CommentSection({
                         ))}
                     </div>
                     {comments.length > 5 && (
-                        <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-12 bg-gradient-to-t from-white via-white/80 to-transparent dark:from-slate-950 dark:via-slate-950/80" />
+                        <div className="pointer-events-none absolute right-0 bottom-0 left-0 h-12 bg-linear-to-t from-white via-white/80 to-transparent dark:from-slate-950 dark:via-slate-950/80" />
                     )}
                 </div>
             )}

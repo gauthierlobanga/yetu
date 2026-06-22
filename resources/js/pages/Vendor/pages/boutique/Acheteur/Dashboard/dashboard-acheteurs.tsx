@@ -44,6 +44,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import tenant from '@/routes/tenant';
 /* ---------- Types ---------- */
@@ -242,6 +243,7 @@ export default function DashboardCustomerBuyer() {
 
     return (
         <SidebarProvider
+            className="h-screen overflow-hidden"
             style={
                 {
                     '--sidebar-width': 'calc(var(--spacing) * 72)',
@@ -251,9 +253,10 @@ export default function DashboardCustomerBuyer() {
         >
             <Head title="Dashboard client" />
             <AppSidebar />
-            <SidebarInset>
+            <SidebarInset className="flex flex-col min-h-0">
                 <SiteHeader />
-                <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950">
+                <ScrollArea className="flex-1 min-h-0">
+                <div className="bg-slate-50/50 dark:bg-slate-950">
                     <div className="space-y-8 p-4 md:p-8">
                         {/* Bienvenue */}
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -650,6 +653,7 @@ export default function DashboardCustomerBuyer() {
                         </Card>
                     </div>
                 </div>
+                </ScrollArea>
             </SidebarInset>
         </SidebarProvider>
     );

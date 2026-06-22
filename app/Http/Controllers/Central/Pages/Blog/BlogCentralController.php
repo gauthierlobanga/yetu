@@ -155,9 +155,9 @@ class BlogCentralController extends Controller
                     'bookmarks_count' => $post->bookmarkedBy()->count(),
                 ]),
             ],
-            'previousPost' => $previousPost ? new PostResource($previousPost) : null,
-            'nextPost' => $nextPost ? new PostResource($nextPost) : null,
-            'relatedPosts' => PostResource::collection($relatedPosts),
+            'previousPost' => $previousPost ? (new PostResource($previousPost))->resolve() : null,
+            'nextPost' => $nextPost ? (new PostResource($nextPost))->resolve() : null,
+            'relatedPosts' => PostResource::collection($relatedPosts)->resolve(),
         ]);
     }
 

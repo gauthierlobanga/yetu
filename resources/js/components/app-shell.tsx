@@ -17,7 +17,7 @@ export function AppShell({ children, variant = 'sidebar' }: Props) {
         return (
             <div
                 className={cn(
-                    'flex min-h-screen w-full flex-col',
+                    'flex h-screen overflow-hidden w-full flex-col',
                     'bg-linear-to-b from-emerald-50/50 via-white to-slate-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20',
                 )}
             >
@@ -30,7 +30,7 @@ export function AppShell({ children, variant = 'sidebar' }: Props) {
         <SidebarProvider defaultOpen={isOpen}>
             <div
                 className={cn(
-                    'flex min-h-screen w-full',
+                    'flex h-screen overflow-hidden w-full',
                     'bg-linear-to-b from-emerald-50/50 via-white to-slate-50/50 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20',
                 )}
             >
