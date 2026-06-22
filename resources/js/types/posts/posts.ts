@@ -116,7 +116,7 @@ export interface Post {
     reading_time_minutes: number | null;
     meta_title: string | null;
     meta_description: string | null;
-    meta_keywords: string | null;
+    meta_keywords: string[] | null;
     metadata?: Record<string, any> | null;
     published_at: string | null;
     scheduled_for: string | null;

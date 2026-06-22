@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import DOMPurify from 'dompurify';
