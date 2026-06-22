@@ -10,9 +10,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Spatie\Sitemap\Contracts\Sitemapable;
+use Spatie\Sitemap\Tags\Url;
 
 #[Table('posts_categories')]
-class PostCategory extends Model
+class PostCategory extends Model implements Sitemapable
 {
     use SoftDeletes;
 
@@ -33,6 +35,14 @@ class PostCategory extends Model
      * @var bool
      */
     public $incrementing = false;
+
+    public function toSitemapTag(): Url|string|array
+    {
+        return Url::create(route('blog.category', $this->slug))
+            ->setLastModificationDate($this->updated_at)
+            ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+            ->setPriority(0.6);
+    }
 
     protected $fillable = [
         'parent_id',

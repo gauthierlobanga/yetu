@@ -95,6 +95,12 @@ class HandleInertiaRequests extends Middleware
                     'is_expired' => $tenant->isTrialExpired(),
                 ];
             },
+            'seo' => [
+                'appName' => config('app.name', 'Yetu'),
+                'appUrl' => config('app.url', 'http://localhost:8000'),
+                'defaultDescription' => 'Bienvenue sur ' . config('app.name', 'Yetu'),
+                'defaultImage' => asset('default-share-image.jpg'),
+            ],
         ];
 
         if ($this->shouldLoadTenantNotifications($request)) {

@@ -20,6 +20,8 @@ use Spatie\Image\Enums\Fit;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Sitemap\Contracts\Sitemapable;
+use Spatie\Sitemap\Tags\Url;
 use Spatie\Tags\HasTags;
 
 #[Fillable([
@@ -44,7 +46,7 @@ use Spatie\Tags\HasTags;
     'expires_at',
     'order',
 ])]
-class Post extends Model implements HasMedia
+class Post extends Model implements HasMedia, Sitemapable
 {
     use HasComments, HasFactory, HasTags, InteractsWithMedia , SoftDeletes;
     use HasTiptapContent,HasUuids;
@@ -62,6 +64,14 @@ class Post extends Model implements HasMedia
      * @var bool
      */
     public $incrementing = false;
+
+    public function toSitemapTag(): Url|string|array
+    {
+        return Url::create(route('blog.show', $this->slug))
+            ->setLastModificationDate($this->updated_at)
+            ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
+            ->setPriority(0.8);
+    }
 
     protected function casts(): array
     {

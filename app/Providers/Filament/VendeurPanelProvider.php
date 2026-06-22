@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Http\Middleware\EnsureTenantSubscription;
 use App\Http\Middleware\EnsureUserIsVendeur;
+use App\Support\Branding\Favicon;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -31,7 +32,6 @@ class VendeurPanelProvider extends PanelProvider
         return $panel
             ->id('vendeur')
             ->path('vendeur')
-            ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandLogo(function () {
                 $tenant = tenant();
                 if ($tenant) {
@@ -44,7 +44,9 @@ class VendeurPanelProvider extends PanelProvider
 
                 return view('filament.admin.logo', compact('logoUrl', 'name'));
             })
+            ->favicon(fn (): string => Favicon::currentUrl())
             ->font('inter')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->sidebarWidth('16rem')
             ->profile()

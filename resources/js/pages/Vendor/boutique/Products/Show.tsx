@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/Product/Show.tsx
-import { Head, Link, usePage, router } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
+import Seo from '@/components/Seo';
 import DOMPurify from 'dompurify';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -300,9 +301,74 @@ export default function ProductShow() {
         toggleWishlist(product.id);
     };
 
+    const { seo } = usePage().props as any;
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : (seo?.appUrl || '');
+    const getAbsoluteUrl = (path: string) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+        
+        // Handle paths that might not have /storage/ prefix yet
+        const fullPath = cleanPath.startsWith('storage/') ? cleanPath : `storage/${cleanPath}`;
+        return `${baseUrl}/${fullPath}`;
+    };
+
+    const imageUrl = product.image_principale ? getAbsoluteUrl(product.image_principale) : (seo?.defaultImage || '');
+
     return (
         <MainLayout>
-            <Head title={product.nom} />
+            <Seo 
+                title={product.seo_title || product.nom}
+                description={product.seo_description || product.short_description}
+                image={imageUrl}
+                type="product"
+                keywords={product.seo_keywords?.join(', ')}
+                jsonLd={{
+                    "@context": "https://schema.org",
+                    "@type": "Product",
+                    "name": product.nom,
+                    "image": imageUrl ? [imageUrl] : undefined,
+                    "description": product.short_description,
+                    ...(product.sku ? { "sku": product.sku } : {}),
+                    ...(product.brand?.nom ? { 
+                        "brand": {
+                            "@type": "Brand",
+                            "name": product.brand.nom 
+                        } 
+                    } : {}),
+                    "offers": {
+                        "@type": "Offer",
+                        "url": typeof window !== 'undefined' ? window.location.href : '',
+                        "priceCurrency": "CDF",
+                        "price": product.prix_actuel,
+                        "itemCondition": "https://schema.org/NewCondition",
+                        "availability": product.stock_disponible > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                    },
+                    ...(product.nombre_avis > 0 ? {
+                        "aggregateRating": {
+                            "@type": "AggregateRating",
+                            "ratingValue": product.note_moyenne,
+                            "reviewCount": product.nombre_avis
+                        }
+                    } : {}),
+                    ...(product.avis && product.avis.length > 0 ? {
+                        "review": product.avis.map(r => ({
+                            "@type": "Review",
+                            "reviewRating": {
+                                "@type": "Rating",
+                                "ratingValue": r.note,
+                                "bestRating": "5"
+                            },
+                            "author": {
+                                "@type": "Person",
+                                "name": r.client || "Client Anonyme"
+                            },
+                            "reviewBody": r.commentaire,
+                            "datePublished": r.date
+                        }))
+                    } : {})
+                }}
+            />
             <div className="mx-auto max-w-7xl px-4 py-8">
                 {/* Fil d'Ariane */}
                 <nav className="mb-6 flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">

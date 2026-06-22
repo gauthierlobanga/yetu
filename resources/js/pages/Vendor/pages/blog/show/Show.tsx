@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import Seo from '@/components/Seo';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import DOMPurify from 'dompurify';
@@ -423,56 +424,39 @@ export default function Show({
         }
     };
 
+    const { seo } = usePage().props as any;
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : (seo?.appUrl || '');
+    const getAbsoluteUrl = (path: string) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+        const fullPath = cleanPath.startsWith('storage/') ? cleanPath : `storage/${cleanPath}`;
+        return `${baseUrl}/${fullPath}`;
+    };
+    
+    const imageUrl = post.data.featured_image_url ? getAbsoluteUrl(post.data.featured_image_url) : (seo?.defaultImage || '');
+
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <Head title={post.data.title}>
-                <meta
-                    name="description"
-                    content={
-                        extractText(post.data.excerpt, 'text') ||
-                        post.data.meta_description ||
-                        ''
+            <Seo 
+                title={post.data.meta_title || post.data.title}
+                description={extractText(post.data.excerpt, 'text') || post.data.meta_description || ''}
+                image={imageUrl}
+                type="article"
+                keywords={post.data.meta_keywords?.join(', ')}
+                jsonLd={{
+                    "@context": "https://schema.org",
+                    "@type": "BlogPosting",
+                    "headline": post.data.title,
+                    "image": imageUrl,
+                    "datePublished": post.data.published_at,
+                    "dateModified": post.data.updated_at,
+                    "author": {
+                        "@type": "Person",
+                        "name": post.data.author?.name || "Auteur"
                     }
-                />
-                {post.data.meta_keywords && (
-                    <meta
-                        name="keywords"
-                        content={post.data.meta_keywords.join(', ')}
-                    />
-                )}
-                <meta property="og:title" content={post.data.title} />
-                <meta
-                    property="og:description"
-                    content={
-                        extractText(post.data.excerpt, 'text') ||
-                        post.data.meta_description ||
-                        ''
-                    }
-                />
-                {post.data.featured_image_url && (
-                    <meta
-                        property="og:image"
-                        content={post.data.featured_image_url}
-                    />
-                )}
-                <meta property="og:type" content="article" />
-                <meta name="twitter:card" content="summary_large_image" />
-                <meta name="twitter:title" content={post.data.title} />
-                <meta
-                    name="twitter:description"
-                    content={
-                        extractText(post.data.excerpt, 'text') ||
-                        post.data.meta_description ||
-                        ''
-                    }
-                />
-                {post.data.featured_image_url && (
-                    <meta
-                        name="twitter:image"
-                        content={post.data.featured_image_url}
-                    />
-                )}
-            </Head>
+                }}
+            />
 
             <ReadingProgressBar />
             <ScrollToTop />

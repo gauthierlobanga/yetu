@@ -41,6 +41,7 @@ use App\Http\Controllers\Vendor\Boutique\Pages\Privacy\PrivacyController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Support\SupportController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Term\TermController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Testimonials\TestimonialsController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\SitemapController;
 use App\Http\Controllers\Vendor\Config\LocationController;
 use App\Http\Controllers\Vendor\Settings\ParametresController;
 use App\Http\Controllers\Vendor\Settings\ParametresSecurityController;
@@ -92,6 +93,8 @@ Route::middleware([
     Route::middleware(EnsureTenantSubscription::class)
         ->get('/', [HomeController::class, 'homeIndex'])
         ->name('tenant.home');
+
+    Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('tenant.sitemap');
 
     Route::get('/tenant-sso-login', [TenantSsoLoginController::class, '__invoke'])
         ->name('tenant.sso.login');

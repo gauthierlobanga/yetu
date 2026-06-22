@@ -36,10 +36,12 @@
 
     <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" href="/favicon.png" type="image/png">
-    {{-- <link rel="icon" href="/favicon.svg" type="image/svg+xml"> --}}
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    @php
+        $faviconUrl = \App\Support\Branding\Favicon::currentUrl();
+    @endphp
+
+    <link id="favicon" rel="icon" href="{{ $faviconUrl }}" data-favicon-href="{{ $faviconUrl }}">
+    <link id="apple-touch-icon" rel="apple-touch-icon" href="{{ $faviconUrl }}">
 
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />

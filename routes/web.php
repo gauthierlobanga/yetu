@@ -18,10 +18,12 @@ use App\Http\Controllers\Central\Pages\Privacy\PrivacyController;
 use App\Http\Controllers\Central\Pages\Support\SupportController;
 use App\Http\Controllers\Central\Pages\Term\TermController;
 use App\Http\Controllers\Central\Pages\Testimonials\TestimonialsController;
+use App\Http\Controllers\TenantFaviconController;
 use App\Http\Controllers\Vendor\Config\PaymentController;
-use App\Http\Controllers\Vendor\Config\VendorRegistrationController;
 // use App\Models\Visit;
+use App\Http\Controllers\Vendor\Config\VendorRegistrationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\Central\SitemapController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -33,7 +35,16 @@ use Laravel\Fortify\Features;
 |--------------------------------------------------------------------------
 */
 
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/', [HeroCentralController::class, 'Index'])->name('home');
+
+// Tenant favicon (returns tenant logo or falls back to public/favicon.ico)
+Route::get('/tenant/{tenant:slug}/favicon', [TenantFaviconController::class, 'show'])
+    ->name('tenant.favicon')
+    ->withoutMiddleware([
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+    ]);
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', fn (Request $request) => Inertia::render('auth/login', [

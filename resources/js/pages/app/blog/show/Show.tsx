@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
-import { Head, Link } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import Seo from '@/components/Seo';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import DOMPurify from 'dompurify';
@@ -340,9 +341,39 @@ export default function Show({
         /* ... identique ... */
     };
 
+    const { seo } = usePage().props as any;
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : (seo?.appUrl || '');
+    const getAbsoluteUrl = (path: string) => {
+        if (!path) return '';
+        if (path.startsWith('http')) return path;
+        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+        const fullPath = cleanPath.startsWith('storage/') ? cleanPath : `storage/${cleanPath}`;
+        return `${baseUrl}/${fullPath}`;
+    };
+    
+    const imageUrl = post.data.featured_image ? getAbsoluteUrl(post.data.featured_image) : (seo?.defaultImage || '');
+
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <Head title={post.data.title}>{/* ... meta identiques ... */}</Head>
+            <Seo 
+                title={post.data.meta_title || post.data.title}
+                description={post.data.meta_description || post.data.excerpt}
+                image={imageUrl}
+                type="article"
+                keywords={post.data.meta_keywords?.join(', ')}
+                jsonLd={{
+                    "@context": "https://schema.org",
+                    "@type": "BlogPosting",
+                    "headline": post.data.title,
+                    "image": imageUrl,
+                    "datePublished": post.data.published_at,
+                    "dateModified": post.data.updated_at,
+                    "author": {
+                        "@type": "Person",
+                        "name": post.data.author?.name || "Auteur"
+                    }
+                }}
+            />
 
             <ReadingProgressBar />
             <ScrollToTop />

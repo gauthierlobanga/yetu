@@ -6,6 +6,7 @@ use App\Filament\Pages\ManageAppSettings;
 use App\Http\Middleware\EnsureCentralDomain;
 use App\Http\Middleware\EnsureUserIsSuperAdmin;
 use App\Settings\SettingApp;
+use App\Support\Branding\Favicon;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -23,7 +24,6 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -41,8 +41,8 @@ class AdminPanelProvider extends PanelProvider
 
                 return view('filament.admin.logo', compact('logoUrl', 'name'));
             })
+            ->favicon(fn (): string => Favicon::centralUrl())
             ->brandLogoHeight('4rem')
-            ->favicon(Storage::url('images/favicon.ico'))
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->sidebarCollapsibleOnDesktop()

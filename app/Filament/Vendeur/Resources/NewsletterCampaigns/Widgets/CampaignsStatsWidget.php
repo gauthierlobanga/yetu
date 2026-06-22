@@ -14,7 +14,7 @@ class CampaignsStatsWidget extends BaseWidget
         $sent = NewsletterCampaign::where('status', NewsletterCampaign::STATUS_ENVOYE)->count();
         $scheduled = NewsletterCampaign::where('status', NewsletterCampaign::STATUS_PROGRAMME)->count();
 
-        $avgOpenRate = NewsletterCampaign::where('status', NewsletterCampaign::STATUS_ENVOYE)->avg('taux_ouverture') ?? 0;
+        $avgOpenRate = NewsletterCampaign::where('status', NewsletterCampaign::STATUS_ENVOYE)->avg('total_desabonnements') ?? 0; // à revoir
 
         return [
             Stat::make('Campagnes totales', number_format($total))

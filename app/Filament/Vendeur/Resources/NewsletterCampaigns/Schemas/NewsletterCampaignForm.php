@@ -55,6 +55,11 @@ class NewsletterCampaignForm
                         Tab::make('Contenu')
                             ->icon('heroicon-o-document-text')
                             ->schema([
+                                Select::make('cree_par')
+                                    ->label('Auteur')
+                                    ->relationship('creePar', 'name')
+                                    ->preload()
+                                    ->searchable(),
                                 RichEditor::make('contenu_html')
                                     ->label('Contenu HTML')
                                     ->required()
@@ -98,10 +103,12 @@ class NewsletterCampaignForm
                                             ->content(fn ($record) => $record?->total_envoyes ?? 0),
                                         Placeholder::make('total_ouverts_display')
                                             ->label('Ouverts')
-                                            ->content(fn ($record) => ($record?->total_ouverts ?? 0).' ('.($record?->taux_ouverture ?? 0).'%)'),
+                                            ->content(fn ($record) => ($record?->total_ouverts ?? 0)),
+                                        // ->content(fn ($record) => ($record?->total_ouverts ?? 0).' ('.($record?->taux_ouverture ?? 0).'%)'),
                                         Placeholder::make('total_clics_display')
                                             ->label('Clics')
-                                            ->content(fn ($record) => ($record?->total_clics ?? 0).' ('.($record?->taux_clic ?? 0).'%)'),
+                                            ->content(fn ($record) => ($record?->total_clics ?? 0)),
+                                        // ->content(fn ($record) => ($record?->total_clics ?? 0).' ('.($record?->taux_clic ?? 0).'%)'),
                                         Placeholder::make('total_desabonnements_display')
                                             ->label('Désabonnements')
                                             ->content(fn ($record) => ($record?->total_desabonnements ?? 0).' ('.($record?->taux_desabonnement ?? 0).'%)'),

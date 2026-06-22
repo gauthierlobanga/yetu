@@ -70,3 +70,33 @@ createInertiaApp({
 
 // This will set light / dark mode on load...
 initializeTheme();
+
+// Ensure the favicon set by the server (Blade) is applied to the SPA and re-applied after Inertia navigations.
+if (typeof window !== 'undefined') {
+    (function () {
+        const getInitialHref = () => {
+            const serverLink = document.getElementById('favicon') || document.querySelector('link[rel="icon"]');
+            return serverLink?.getAttribute('href') || '/favicon.ico';
+        };
+
+        const setFavicon = (href: string | null | undefined) => {
+            if (!href) return;
+            let link = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+            if (!link) {
+                link = document.createElement('link');
+                link.rel = 'icon';
+                link.id = 'favicon';
+            }
+            const sep = href.includes('?') ? '&' : '?';
+            link.href = href + sep + 'v=' + Date.now(); // cache buster
+            document.head.appendChild(link);
+        };
+
+        // Apply on load
+        setFavicon(getInitialHref());
+
+        // Re-apply after Inertia navigations (events fired by Inertia)
+        document.addEventListener('inertia:finish', () => setFavicon(getInitialHref()));
+        document.addEventListener('inertia:load', () => setFavicon(getInitialHref()));
+    })();
+}
