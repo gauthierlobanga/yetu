@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Vendeur\Resources\Newsletters\Schemas;
+namespace App\Filament\Resources\Newsletters\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;

@@ -174,7 +174,13 @@ class BlogBoutiqueController extends Controller
      * Gère l'ajout de commentaire sur le blog.
      * (Actuellement vide ou non implémenté)
      */
-    public function blogComment() {}
+    public function blogComment(Request $request, Post $post)
+    {
+        $request->validate(['content' => 'required|string|max:5000']);
+        $comment = $post->addComment($request->user(), $request->content);
+
+        return response()->json(['comment' => $comment->load('user')]);
+    }
 
     /**
      * Permet à un utilisateur authentifié d'aimer ou de retirer un "J'aime"

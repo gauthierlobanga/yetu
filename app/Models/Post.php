@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Concerns\Traits\HasTiptapContent;
+// use App\Concerns\Traits\HasTiptapContent;
 use App\Traits\HasComments;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -49,6 +49,7 @@ use Spatie\Tags\HasTags;
 class Post extends Model implements HasMedia, Sitemapable
 {
     use HasComments, HasFactory, HasTags, InteractsWithMedia , SoftDeletes;
+
     // use HasTiptapContent;
     use HasUuids;
 

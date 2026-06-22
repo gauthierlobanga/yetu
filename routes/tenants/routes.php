@@ -29,6 +29,7 @@ use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ProductController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ReviewController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Promotion\PromotionController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Return\ReturnController;
+use App\Http\Controllers\Vendor\Boutique\Ecommerce\SitemapController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\WishList\WishlistController;
 use App\Http\Controllers\Vendor\Boutique\Pages\About\AboutController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Blog\BlogBoutiqueController;
@@ -41,7 +42,6 @@ use App\Http\Controllers\Vendor\Boutique\Pages\Privacy\PrivacyController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Support\SupportController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Term\TermController;
 use App\Http\Controllers\Vendor\Boutique\Pages\Testimonials\TestimonialsController;
-use App\Http\Controllers\Vendor\Boutique\Ecommerce\SitemapController;
 use App\Http\Controllers\Vendor\Config\LocationController;
 use App\Http\Controllers\Vendor\Settings\ParametresController;
 use App\Http\Controllers\Vendor\Settings\ParametresSecurityController;
@@ -347,7 +347,7 @@ Route::middleware([
         | ROUTES AUTHENTIFIÉES (commentaires, avis, wishlist)
         |--------------------------------------------------------------------------
         */
-        Route::middleware('auth:sanctum')->prefix('comments')->name('comments.')->group(function () {
+        Route::middleware('auth')->prefix('comments')->name('comments.')->group(function () {
             Route::get('/', [CommentController::class, 'commentsIndex'])->name('index');
             Route::post('/', [CommentController::class, 'commentsStore'])->name('store');
             Route::post('/{comment}/like', [CommentController::class, 'commentsLike'])->name('like');

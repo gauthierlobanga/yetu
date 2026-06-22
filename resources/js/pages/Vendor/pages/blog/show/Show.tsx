@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import { CommentSection } from '@/components/Comments/CommentSection';
 import Seo from '@/components/Seo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -430,43 +431,54 @@ export default function Show({
     };
 
     const { seo } = usePage().props as any;
-    const baseUrl = typeof window !== 'undefined' ? window.location.origin : (seo?.appUrl || '');
+    const baseUrl =
+        typeof window !== 'undefined'
+            ? window.location.origin
+            : seo?.appUrl || '';
     const getAbsoluteUrl = (path: string) => {
         if (!path) {
-return '';
-}
+            return '';
+        }
 
         if (path.startsWith('http')) {
-return path;
-}
+            return path;
+        }
 
         const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-        const fullPath = cleanPath.startsWith('storage/') ? cleanPath : `storage/${cleanPath}`;
+        const fullPath = cleanPath.startsWith('storage/')
+            ? cleanPath
+            : `storage/${cleanPath}`;
 
         return `${baseUrl}/${fullPath}`;
     };
 
-    const imageUrl = post.data.featured_image_url ? getAbsoluteUrl(post.data.featured_image_url) : (seo?.defaultImage || '');
+    const imageUrl = post.data.featured_image_url
+        ? getAbsoluteUrl(post.data.featured_image_url)
+        : seo?.defaultImage || '';
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <Seo
                 title={post.data.meta_title || post.data.title}
-                description={extractText(post.data.excerpt, 'text') || post.data.meta_description || ''}
+                description={
+                    extractText(post.data.excerpt, 'text') ||
+                    post.data.meta_description ||
+                    ''
+                }
                 image={imageUrl}
                 type="article"
                 keywords={post.data.meta_keywords?.join(', ')}
                 jsonLd={{
-                    "@context": "https://schema.org",
-                    "@type": "BlogPosting",
-                    "headline": post.data.title,
-                    "image": imageUrl,
-                    "datePublished": post.data.published_at,
-                    "dateModified": post.data.updated_at,
-                    "author": {
-                        "@type": "Person",
-                        "name": post.data.author?.name || "Auteur"
-                    }
+                    '@context': 'https://schema.org',
+                    '@type': 'BlogPosting',
+                    headline: post.data.title,
+                    image: imageUrl,
+                    datePublished: post.data.published_at,
+                    dateModified: post.data.updated_at,
+                    author: {
+                        '@type': 'Person',
+                        name: post.data.author?.name || 'Auteur',
+                    },
                 }}
             />
 
@@ -871,7 +883,7 @@ return path;
                 {/* Commentaires */}
                 <div className="border-t border-slate-100 dark:border-slate-800">
                     <div className="container mx-auto max-w-6xl px-4 py-12">
-                        <div className="mb-6 flex items-center justify-between">
+                        <div className="mb-3 flex items-center justify-between">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
                                 Commentaires
                             </h2>
@@ -883,24 +895,11 @@ return path;
                                 {post.data.comments_count || 0}
                             </Badge>
                         </div>
-                        <Separator className="mb-8 bg-slate-100 dark:bg-slate-800" />
-                        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900/60">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30">
-                                <MessageCircle className="h-8 w-8 text-emerald-500" />
-                            </div>
-                            <h3 className="mb-2 text-xl font-semibold text-slate-800 dark:text-slate-200">
-                                Laissez un commentaire
-                            </h3>
-                            <p className="mb-6 text-slate-500 dark:text-slate-400">
-                                Connectez-vous pour participer à la discussion
-                            </p>
-                            <Link
-                                href="/login"
-                                className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-emerald-600 to-emerald-500 px-6 py-2.5 font-medium text-white shadow-md shadow-emerald-500/20 transition-all hover:from-emerald-700 hover:to-emerald-600"
-                            >
-                                Se connecter
-                            </Link>
-                        </div>
+                        <Separator className="mb-5 bg-slate-100 dark:bg-slate-800" />
+                        <CommentSection
+                            commentableType={"App\\Models\\Post"}
+                            commentableId={String(post.data.id)}
+                        />
                     </div>
                 </div>
             </article>

@@ -7,6 +7,7 @@ use App\Models\Comment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -27,14 +28,16 @@ class CommentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'commentable_type' => 'required|string',
-            'commentable_id' => 'required|integer',
+            'commentable_id' => 'required|string',   // ← était "integer"
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $comments = Comment::where('commentable_type', $request->commentable_type)
+        $commentableType = str_replace('\\\\', '\\', $request->commentable_type);
+
+        $comments = Comment::where('commentable_type', $commentableType)
             ->where('commentable_id', $request->commentable_id)
             ->whereNull('parent_id')
             ->with(['user', 'replies.user'])
@@ -55,7 +58,7 @@ class CommentController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'commentable_type' => 'required|string',
-            'commentable_id' => 'required|integer',
+            'commentable_id' => 'required|string',
             'content' => 'required|string|min:2|max:5000',
             'parent_id' => 'nullable|exists:comments,id',
         ]);
@@ -64,23 +67,44 @@ class CommentController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $model = $request->commentable_type::findOrFail($request->commentable_id);
+        // Pas de class_exists, on tente directement
+        $modelClass = str_replace('\\\\', '\\', $request->commentable_type);
+
+        if (! class_exists($modelClass)) {
+            return response()->json(['error' => 'Type de ressource invalide'], 400);
+        }
+
+        $model = $modelClass::find($request->commentable_id);
+
+        if (! $model) {
+            return response()->json(['error' => 'Ressource introuvable'], 404);
+        }
 
         $parent = null;
         if ($request->parent_id) {
-            $parent = Comment::findOrFail($request->parent_id);
+            $parent = Comment::find($request->parent_id);
         }
 
-        $comment = $model->addComment(
-            Auth::user(),
-            $request->content,
-            $parent
-        );
+        try {
+            $comment = $model->addComment(
+                Auth::user(),
+                $request->content,
+                $parent
+            );
 
-        return response()->json([
-            'comment' => $comment->load('user'),
-            'message' => 'Commentaire ajouté avec succès',
-        ], 201);
+            return response()->json([
+                'comment' => $comment->load('user'),
+                'message' => 'Commentaire ajouté avec succès',
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Erreur commentaire : '.$e->getMessage(), [
+                'user' => Auth::id(),
+                'type' => $request->commentable_type,
+                'id' => $request->commentable_id,
+            ]);
+
+            return response()->json(['error' => 'Erreur interne'], 500);
+        }
     }
 
     /**
