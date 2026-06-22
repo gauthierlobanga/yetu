@@ -95,11 +95,15 @@ class HandleInertiaRequests extends Middleware
                     'is_expired' => $tenant->isTrialExpired(),
                 ];
             },
+            // Données SEO globales partagées avec toutes les pages React.
+            // Le favicon est résolu dynamiquement via Favicon::currentUrl() pour 
+            // correspondre au logo du locataire actuel (vendeur) ou du site central.
             'seo' => [
                 'appName' => config('app.name', 'Yetu'),
                 'appUrl' => config('app.url', 'http://localhost:8000'),
                 'defaultDescription' => 'Bienvenue sur ' . config('app.name', 'Yetu'),
                 'defaultImage' => asset('default-share-image.jpg'),
+                'favicon' => \App\Support\Branding\Favicon::currentUrl(),
             ],
         ];
 

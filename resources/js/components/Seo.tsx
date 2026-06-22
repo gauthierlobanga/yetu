@@ -11,6 +11,12 @@ interface SeoProps {
     keywords?: string;
 }
 
+/**
+ * Composant Seo pour la gestion des métadonnées (titre, description, Open Graph, etc.).
+ * Il injecte également le favicon dynamiquement depuis les props partagées d'Inertia
+ * (seo.favicon) afin que les boutiques vendeurs affichent leur propre logo
+ * et que le domaine central affiche le sien, même lors d'une navigation côté client.
+ */
 export default function Seo({
     title,
     description,
@@ -48,6 +54,8 @@ export default function Seo({
             <meta name="twitter:image" content={metaImage} />
 
             <link rel="canonical" href={metaUrl} />
+            <link rel="icon" href={seo?.favicon || '/favicon.ico'} />
+            <link rel="apple-touch-icon" href={seo?.favicon || '/favicon.ico'} />
 
             {/* JSON-LD Structured Data */}
             {jsonLd && (
