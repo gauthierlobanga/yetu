@@ -49,7 +49,8 @@ use Spatie\Tags\HasTags;
 class Post extends Model implements HasMedia, Sitemapable
 {
     use HasComments, HasFactory, HasTags, InteractsWithMedia , SoftDeletes;
-    use HasTiptapContent,HasUuids;
+    // use HasTiptapContent;
+    use HasUuids;
 
     /**
      * Indique que les clés primaires sont de type string (UUID)
@@ -486,9 +487,9 @@ class Post extends Model implements HasMedia, Sitemapable
         return route('tenant.blog.show', $this->slug);
     }
 
-    public function getUrlBlogAttribute(): string
+    public function getUrlCentralgAttribute(): string
     {
-        return route('tenant.blog.show', $this->slug);
+        return route('blog.show', $this->slug);
     }
 
     public function getStatusLabelAttribute(): string
@@ -547,75 +548,75 @@ class Post extends Model implements HasMedia, Sitemapable
      * Get the excerpt attribute.
      * Ensures a valid Tiptap document structure is always returned.
      */
-    // public function getExcerptAttribute($value)
-    // {
-    //     if (is_string($value)) {
-    //         $decoded = json_decode($value, true);
-    //         if (json_last_error() === JSON_ERROR_NONE) {
-    //             if (is_array($decoded) && isset($decoded['type']) && ! isset($decoded['content'])) {
-    //                 $decoded['content'] = [];
-    //             }
+    public function getExcerptAttribute($value)
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                if (is_array($decoded) && isset($decoded['type']) && ! isset($decoded['content'])) {
+                    $decoded['content'] = [];
+                }
 
-    //             return $decoded;
-    //         }
+                return $decoded;
+            }
 
-    //         return $value;
-    //     }
+            return $value;
+        }
 
-    //     if (is_array($value) && isset($value['type']) && ! isset($value['content'])) {
-    //         $value['content'] = [];
-    //     }
+        if (is_array($value) && isset($value['type']) && ! isset($value['content'])) {
+            $value['content'] = [];
+        }
 
-    //     return $value;
-    // }
+        return $value;
+    }
 
-    // public function setContentAttribute($value): void
-    // {
-    //     if (is_null($value) || $value === '') {
-    //         $value = ['type' => 'doc', 'content' => []];
-    //     }
+    public function setContentAttribute($value): void
+    {
+        if (is_null($value) || $value === '') {
+            $value = ['type' => 'doc', 'content' => []];
+        }
 
-    //     if (is_array($value)) {
-    //         $this->attributes['content'] = json_encode($value);
-    //     } else {
-    //         $this->attributes['content'] = $value;
-    //     }
-    // }
+        if (is_array($value)) {
+            $this->attributes['content'] = json_encode($value);
+        } else {
+            $this->attributes['content'] = $value;
+        }
+    }
 
-    // public function setExcerptAttribute($value): void
-    // {
-    //     if (is_null($value) || $value === '') {
-    //         $value = ['type' => 'doc', 'content' => []];
-    //     }
+    public function setExcerptAttribute($value): void
+    {
+        if (is_null($value) || $value === '') {
+            $value = ['type' => 'doc', 'content' => []];
+        }
 
-    //     if (is_array($value)) {
-    //         $this->attributes['excerpt'] = json_encode($value);
-    //     } else {
-    //         $this->attributes['excerpt'] = $value;
-    //     }
-    // }
+        if (is_array($value)) {
+            $this->attributes['excerpt'] = json_encode($value);
+        } else {
+            $this->attributes['excerpt'] = $value;
+        }
+    }
 
-    // public function getContentAttribute($value)
-    // {
-    //     if (is_string($value)) {
-    //         $decoded = json_decode($value, true);
-    //         if (json_last_error() === JSON_ERROR_NONE) {
-    //             if (is_array($decoded) && isset($decoded['type']) && ! isset($decoded['content'])) {
-    //                 $decoded['content'] = [];
-    //             }
+    public function getContentAttribute($value)
+    {
+        if (is_string($value)) {
+            $decoded = json_decode($value, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                if (is_array($decoded) && isset($decoded['type']) && ! isset($decoded['content'])) {
+                    $decoded['content'] = [];
+                }
 
-    //             return $decoded;
-    //         }
+                return $decoded;
+            }
 
-    //         return $value;
-    //     }
+            return $value;
+        }
 
-    //     if (is_array($value) && isset($value['type']) && ! isset($value['content'])) {
-    //         $value['content'] = [];
-    //     }
+        if (is_array($value) && isset($value['type']) && ! isset($value['content'])) {
+            $value['content'] = [];
+        }
 
-    //     return $value;
-    // }
+        return $value;
+    }
 
     public function getContentPlainTextAttribute()
     {

@@ -493,7 +493,7 @@ export default function CartContent() {
                         {/* Bouton de commande */}
                         <Button
                             asChild
-                            className="w-full gap-2 rounded-xl bg-linear-to-r from-emerald-600 to-emerald-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition-all hover:shadow-xl hover:shadow-emerald-300 dark:shadow-emerald-900/30 dark:hover:shadow-emerald-800/40"
+                            className="w-full gap-2 rounded py-3.5 text-sm font-semibold text-white transition-all"
                         >
                             <Link href={route('tenant.checkout.index')}>
                                 <ShieldCheck className="h-4 w-4" />

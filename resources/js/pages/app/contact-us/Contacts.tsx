@@ -41,6 +41,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import NewsletterSectionCentral from '@/layouts/app/app-newsletters';
 import MainLayout from '@/layouts/main-layout';
 import getToastStyle from '@/lib/toast-style';
 import { cn } from '@/lib/utils';
@@ -817,6 +818,7 @@ export default function Contacts({ categories, contactMeta = {} }: Props) {
                     </div>
                 </div>
             </section>
+            <NewsletterSectionCentral />
         </MainLayout>
     );
 }

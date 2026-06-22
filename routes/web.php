@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
-// use App\Http\Controllers\Admin\SubscriptionController as AdminSubscriptionController;
 use App\Http\Controllers\Admin\VisitorStatsController;
 use App\Http\Controllers\Api\VendorRequestStatusController;
 use App\Http\Controllers\Auth\TenantAccountController;
@@ -18,13 +17,14 @@ use App\Http\Controllers\Central\Pages\Privacy\PrivacyController;
 use App\Http\Controllers\Central\Pages\Support\SupportController;
 use App\Http\Controllers\Central\Pages\Term\TermController;
 use App\Http\Controllers\Central\Pages\Testimonials\TestimonialsController;
+use App\Http\Controllers\Central\SitemapController;
 use App\Http\Controllers\TenantFaviconController;
 use App\Http\Controllers\Vendor\Config\PaymentController;
-// use App\Models\Visit;
 use App\Http\Controllers\Vendor\Config\VendorRegistrationController;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
-use App\Http\Controllers\Central\SitemapController;
 use Illuminate\Http\Request;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -42,8 +42,8 @@ Route::get('/', [HeroCentralController::class, 'Index'])->name('home');
 Route::get('/tenant/{tenant:slug}/favicon', [TenantFaviconController::class, 'show'])
     ->name('tenant.favicon')
     ->withoutMiddleware([
-        \Illuminate\Session\Middleware\StartSession::class,
-        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        StartSession::class,
+        AddQueuedCookiesToResponse::class,
     ]);
 
 Route::middleware('guest')->group(function () {

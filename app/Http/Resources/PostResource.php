@@ -9,6 +9,7 @@ class PostResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -73,7 +74,8 @@ class PostResource extends JsonResource
             ),
 
             // Accesseurs
-            'url' => $this->url,
+            'url' => $this->checkUrl(),
+            'Url_central' => $this->Url_central,
             'status_label' => $this->status_label,
             'status_color' => $this->status_color,
             'is_published' => $this->is_published,
@@ -83,5 +85,14 @@ class PostResource extends JsonResource
             'featured_image_card' => $this->featured_image_card,
             'gallery_images' => $this->gallery_images,
         ];
+    }
+
+    private function checkUrl()
+    {
+        if (function_exists('tenancy') && tenancy()->initialized) {
+            return $this->url;
+        }
+
+        return $this->url_central;
     }
 }

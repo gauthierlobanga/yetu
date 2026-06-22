@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/SaaSLanding/Home.tsx
 import { Head, Link } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import type { Variants } from 'framer-motion';
 import { animate, motion, useInView } from 'framer-motion';
 import { gsap } from 'gsap';
@@ -30,12 +31,12 @@ import type {
     GlobeStats,
 } from '@/types/Admin/Statistics/globe';
 
-// Chargement dynamique
-const GlobeSection = lazy(() =>
-    import('./globe-moderne').then((module) => ({
-        default: module.GlobeSection,
-    })),
-);
+// // Chargement dynamique
+// const GlobeSection = lazy(() =>
+//     import('./globe-moderne').then((module) => ({
+//         default: module.GlobeSection,
+//     })),
+// );
 gsap.registerPlugin(ScrollTrigger);
 
 // ----------------------------------------------------------------------
@@ -549,6 +550,8 @@ export default function SaaSLanding({
     arcsData,
     globeStats,
 }: Props) {
+    const { name } = usePage().props as any;
+
     return (
         <MainLayout>
             <Head title="Yetu – Créez votre boutique en ligne" />
@@ -562,17 +565,6 @@ export default function SaaSLanding({
                 <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="grid items-center gap-12 lg:grid-cols-2">
                         <div>
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.6 }}
-                                className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                            >
-                                <Sparkles className="h-4 w-4" />
-                                IA intégrée • Multi‑vendeurs • Paiements
-                                sécurisés
-                            </motion.div>
-
                             <motion.h1
                                 initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -581,9 +573,9 @@ export default function SaaSLanding({
                             >
                                 Lancez votre
                                 <span className="block bg-linear-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
-                                    boutique e‑commerce
+                                    boutique en quelques
                                 </span>
-                                en quelques minutes.
+                                minutes sur{' '} {name}
                             </motion.h1>
 
                             <motion.p

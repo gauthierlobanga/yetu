@@ -168,6 +168,7 @@ export interface Post {
 
     // Accesseurs
     url?: string;
+    Url_central?: string;
     status_label?: string;
     status_color?: string;
     is_published?: boolean;

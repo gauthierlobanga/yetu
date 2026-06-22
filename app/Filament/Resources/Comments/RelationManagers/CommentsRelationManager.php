@@ -95,7 +95,7 @@ class CommentsRelationManager extends RelationManager
                 Action::make('view')
                     ->label('Voir')
                     ->icon('heroicon-m-eye')
-                    ->url(fn ($record) => route('filament.admin.resources.comments.edit', $record))
+                    // ->url(fn ($record) => route('filament.admin.resources.comments.edit', $record))
                     ->openUrlInNewTab(),
 
                 Action::make('approve')

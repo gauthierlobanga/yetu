@@ -5,6 +5,7 @@ import type { SubmitEventHandler } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getToastStyles } from '@/lib/toast-style';
 import { cn } from '@/lib/utils';
 
 export default function NewsletterSectionCentral() {
@@ -20,12 +21,14 @@ export default function NewsletterSectionCentral() {
             onSuccess: () => {
                 toast.success('Subscription successful!', {
                     description: 'You are now part of our community.',
+                    style: getToastStyles()
                 });
                 reset('email');
             },
             onError: () => {
                 toast.error(errors.email || 'Error during subscription.', {
                     description: errors.email || 'Please try again.',
+                    style: getToastStyles('error')
                 });
             },
         });
