@@ -3,7 +3,6 @@
 'use client';
 
 import { Link } from '@inertiajs/react';
-import Seo from '@/components/Seo';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import DOMPurify from 'dompurify';
@@ -31,6 +30,7 @@ import {
 } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
+import Seo from '@/components/Seo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -352,10 +352,12 @@ export default function Show({
                     'X-CSRF-TOKEN': getCsrfToken(),
                 },
             });
+
             if (response.ok) {
                 const data = await response.json();
                 setIsLiked(data.is_liked);
                 setLikesCount(data.likes_count);
+
                 if (data.message === 'Authentification requise') {
                     toast.error(
                         'Vous devez être connecté pour aimer un article',
@@ -381,10 +383,12 @@ export default function Show({
                     'X-CSRF-TOKEN': getCsrfToken(),
                 },
             });
+
             if (response.ok) {
                 const data = await response.json();
                 setIsBookmarked(data.is_bookmarked);
                 setBookmarksCount(data.bookmarks_count);
+
                 if (data.message === 'Authentification requise') {
                     toast.error(
                         'Vous devez être connecté pour sauvegarder un article',
@@ -427,18 +431,25 @@ export default function Show({
     const { seo } = usePage().props as any;
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : (seo?.appUrl || '');
     const getAbsoluteUrl = (path: string) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
+        if (!path) {
+return '';
+}
+
+        if (path.startsWith('http')) {
+return path;
+}
+
         const cleanPath = path.startsWith('/') ? path.substring(1) : path;
         const fullPath = cleanPath.startsWith('storage/') ? cleanPath : `storage/${cleanPath}`;
+
         return `${baseUrl}/${fullPath}`;
     };
-    
+
     const imageUrl = post.data.featured_image_url ? getAbsoluteUrl(post.data.featured_image_url) : (seo?.defaultImage || '');
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <Seo 
+            <Seo
                 title={post.data.meta_title || post.data.title}
                 description={extractText(post.data.excerpt, 'text') || post.data.meta_description || ''}
                 image={imageUrl}

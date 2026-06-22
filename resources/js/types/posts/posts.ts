@@ -131,6 +131,11 @@ export interface Post {
         email: string;
         avatar_url?: string;
     };
+    author?: {
+        id: number;
+        name: string;
+        avatar?: string;
+    };
 
     categories?: Array<{
         id: number;
