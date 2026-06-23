@@ -60,6 +60,30 @@ class UsersTable
                     ->formatStateUsing(fn ($state) => ucfirst($state))
                     ->searchable(),
 
+                TextColumn::make('preferences')
+                    ->label('Préférences')
+                    ->formatStateUsing(function ($state) {
+                        if (! $state) {
+                            return 'Aucune';
+                        }
+                        
+                        $summary = [];
+                        if (isset($state['locale'])) {
+                            $summary[] = strtoupper($state['locale']);
+                        }
+                        if (isset($state['country'])) {
+                            $summary[] = $state['country'];
+                        }
+                        if (isset($state['currency'])) {
+                            $summary[] = $state['currency'];
+                        }
+                        
+                        return implode(' | ', $summary) ?: 'Aucune';
+                    })
+                    ->badge()
+                    ->color('info')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 IconColumn::make('is_active')
                     ->label('Actif')
                     ->boolean()

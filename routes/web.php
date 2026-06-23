@@ -18,6 +18,7 @@ use App\Http\Controllers\Central\Pages\Support\SupportController;
 use App\Http\Controllers\Central\Pages\Term\TermController;
 use App\Http\Controllers\Central\Pages\Testimonials\TestimonialsController;
 use App\Http\Controllers\Central\SitemapController;
+use App\Http\Controllers\Others\UserPreferenceController;
 use App\Http\Controllers\TenantFaviconController;
 use App\Http\Controllers\Vendor\Config\PaymentController;
 use App\Http\Controllers\Vendor\Config\VendorRegistrationController;
@@ -37,6 +38,7 @@ use Laravel\Fortify\Features;
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/', [HeroCentralController::class, 'Index'])->name('home');
+Route::post('/preferences', [UserPreferenceController::class, 'update'])->name('preferences.update');
 
 // Tenant favicon (returns tenant logo or falls back to public/favicon.ico)
 Route::get('/tenant/{tenant:slug}/favicon', [TenantFaviconController::class, 'show'])

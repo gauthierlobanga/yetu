@@ -1,11 +1,12 @@
 // resources/js/components/ecommerce/products/TrendingProducts.tsx
 import { Link } from '@inertiajs/react';
+import type { Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ChevronRight, TrendingUp, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import type { Product } from '@/types/ecommerce/products';
 import ProductCard from './ProductCard';
-import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
 
 interface TrendingProductsProps {
     products: Product[];
@@ -22,7 +23,7 @@ const containerVariants = {
     },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: {
         opacity: 1,
@@ -35,7 +36,7 @@ const itemVariants = {
     },
 };
 
-const headerVariants = {
+const headerVariants: Variants = {
     hidden: { opacity: 0, y: -20 },
     show: {
         opacity: 1,
@@ -51,15 +52,9 @@ const headerVariants = {
 export default function TrendingProducts({ products }: TrendingProductsProps) {
     return (
         <section className="relative overflow-hidden py-16 lg:py-24">
-            {/* Dégradé de fond clair (clair / sombre agréable) avec Tailwind v4 */}
-            <div className="absolute inset-0 bg-linear-to-b from-emerald-50/50 via-white to-emerald-50/10 dark:from-emerald-950/20 dark:via-gray-950 dark:to-emerald-950/10" />
-            
-            {/* Subtle animated background glowing blobs */}
-            <div className="pointer-events-none absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
-            <div className="pointer-events-none absolute bottom-0 left-0 -ml-20 -mb-20 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
 
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <motion.header 
+                <motion.header
                     initial="hidden"
                     whileInView="show"
                     viewport={{ once: true, margin: "-100px" }}
@@ -67,7 +62,7 @@ export default function TrendingProducts({ products }: TrendingProductsProps) {
                     className="mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end"
                 >
                     <div className="max-w-2xl">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.9 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
@@ -79,14 +74,14 @@ export default function TrendingProducts({ products }: TrendingProductsProps) {
                                 Populaires
                             </span>
                         </motion.div>
-                        <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl">
+                        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground md:text-4xl lg:text-5xl">
                             Tendances <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300">actuelles</span>
                         </h2>
                         <p className="mt-3 text-base text-muted-foreground md:text-lg">
                             Découvrez les produits les plus populaires et les plus recherchés du moment par notre communauté.
                         </p>
                     </div>
-                    
+
                     <Button
                         variant="ghost"
                         size="sm"
@@ -110,7 +105,7 @@ export default function TrendingProducts({ products }: TrendingProductsProps) {
                 </motion.header>
 
                 {products.length > 0 ? (
-                    <motion.div 
+                    <motion.div
                         variants={containerVariants}
                         initial="hidden"
                         whileInView="show"
@@ -119,13 +114,13 @@ export default function TrendingProducts({ products }: TrendingProductsProps) {
                     >
                         {products.map((product) => {
                             const inStock = (product.quantite_stock ?? product.stock_disponible ?? 0) > 0;
-                            
+
                             return (
-                                <motion.div 
-                                    key={product.id} 
+                                <motion.div
+                                    key={product.id}
                                     variants={itemVariants}
                                     className={cn(
-                                        "group relative h-full transition-opacity duration-300", 
+                                        "group relative h-full transition-opacity duration-300",
                                         !inStock && "opacity-80 hover:opacity-100"
                                     )}
                                 >
@@ -135,11 +130,11 @@ export default function TrendingProducts({ products }: TrendingProductsProps) {
                         })}
                     </motion.div>
                 ) : (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/40 text-center text-muted-foreground backdrop-blur-xs"
+                        className="flex min-h-75 flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/40 text-center text-muted-foreground backdrop-blur-xs"
                     >
                         <div className="mb-4 rounded-full bg-emerald-100/50 p-4 dark:bg-emerald-900/20">
                             <Sparkles className="h-8 w-8 text-emerald-600/60 dark:text-emerald-400/60" />

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\ApplyUserPreferences;
 use App\Http\Middleware\EnsurePaymentSession;
 use App\Http\Middleware\EnsureUserIsSuperAdmin;
 use App\Http\Middleware\HandleAppearance;
@@ -53,6 +54,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             HandleAppearance::class,
+            ApplyUserPreferences::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             TrackVisitor::class,

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 // resources/js/components/home/daily-offers.tsx
 import { Link } from '@inertiajs/react';
 import type { Variants } from 'framer-motion';
@@ -8,7 +9,6 @@ import {
     ChevronRight,
     Clock,
     Package,
-    Sparkles,
     TrendingUp,
     Zap,
 } from 'lucide-react';
@@ -71,6 +71,7 @@ function CountdownTimer() {
                     s: Math.floor((diff / 1000) % 60),
                 };
             }
+
             return { h: 0, m: 0, s: 0 };
         };
 
@@ -119,11 +120,6 @@ export default function DailyOffers({
 }: DailyOffersProps) {
     return (
         <section className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
-            {/* Background Effects */}
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div className="h-[40rem] w-[40rem] -translate-y-1/2 translate-x-1/3 rounded-full bg-emerald-100/30 blur-[100px] dark:bg-emerald-900/10"></div>
-                <div className="h-[30rem] w-[30rem] translate-y-1/3 -translate-x-1/3 rounded-full bg-rose-100/30 blur-[100px] dark:bg-rose-900/10"></div>
-            </div>
 
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Header */}
@@ -134,15 +130,7 @@ export default function DailyOffers({
                     viewport={{ once: true, margin: '-100px' }}
                     className="mx-auto mb-12 max-w-3xl text-center lg:mb-16"
                 >
-                    <Badge
-                        variant="outline"
-                        className="rounded-full border-emerald-200/70 bg-white/80 px-4 py-1.5 text-xs font-semibold tracking-[0.18em] text-emerald-700 uppercase shadow-sm backdrop-blur dark:border-emerald-800/60 dark:bg-emerald-500/10 dark:text-emerald-300"
-                    >
-                        <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                        Offres exclusives
-                    </Badge>
-
-                    <h2 className="mt-5 bg-linear-to-br from-slate-900 to-slate-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl lg:text-5xl dark:from-white dark:to-slate-400">
+                    <h2 className="mt-5 bg-linear-to-br from-slate-900 to-slate-600 bg-clip-text text-2xl font-semibold tracking-tight text-transparent sm:text-4xl lg:text-5xl dark:from-white dark:to-slate-400">
                         Les meilleures offres du moment
                     </h2>
 
@@ -252,15 +240,15 @@ function OfferSection({
             whileInView="visible"
             viewport={{ once: true, margin: '-100px' }}
             className={cn(
-                'relative flex flex-col overflow-hidden rounded-3xl border',
-                'backdrop-blur-2xl transition-all duration-500 hover:shadow-2xl',
+                'relative flex flex-col overflow-hidden rounded border',
+                'backdrop-blur-2xl transition-all duration-500 hover:shadow',
                 highlighted
                     ? 'border-rose-200/60 bg-linear-to-br from-rose-50/90 via-white/95 to-amber-50/80 hover:shadow-rose-500/10 dark:border-rose-900/40 dark:from-rose-950/40 dark:via-slate-950/95 dark:to-amber-950/20 dark:hover:shadow-rose-900/20'
                     : 'border-slate-200/70 bg-white/90 hover:shadow-emerald-500/5 dark:border-slate-800/70 dark:bg-slate-900/80 dark:hover:shadow-emerald-900/10',
             )}
         >
             {/* Glow */}
-            <div className="pointer-events-none absolute inset-0">
+            {/* <div className="pointer-events-none absolute inset-0">
                 <div
                     className={cn(
                         'absolute -top-24 right-0 h-64 w-64 rounded-full blur-[80px] transition-opacity duration-500',
@@ -269,7 +257,7 @@ function OfferSection({
                             : 'bg-emerald-400/15 dark:bg-emerald-600/15',
                     )}
                 />
-            </div>
+            </div> */}
 
             <div className="relative flex flex-1 flex-col p-6 sm:p-8">
                 {/* Header */}
@@ -414,14 +402,14 @@ function Carousel({
                                 className="group relative h-full"
                             >
                                 {/* Glow Effect on Hover */}
-                                <div
+                                {/* <div
                                     className={cn(
                                         'absolute -inset-1 rounded-2xl opacity-0 blur-lg transition-all duration-500 group-hover:opacity-100',
                                         isRose
                                             ? 'bg-linear-to-br from-rose-500/20 via-orange-400/10 to-rose-600/20 dark:from-rose-500/30 dark:via-orange-400/15 dark:to-rose-600/30'
                                             : 'bg-linear-to-br from-emerald-500/20 via-teal-400/10 to-emerald-600/20 dark:from-emerald-500/30 dark:via-teal-400/15 dark:to-emerald-600/30',
                                     )}
-                                ></div>
+                                ></div> */}
 
                                 <div
                                     className={cn(
@@ -430,7 +418,7 @@ function Carousel({
                                             ? 'border-rose-100 group-hover:border-rose-300 group-hover:shadow-rose-500/10 dark:border-rose-900/40 dark:group-hover:border-rose-700/60'
                                             : 'border-slate-200/70 group-hover:border-emerald-300 group-hover:shadow-emerald-500/10 dark:border-slate-800/70 dark:group-hover:border-emerald-700/60',
                                         !inStock &&
-                                            'opacity-80 grayscale-[0.4] group-hover:-translate-y-0 group-hover:shadow-none',
+                                            'opacity-80 grayscale-[0.4] group-hover:translate-y-0 group-hover:shadow-none',
                                     )}
                                 >
                                     <DailyOfferProductCard
@@ -494,9 +482,9 @@ function NavButton({
             type="button"
             className={cn(
                 className,
-                'absolute top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border',
+                'absolute top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded border',
                 'border-white/80 bg-white/90 text-slate-700 backdrop-blur-xl',
-                'shadow-[0_8px_20px_-8px_rgba(15,23,42,0.2)]',
+                'shadow-[0_5px_18px_-8px_rgba(15,23,42,0.2)]',
                 'opacity-0 transition-all duration-300',
                 'group-hover/carousel:opacity-100 xl:flex',
                 'hover:scale-110 hover:shadow-[0_8px_25px_-8px_rgba(15,23,42,0.3)]',
@@ -535,7 +523,7 @@ function EmptyState({
     linkText,
 }: EmptyStateProps) {
     return (
-        <div className="flex min-h-[300px] flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200/70 bg-slate-50/50 px-6 py-10 text-center backdrop-blur-sm transition-colors hover:bg-slate-50/80 dark:border-slate-800/70 dark:bg-slate-900/30 dark:hover:bg-slate-900/50">
+        <div className="flex min-h-75 flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200/70 bg-slate-50/50 px-6 py-10 text-center backdrop-blur-sm transition-colors hover:bg-slate-50/80 dark:border-slate-800/70 dark:bg-slate-900/30 dark:hover:bg-slate-900/50">
             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/70 dark:bg-slate-800 dark:ring-slate-700">
                 <Icon className="h-7 w-7 text-slate-400 dark:text-slate-500" />
             </div>

@@ -43,7 +43,7 @@ class PostLikesTable
                     ->preload(),
             ])
             ->recordActions([
-              DeleteAction::make(),
+                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

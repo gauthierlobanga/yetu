@@ -90,7 +90,7 @@ export function ChooseYetuContent() {
                     <div className="grid grid-cols-1 gap-y-8 gap-x-8 md:grid-cols-2 lg:grid-cols-4">
                         {menuSections.map((section, sectionIdx) => (
                             <div key={section.title} className="space-y-5">
-                                <motion.h3 
+                                <motion.h3
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.4, delay: sectionIdx * 0.05, ease: [0.16, 1, 0.3, 1] }}
@@ -116,7 +116,7 @@ export function ChooseYetuContent() {
                                             >
                                                 <span className="relative">
                                                     {link.label}
-                                                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 rounded-full bg-emerald-500 transition-all duration-300 group-hover:w-full"></span>
+                                                    <span className="absolute -bottom-.5 left-0 h-0.5 w-0 rounded bg-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                                                 </span>
                                             </Link>
                                         </motion.li>

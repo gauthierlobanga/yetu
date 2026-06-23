@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Vendor\Boutique\Ecommerce;
 
 use App\Http\Controllers\Controller;
-use App\Models\Produit;
-use App\Models\ProductCategory;
 use App\Models\Post;
 use App\Models\PostCategory;
-use Illuminate\Http\Request;
+use App\Models\ProductCategory;
+use App\Models\Produit;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 

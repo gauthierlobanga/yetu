@@ -2,7 +2,6 @@
 
 namespace App\Filament\Vendeur\Resources\Produits\Schemas;
 
-// use App\Models\ProductCategory;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
@@ -31,6 +30,7 @@ class ProduitForm
                 Tabs::make('Produit')
                     ->columnSpanFull()
                     ->tabs([
+                        // ==================== 1. INFORMATIONS GÉNÉRALES ====================
                         Tab::make('Informations générales')
                             ->icon('heroicon-o-shopping-bag')
                             ->schema([
@@ -39,7 +39,6 @@ class ProduitForm
                                     ->schema([
                                         Grid::make(3)
                                             ->schema([
-
                                                 TextInput::make('nom')
                                                     ->label('Nom du produit')
                                                     ->required()
@@ -58,6 +57,7 @@ class ProduitForm
                                                     ->maxLength(255)
                                                     ->unique(ignoreRecord: true)
                                                     ->helperText('Identifiant unique pour l\'URL'),
+
                                                 TextInput::make('reference')
                                                     ->label('Référence')
                                                     ->maxLength(100),
@@ -128,7 +128,7 @@ class ProduitForm
                                                     ])
                                                     ->searchable()
                                                     ->preload()
-                                                    ->default('draft')
+                                                    ->default('brouillon')
                                                     ->required(),
 
                                                 DateTimePicker::make('published_at')
@@ -169,17 +169,12 @@ class ProduitForm
                                     ]),
                             ]),
 
+                        // ==================== 2. PRIX ET STOCK ====================
                         Tab::make('Prix et stock')
                             ->icon('heroicon-o-currency-euro')
                             ->schema([
                                 Grid::make(3)
                                     ->schema([
-                                        // Select::make('currency_id')
-                                        //     ->label('Devise')
-                                        //     ->relationship('currency', 'code')
-                                        //     // ->required()
-                                        //     ->default(1),
-
                                         TextInput::make('prix_ht')
                                             ->label('Prix HT')
                                             ->numeric()
@@ -206,7 +201,7 @@ class ProduitForm
                                             ->numeric()
                                             ->prefix('€')
                                             ->step(0.01)
-                                            ->required(fn (callable $get) => $get('is_deal_of_the_day') === true) // obligatoire si deal activé
+                                            ->required(fn (callable $get) => $get('is_deal_of_the_day') === true)
                                             ->helperText('Laissez vide si pas de promotion. Obligatoire pour un Deal du jour.'),
 
                                         DateTimePicker::make('expires_at')
@@ -262,6 +257,7 @@ class ProduitForm
                                     ]),
                             ]),
 
+                        // ==================== 3. IMAGES ET MÉDIAS ====================
                         Tab::make('Images et médias')
                             ->icon('heroicon-o-photo')
                             ->schema([
@@ -328,50 +324,82 @@ class ProduitForm
                                     ]),
                             ]),
 
+                        // ==================== 4. VARIANTES ET ATTRIBUTS SPÉCIFIQUES ====================
                         Tab::make('Variantes et attributs')
                             ->icon('heroicon-o-bars-3')
                             ->schema([
-                                Repeater::make('variantes')
-                                    ->label('Variantes du produit')
-                                    ->relationship('variantes')
+                                // Section pour les variantes (existantes)
+                                Section::make('Variantes')
                                     ->schema([
-                                        Grid::make(3)
+                                        Repeater::make('variantes')
+                                            ->label('Variantes du produit')
+                                            ->relationship('variantes')
                                             ->schema([
-                                                TextInput::make('nom')
-                                                    ->label('Nom de la variante')
-                                                    ->required()
-                                                    ->placeholder('Ex: Taille, Couleur'),
+                                                Grid::make(3)
+                                                    ->schema([
+                                                        TextInput::make('nom')
+                                                            ->label('Nom de la variante')
+                                                            ->required()
+                                                            ->placeholder('Ex: Taille, Couleur'),
 
-                                                TextInput::make('valeur')
-                                                    ->label('Valeur')
-                                                    ->required()
-                                                    ->placeholder('Ex: M, Rouge'),
+                                                        TextInput::make('valeur')
+                                                            ->label('Valeur')
+                                                            ->required()
+                                                            ->placeholder('Ex: M, Rouge'),
 
-                                                TextInput::make('supplement_prix')
-                                                    ->label('Supplément prix')
-                                                    ->numeric()
-                                                    ->default(0)
-                                                    ->prefix('€')
-                                                    ->step(0.01),
+                                                        TextInput::make('supplement_prix')
+                                                            ->label('Supplément prix')
+                                                            ->numeric()
+                                                            ->default(0)
+                                                            ->prefix('€')
+                                                            ->step(0.01),
+                                                    ]),
+                                                Grid::make(2)
+                                                    ->schema([
+                                                        TextInput::make('stock')
+                                                            ->label('Stock')
+                                                            ->numeric()
+                                                            ->default(0)
+                                                            ->minValue(0),
 
-                                            ]),
-                                        Grid::make(2)
-                                            ->schema([
-                                                TextInput::make('stock')
-                                                    ->label('Stock')
-                                                    ->numeric()
-                                                    ->default(0)
-                                                    ->minValue(0),
+                                                        TextInput::make('sku_variante')
+                                                            ->label('SKU')
+                                                            ->maxLength(100),
+                                                    ]),
+                                                KeyValue::make('attributs')
+                                                    ->label('Attributs supplémentaires de la variante')
+                                                    ->keyLabel('Propriété')
+                                                    ->valueLabel('Valeur')
+                                                    ->addActionLabel('Ajouter un attribut')
+                                                    ->dehydrateStateUsing(fn ($state) => is_array($state)
+                                                        ? collect($state)
+                                                            ->filter(fn ($value, $key) => $key !== '' && $key !== null && $value !== '' && $value !== null)
+                                                            ->toArray()
+                                                        : []
+                                                    )
+                                                    ->afterStateHydrated(fn ($state) => is_array($state)
+                                                        ? collect($state)
+                                                            ->filter(fn ($value, $key) => $key !== '' && $key !== null)
+                                                            ->toArray()
+                                                        : []
+                                                    )
+                                                    ->columnSpanFull(),
+                                            ])
+                                            ->columns(1)
+                                            ->addActionLabel('Ajouter une variante')
+                                            ->defaultItems(0)
+                                            ->collapsible(),
+                                    ]),
 
-                                                TextInput::make('sku_variante')
-                                                    ->label('SKU')
-                                                    ->maxLength(100),
-                                            ]),
+                                // Section pour les attributs généraux du produit (caractéristiques)
+                                Section::make('Caractéristiques du produit')
+                                    ->description('Ajoutez ici les spécifications techniques ou commerciales (ex: type, application, matière, etc.)')
+                                    ->schema([
                                         KeyValue::make('attributs')
-                                            ->label('Attributs supplémentaires')
+                                            ->label('Caractéristiques')
                                             ->keyLabel('Propriété')
                                             ->valueLabel('Valeur')
-                                            ->addActionLabel('Ajouter un attribut')
+                                            ->addActionLabel('Ajouter une caractéristique')
                                             ->dehydrateStateUsing(fn ($state) => is_array($state)
                                                 ? collect($state)
                                                     ->filter(fn ($value, $key) => $key !== '' && $key !== null && $value !== '' && $value !== null)
@@ -384,35 +412,14 @@ class ProduitForm
                                                     ->toArray()
                                                 : []
                                             )
+                                            ->helperText('Exemples : "Type: Machine à poupée", "Application: Intérieur, Centre de jeu", "Alimentation: 110-240V"')
                                             ->columnSpanFull(),
-                                    ])
-                                    ->columns(1)
-                                    ->addActionLabel('Ajouter une variante')
-                                    ->defaultItems(0)
-                                    ->collapsible(),
-
-                                // KeyValue::make('attributes')
-                                //     ->label('Attributs personnalisés')
-                                //     ->keyLabel('Attribut')
-                                //     ->valueLabel('Valeur')
-                                //     ->addActionLabel('Ajouter un attribut')
-                                //     ->dehydrateStateUsing(fn ($state) => is_array($state)
-                                //         ? collect($state)
-                                //             ->filter(fn ($value, $key) => $key !== '' && $key !== null && $value !== '' && $value !== null)
-                                //             ->toArray()
-                                //         : []
-                                //     )
-                                //     ->afterStateHydrated(fn ($state) => is_array($state)
-                                //         ? collect($state)
-                                //             ->filter(fn ($value, $key) => $key !== '' && $key !== null)
-                                //             ->toArray()
-                                //         : []
-                                //     )
-                                //     ->helperText('Attributs supplémentaires du produit (ex: Matière: Coton, Garantie: 2 ans)'),
+                                    ]),
                             ]),
-                        Tab::make('Attributs supplémentaires')
+
+                        // ==================== 5. MÉTADONNÉES (ATTRIBUTS SUPPLÉMENTAIRES) ====================
+                        Tab::make('Métadonnées')
                             ->icon('heroicon-o-cog-6-tooth')
-                            ->columnSpanFull()
                             ->schema([
                                 KeyValue::make('metadata')
                                     ->label('Métadonnées personnalisées')
@@ -431,9 +438,11 @@ class ProduitForm
                                             ->filter(fn ($value, $key) => $key !== '' && $key !== null)
                                             ->toArray()
                                         : []
-                                    ),
+                                    )
+                                    ->helperText('Utilisez cette zone pour stocker des données supplémentaires non structurées (ex: données de suivi, préférences internes).'),
                             ]),
 
+                        // ==================== 6. SEO ET TAGS ====================
                         Tab::make('SEO et tags')
                             ->icon('heroicon-o-magnifying-glass')
                             ->schema([
@@ -447,7 +456,6 @@ class ProduitForm
 
                                 Section::make('Tags')
                                     ->schema([
-
                                         Textarea::make('seo_description')
                                             ->label('Description SEO')
                                             ->maxLength(160)
@@ -462,18 +470,6 @@ class ProduitForm
                                     ]),
                             ]),
 
-                        Tab::make('Métadonnées')
-                            ->icon('heroicon-o-code-bracket')
-                            ->schema([
-                                KeyValue::make('metadata')
-                                    ->label('Métadonnées personnalisées')
-                                    ->keyLabel('Clé')
-                                    ->valueLabel('Valeur')
-                                    ->addActionLabel('Ajouter')
-                                    ->reorderable()
-                                    ->dehydrateStateUsing(fn ($state) => is_array($state) ? array_filter($state, fn ($key, $value) => $key !== '' && $value !== '', ARRAY_FILTER_USE_BOTH) : $state)
-                                    ->afterStateHydrated(fn ($state) => is_array($state) ? array_filter($state, fn ($key) => $key !== '', ARRAY_FILTER_USE_KEY) : $state),
-                            ]),
                     ]),
             ]);
     }

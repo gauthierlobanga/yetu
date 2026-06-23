@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { useCart } from '@/hooks/ecommerce/use-cart';
+import { getToastStyles } from '@/lib/toast-style';
 import { cn } from '@/lib/utils';
 import tenant from '@/routes/tenant';
 
@@ -87,16 +88,17 @@ export default function ShopWishlistPage() {
         router.delete(route('tenant.wishlist.remove', productId), {
             preserveScroll: true,
             preserveState: true,
+            showProgress:false,
             onSuccess: () =>
-                toast.success('Produit retiré de votre liste de souhaits'),
+                toast.success('Produit retiré de votre liste de souhaits',{style:getToastStyles('success')}),
             onError: () =>
-                toast.error('Une erreur est survenue lors de la suppression'),
+                toast.error('Une erreur est survenue lors de la suppression',{style:getToastStyles('error')}),
         });
     };
 
     const handleAddToCart = (productId: string, quantity: number = 1) => {
         addToCart(productId, quantity);
-        toast.success('Produit ajouté au panier');
+        toast.success('Produit ajouté au panier',{style:getToastStyles('success')});
     };
 
     return (

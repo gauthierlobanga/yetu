@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Vendor\Acheteurs;
 
 use App\Http\Controllers\Controller;
+use App\Models\Panier;
 use App\Models\Retour;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -302,8 +303,8 @@ class AccountDashboardController extends Controller
         | Panier Abandonné (Relance)
         |--------------------------------------------------------------------------
         */
-        $abandonedCart = \App\Models\Panier::where('client_id', $client->id)
-            ->where('statut', \App\Models\Panier::STATUT_ABANDONNE)
+        $abandonedCart = Panier::where('client_id', $client->id)
+            ->where('statut', Panier::STATUT_ABANDONNE)
             ->withCount('items')
             ->latest('date_abandon')
             ->first();

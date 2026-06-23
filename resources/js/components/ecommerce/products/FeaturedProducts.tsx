@@ -51,10 +51,10 @@ function FeaturedProductCard({ product }: { product: Product }) {
 
     const isWishlisted = isInWishlist(product.id);
     const rating = Number(product.note_moyenne) || 0;
-    
+
     // Fix out-of-stock check
     const inStock = (product.quantite_stock ?? product.stock_disponible ?? 0) > 0;
-    
+
     const currentPrice = product.prix_actuel ?? product.prix_ttc;
     const oldPrice = product.est_en_promotion && product.prix_ttc > currentPrice ? product.prix_ttc : null;
     const discount = oldPrice ? Math.round(((oldPrice - currentPrice) / oldPrice) * 100) : (product.reduction_pourcentage || 0);
@@ -62,6 +62,7 @@ function FeaturedProductCard({ product }: { product: Product }) {
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+
         if (inStock) {
             addToCart(product.id, 1);
             toast.success('Ajouté au panier', { style: getToastStyles() });
@@ -120,7 +121,7 @@ function FeaturedProductCard({ product }: { product: Product }) {
                 <div className="absolute bottom-0 left-0 right-0 p-5 flex flex-col justify-end">
                     <div className="mb-2 flex items-center gap-1.5 opacity-0 -translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
                         <StarRating rating={rating} />
-                        <span className="text-xs font-medium text-slate-300">
+                        <span className="text-sm font-medium text-slate-300">
                             {rating.toFixed(1)}
                         </span>
                     </div>
@@ -147,15 +148,15 @@ function FeaturedProductCard({ product }: { product: Product }) {
                             disabled={!inStock}
                             className={cn(
                                 "group/cart-btn relative flex h-10 w-10 shrink-0 items-center justify-start overflow-hidden rounded-full transition-all duration-300 ease-out shadow-lg",
-                                inStock 
-                                    ? "bg-emerald-500 text-white hover:w-[110px] hover:bg-emerald-400"
+                                inStock
+                                    ? "bg-emerald-500 text-white hover:w-27 hover:bg-emerald-400"
                                     : "bg-slate-600/80 text-slate-300 cursor-not-allowed"
                             )}
                         >
                             <div className="absolute left-0 flex h-10 w-10 items-center justify-center">
                                 <ShoppingCart className="h-4 w-4 transition-transform duration-300 group-hover/cart-btn:scale-110" />
                             </div>
-                            <span className="ml-10 whitespace-nowrap pr-3 text-xs font-bold opacity-0 transition-opacity duration-300 group-hover/cart-btn:opacity-100">
+                            <span className="ml-10 whitespace-nowrap pr-2 text-xs font-bold opacity-0 transition-opacity duration-300 group-hover/cart-btn:opacity-100">
                                 Ajouter
                             </span>
                         </Button>
@@ -204,9 +205,6 @@ export default function FeaturedProducts({
 
     return (
         <section className="py-16 lg:py-24 overflow-hidden relative">
-            {/* Background elements for premium feel */}
-            <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-slate-200 dark:via-slate-800 to-transparent" />
-            <div className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[120px] w-[800px] h-[400px] dark:bg-emerald-500/5" />
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
                 <header className="mb-12 flex flex-col items-center text-center">
@@ -219,16 +217,16 @@ export default function FeaturedProducts({
                             <PackageSearch className="h-4 w-4" /> Sélection
                         </span>
                     </motion.div>
-                    <motion.h2 
+                    <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white"
+                        className="mt-6 text-2xl font-semibold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white"
                     >
                         Nos produits phares
                     </motion.h2>
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -243,7 +241,7 @@ export default function FeaturedProducts({
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex min-h-[400px] flex-col items-center justify-center rounded-[2rem] border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center backdrop-blur dark:border-slate-800 dark:bg-slate-900/30"
+                        className="flex min-h-100 flex-col items-center justify-center rounded-[2rem] border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center backdrop-blur dark:border-slate-800 dark:bg-slate-900/30"
                     >
                         <motion.div
                             animate={{

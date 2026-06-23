@@ -164,7 +164,7 @@ export default function FiltersPanel({
                     {hasActiveFilters && (
                         <Button
                             variant="ghost"
-                            size="sm"
+                            size="lg"
                             onClick={clearAllFilters}
                             className="h-8 cursor-pointer gap-1 text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
                         >
@@ -320,17 +320,40 @@ export default function FiltersPanel({
                                 })
                             }
                         >
-                            <SelectTrigger className="h-9 border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50">
+                            <SelectTrigger
+                                className={cn(
+                                    'h-11 w-56 rounded border px-3 text-sm font-normal transition-all duration-200',
+                                    'border-slate-200 bg-white/80 text-slate-700',
+                                    'hover:border-emerald-300 hover:bg-white',
+                                    'focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20',
+                                    'dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300',
+                                    'dark:hover:border-emerald-700 dark:hover:bg-slate-900',
+                                    'dark:focus:border-emerald-400 dark:focus:ring-emerald-400/20',
+                                )}
+                            >
                                 <SelectValue placeholder="Toutes les marques" />
                             </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">
+                            <SelectContent
+                                position="popper"
+                                side="bottom"
+                                align="start"
+                                sideOffset={1}
+                                className={cn(
+                                    'rounded border border-slate-200/80 bg-white/95 p-1',
+                                    'dark:border-slate-800/80 dark:bg-slate-950/90',
+                                )}
+                            >
+                                <SelectItem
+                                    value="all"
+                                    className="px-3 py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
+                                >
                                     Toutes les marques
                                 </SelectItem>
                                 {brands.map((brand) => (
                                     <SelectItem
                                         key={brand.id}
                                         value={String(brand.id)}
+                                        className="px-3 cursor-pointer py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
                                     >
                                         {brand.name}
                                     </SelectItem>

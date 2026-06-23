@@ -59,6 +59,37 @@ class UsersTable
                     ->formatStateUsing(fn ($state) => ucfirst($state))
                     ->searchable(),
 
+                TextColumn::make('preferences')
+                    ->label('Préférences')
+                    ->formatStateUsing(function ($state) {
+                        // 1. Décoder si c'est une chaîne JSON (comme dans votre DB)
+                        if (is_string($state)) {
+                            $state = json_decode($state, true);
+                        }
+
+                        // 2. Vérifier qu'on a bien un tableau non vide
+                        if (! is_array($state) || empty($state)) {
+                            return '—';
+                        }
+
+                        // 3. Construire l'affichage
+                        $parts = [];
+                        if (! empty($state['locale'])) {
+                            $parts[] = '🌐 '.strtoupper($state['locale']);
+                        }
+                        if (! empty($state['country'])) {
+                            $parts[] = '📍 '.$state['country'];
+                        }
+                        if (! empty($state['currency'])) {
+                            $parts[] = '💱 '.$state['currency'];
+                        }
+
+                        return implode('  ', $parts) ?: '—';
+                    })
+                    ->badge()
+                    ->color('info')
+                    ->toggleable(isToggledHiddenByDefault: false), // visible par défaut
+
                 IconColumn::make('is_active')
                     ->label('Actif')
                     ->boolean()

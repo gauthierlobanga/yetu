@@ -2,6 +2,7 @@
 // resources/js/pages/customs/dashboard-acheteurs.tsx
 import type { PageProps } from '@inertiajs/core';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 import type { LucideIcon } from 'lucide-react';
 import {
     ArrowRight,
@@ -219,6 +220,7 @@ export default function DashboardCustomerBuyer() {
         statusDistribution,
         loyalty,
         loyaltyHistory,
+        auth,
         weeklySpending,
         topCategories,
         abandonedCart,
@@ -276,7 +278,7 @@ export default function DashboardCustomerBuyer() {
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                    Bonjour 👋
+                                     Bonjour {auth.user.name ? (auth.user.name): ('')}
                                 </h1>
                                 <p className="text-slate-500 dark:text-slate-400">
                                     Voici un aperçu de votre activité récente.
@@ -304,7 +306,7 @@ export default function DashboardCustomerBuyer() {
                                 className="relative overflow-hidden rounded-2xl border border-amber-200 bg-linear-to-r from-amber-50 to-orange-50 p-6 shadow-sm dark:border-amber-900/50 dark:from-amber-950/30 dark:to-orange-950/20"
                             >
                                 <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-amber-400/10 blur-3xl" />
-                                
+
                                 <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div className="flex items-center gap-4">
                                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400">
@@ -321,7 +323,7 @@ export default function DashboardCustomerBuyer() {
                                     </div>
                                     <Link
                                         href={route('tenant.cart.recover', { relance: abandonedCart.id })}
-                                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 dark:bg-amber-600 dark:hover:bg-amber-500"
+                                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-amber-500 dark:bg-amber-600 dark:hover:bg-amber-500"
                                     >
                                         Terminer ma commande
                                         <ArrowRight className="h-4 w-4" />

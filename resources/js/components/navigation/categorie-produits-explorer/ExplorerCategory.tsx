@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/set-state-in-effect */
 // resources/js/components/navigation/ProductsMegaMenu.tsx
 import { Link } from '@inertiajs/react';
@@ -55,7 +56,6 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 /*                                  Helpers                                   */
 /* -------------------------------------------------------------------------- */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const formatPrice = (price: number) =>
     new Intl.NumberFormat('fr-CD', {
         style: 'currency',
@@ -165,62 +165,56 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
                 'dark:shadow-none lg:dark:shadow-[0_30px_80px_-20px_rgba(0,0,0,0.65)]',
             )}
         >
-            {/* Glow décoratif */}
-            <div className="pointer-events-none absolute -top-24 left-10 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl hidden lg:block" />
-            <div className="pointer-events-none absolute top-1/2 right-0 h-72 w-72 -translate-y-1/2 rounded-full bg-slate-400/10 blur-3xl dark:bg-emerald-400/5" />
-
-
 
             <div className="grid w-full grid-cols-12">
                 {/* Sidebar catégories */}
                 <aside className="col-span-4 border-r border-slate-200/70 bg-slate-50/70 p-6 dark:border-slate-700/60 dark:bg-slate-900/40">
                     <div className="mb-5 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/10">
-                                <Sparkles className="h-4 w-4 text-emerald-500" />
-                            </div>
                             <span className="text-xs font-semibold tracking-widest text-slate-500 uppercase dark:text-slate-400">
                                 Catégories
                             </span>
                         </div>
-                        <span className="rounded-full bg-slate-200/70 px-2.5 py-1 text-[10px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                        <span className="rounded bg-slate-200/70 px-2.5 py-1.5 text-[13px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             {categories.length}
                         </span>
                     </div>
 
                     <div className="max-h-96 space-y-2 overflow-y-auto pr-1">
-                        {categories.map((category, index) => {
+                        {categories.map((category) => {
                             const Icon = getCategoryIcon(category);
                             const isSelected = selectedCat.id === category.id;
 
                             return (
                                 <motion.button
                                     key={category.id}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.3, delay: index * 0.03, ease: [0.16, 1, 0.3, 1] }}
                                     type="button"
                                     disabled={isTransitioning}
                                     onClick={() =>
                                         handleCategoryChange(category)
                                     }
                                     className={cn(
-                                        'group relative flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all duration-300',
+                                        'group relative flex w-full items-center gap-3 rounded border p-3 text-left transition-all duration-300',
                                         isSelected
-                                            ? 'border-emerald-200 bg-white shadow-lg shadow-emerald-500/10 dark:border-emerald-800/50 dark:bg-slate-800'
+                                            ? 'border-emerald-200 bg-white shadow shadow-emerald-500/10 dark:border-emerald-800/50 dark:bg-slate-800'
                                             : 'border-transparent hover:border-slate-200 hover:bg-white/80 dark:hover:border-slate-700 dark:hover:bg-slate-800/60',
                                     )}
                                 >
                                     {isSelected && (
-                                        <div className="absolute inset-y-3 left-0 w-1 rounded-r-full bg-emerald-500" />
+                                        <div className="absolute inset-y-0 left-0 w-1 bg-emerald-500" />
                                     )}
                                     <div
                                         className={cn(
                                             'flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl transition-all',
-                                            isSelected
+                                            isSelected && !category.image
                                                 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25'
                                                 : 'bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-emerald-500/10 dark:group-hover:text-emerald-400',
-                                        )}
+
+                                            isSelected && category.image
+                                                ? 'bg-transparent text-white shadow-lg shadow-emerald-500/25'
+                                                : 'bg-slate-100 text-slate-600 group-hover:bg-emerald-50 group-hover:text-emerald-600 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-emerald-500/10 dark:group-hover:text-emerald-400',
+
+                                            )}
                                     >
                                         {category.image ? (
                                             <img
@@ -269,7 +263,7 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
                             </p>
                         </div>
                         <Link
-                            href={`/category/${selectedCat.slug}`}
+                            href={`/product/category/${selectedCat.slug}`}
                             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-all hover:border-emerald-200 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-emerald-800 dark:hover:text-emerald-400"
                         >
                             Voir tout
@@ -283,7 +277,7 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
                             {selectedCat.sous_categories!.map((sub) => (
                                 <Link
                                     key={sub}
-                                    href={`/category/${selectedCat.slug}/${sub.toLowerCase()}`}
+                                    href={`/product/category/${selectedCat.slug}-${sub.toLowerCase()}`}
                                     className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:border-emerald-800 dark:hover:bg-emerald-500/10 dark:hover:text-emerald-400"
                                 >
                                     {sub}
@@ -341,14 +335,14 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
                             <div className="flex-1">
                                 <p className="text-sm font-semibold text-slate-900 dark:text-white">
                                     Explorez nos meilleures collections de
-                                    produits
+                                    produits par catégories
                                 </p>
 
                                 <Link
-                                    href={route('tenant.product.index')}
+                                    href={route('tenant.product.category.index')}
                                     className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 transition-colors hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
                                 >
-                                    Voir tout
+                                    Voir toutes les catégories
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
                             </div>

@@ -10,6 +10,7 @@ use App\Models\Produit;
 use App\Models\User;
 use App\Services\TenantPropsService;
 use App\Settings\SettingApp;
+use App\Support\Branding\Favicon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -102,10 +103,17 @@ class HandleInertiaRequests extends Middleware
             'seo' => [
                 'appName' => config('app.name', 'Yetu'),
                 'appUrl' => config('app.url', 'http://localhost:8000'),
-                'defaultDescription' => 'Bienvenue sur ' . config('app.name', 'Yetu'),
+                'defaultDescription' => 'Bienvenue sur '.config('app.name', 'Yetu'),
                 'defaultImage' => Storage::url('images/default.png'),
-                'favicon' => \App\Support\Branding\Favicon::currentUrl(),
+                'favicon' => Favicon::currentUrl(),
             ],
+            'locale' => app()->getLocale(),
+            'translations' => function () {
+                $locale = app()->getLocale();
+                $path = base_path("lang/{$locale}.json");
+
+                return file_exists($path) ? json_decode(file_get_contents($path), true) : [];
+            },
         ];
 
         if ($this->shouldLoadTenantNotifications($request)) {

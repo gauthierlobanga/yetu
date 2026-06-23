@@ -45,7 +45,7 @@ class SendCartReminders extends Command
                 ->where('nombre_relances', '<', $maxRelances)
                 ->where(function ($query) {
                     $query->whereNull('derniere_relance')
-                          ->orWhere('derniere_relance', '<=', now()->subHours(24));
+                        ->orWhere('derniere_relance', '<=', now()->subHours(24));
                 })
                 ->get();
 
@@ -57,7 +57,7 @@ class SendCartReminders extends Command
                         $this->line("Tenant {$tenant->id} - Reminder sent for cart {$abandon->panier_id}. (Attempt: {$abandon->nombre_relances})");
                     }
                 } catch (\Exception $e) {
-                    Log::error("Failed to send reminder for cart {$abandon->panier_id} in tenant {$tenant->id}: " . $e->getMessage());
+                    Log::error("Failed to send reminder for cart {$abandon->panier_id} in tenant {$tenant->id}: ".$e->getMessage());
                     $this->error("Failed to send reminder for cart {$abandon->panier_id}.");
                 }
             }

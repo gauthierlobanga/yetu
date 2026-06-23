@@ -176,7 +176,6 @@ class BlogCentralController extends Controller
 
     /**
      * Gère la soumission d'un commentaire sur un article.
-     *
      */
     public function blogComment(Request $request, Post $post)
     {
@@ -185,6 +184,7 @@ class BlogCentralController extends Controller
 
         return response()->json(['comment' => $comment->load('user')]);
     }
+
     /**
      * Ajoute ou retire un "J'aime" (Like) sur un article de blog.
      *

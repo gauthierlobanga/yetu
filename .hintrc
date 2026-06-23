@@ -22,9 +22,11 @@
       "default",
       {
         "definition-list": "off",
-        "dlitem": "off"
+        "dlitem": "off",
+        "list": "off"
       }
     ],
-    "axe/text-alternatives": "off"
+    "axe/text-alternatives": "off",
+    "apple-touch-icons": "off"
   }
 }

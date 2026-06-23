@@ -54,13 +54,14 @@ final class Favicon
      * Utilise la fonction asset() pour garantir une URL complète et absolue,
      * évitant ainsi les problèmes de CORS ou de redirections côté frontend.
      *
-     * @param Tenant $tenant L'instance du tenant (vendeur).
+     * @param  Tenant  $tenant  L'instance du tenant (vendeur).
      * @return string L'URL absolue du favicon du tenant.
      */
     public static function tenantUrl(Tenant $tenant): string
     {
         try {
             $logoUrl = $tenant->logo_url ?: $tenant->getFirstMedia('tenant_avatar')?->getUrl();
+
             return $logoUrl ? asset($logoUrl) : asset('favicon.ico');
         } catch (Throwable) {
             return asset('favicon.ico');

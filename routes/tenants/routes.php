@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\VisitorAnalyticsController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\Auth\TenantSsoLoginController;
 use App\Http\Controllers\Others\SearchController;
+use App\Http\Controllers\Others\UserPreferenceController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use App\Http\Controllers\Vendor\Acheteurs\AccountDashboardController;
@@ -95,6 +96,8 @@ Route::middleware([
         ->name('tenant.home');
 
     Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('tenant.sitemap');
+
+    Route::post('/preferences', [UserPreferenceController::class, 'update'])->name('tenant.preferences.update');
 
     Route::get('/tenant-sso-login', [TenantSsoLoginController::class, '__invoke'])
         ->name('tenant.sso.login');

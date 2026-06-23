@@ -5,21 +5,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Bell, BellRing, CheckCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-
 import { Button } from '@/components/ui/button';
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover';
-import getToastStyle from '@/lib/toast-style'; // ✅ import corrigé
+import getToastStyle from '@/lib/toast-style';
 import type { DashboardNotification } from '@/types/ecommerce/notifications/notification';
 
-// --- Helpers (inchangés) ---
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === 'object' && value !== null && !Array.isArray(value);
+
 const stringValue = (value: unknown, fallback = ''): string =>
     typeof value === 'string' && value.trim() !== '' ? value : fallback;
+
 const nullableStringValue = (value: unknown): string | null =>
     typeof value === 'string' && value.trim() !== '' ? value : null;
 
@@ -42,6 +43,7 @@ function normalizeNotification(
         value.id ??
         data.id ??
         `realtime-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
     const title = stringValue(
         value.title,
         stringValue(
@@ -55,6 +57,7 @@ function normalizeNotification(
             ),
         ),
     );
+
     const message = stringValue(
         value.message,
         stringValue(
@@ -62,6 +65,7 @@ function normalizeNotification(
             stringValue(value.body, stringValue(data.body)),
         ),
     );
+
     const createdAt = stringValue(
         value.created_at,
         stringValue(

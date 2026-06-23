@@ -205,6 +205,7 @@ function KpiCard({
 /* ---------- Page ---------- */
 export default function DashboardCustomerBuyer() {
     const {
+        auth,
         stats,
         advancedStats,
         recentOrders,
@@ -262,7 +263,7 @@ export default function DashboardCustomerBuyer() {
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                    Bonjour 👋
+                                    Bonjour {auth.user.name ? (auth.user.name): ('')}
                                 </h1>
                                 <p className="text-slate-500 dark:text-slate-400">
                                     Voici un aperçu de votre activité récente.

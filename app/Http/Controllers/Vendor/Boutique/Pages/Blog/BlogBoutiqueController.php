@@ -108,7 +108,7 @@ class BlogBoutiqueController extends Controller
 
         $categories = PostCategory::select('id', 'nom', 'slug', 'color')
             ->where('est_active', true)
-            ->orderBy('nom','asc')
+            ->orderBy('nom', 'asc')
             ->get();
 
         return Inertia::render('Vendor/pages/blog/list/List', [

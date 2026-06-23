@@ -25,7 +25,7 @@ class CommentLikesTable
                 TextColumn::make('comment.content')
                     ->label('Contenu du commentaire')
                     ->limit(30)
-                    ->tooltip(fn ($record) =>  $record->comment?->content ?? strip_tags($record->comment->content) ?? '')
+                    ->tooltip(fn ($record) => $record->comment?->content ?? strip_tags($record->comment->content) ?? '')
                     ->searchable()
                     ->sortable()
                     ->copyable()

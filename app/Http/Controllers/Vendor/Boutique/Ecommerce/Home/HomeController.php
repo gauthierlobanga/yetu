@@ -97,9 +97,9 @@ class HomeController extends Controller
                 ->inStock()
                 ->featured()
                 ->with($productRelations)
-                ->paginate(12, ['*'], 'featuredPage', $featuredPage)
+                ->paginate(24, ['*'], 'featuredPage', $featuredPage)
                 ->through(fn ($product) => $this->formatProduct($product))
-            : new LengthAwarePaginator([], 0, 12, $featuredPage);
+            : new LengthAwarePaginator([], 0, 24, $featuredPage);
 
         // Produits tendance
         $trendingProducts = $hasProducts
@@ -107,7 +107,7 @@ class HomeController extends Controller
                 ->inStock()
                 ->bestseller()
                 ->with($productRelations)
-                ->take(4)
+                ->take(12)
                 ->get()
                 ->map(fn ($product) => $this->formatProduct($product))
             : collect();

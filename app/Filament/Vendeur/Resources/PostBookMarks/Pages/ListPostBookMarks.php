@@ -7,7 +7,6 @@ use App\Filament\Vendeur\Resources\PostBookMarks\Widgets\PostBookMarksStatsWidge
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
-
 class ListPostBookMarks extends ListRecords
 {
     protected static string $resource = PostBookMarkResource::class;
@@ -25,5 +24,4 @@ class ListPostBookMarks extends ListRecords
             PostBookMarksStatsWidget::class,
         ];
     }
-
 }

@@ -1,6 +1,5 @@
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
 import {
     Store,
     ShoppingCart,
@@ -13,6 +12,7 @@ import {
     Factory,
     ArrowRight,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const tools = [
     {
@@ -147,7 +147,7 @@ export function ProductsMenuContent() {
                         </div>
 
                         {/* CTA */}
-                        <div className="relative overflow-hidden rounded-2xl border border-emerald-200/70 bg-linear-to-br from-emerald-50 via-white to-slate-50 p-5 shadow-md shadow-emerald-500/5 dark:border-emerald-900/50 dark:from-emerald-950/30 dark:via-slate-900 dark:to-slate-900">
+                        <div className="relative overflow-hidden rounded border border-emerald-200/70 bg-linear-to-br from-emerald-50 via-white to-slate-50 p-5 shadow shadow-emerald-500/5 dark:border-emerald-900/50 dark:from-emerald-950/30 dark:via-slate-900 dark:to-slate-900">
                             <div className="absolute -top-6 -right-6 h-16 w-16 rounded-full bg-emerald-400/10 blur-2xl" />
                             <div className="relative">
                                 <p className="text-sm font-bold text-slate-900 dark:text-white">
@@ -157,10 +157,10 @@ export function ProductsMenuContent() {
                                     Démarrez une boutique en quelques clics.
                                 </p>
                                 <Link
-                                    href={route('vendor.register')}
+                                    href={route('tenant.product.index')}
                                     className="group mt-3 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-600/30 dark:bg-emerald-500 dark:hover:bg-emerald-400"
                                 >
-                                    Créer ma boutique
+                                    Commener mes achats
                                     <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                                 </Link>
                             </div>

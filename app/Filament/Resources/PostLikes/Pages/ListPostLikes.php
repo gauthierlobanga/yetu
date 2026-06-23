@@ -7,7 +7,6 @@ use App\Filament\Resources\PostLikes\Widgets\PostLikeStatsWidget;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
-
 class ListPostLikes extends ListRecords
 {
     protected static string $resource = PostLikeResource::class;
@@ -25,5 +24,4 @@ class ListPostLikes extends ListRecords
             PostLikeStatsWidget::class,
         ];
     }
-
 }

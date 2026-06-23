@@ -51,16 +51,12 @@ export function CentreAcheteurs() {
             "backdrop-blur-none lg:backdrop-blur-xl"
         )}>
             <div className="relative overflow-hidden">
-                {/* Fond décoratif */}
-                <div className="absolute inset-0 hidden lg:block bg-linear-to-br from-emerald-50/40 via-white/40 to-slate-50/40 dark:from-emerald-950/20 dark:via-slate-900/40 dark:to-slate-950/40" />
-                <div className="absolute top-0 left-0 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
-                <div className="absolute right-0 bottom-0 h-64 w-64 rounded-full bg-slate-400/10 blur-3xl dark:bg-slate-600/10" />
 
                 <div className="relative mx-auto max-w-7xl px-4 py-4 lg:px-6 lg:py-10">
                     <div className="grid grid-cols-1 gap-y-8 gap-x-8 md:grid-cols-2 lg:grid-cols-4">
                         {menuSections.map((section, sectionIdx) => (
                             <div key={section.title} className="space-y-5">
-                                <motion.h3 
+                                <motion.h3
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.4, delay: sectionIdx * 0.05, ease: [0.16, 1, 0.3, 1] }}

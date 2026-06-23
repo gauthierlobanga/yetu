@@ -111,6 +111,7 @@ export default function CategoryShow({
                 {
                     preserveState: true,
                     preserveScroll: true,
+                    showProgress: false,
                     only: ['products'],
                 },
             );
@@ -125,6 +126,7 @@ export default function CategoryShow({
             {
                 preserveState: true,
                 preserveScroll: true,
+                showProgress: false,
                 only: ['products'],
             },
         );
@@ -135,7 +137,7 @@ export default function CategoryShow({
         router.get(
             window.location.pathname,
             { sort: filters.sort },
-            { preserveState: true, preserveScroll: true, only: ['products'] },
+            { preserveState: true, preserveScroll: true, only: ['products'],showProgress: false },
         );
     };
 
@@ -154,8 +156,8 @@ export default function CategoryShow({
             pages.push(1);
 
             if (currentPage > 3) {
-pages.push('...');
-}
+                pages.push('...');
+            }
 
             for (
                 let i = Math.max(2, currentPage - 1);
@@ -166,8 +168,8 @@ pages.push('...');
             }
 
             if (currentPage < totalPages - 2) {
-pages.push('...');
-}
+                pages.push('...');
+            }
 
             pages.push(totalPages);
         }
@@ -179,7 +181,7 @@ pages.push('...');
         router.get(
             window.location.pathname,
             { page, sort: filters.sort, search: searchQuery || undefined },
-            { preserveState: true, preserveScroll: true },
+            { preserveState: true, preserveScroll: true ,showProgress: false},
         );
     };
 
@@ -197,7 +199,7 @@ pages.push('...');
                 {/* Modernized Breadcrumb */}
                 <nav className="mb-8 flex flex-wrap items-center text-sm font-medium text-slate-500 dark:text-slate-400">
                     <Link
-                        href="/"
+                        href={route('tenant.home')}
                         className="transition-colors hover:text-emerald-600 dark:hover:text-emerald-400"
                     >
                         Accueil
@@ -222,7 +224,7 @@ pages.push('...');
                 </nav>
 
                 {/* Premium Category Header */}
-                <div className="relative mb-12 overflow-hidden rounded-[2.5rem] bg-slate-950 p-8 shadow-2xl shadow-slate-200/50 md:p-12 dark:shadow-none">
+                <div className="relative mb-12 overflow-hidden rounded bg-white p-8 shadow shadow-slate-200/50 ring-slate-100 md:p-12 dark:bg-slate-950 dark:shadow-none">
                     {/* Background layers */}
                     {category.banner ? (
                         <div className="absolute inset-0">
@@ -238,13 +240,27 @@ pages.push('...');
                         <div className="absolute inset-0">
                             <div className="absolute inset-0 bg-linear-to-br from-emerald-900/40 via-slate-950 to-slate-950" />
                             <motion.div
-                                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }}
-                                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                                animate={{
+                                    scale: [1, 1.1, 1],
+                                    rotate: [0, 5, 0],
+                                }}
+                                transition={{
+                                    duration: 20,
+                                    repeat: Infinity,
+                                    ease: 'linear',
+                                }}
                                 className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-emerald-500/20 blur-[100px]"
                             />
                             <motion.div
-                                animate={{ scale: [1, 1.2, 1], rotate: [0, -5, 0] }}
-                                transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                                animate={{
+                                    scale: [1, 1.2, 1],
+                                    rotate: [0, -5, 0],
+                                }}
+                                transition={{
+                                    duration: 25,
+                                    repeat: Infinity,
+                                    ease: 'linear',
+                                }}
                                 className="absolute -bottom-40 left-20 h-96 w-96 rounded-full bg-sky-500/20 blur-[100px]"
                             />
                         </div>
@@ -283,7 +299,8 @@ pages.push('...');
                             <div className="flex items-center gap-3 rounded-full border border-white/10 bg-white/10 px-5 py-2.5 backdrop-blur-md">
                                 <Package className="h-5 w-5 text-emerald-400" />
                                 <span className="font-medium text-white">
-                                    {totalProducts} produit{totalProducts > 1 ? 's' : ''}
+                                    {totalProducts} produit
+                                    {totalProducts > 1 ? 's' : ''}
                                 </span>
                             </div>
                         </motion.div>
@@ -314,7 +331,9 @@ pages.push('...');
                                         <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full border border-slate-100 bg-slate-100 transition-transform duration-300 group-hover:scale-110 dark:border-slate-700 dark:bg-slate-800">
                                             {sub.image ? (
                                                 <img
-                                                    src={resolveImageUrl(sub.image)}
+                                                    src={resolveImageUrl(
+                                                        sub.image,
+                                                    )}
                                                     alt={sub.nom}
                                                     className="h-full w-full object-cover"
                                                     onError={handleImageFallback()}
@@ -342,7 +361,9 @@ pages.push('...');
                                 placeholder="Rechercher dans cette catégorie..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && applySearch()}
+                                onKeyDown={(e) =>
+                                    e.key === 'Enter' && applySearch()
+                                }
                                 className="h-10 rounded-xl border-slate-200 bg-white/80 pr-10 pl-9 transition-all hover:border-emerald-300 focus:border-emerald-500 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900/50"
                             />
                             {searchQuery && (
@@ -356,63 +377,100 @@ pages.push('...');
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <Select value={filters.sort || 'newest'} onValueChange={updateSort}>
+                            <Select
+                                value={filters.sort || 'newest'}
+                                onValueChange={updateSort}
+                            >
                                 <SelectTrigger className="h-10 w-40 rounded-xl border-slate-200 bg-white/80 transition-all hover:border-emerald-300 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900/50">
                                     <ArrowUpDown className="mr-2 h-4 w-4 text-slate-500" />
                                     <SelectValue placeholder="Trier" />
                                 </SelectTrigger>
                                 <SelectContent className="rounded-xl">
-                                    <SelectItem value="newest">Nouveautés</SelectItem>
-                                    <SelectItem value="popular">Popularité</SelectItem>
-                                    <SelectItem value="price_asc">Prix croissant</SelectItem>
-                                    <SelectItem value="price_desc">Prix décroissant</SelectItem>
-                                    <SelectItem value="rating">Meilleure note</SelectItem>
+                                    <SelectItem value="newest">
+                                        Nouveautés
+                                    </SelectItem>
+                                    <SelectItem value="popular">
+                                        Popularité
+                                    </SelectItem>
+                                    <SelectItem value="price_asc">
+                                        Prix croissant
+                                    </SelectItem>
+                                    <SelectItem value="price_desc">
+                                        Prix décroissant
+                                    </SelectItem>
+                                    <SelectItem value="rating">
+                                        Meilleure note
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
 
                             <div className="hidden items-center rounded-xl border border-slate-200 bg-slate-50/80 p-1 backdrop-blur-md md:flex dark:border-slate-700 dark:bg-slate-800/80">
-                                {(['grid', 'list', 'bento'] as ViewMode[]).map((mode) => (
-                                    <button
-                                        key={mode}
-                                        onClick={() => setViewMode(mode)}
-                                        className={cn(
-                                            "relative rounded-lg p-2 transition-all duration-300",
-                                            viewMode === mode
-                                                ? 'text-emerald-700 dark:text-emerald-400'
-                                                : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                                        )}
-                                    >
-                                        {viewMode === mode && (
-                                            <motion.div
-                                                layoutId="viewModeBgCatShow"
-                                                className="absolute inset-0 rounded-lg bg-white shadow-xs dark:bg-slate-700"
-                                                initial={false}
-                                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                                            />
-                                        )}
-                                        <span className="relative z-10">
-                                            {mode === 'grid' && <Grid3X3 className="h-4 w-4" />}
-                                            {mode === 'list' && <List className="h-4 w-4" />}
-                                            {mode === 'bento' && <LayoutDashboard className="h-4 w-4" />}
-                                        </span>
-                                    </button>
-                                ))}
+                                {(['grid', 'list', 'bento'] as ViewMode[]).map(
+                                    (mode) => (
+                                        <button
+                                            key={mode}
+                                            onClick={() => setViewMode(mode)}
+                                            className={cn(
+                                                'relative rounded-lg p-2 transition-all duration-300',
+                                                viewMode === mode
+                                                    ? 'text-emerald-700 dark:text-emerald-400'
+                                                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
+                                            )}
+                                        >
+                                            {viewMode === mode && (
+                                                <motion.div
+                                                    layoutId="viewModeBgCatShow"
+                                                    className="absolute inset-0 rounded-lg bg-white shadow-xs dark:bg-slate-700"
+                                                    initial={false}
+                                                    transition={{
+                                                        type: 'spring',
+                                                        bounce: 0.2,
+                                                        duration: 0.6,
+                                                    }}
+                                                />
+                                            )}
+                                            <span className="relative z-10">
+                                                {mode === 'grid' && (
+                                                    <Grid3X3 className="h-4 w-4" />
+                                                )}
+                                                {mode === 'list' && (
+                                                    <List className="h-4 w-4" />
+                                                )}
+                                                {mode === 'bento' && (
+                                                    <LayoutDashboard className="h-4 w-4" />
+                                                )}
+                                            </span>
+                                        </button>
+                                    ),
+                                )}
                             </div>
 
                             {/* Mobile Filters */}
-                            <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+                            <Sheet
+                                open={mobileFiltersOpen}
+                                onOpenChange={setMobileFiltersOpen}
+                            >
                                 <SheetTrigger asChild>
-                                    <Button variant="outline" className="h-10 rounded-xl md:hidden">
-                                        <SlidersHorizontal className="mr-2 h-4 w-4" /> Filtres
+                                    <Button
+                                        variant="outline"
+                                        className="h-10 rounded-xl md:hidden"
+                                    >
+                                        <SlidersHorizontal className="mr-2 h-4 w-4" />{' '}
+                                        Filtres
                                     </Button>
                                 </SheetTrigger>
-                                <SheetContent side="right" className="w-full sm:w-96">
+                                <SheetContent
+                                    side="right"
+                                    className="w-full sm:w-96"
+                                >
                                     <SheetHeader>
                                         <SheetTitle>Filtres</SheetTitle>
                                     </SheetHeader>
                                     <div className="mt-6 space-y-8">
                                         <div>
-                                            <Label className="text-sm font-semibold">Prix (CDF)</Label>
+                                            <Label className="text-sm font-semibold">
+                                                Prix (CDF)
+                                            </Label>
                                             <div className="mt-4 flex items-center gap-4">
                                                 <span className="w-16 rounded-lg bg-slate-100 p-2 text-center text-xs font-medium dark:bg-slate-800">
                                                     {priceRange[0]}
@@ -422,7 +480,12 @@ pages.push('...');
                                                     max={5000}
                                                     step={10}
                                                     value={priceRange}
-                                                    onValueChange={(v) => setPriceRange([v[0], v[1]])}
+                                                    onValueChange={(v) =>
+                                                        setPriceRange([
+                                                            v[0],
+                                                            v[1],
+                                                        ])
+                                                    }
                                                     className="flex-1"
                                                 />
                                                 <span className="w-16 rounded-lg bg-slate-100 p-2 text-center text-xs font-medium dark:bg-slate-800">
@@ -431,15 +494,26 @@ pages.push('...');
                                             </div>
                                         </div>
                                         <div>
-                                            <Label className="text-sm font-semibold">Note minimum</Label>
+                                            <Label className="text-sm font-semibold">
+                                                Note minimum
+                                            </Label>
                                             <div className="mt-3 flex gap-2">
                                                 {[1, 2, 3, 4, 5].map((star) => (
                                                     <button
                                                         key={star}
-                                                        onClick={() => setMinRating(star === minRating ? 0 : star)}
+                                                        onClick={() =>
+                                                            setMinRating(
+                                                                star ===
+                                                                    minRating
+                                                                    ? 0
+                                                                    : star,
+                                                            )
+                                                        }
                                                         className={cn(
-                                                            "rounded-full p-2 transition-all hover:bg-slate-100 dark:hover:bg-slate-800",
-                                                            star <= minRating ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'
+                                                            'rounded-full p-2 transition-all hover:bg-slate-100 dark:hover:bg-slate-800',
+                                                            star <= minRating
+                                                                ? 'text-amber-400'
+                                                                : 'text-slate-300 dark:text-slate-600',
                                                         )}
                                                     >
                                                         <Star className="h-6 w-6 fill-current" />
@@ -451,15 +525,22 @@ pages.push('...');
                                             <Checkbox
                                                 id="inStock"
                                                 checked={inStockOnly}
-                                                onCheckedChange={(c) => setInStockOnly(!!c)}
+                                                onCheckedChange={(c) =>
+                                                    setInStockOnly(!!c)
+                                                }
                                             />
-                                            <Label htmlFor="inStock" className="cursor-pointer font-medium">
+                                            <Label
+                                                htmlFor="inStock"
+                                                className="cursor-pointer font-medium"
+                                            >
                                                 En stock uniquement
                                             </Label>
                                         </div>
                                         <Button
                                             className="w-full rounded-xl bg-slate-900 py-6 text-base font-semibold text-white hover:bg-slate-800 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
-                                            onClick={() => setMobileFiltersOpen(false)}
+                                            onClick={() =>
+                                                setMobileFiltersOpen(false)
+                                            }
                                         >
                                             Appliquer les filtres
                                         </Button>
@@ -485,17 +566,27 @@ pages.push('...');
                                 Aucun produit trouvé
                             </h3>
                             <p className="mt-2 max-w-md text-slate-500 dark:text-slate-400">
-                                Essayez d'ajuster vos filtres ou votre recherche pour trouver ce que vous cherchez.
+                                Essayez d'ajuster vos filtres ou votre recherche
+                                pour trouver ce que vous cherchez.
                             </p>
                             <div className="mt-8 flex gap-3">
                                 <Link
                                     href={route('tenant.product.index')}
                                     className="inline-flex h-11 items-center justify-center rounded-full bg-slate-900 px-6 font-medium text-white transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
                                 >
-                                    Voir tous les produits <ChevronRight className="ml-2 h-4 w-4" />
+                                    Voir tous les produits{' '}
+                                    <ChevronRight className="ml-2 h-4 w-4" />
                                 </Link>
-                                <Button variant="outline" asChild className="h-11 rounded-full px-6">
-                                    <Link href={route('tenant.product.category.index')}>
+                                <Button
+                                    variant="outline"
+                                    asChild
+                                    className="h-11 rounded-full px-6"
+                                >
+                                    <Link
+                                        href={route(
+                                            'tenant.product.category.index',
+                                        )}
+                                    >
                                         Explorer les catégories
                                     </Link>
                                 </Button>
@@ -518,16 +609,24 @@ pages.push('...');
                                             layout
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: index * 0.05, duration: 0.4 }}
+                                            transition={{
+                                                delay: index * 0.05,
+                                                duration: 0.4,
+                                            }}
                                             className={
-                                                viewMode === 'bento' && (index === 0 || index === 4)
+                                                viewMode === 'bento' &&
+                                                (index === 0 || index === 4)
                                                     ? 'sm:col-span-2 sm:row-span-2'
                                                     : ''
                                             }
                                         >
                                             <ProductCard
                                                 product={product}
-                                                viewMode={viewMode === 'list' ? 'list' : 'grid'}
+                                                viewMode={
+                                                    viewMode === 'list'
+                                                        ? 'list'
+                                                        : 'grid'
+                                                }
                                             />
                                         </motion.div>
                                     ))}
@@ -537,11 +636,16 @@ pages.push('...');
                             {/* Pagination */}
                             {totalPages > 1 && (
                                 <div className="mt-16 flex justify-center">
-                                    <nav className="flex items-center gap-2" aria-label="Pagination">
+                                    <nav
+                                        className="flex items-center gap-2"
+                                        aria-label="Pagination"
+                                    >
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            onClick={() => goToPage(currentPage - 1)}
+                                            onClick={() =>
+                                                goToPage(currentPage - 1)
+                                            }
                                             disabled={currentPage === 1}
                                             className="h-11 w-11 rounded-full transition-colors hover:border-emerald-300 hover:text-emerald-600"
                                         >
@@ -550,28 +654,41 @@ pages.push('...');
                                         <div className="flex items-center gap-1">
                                             {pagesToShow.map((page, idx) =>
                                                 page === '...' ? (
-                                                    <span key={`dots-${idx}`} className="px-3 text-slate-400">...</span>
+                                                    <span
+                                                        key={`dots-${idx}`}
+                                                        className="px-3 text-slate-400"
+                                                    >
+                                                        ...
+                                                    </span>
                                                 ) : (
                                                     <button
                                                         key={page}
-                                                        onClick={() => goToPage(page as number)}
+                                                        onClick={() =>
+                                                            goToPage(
+                                                                page as number,
+                                                            )
+                                                        }
                                                         className={cn(
-                                                            "h-11 min-w-11 rounded-full px-4 text-sm font-medium transition-all",
+                                                            'h-11 min-w-11 rounded-full px-4 text-sm font-medium transition-all',
                                                             page === currentPage
-                                                                ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20"
-                                                                : "bg-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                                                                ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
+                                                                : 'bg-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800',
                                                         )}
                                                     >
                                                         {page}
                                                     </button>
-                                                )
+                                                ),
                                             )}
                                         </div>
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            onClick={() => goToPage(currentPage + 1)}
-                                            disabled={currentPage === totalPages}
+                                            onClick={() =>
+                                                goToPage(currentPage + 1)
+                                            }
+                                            disabled={
+                                                currentPage === totalPages
+                                            }
                                             className="h-11 w-11 rounded-full transition-colors hover:border-emerald-300 hover:text-emerald-600"
                                         >
                                             <ChevronRight className="h-5 w-5" />
@@ -588,13 +705,14 @@ pages.push('...');
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "-100px" }}
+                        viewport={{ once: true, margin: '-100px' }}
                         className="mt-24 rounded-[2.5rem] bg-slate-50/80 p-8 sm:p-12 dark:bg-slate-900/50"
                     >
                         <div className="mb-10 flex flex-col items-start gap-4 sm:flex-row sm:items-end sm:justify-between">
                             <div>
-                                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                    <TrendingUp className="h-4 w-4" /> Populaires
+                                <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-xs font-semibold tracking-wider text-emerald-700 uppercase dark:border-emerald-800/50 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                    <TrendingUp className="h-4 w-4" />{' '}
+                                    Populaires
                                 </span>
                                 <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                                     À ne pas manquer

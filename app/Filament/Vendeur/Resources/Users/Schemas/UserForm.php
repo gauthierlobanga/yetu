@@ -3,6 +3,7 @@
 namespace App\Filament\Vendeur\Resources\Users\Schemas;
 
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -136,6 +137,18 @@ class UserForm
                                     ->native(false)
                                     ->placeholder('Sélectionner des rôles')
                                     ->helperText('Attribuer des rôles à l\'utilisateur'),
+                            ]),
+
+                        Section::make('Préférences')
+                            ->icon('heroicon-o-cog-8-tooth')
+                            ->components([
+                                KeyValue::make('preferences')
+                                    ->label('Préférences utilisateur')
+                                    ->keyLabel('Paramètre')
+                                    ->valueLabel('Valeur')
+                                    ->addActionLabel('Ajouter une préférence')
+                                    ->reorderable()
+                                    ->helperText('Exemples: country (CD), currency (CDF), locale (fr)'),
                             ]),
                     ]),
 

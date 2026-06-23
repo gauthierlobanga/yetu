@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, Zap, Sparkles, Factory } from 'lucide-react';
+import { Menu, Factory } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppearanceToogle from '@/components/appearance-toogle';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -52,7 +52,7 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
             title: 'Les fabricants',
             icon: Factory,
             href: '#', // TODO: create the route and change this later
-        }
+        },
     ];
 
     return (
@@ -86,7 +86,9 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                                 </SheetHeader>
                                 <div className="flex h-full flex-col">
                                     <div className="flex-1 overflow-y-auto">
-                                        <MobileNavigation items={vendorNavItems} />
+                                        <MobileNavigation
+                                            items={vendorNavItems}
+                                        />
                                     </div>
                                     <div className="mt-auto shrink-0 border-t border-slate-200 p-5 dark:border-slate-700">
                                         <div className="mb-6 flex items-center justify-between gap-4 sm:hidden">
@@ -94,12 +96,26 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                                             <AppearanceToogle />
                                         </div>
                                         {!auth.user ? (
-                                            <Button asChild className="w-full" size="lg">
-                                                <Link href={login()}>Se connecter</Link>
+                                            <Button
+                                                asChild
+                                                className="w-full"
+                                                size="lg"
+                                            >
+                                                <Link href={login()}>
+                                                    Se connecter
+                                                </Link>
                                             </Button>
                                         ) : (
-                                            <Button asChild className="w-full" size="lg">
-                                                <Link href={route('central.account-selection.index')}>
+                                            <Button
+                                                asChild
+                                                className="w-full"
+                                                size="lg"
+                                            >
+                                                <Link
+                                                    href={route(
+                                                        'central.account-selection.index',
+                                                    )}
+                                                >
                                                     Accéder aux boutiques
                                                 </Link>
                                             </Button>
@@ -121,7 +137,7 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                     </div>
 
                     {/* Zone moderne de recherche (Centre) */}
-                    <div className="hidden flex-1 max-w-4xl px-6 lg:block">
+                    <div className="hidden max-w-4xl flex-1 px-6 lg:block">
                         <SearchExperience
                             showImageSearch={true}
                             onImageSearch={(file) => {
@@ -132,7 +148,7 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                     </div>
 
                     {/* Actions à droite */}
-                    <div className="flex items-center gap-1 sm:gap-2">
+                    <div className="flex items-center gap-4 sm:gap-6">
                         <div className="hidden sm:block">
                             <RegionSelectorForm />
                         </div>
@@ -145,7 +161,12 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                         {auth.user ? (
                             <UserNavigation user={auth.user} />
                         ) : (
-                            <Button variant="ghost" size="sm" asChild className="hidden text-sm font-medium sm:inline-flex">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                asChild
+                                className="hidden text-sm font-medium sm:inline-flex"
+                            >
                                 <Link href={login()}>Se connecter</Link>
                             </Button>
                         )}
@@ -156,7 +177,10 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                 <div className="flex items-center gap-2 border-t border-slate-100 p-3 lg:hidden dark:border-slate-800">
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button variant="outline" className="flex shrink-0 items-center gap-2 rounded-xl border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
+                            <Button
+                                variant="outline"
+                                className="flex shrink-0 items-center gap-2 rounded-xl border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
+                            >
                                 <Menu className="h-4 w-4" />
                                 <span>Explorer</span>
                             </Button>
@@ -181,29 +205,37 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                         />
                     </div>
                 </div>
+
                 {/* Ligne Inférieure : Navigation dropdown & Nouveaux liens */}
-                <div className="hidden border-t border-slate-100 dark:border-slate-800 lg:block">
+                <div className="hidden border-t border-slate-100 lg:block dark:border-slate-800">
                     <div className="mx-auto flex h-12 max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-8">
                         {/* Menus de gauche */}
                         <div className="flex h-full items-center">
-                            <MainNavigation items={vendorNavItems} topClass="top-[113px]" />
+                            <MainNavigation
+                                items={vendorNavItems}
+                                topClass="top-[113px]"
+                            />
                         </div>
 
                         {/* Liens additionnels à droite */}
                         <div className="flex h-full items-center gap-6">
                             <Link
                                 href="#"
-                                className="group flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400"
+                                className="group inline-flex items-center text-base font-medium text-slate-500 transition-colors dark:text-slate-400"
                             >
-                                <Zap className="h-4 w-4 text-amber-500 transition-transform group-hover:scale-110" />
-                                Ventes Flash
+                                <span className="relative">
+                                    Ventes Flash
+                                    <span className="absolute -bottom-0.5 left-0 h-0.5 w-0 rounded bg-emerald-400 transition-all duration-300 group-hover:w-full"></span>
+                                </span>
                             </Link>
                             <Link
                                 href="#"
-                                className="group flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400"
+                                className="group inline-flex items-center text-base font-medium text-slate-500 transition-colors dark:text-slate-400"
                             >
-                                <Sparkles className="h-4 w-4 text-emerald-500 transition-transform group-hover:scale-110" />
-                                Nouveautés
+                                <span className="relative">
+                                    Nouveautés
+                                    <span className="absolute -bottom-0.5 left-0 h-0.5 w-0 rounded bg-emerald-400 transition-all duration-300 group-hover:w-full"></span>
+                                </span>
                             </Link>
                         </div>
                     </div>

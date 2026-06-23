@@ -200,7 +200,7 @@ class ProductController extends Controller
             'breadcrumbs' => [
                 ['name' => 'Produits', 'url' => route('tenant.product.index')],
                 ['name' => $produit->nom, 'url' => ''],
-            ]
+            ],
         ]);
     }
 
