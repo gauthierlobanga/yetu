@@ -196,7 +196,11 @@ class ProductController extends Controller
 
         return Inertia::render('Vendor/boutique/Products/Show', [
             'product' => $this->formatProduct($produit, true),
-            'relatedProducts' => $related,
+            'similarProducts' => $related,
+            'breadcrumbs' => [
+                ['name' => 'Produits', 'url' => route('tenant.product.index')],
+                ['name' => $produit->nom, 'url' => ''],
+            ]
         ]);
     }
 
@@ -228,6 +232,7 @@ class ProductController extends Controller
             'id' => $product->id,
             'nom' => $product->nom,
             'slug' => $product->slug,
+            'quantite_stock' => $product->quantite_stock,
             'prix_ttc' => (float) $product->prix_ttc,
             'prix_actuel' => (float) $product->prix_actuel,
             'est_en_promotion' => $product->est_en_promotion,

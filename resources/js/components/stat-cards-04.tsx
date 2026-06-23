@@ -6,7 +6,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 
-export default function CardStat() {
+export default function Stats04() {
     return (
         <div className="mx-auto p-4 md:w-100 lg:py-10">
             <Card>

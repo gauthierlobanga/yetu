@@ -1,4 +1,3 @@
-import { ArrowRight } from 'lucide-react';
 import { FaFacebook, FaMicrosoft, FaInstagram } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 import { Button } from '@/components/ui/button';
@@ -87,14 +86,9 @@ export function SocialLoginButtons() {
                             {/* Contenu */}
                             <span className="relative flex items-center justify-center gap-2">
                                 {provider.icon}
-                                {/* <span className="hidden text-sm font-medium sm:inline">
+                                <span className="hidden text-sm font-medium sm:inline">
                                     {provider.label}
-                                </span> */}
-                            </span>
-
-                            {/* Indicateur discret au hover */}
-                            <span className="absolute top-2 right-2 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
-                                <ArrowRight className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                                </span>
                             </span>
                         </Button>
                     </a>

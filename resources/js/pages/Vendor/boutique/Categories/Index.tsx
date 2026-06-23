@@ -28,6 +28,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import MainLayout from '@/layouts/main-layout';
 import { handleImageFallback, resolveImageUrl } from '@/lib/media';
+import { cn } from '@/lib/utils';
 import type { Category } from '@/types/ecommerce/products';
 
 interface PageProps extends Record<string, unknown> {
@@ -43,7 +44,7 @@ export default function CategoriesIndex() {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<string>('name_asc');
     const [viewMode, setViewMode] = useState<ViewMode>('comfortable');
-    const [isLoading, setIsLoading] = useState(false); // État de chargement pour les squelettes
+    const [isLoading, setIsLoading] = useState(false);
 
     // Filtrage et tri locaux
     const filteredCategories = useMemo(() => {
@@ -80,13 +81,9 @@ export default function CategoriesIndex() {
         return result;
     }, [categories, searchQuery, sortBy]);
 
-    console.log(categories.length);
-    // Déclenchement du squelette lors d'un changement de filtre ou de mode
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setIsLoading(true);
         const timer = setTimeout(() => setIsLoading(false), 300);
-
         return () => clearTimeout(timer);
     }, [viewMode, searchQuery, sortBy]);
 
@@ -99,94 +96,123 @@ export default function CategoriesIndex() {
             case 'comfortable':
                 return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5';
             case 'bento':
-                return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 auto-rows-auto';
+                return 'grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 auto-rows-[280px] grid-flow-dense';
             default:
                 return 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5';
         }
     }, [viewMode]);
 
-    // Nombre de squelettes à afficher selon le mode
-    const skeletonCount =
-        viewMode === 'compact' ? categories.length : categories.length;
+    const getBentoClasses = (index: number) => {
+        const pattern = index % 6;
+        switch (pattern) {
+            case 0: return 'sm:col-span-2 sm:row-span-2';
+            case 3: return 'sm:col-span-2 sm:row-span-1';
+            case 4: return 'sm:col-span-1 sm:row-span-2';
+            default: return 'sm:col-span-1 sm:row-span-1';
+        }
+    };
+
+    const skeletonCount = viewMode === 'compact' ? categories.length : categories.length;
 
     return (
         <MainLayout>
             <Head title="Toutes les catégories" />
 
-            {/* Hero Section */}
-            <section className="relative overflow-hidden bg-linear-to-b from-emerald-50/50 via-white to-white py-14 md:py-20 dark:from-emerald-950/20 dark:via-slate-950 dark:to-slate-950">
-                <div className="pointer-events-none absolute -top-20 -right-20 h-96 w-96 rounded-full bg-emerald-100/20 blur-3xl dark:bg-emerald-900/10" />
-                <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-slate-100/30 blur-3xl dark:bg-slate-800/10" />
+            {/* Premium Hero Section */}
+            <section className="relative overflow-hidden bg-white py-16 md:py-24 dark:bg-slate-950">
+                {/* Animated background elements */}
+                <div className="absolute inset-0 bg-[url('/img/grid.svg')] bg-center opacity-5 dark:opacity-10" />
+                <motion.div 
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 150, repeat: Infinity, ease: "linear" }}
+                    className="pointer-events-none absolute -top-40 -right-40 h-[600px] w-[600px] rounded-full bg-linear-to-bl from-emerald-200/40 via-emerald-100/10 to-transparent blur-3xl dark:from-emerald-900/30 dark:via-emerald-900/10" 
+                />
+                <motion.div 
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 200, repeat: Infinity, ease: "linear" }}
+                    className="pointer-events-none absolute -bottom-40 -left-40 h-[600px] w-[600px] rounded-full bg-linear-to-tr from-sky-200/40 via-sky-100/10 to-transparent blur-3xl dark:from-sky-900/30 dark:via-sky-900/10" 
+                />
 
                 <div className="relative mx-auto max-w-7xl px-4 text-center">
-                    <motion.span
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
+                    <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ duration: 0.4 }}
+                        className="mb-6 flex justify-center"
                     >
-                        <Grid3X3 className="h-4 w-4" />
-                        {categories.length} catégorie
-                        {categories.length > 1 ? 's' : ''} disponible
-                        {categories.length > 1 ? 's' : ''}
-                    </motion.span>
-                    <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-slate-800 md:text-5xl lg:text-6xl dark:text-white">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/50 px-5 py-2 text-sm font-medium text-emerald-700 backdrop-blur-md dark:border-emerald-800/50 dark:bg-emerald-900/30 dark:text-emerald-400">
+                            <span className="relative flex h-2.5 w-2.5">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                            </span>
+                            {categories.length} catégorie{categories.length > 1 ? 's' : ''} disponible{categories.length > 1 ? 's' : ''}
+                        </span>
+                    </motion.div>
+                    
+                    <motion.h1 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.1 }}
+                        className="mx-auto max-w-4xl text-5xl font-extrabold tracking-tight text-slate-900 md:text-6xl lg:text-7xl dark:text-white"
+                    >
                         Explorez nos{' '}
-                        <span className="bg-linear-to-r from-emerald-600 to-emerald-800 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-300">
+                        <span className="bg-linear-to-r from-emerald-500 to-sky-500 bg-clip-text text-transparent dark:from-emerald-400 dark:to-sky-400">
                             univers
                         </span>
-                    </h1>
-                    <p className="mx-auto mt-4 max-w-2xl text-lg text-slate-500 dark:text-slate-400">
-                        Chaque catégorie a été pensée pour vous offrir une
-                        expérience unique. Laissez-vous guider.
-                    </p>
+                    </motion.h1>
+                    
+                    <motion.p 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-500 dark:text-slate-400"
+                    >
+                        Chaque catégorie a été pensée pour vous offrir une expérience unique. Laissez-vous guider à travers notre sélection premium.
+                    </motion.p>
                 </div>
             </section>
 
-            {/* Grille de catégories */}
-            <section className="py-16">
+            {/* Category Grid Section */}
+            <section className="py-12 md:py-16">
                 <div className="mx-auto max-w-7xl px-4">
-                    {/* Barre d'outils */}
-                    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    {/* Glassmorphic Toolbar */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-10 flex flex-col gap-4 rounded-2xl border border-slate-200/60 bg-white/60 p-4 shadow-xs backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between dark:border-slate-800/60 dark:bg-slate-900/60"
+                    >
                         <div className="relative w-full sm:w-96">
-                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400 transition-colors focus-within:text-emerald-500" />
                             <Input
                                 placeholder="Rechercher une catégorie..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="h-10 rounded-xl border-slate-200 bg-white/80 pr-8 pl-9 text-sm backdrop-blur-sm transition-all focus:border-emerald-400 dark:border-slate-700 dark:bg-slate-900/70 dark:focus:border-emerald-500"
+                                className="h-11 rounded-xl border-slate-200/80 bg-white/80 pr-10 pl-10 text-sm shadow-inner transition-all hover:border-emerald-300 focus:border-emerald-500 focus:ring-emerald-500/20 dark:border-slate-700/80 dark:bg-slate-800/80"
                             />
                             {searchQuery && (
                                 <button
                                     onClick={clearSearch}
-                                    className="absolute top-1/2 right-2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                    className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full bg-slate-100 p-1 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
                                 >
-                                    <X className="h-4 w-4" />
+                                    <X className="h-3.5 w-3.5" />
                                 </button>
                             )}
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
                             <Select value={sortBy} onValueChange={setSortBy}>
-                                <SelectTrigger className="h-10 w-40 rounded-xl border-slate-200 bg-white/80 text-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/70">
+                                <SelectTrigger className="h-11 w-[160px] rounded-xl border-slate-200/80 bg-white/80 text-sm shadow-inner transition-all hover:border-emerald-300 focus:ring-emerald-500/20 dark:border-slate-700/80 dark:bg-slate-800/80">
                                     <SelectValue placeholder="Trier par" />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="name_asc">
-                                        Nom A-Z
-                                    </SelectItem>
-                                    <SelectItem value="name_desc">
-                                        Nom Z-A
-                                    </SelectItem>
-                                    <SelectItem value="products_desc">
-                                        Plus de produits
-                                    </SelectItem>
-                                    <SelectItem value="products_asc">
-                                        Moins de produits
-                                    </SelectItem>
+                                <SelectContent className="rounded-xl border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-800/90">
+                                    <SelectItem value="name_asc" className="rounded-lg">Nom A-Z</SelectItem>
+                                    <SelectItem value="name_desc" className="rounded-lg">Nom Z-A</SelectItem>
+                                    <SelectItem value="products_desc" className="rounded-lg">Plus de produits</SelectItem>
+                                    <SelectItem value="products_asc" className="rounded-lg">Moins de produits</SelectItem>
                                 </SelectContent>
                             </Select>
 
-                            <div className="flex items-center rounded-xl border border-slate-200 bg-white/80 p-1 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/70">
+                            <div className="flex items-center rounded-xl border border-slate-200/80 bg-slate-50/80 p-1.5 shadow-inner backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-800/80">
                                 {(
                                     [
                                         'comfortable',
@@ -197,70 +223,58 @@ export default function CategoriesIndex() {
                                     <button
                                         key={mode}
                                         onClick={() => setViewMode(mode)}
-                                        className={`rounded-lg p-1.5 transition-all ${
+                                        className={cn(
+                                            "relative rounded-lg p-2 transition-all duration-300",
                                             viewMode === mode
-                                                ? 'bg-emerald-100 text-emerald-700 shadow-sm dark:bg-emerald-900/40 dark:text-emerald-400'
-                                                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                                        }`}
-                                        title={
-                                            mode === 'bento'
-                                                ? 'Bento'
-                                                : mode === 'compact'
-                                                  ? 'Compact'
-                                                  : 'Confortable'
-                                        }
+                                                ? 'text-emerald-700 dark:text-emerald-400'
+                                                : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                                        )}
+                                        title={mode === 'bento' ? 'Bento' : mode === 'compact' ? 'Compact' : 'Confortable'}
                                     >
-                                        {mode === 'comfortable' && (
-                                            <LayoutGrid className="h-4 w-4" />
+                                        {viewMode === mode && (
+                                            <motion.div
+                                                layoutId="viewModeBg"
+                                                className="absolute inset-0 rounded-lg bg-white shadow-xs dark:bg-slate-700"
+                                                initial={false}
+                                                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                            />
                                         )}
-                                        {mode === 'compact' && (
-                                            <Grid2X2 className="h-4 w-4" />
-                                        )}
-                                        {mode === 'bento' && (
-                                            <LayoutDashboard className="h-4 w-4" />
-                                        )}
+                                        <span className="relative z-10">
+                                            {mode === 'comfortable' && <LayoutGrid className="h-4 w-4" />}
+                                            {mode === 'compact' && <Grid2X2 className="h-4 w-4" />}
+                                            {mode === 'bento' && <LayoutDashboard className="h-4 w-4" />}
+                                        </span>
                                     </button>
                                 ))}
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
-                    {/* Message de résultat */}
                     {searchQuery && (
-                        <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-                            {filteredCategories.length} catégorie
-                            {filteredCategories.length > 1 ? 's' : ''} trouvée
-                            {filteredCategories.length > 1 ? 's' : ''} pour «{' '}
-                            {searchQuery} »
-                        </p>
+                        <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="mb-6 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400"
+                        >
+                            <span className="flex h-6 items-center justify-center rounded-full bg-emerald-100 px-2.5 font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+                                {filteredCategories.length}
+                            </span>
+                            résultat{filteredCategories.length > 1 ? 's' : ''} pour « <span className="font-semibold text-slate-900 dark:text-white">{searchQuery}</span> »
+                        </motion.div>
                     )}
 
-                    {/* Contenu : chargement, grille ou état vide */}
                     {filteredCategories.length > 0 ? (
                         isLoading ? (
-                            <div className={`grid gap-4 ${gridClass}`}>
-                                {Array.from({ length: skeletonCount }).map(
-                                    (_, i) => (
-                                        <div
-                                            key={i}
-                                            className={
-                                                viewMode === 'compact'
-                                                    ? 'flex items-center gap-3'
-                                                    : ''
-                                            }
-                                        >
-                                            <Skeleton
-                                                className={`${viewMode === 'compact' ? 'h-10 w-10 rounded-lg' : 'aspect-square w-full rounded-2xl'}`}
-                                            />
-                                            <div className="flex-1 space-y-2">
-                                                <Skeleton className="h-4 w-2/3" />
-                                                {viewMode !== 'compact' && (
-                                                    <Skeleton className="h-3 w-1/2" />
-                                                )}
-                                            </div>
+                            <div className={cn("grid gap-6", gridClass)}>
+                                {Array.from({ length: skeletonCount }).map((_, i) => (
+                                    <div key={i} className={cn("group flex flex-col overflow-hidden rounded-2xl bg-white p-2 shadow-xs dark:bg-slate-900", viewMode === 'compact' && "flex-row items-center gap-4")}>
+                                        <Skeleton className={cn(viewMode === 'compact' ? "h-16 w-16 rounded-xl" : "aspect-square w-full rounded-xl")} />
+                                        <div className={cn("flex-1 space-y-3", viewMode !== 'compact' && "p-4")}>
+                                            <Skeleton className="h-5 w-2/3 rounded-full" />
+                                            <Skeleton className="h-4 w-1/3 rounded-full" />
                                         </div>
-                                    ),
-                                )}
+                                    </div>
+                                ))}
                             </div>
                         ) : (
                             <AnimatePresence mode="wait">
@@ -269,91 +283,102 @@ export default function CategoriesIndex() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                    className={`grid gap-4 ${gridClass}`}
+                                    transition={{ duration: 0.3 }}
+                                    className={cn("grid gap-6", gridClass)}
                                 >
-                                    {filteredCategories.map(
-                                        (category, index) => (
-                                            <motion.div
-                                                key={category.id}
-                                                layout
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -20 }}
-                                                transition={{
-                                                    delay: index * 0.02,
-                                                    duration: 0.25,
-                                                }}
-                                                className={`${
-                                                    viewMode === 'bento'
-                                                        ? index === 0
-                                                            ? 'sm:col-span-2' // première carte large mais hauteur normale
-                                                            : index === 3
-                                                              ? 'sm:col-span-2'
-                                                              : ''
-                                                        : ''
-                                                } overflow-hidden`}
-                                            >
-                                                <CategoryCard
-                                                    category={category}
-                                                    viewMode={viewMode}
-                                                />
-                                            </motion.div>
-                                        ),
-                                    )}
+                                    {filteredCategories.map((category, index) => (
+                                        <motion.div
+                                            key={category.id}
+                                            layout
+                                            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{
+                                                delay: index * 0.05,
+                                                type: "spring",
+                                                stiffness: 300,
+                                                damping: 24
+                                            }}
+                                            className={cn(
+                                                viewMode === 'bento' ? getBentoClasses(index) : ''
+                                            )}
+                                        >
+                                            <CategoryCard category={category} viewMode={viewMode} />
+                                        </motion.div>
+                                    ))}
                                 </motion.div>
                             </AnimatePresence>
                         )
                     ) : (
-                        <EmptyState
-                            searchQuery={searchQuery}
-                            onClear={clearSearch}
-                        />
+                        <EmptyState searchQuery={searchQuery} onClear={clearSearch} />
                     )}
                 </div>
             </section>
 
-            {/* Section avantages */}
-            <section className="border-t border-slate-200 bg-slate-50/70 py-16 dark:border-slate-800 dark:bg-slate-900/50">
-                <div className="mx-auto max-w-7xl px-4 text-center">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                        <Sparkles className="h-4 w-4" /> Pourquoi nos catégories
-                    </span>
-                    <h2 className="mt-4 text-2xl font-bold tracking-tight text-slate-800 dark:text-white">
-                        Une navigation pensée pour vous
-                    </h2>
-                    <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
+            {/* Premium Advantages Section */}
+            <section className="relative overflow-hidden border-t border-slate-200/50 bg-slate-50/50 py-24 dark:border-slate-800/50 dark:bg-slate-900/30">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white via-slate-50 to-transparent dark:from-slate-900 dark:via-slate-950 dark:to-transparent" />
+                <div className="relative mx-auto max-w-7xl px-4">
+                    <div className="text-center">
+                        <motion.span 
+                            initial={{ opacity: 0, y: 10 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-5 py-2 text-sm font-medium text-emerald-700 dark:border-emerald-800/50 dark:bg-emerald-900/30 dark:text-emerald-400"
+                        >
+                            <Sparkles className="h-4 w-4" /> L'expérience Yetu
+                        </motion.span>
+                        <motion.h2 
+                            initial={{ opacity: 0, y: 10 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1 }}
+                            className="mt-6 text-3xl font-bold tracking-tight text-slate-900 md:text-4xl dark:text-white"
+                        >
+                            Une navigation pensée pour vous
+                        </motion.h2>
+                    </div>
+
+                    <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-3">
                         {[
                             {
                                 icon: Grid3X3,
                                 title: 'Catégories organisées',
                                 desc: 'Trouvez facilement ce que vous cherchez grâce à notre arborescence claire.',
+                                color: 'from-blue-500 to-cyan-400'
                             },
                             {
                                 icon: ShoppingBag,
                                 title: 'Produits exclusifs',
                                 desc: 'Chaque catégorie propose une sélection unique de produits artisanaux.',
+                                color: 'from-emerald-500 to-teal-400'
                             },
                             {
                                 icon: Sparkles,
                                 title: 'Nouveautés permanentes',
                                 desc: 'De nouvelles catégories et produits ajoutés régulièrement.',
+                                color: 'from-purple-500 to-pink-400'
                             },
-                        ].map(({ icon: Icon, title, desc }) => (
-                            <div
+                        ].map(({ icon: Icon, title, desc, color }, idx) => (
+                            <motion.div
                                 key={title}
-                                className="flex flex-col items-center gap-3"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: idx * 0.15 }}
+                                className="group relative flex flex-col items-center rounded-3xl bg-white p-8 text-center shadow-xs transition-all duration-300 hover:-translate-y-2 hover:shadow-xl dark:bg-slate-900/80 dark:hover:bg-slate-900"
                             >
-                                <div className="rounded-full bg-emerald-100 p-4 text-emerald-600 shadow-sm dark:bg-emerald-900/30 dark:text-emerald-400">
+                                <div className="absolute inset-0 rounded-3xl bg-linear-to-b from-transparent to-slate-50/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:to-slate-800/50" />
+                                <div className={cn("relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-tr text-white shadow-lg", color)}>
                                     <Icon className="h-8 w-8" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-slate-800 dark:text-white">
+                                <h3 className="relative text-xl font-semibold text-slate-900 dark:text-white">
                                     {title}
                                 </h3>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                <p className="relative mt-3 text-slate-500 leading-relaxed dark:text-slate-400">
                                     {desc}
                                 </p>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
@@ -362,34 +387,31 @@ export default function CategoriesIndex() {
     );
 }
 
-// -------- Composant de carte catégorie (sans modification majeure) --------
-function CategoryCard({
-    category,
-    viewMode,
-}: {
-    category: Category;
-    viewMode: ViewMode;
-}) {
+// -------- Category Card Modernized --------
+function CategoryCard({ category, viewMode }: { category: Category; viewMode: ViewMode }) {
     const productsCount = category.products_count ?? 0;
 
     if (viewMode === 'compact') {
         return (
             <Link
                 href={category.url}
-                className="group relative flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-emerald-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900/80 dark:hover:border-emerald-700"
+                className="group relative flex items-center gap-4 rounded-2xl border border-slate-200/60 bg-white p-3 shadow-xs transition-all duration-300 hover:border-emerald-300 hover:shadow-md dark:border-slate-800/60 dark:bg-slate-900/60 dark:hover:border-emerald-700/60"
             >
-                <img
-                    src={resolveImageUrl(category.image)}
-                    alt={category.nom}
-                    className="h-10 w-10 rounded-lg object-cover"
-                    loading="lazy"
-                    onError={handleImageFallback()}
-                />
+                <div className="absolute left-0 top-1/2 h-0 w-1 -translate-y-1/2 rounded-r-full bg-emerald-500 transition-all duration-300 group-hover:h-1/2" />
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl">
+                    <img
+                        src={resolveImageUrl(category.image)}
+                        alt={category.nom}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                        onError={handleImageFallback()}
+                    />
+                </div>
                 <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-semibold text-slate-800 dark:text-white">
+                    <h3 className="truncate text-base font-semibold text-slate-800 transition-colors group-hover:text-emerald-600 dark:text-white dark:group-hover:text-emerald-400">
                         {category.nom}
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                         {productsCount} produit{productsCount > 1 ? 's' : ''}
                     </p>
                 </div>
@@ -400,100 +422,108 @@ function CategoryCard({
     return (
         <Link
             href={category.url}
-            className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-emerald-200 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900/80 dark:hover:border-emerald-700"
+            className={cn(
+                "group relative flex h-full flex-col overflow-hidden rounded-[2rem] bg-slate-100 dark:bg-slate-800",
+                viewMode === 'bento' && "min-h-[250px]"
+            )}
+            style={{ perspective: '1000px' }}
         >
-            <div className="relative aspect-square overflow-hidden">
+            <div className={cn(
+                "relative w-full overflow-hidden",
+                viewMode === 'bento' ? "h-full" : "aspect-[4/3] sm:aspect-[3/4]"
+            )}>
                 <img
                     src={resolveImageUrl(category.image)}
                     alt={category.nom}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                     loading="lazy"
                     onError={handleImageFallback()}
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-                <div className="absolute top-3 left-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-slate-800 backdrop-blur-sm dark:bg-slate-900/90 dark:text-white">
-                    {productsCount} produit{productsCount > 1 ? 's' : ''}
+                
+                {/* Dynamic Gradient Overlay */}
+                <div className="absolute inset-0 bg-linear-to-t from-slate-900/90 via-slate-900/20 to-transparent opacity-80 transition-opacity duration-500 group-hover:opacity-90" />
+                
+                {/* Hover Glow Effect */}
+                <div className="absolute inset-0 bg-emerald-500/20 opacity-0 mix-blend-overlay transition-opacity duration-500 group-hover:opacity-100" />
+
+                {/* Badges */}
+                <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                    <div className="rounded-full border border-white/20 bg-black/40 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md transition-all duration-300 group-hover:bg-emerald-500 group-hover:border-emerald-400 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.5)]">
+                        {productsCount} article{productsCount > 1 ? 's' : ''}
+                    </div>
                 </div>
-            </div>
-            <div className="p-4">
-                <h3 className="text-sm font-semibold text-slate-800 transition-colors group-hover:text-emerald-600 dark:text-white dark:group-hover:text-emerald-400">
-                    {category.nom}
-                </h3>
-                {category.description && (
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
-                        {category.description}
-                    </p>
-                )}
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center bg-emerald-500/10 opacity-0 backdrop-blur-[1px] transition-opacity duration-300 group-hover:opacity-100">
-                <span className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm dark:bg-slate-900 dark:text-emerald-400">
-                    <Tag className="h-4 w-4" /> Explorer
-                </span>
+
+                {/* Content Overlay */}
+                <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end p-6 md:p-8">
+                    <h3 className="text-2xl font-bold tracking-tight text-white transition-transform duration-500 group-hover:-translate-y-1">
+                        {category.nom}
+                    </h3>
+                    {category.description && (
+                        <p className="mt-2 line-clamp-2 text-sm text-slate-300 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100 sm:-translate-y-4">
+                            {category.description}
+                        </p>
+                    )}
+                </div>
+
+                {/* Animated Bottom Bar Indicator */}
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20">
+                    <div className="h-full w-0 bg-emerald-500 transition-all duration-700 ease-out group-hover:w-full" />
+                </div>
             </div>
         </Link>
     );
 }
 
-// -------- État vide --------
-function EmptyState({
-    searchQuery,
-    onClear,
-}: {
-    searchQuery: string;
-    onClear: () => void;
-}) {
+// -------- Empty State Modernized --------
+function EmptyState({ searchQuery, onClear }: { searchQuery: string; onClear: () => void }) {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex min-h-75 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center dark:border-slate-800 dark:bg-slate-900/30"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex min-h-[400px] flex-col items-center justify-center rounded-[2.5rem] border border-slate-200/50 bg-linear-to-b from-white to-slate-50/80 p-8 text-center shadow-2xl shadow-slate-200/20 dark:border-slate-800/50 dark:from-slate-900/80 dark:to-slate-950 dark:shadow-none"
         >
             {searchQuery ? (
                 <>
-                    <div className="mb-4 rounded-full bg-amber-100 p-4 dark:bg-amber-900/30">
-                        <Search className="h-10 w-10 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-slate-800 dark:text-white">
+                    <motion.div 
+                        initial={{ rotate: -10, scale: 0.8 }}
+                        animate={{ rotate: 0, scale: 1 }}
+                        transition={{ type: "spring", bounce: 0.5 }}
+                        className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-tr from-amber-100 to-orange-50 text-amber-600 shadow-inner dark:from-amber-900/40 dark:to-orange-900/20 dark:text-amber-400"
+                    >
+                        <Search className="h-10 w-10" />
+                    </motion.div>
+                    <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
                         Aucune catégorie trouvée
                     </h2>
-                    <p className="mt-2 max-w-md text-slate-500 dark:text-slate-400">
-                        Nous n’avons pas trouvé de catégorie correspondant à «{' '}
-                        {searchQuery} ».
+                    <p className="mt-3 max-w-md text-base text-slate-500 dark:text-slate-400">
+                        Nous n’avons trouvé aucune catégorie pour « <span className="font-semibold text-slate-700 dark:text-slate-300">{searchQuery}</span> ».
                     </p>
-                    <Button
-                        onClick={onClear}
-                        variant="outline"
-                        className="mt-4 gap-2"
-                    >
-                        <X className="h-4 w-4" /> Effacer la recherche
+                    <Button onClick={onClear} variant="outline" className="mt-8 gap-2 rounded-full px-6 transition-all hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <X className="h-4 w-4" /> Réinitialiser la recherche
                     </Button>
                 </>
             ) : (
                 <>
-                    <div className="mb-4 rounded-full bg-emerald-100 p-4 dark:bg-emerald-900/30">
-                        <Store className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-slate-800 dark:text-white">
-                        Aucune catégorie pour le moment
+                    <motion.div 
+                        initial={{ y: 10, scale: 0.8 }}
+                        animate={{ y: 0, scale: 1 }}
+                        transition={{ type: "spring", bounce: 0.5 }}
+                        className="mb-6 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-linear-to-tr from-emerald-100 to-sky-100 text-emerald-600 shadow-inner dark:from-emerald-900/40 dark:to-sky-900/20 dark:text-emerald-400"
+                    >
+                        <Store className="h-12 w-12" />
+                    </motion.div>
+                    <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                        Notre catalogue arrive
                     </h2>
-                    <p className="mt-2 max-w-md text-slate-500 dark:text-slate-400">
-                        Notre collection de catégories est en cours de
-                        préparation. Revenez bientôt !
+                    <p className="mt-3 max-w-md text-base text-slate-500 dark:text-slate-400">
+                        Les catégories sont en cours de préparation pour vous offrir la meilleure sélection.
                     </p>
-                    <div className="mt-6 flex flex-wrap justify-center gap-3">
+                    <div className="mt-8 flex flex-wrap justify-center gap-4">
                         <Link
                             href={route('tenant.product.index')}
-                            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700"
+                            className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
                         >
-                            <Sparkles className="h-4 w-4" /> Voir tous les
-                            produits
-                            <ArrowRight className="h-4 w-4" />
-                        </Link>
-                        <Link
-                            href={route('home')}
-                            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
-                        >
-                            <Package className="h-4 w-4" /> Retour à l'accueil
+                            <Sparkles className="h-4 w-4" /> Explorer les produits
                         </Link>
                     </div>
                 </>

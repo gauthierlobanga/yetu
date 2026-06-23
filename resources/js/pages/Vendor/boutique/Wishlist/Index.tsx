@@ -49,7 +49,7 @@ interface Props extends PageProps {
 // ---------- Helpers ----------
 function getImageUrl(image?: string | null): string {
     if (!image) {
-        return '/images/Vue-Storefront.png';
+        return '/images/loafers-leaning-along-white-wall.jpg';
     }
 
     if (
@@ -205,7 +205,7 @@ export default function ShopWishlistPage() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.35 }}
-                                    className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
+                                    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                                 >
                                     {items.map((item, index) => (
                                         <motion.article
@@ -216,130 +216,92 @@ export default function ShopWishlistPage() {
                                                 duration: 0.35,
                                                 delay: index * 0.04,
                                             }}
-                                            className={cn(
-                                                'group relative overflow-hidden rounded-3xl',
-                                                'border border-slate-200/70 bg-white/90 backdrop-blur-xl',
-                                                'shadow-[0_8px_30px_rgba(15,23,42,0.06)]',
-                                                'transition-all duration-500 hover:-translate-y-1.5',
-                                                'hover:border-emerald-200 hover:shadow-[0_20px_60px_rgba(16,185,129,0.10)]',
-                                                'dark:border-slate-800/70 dark:bg-slate-900/90',
-                                            )}
+                                            className="group relative flex flex-col overflow-hidden"
                                         >
-                                            {/* Glow */}
-                                            <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-emerald-500/3 via-transparent to-rose-500/3 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-                                            {/* Image */}
-                                            <Link
-                                                href={item.produit.url}
-                                                className="relative block aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800"
-                                            >
+                                            {/* Image & Overlays */}
+                                            <div className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800">
                                                 <img
                                                     src={getImageUrl(
                                                         item.produit
                                                             .image_principale,
                                                     )}
                                                     alt={item.produit.nom}
-                                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                    className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
                                                     loading="lazy"
                                                 />
-                                                <div className="absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                                                {/* Dark gradient on hover for better button visibility */}
+                                                <div className="absolute inset-0 bg-black/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:bg-black/20" />
+                                                <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
-                                                {/* Remove button */}
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        handleRemove(
-                                                            item.produit.id,
-                                                        );
-                                                    }}
-                                                    className={cn(
-                                                        'absolute top-3 right-3 z-10 flex h-10 w-10 items-center justify-center rounded-2xl',
-                                                        'border border-white/70 bg-white/85 backdrop-blur-xl',
-                                                        'text-slate-500 shadow-lg shadow-slate-900/10',
-                                                        'transition-all duration-300 hover:scale-105 hover:bg-red-50 hover:text-red-600',
-                                                        'dark:border-slate-700/70 dark:bg-slate-900/85',
-                                                    )}
-                                                    aria-label="Retirer de la wishlist"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-
-                                                {/* Favorite badge */}
-                                                <div className="absolute top-3 left-3">
-                                                    <Badge className="rounded-full border-0 bg-rose-500 px-2.5 py-1 text-[10px] font-semibold text-white shadow-lg shadow-rose-500/20">
-                                                        <Heart className="mr-1 h-3 w-3 fill-current" />
-                                                        Favori
-                                                    </Badge>
+                                                {/* Top actions */}
+                                                <div className="absolute top-3 right-3 flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleRemove(item.produit.id);
+                                                        }}
+                                                        className={cn(
+                                                            'flex h-8 w-8 items-center justify-center rounded-full',
+                                                            'bg-white/70 text-slate-700 backdrop-blur-md transition-all duration-300',
+                                                            'hover:scale-110 hover:bg-white hover:text-red-500',
+                                                            'dark:bg-slate-900/70 dark:text-slate-300 dark:hover:bg-slate-900',
+                                                        )}
+                                                        aria-label="Retirer"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
                                                 </div>
-                                            </Link>
 
-                                            {/* Content */}
-                                            <div className="p-5">
+                                                {/* Floating "Add to Cart" Button on Hover */}
+                                                <div className="absolute inset-x-4 bottom-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                                                    <Button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            handleAddToCart(
+                                                                item.produit.id,
+                                                                item.quantite,
+                                                            );
+                                                        }}
+                                                        className={cn(
+                                                            'h-11 w-full rounded-xl border-0',
+                                                            'bg-white/90 text-slate-900 backdrop-blur-md',
+                                                            'hover:bg-emerald-500 hover:text-white',
+                                                            'dark:bg-slate-900/90 dark:text-white dark:hover:bg-emerald-500',
+                                                            'shadow-lg shadow-black/5',
+                                                        )}
+                                                    >
+                                                        <ShoppingBag className="mr-2 h-4 w-4" />
+                                                        Ajouter au panier
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            {/* Content Details */}
+                                            <div className="mt-4 flex flex-col">
                                                 <Link
                                                     href={item.produit.url}
                                                     className="block"
                                                 >
-                                                    <h3 className="line-clamp-2 min-h-11 text-sm leading-5 font-semibold text-slate-900 transition-colors group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-400">
+                                                    <h3 className="line-clamp-1 text-sm font-medium text-slate-900 transition-colors group-hover:text-emerald-600 dark:text-slate-100 dark:group-hover:text-emerald-400">
                                                         {item.produit.nom}
                                                     </h3>
                                                 </Link>
-
-                                                <div className="mt-3">
-                                                    <p className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                                <div className="mt-1.5 flex items-center justify-between">
+                                                    <p className="text-base font-semibold text-slate-900 dark:text-white">
                                                         {formatPrice(
-                                                            item.produit
-                                                                .prix_actuel,
+                                                            item.produit.prix_actuel,
                                                         )}
                                                     </p>
+                                                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                                                        Qté: {item.quantite}
+                                                    </span>
                                                 </div>
-
-                                                <div className="mt-3 space-y-1">
-                                                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                        Quantité souhaitée :{' '}
-                                                        <span className="font-medium text-slate-700 dark:text-slate-300">
-                                                            {item.quantite}
-                                                        </span>
+                                                {item.note && (
+                                                    <p className="mt-1 line-clamp-1 text-xs text-slate-400 dark:text-slate-500">
+                                                        {item.note}
                                                     </p>
-                                                    {item.note && (
-                                                        <p className="line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
-                                                            Note : {item.note}
-                                                        </p>
-                                                    )}
-                                                </div>
-
-                                                <div className="mt-5 flex gap-2">
-                                                    <Button
-                                                        onClick={() =>
-                                                            handleAddToCart(
-                                                                item.produit.id,
-                                                                item.quantite,
-                                                            )
-                                                        }
-                                                        className={cn(
-                                                            'h-11 flex-1 rounded-2xl border-0',
-                                                            'bg-linear-to-r from-emerald-600 to-emerald-500',
-                                                            'text-white shadow-lg shadow-emerald-500/20',
-                                                            'hover:shadow-xl hover:shadow-emerald-500/30',
-                                                        )}
-                                                    >
-                                                        <ShoppingBag className="mr-2 h-4 w-4" />
-                                                        Ajouter
-                                                    </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        onClick={() =>
-                                                            handleRemove(
-                                                                item.produit.id,
-                                                            )
-                                                        }
-                                                        className="h-11 w-11 rounded-2xl border-slate-200 hover:border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-slate-700 dark:hover:border-red-800 dark:hover:bg-red-950/20"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
+                                                )}
                                             </div>
                                         </motion.article>
                                     ))}

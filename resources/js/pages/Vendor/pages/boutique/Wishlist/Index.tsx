@@ -49,7 +49,7 @@ interface Props extends PageProps {
 // ---------- Helpers ----------
 function getImageUrl(image?: string | null): string {
     if (!image) {
-        return '/images/Vue-Storefront.png';
+        return '/images/loafers-leaning-along-white-wall.jpg';
     }
 
     if (

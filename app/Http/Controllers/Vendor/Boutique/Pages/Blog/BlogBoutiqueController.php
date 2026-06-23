@@ -108,7 +108,7 @@ class BlogBoutiqueController extends Controller
 
         $categories = PostCategory::select('id', 'nom', 'slug', 'color')
             ->where('est_active', true)
-            ->orderBy('nom')
+            ->orderBy('nom','asc')
             ->get();
 
         return Inertia::render('Vendor/pages/blog/list/List', [
@@ -139,7 +139,7 @@ class BlogBoutiqueController extends Controller
 
         $previousPost = $post->getPreviousPublished();
         $nextPost = $post->getNextPublished();
-        $relatedPosts = $post->getRelatedPosts(3);
+        $relatedPosts = $post->getRelatedPosts();
 
         $postResource = (new PostResource($post))->resolve();
 
@@ -171,8 +171,7 @@ class BlogBoutiqueController extends Controller
     }
 
     /**
-     * Gère l'ajout de commentaire sur le blog.
-     * (Actuellement vide ou non implémenté)
+     * Gère la soumission d'un commentaire sur un article.
      */
     public function blogComment(Request $request, Post $post)
     {

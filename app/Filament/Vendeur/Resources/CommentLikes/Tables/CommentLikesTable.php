@@ -23,18 +23,13 @@ class CommentLikesTable
             ->columns([
 
                 TextColumn::make('comment.content')
-                    ->label('ID Commentaire')
+                    ->label('Contenu du commentaire')
+                    ->limit(30)
+                    ->tooltip(fn ($record) =>  $record->comment?->content ?? strip_tags($record->comment->content) ?? '')
                     ->searchable()
                     ->sortable()
                     ->copyable()
                     ->icon('heroicon-o-chat-bubble-left'),
-
-                TextColumn::make('comment.contenu') // Adaptez 'contenu' selon votre colonne
-                    ->label('Contenu du commentaire')
-                    ->limit(50)
-                    ->searchable()
-                    ->toggleable()
-                    ->tooltip(fn ($record) => $record->comment?->contenu ?? $record->comment?->content ?? ''),
 
                 TextColumn::make('user.name') // Vérifiez si c'est 'name' ou 'nom'
                     ->label('Utilisateur')

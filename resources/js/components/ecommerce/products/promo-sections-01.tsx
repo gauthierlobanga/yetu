@@ -43,11 +43,11 @@ function formatDate(date: Date): string {
 
 function CountdownUnit({ label, value }: { label: string; value: number }) {
     return (
-        <div className="flex min-w-9.5 flex-col items-center">
-            <span className="text-lg font-bold tracking-tight text-slate-900 tabular-nums md:text-xl dark:text-white">
+        <div className="flex min-w-[3.5rem] flex-col items-center justify-center rounded-xl border border-slate-200/50 bg-white/60 p-2 shadow-xs backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-800/60">
+            <span className="text-xl font-bold tracking-tighter text-slate-900 tabular-nums md:text-2xl dark:text-white">
                 {formatNumber(value)}
             </span>
-            <span className="mt-0 text-[9px] font-medium tracking-wider text-slate-400 uppercase dark:text-slate-500">
+            <span className="mt-0.5 text-[10px] font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400">
                 {label}
             </span>
         </div>
@@ -104,29 +104,59 @@ export default function PromoSection({ promo }: PromoSectionProps) {
 
     const item: Variants = {
         hidden: { opacity: 0, y: 20 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+        show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.21, 0.47, 0.32, 0.98] } },
     };
 
     return (
-        <section className="relative w-full overflow-hidden border-y border-slate-100 bg-white py-10 md:py-12 dark:border-slate-900 dark:bg-slate-950">
-            {/* Arrière-plan diagonal - image fixe avec fondu */}
+        <section className="relative w-full overflow-hidden border-y border-slate-200/50 bg-white py-12 md:py-16 lg:py-20 dark:border-slate-800/50 dark:bg-slate-950">
+            {/* Animated Gradient Background */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                <motion.div
+                    animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.3, 0.5, 0.3],
+                        rotate: [0, 90, 0],
+                    }}
+                    transition={{
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: 'linear'
+                    }}
+                    className="absolute -left-1/4 -top-1/2 h-[800px] w-[800px] rounded-full bg-linear-to-tr from-emerald-500/20 to-teal-400/20 blur-[100px] mix-blend-multiply dark:mix-blend-screen"
+                />
+                <motion.div
+                    animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.2, 0.4, 0.2],
+                        rotate: [0, -90, 0],
+                    }}
+                    transition={{
+                        duration: 25,
+                        repeat: Infinity,
+                        ease: 'linear'
+                    }}
+                    className="absolute -bottom-1/2 -right-1/4 h-[600px] w-[600px] rounded-full bg-linear-to-bl from-cyan-500/20 to-emerald-400/20 blur-[100px] mix-blend-multiply dark:mix-blend-screen"
+                />
+            </div>
+
+            {/* Promo Image with smooth fade mask */}
             {promo.image && (
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.6 }}
-                    className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-7/12 select-none md:block lg:w-1/2"
+                    initial={{ opacity: 0, scale: 1.05 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 1.5, ease: 'easeOut' }}
+                    className="pointer-events-none absolute inset-y-0 right-0 z-0 hidden w-full select-none md:block md:w-1/2 lg:w-3/5"
                     style={{
-                        clipPath: 'polygon(25% 0, 100% 0, 100% 100%, 0% 100%)',
+                        maskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
+                        WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
                     }}
                 >
                     <img
                         src={promo.image}
                         alt=""
-                        className="h-full w-full object-cover object-center opacity-40 dark:opacity-25"
+                        className="h-full w-full object-cover object-center opacity-40 mix-blend-overlay dark:opacity-30 dark:mix-blend-lighten"
                         loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-linear-to-r from-white via-white/30 to-transparent dark:from-slate-950 dark:via-slate-950/30" />
                 </motion.div>
             )}
 
@@ -136,32 +166,32 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                     initial="hidden"
                     whileInView="show"
                     viewport={{ once: true, margin: '-50px' }}
-                    className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+                    className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between"
                 >
                     {/* Colonne gauche */}
-                    <div className="w-full space-y-4 lg:max-w-4xl">
+                    <div className="w-full space-y-6 lg:max-w-3xl">
                         {/* Titre + badges */}
-                        <motion.div variants={item} className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-2">
-                                <h2 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl dark:text-white">
+                        <motion.div variants={item} className="flex flex-wrap items-center gap-4">
+                            <div className="flex items-center gap-3">
+                                <h2 className="bg-linear-to-br from-slate-900 to-slate-600 bg-clip-text text-3xl font-extrabold tracking-tight text-transparent md:text-4xl lg:text-5xl dark:from-white dark:to-slate-400">
                                     {promo.title}
                                 </h2>
                                 {promo.discount_percentage && (
-                                    <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-semibold text-white">
-                                        <Zap className="h-2.5 w-2.5 fill-current" />
+                                    <span className="inline-flex rotate-3 items-center gap-0.5 rounded-xl bg-emerald-500 px-3 py-1 text-sm font-bold text-white shadow-lg shadow-emerald-500/30">
+                                        <Zap className="h-4 w-4 fill-current" />
                                         -{promo.discount_percentage}%
                                     </span>
                                 )}
                             </div>
-                            <div className="ml-0 flex items-center gap-1.5 sm:ml-2">
-                                <Badge className="h-5 gap-1 border border-emerald-500/15 bg-emerald-500/10 text-[10px] text-emerald-700 shadow-none hover:bg-emerald-500/15 dark:bg-emerald-500/5 dark:text-emerald-400">
-                                    <Sparkles className="h-2.5 w-2.5" /> Exclusif
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Badge className="h-7 gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 text-xs font-semibold text-emerald-700 shadow-none backdrop-blur-md transition-colors hover:bg-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-400">
+                                    <Sparkles className="h-3.5 w-3.5" /> Exclusif
                                 </Badge>
                                 <Badge
                                     variant="outline"
-                                    className="h-5 gap-1 border-slate-200 text-[10px] font-normal text-slate-400 dark:border-slate-800 dark:text-slate-500"
+                                    className="h-7 gap-1.5 rounded-lg border-slate-200/60 bg-white/50 px-3 text-xs font-medium text-slate-600 backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/50 dark:text-slate-300"
                                 >
-                                    <Calendar className="h-2.5 w-2.5" />
+                                    <Calendar className="h-3.5 w-3.5" />
                                     Fin : {formatDate(targetDate)}
                                 </Badge>
                             </div>
@@ -169,7 +199,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
 
                         {/* Description */}
                         {promo.description && (
-                            <motion.p variants={item} className="line-clamp-1 max-w-3xl text-xs text-slate-500 dark:text-slate-400">
+                            <motion.p variants={item} className="max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg dark:text-slate-300">
                                 {promo.description}
                             </motion.p>
                         )}
@@ -178,60 +208,63 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                         {!isExpired && (
                             <motion.div
                                 variants={item}
-                                className="inline-flex max-w-full flex-col gap-4 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 backdrop-blur-xs sm:flex-row sm:items-center dark:border-slate-900/60 dark:bg-slate-900/20"
+                                className="inline-flex w-full flex-col gap-6 rounded-3xl border border-white/60 bg-white/50 p-6 shadow-xl shadow-slate-200/20 backdrop-blur-xl sm:w-auto sm:flex-row sm:items-center dark:border-slate-800/40 dark:bg-slate-900/40 dark:shadow-none"
                             >
                                 {/* Timer */}
-                                <div className="flex items-center gap-3">
-                                    <div className="flex shrink-0 items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-600 dark:text-slate-300">
                                         <Clock3
                                             className={cn(
-                                                'h-3.5 w-3.5',
+                                                'h-4 w-4',
                                                 isAlmostExpired ? 'animate-pulse text-rose-500' : 'text-emerald-500',
                                             )}
                                         />
-                                        Fin de l’offre :
+                                        Fin de l’offre dans
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                        <CountdownUnit label="j" value={timeLeft.days} />
-                                        <span className="-mt-2 font-light text-slate-300 dark:text-slate-800">:</span>
+                                    <div className="flex items-center gap-2">
+                                        <CountdownUnit label="jours" value={timeLeft.days} />
+                                        <span className="text-2xl font-light text-slate-300 dark:text-slate-700">:</span>
                                         <CountdownUnit label="h" value={timeLeft.hours} />
-                                        <span className="-mt-2 font-light text-slate-300 dark:text-slate-800">:</span>
+                                        <span className="text-2xl font-light text-slate-300 dark:text-slate-700">:</span>
                                         <CountdownUnit label="m" value={timeLeft.minutes} />
-                                        <span className="-mt-2 font-light text-slate-300 dark:text-slate-800">:</span>
+                                        <span className="text-2xl font-light text-slate-300 dark:text-slate-700">:</span>
                                         <CountdownUnit label="s" value={timeLeft.seconds} />
                                     </div>
                                 </div>
 
                                 {/* Séparateur */}
-                                <div className="hidden h-6 w-px bg-slate-200 sm:block dark:bg-slate-800" />
+                                {coupons.length > 0 && (
+                                    <div className="hidden h-20 w-px bg-slate-200/60 sm:block dark:bg-slate-700/60" />
+                                )}
 
                                 {/* Codes promo */}
                                 {coupons.length > 0 && (
-                                    <div className="flex min-w-50 items-center gap-2">
-                                        <div className="flex shrink-0 items-center gap-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-                                            <Ticket className="h-3.5 w-3.5 text-emerald-500" />
-                                            Codes :
+                                    <div className="flex flex-col gap-3">
+                                        <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-600 dark:text-slate-300">
+                                            <Ticket className="h-4 w-4 text-emerald-500" />
+                                            Codes promo
                                         </div>
-                                        <div className="flex flex-wrap gap-1">
+                                        <div className="flex flex-wrap gap-3">
                                             {coupons.map((coupon, idx) => (
                                                 <motion.div
                                                     key={`${coupon.code}-${idx}`}
-                                                    whileHover={{ y: -0.5 }}
-                                                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white py-0.5 pr-0.5 pl-2 text-xs shadow-2xs dark:border-slate-800 dark:bg-slate-950"
+                                                    whileHover={{ y: -2, scale: 1.02 }}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    className="group flex items-center gap-2 rounded-xl border border-slate-200/60 bg-white p-1.5 pl-4 shadow-xs transition-all hover:border-emerald-500/30 hover:shadow-emerald-500/10 dark:border-slate-700/60 dark:bg-slate-800 dark:hover:border-emerald-500/30"
                                                 >
-                                                    <span className="font-mono font-bold tracking-wide text-slate-700 dark:text-slate-300">
+                                                    <span className="font-mono text-sm font-bold tracking-wider text-slate-800 dark:text-slate-100">
                                                         {coupon.code}
                                                     </span>
                                                     <Button
                                                         size="icon"
                                                         variant="ghost"
-                                                        className="h-5 w-5 rounded-md text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-950/50"
+                                                        className="h-8 w-8 rounded-lg bg-slate-50 text-slate-400 transition-colors group-hover:bg-emerald-50 group-hover:text-emerald-600 dark:bg-slate-900 dark:group-hover:bg-emerald-500/20 dark:group-hover:text-emerald-400"
                                                         onClick={() => copyCode(coupon.code)}
                                                     >
                                                         {copiedCode === coupon.code ? (
-                                                            <Check className="h-3 w-3 text-emerald-500" />
+                                                            <Check className="h-4 w-4 text-emerald-500" />
                                                         ) : (
-                                                            <Copy className="h-3 w-3" />
+                                                            <Copy className="h-4 w-4" />
                                                         )}
                                                     </Button>
                                                 </motion.div>
@@ -241,32 +274,37 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                                 )}
                             </motion.div>
                         )}
-                    </div>
 
-                    {/* Bloc CTA + éventuels indicateurs */}
-                    <motion.div
-                        variants={item}
-                        className="flex shrink-0 items-center gap-3 pt-1 lg:pt-0"
-                    >
-                        <Link
-                            href={route('tenant.promotions.index')}
-                            className="group inline-flex h-14 items-center gap-2 rounded-lg bg-emerald-600 px-8 text-base font-semibold text-white shadow-sm transition-all duration-300 ease-out hover:bg-emerald-700 hover:shadow-md focus-visible:outline focus-visible:outline-emerald-600 active:scale-[0.98]"
+                        {/* CTA Block */}
+                        <motion.div
+                            variants={item}
+                            className="flex flex-col items-start gap-4 pt-4 sm:flex-row sm:items-center"
                         >
-                            Profiter de l’offre
-                            <ArrowRight className="h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-1" />
-                        </Link>
+                            <Link
+                                href={route('tenant.promotions.index')}
+                                className="group relative inline-flex h-14 items-center justify-center gap-3 overflow-hidden rounded-xl bg-emerald-600 px-8 text-base font-semibold text-white shadow-[0_0_40px_-10px_rgba(16,185,129,0.4)] transition-all duration-300 hover:scale-[1.02] hover:bg-emerald-500 hover:shadow-[0_0_60px_-15px_rgba(16,185,129,0.6)] active:scale-[0.98]"
+                            >
+                                <span className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover:duration-1000 group-hover:[transform:skew(-13deg)_translateX(100%)]">
+                                    <div className="relative h-full w-8 bg-white/20" />
+                                </span>
+                                <span className="relative flex items-center gap-2">
+                                    Profiter de l’offre
+                                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1.5" />
+                                </span>
+                            </Link>
 
-                        {isExpired && (
-                            <span className="rounded border border-rose-500/10 bg-rose-500/5 px-2 py-0.5 text-[10px] font-bold tracking-wider text-rose-500 uppercase">
-                                Expiré
-                            </span>
-                        )}
-                        {isAlmostExpired && !isExpired && (
-                            <span className="animate-pulse text-[11px] font-medium text-amber-500 dark:text-amber-400">
-                                ⏰ Fin imminente !
-                            </span>
-                        )}
-                    </motion.div>
+                            {isExpired && (
+                                <span className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-2 text-sm font-bold tracking-wider text-rose-600 uppercase dark:text-rose-400">
+                                    <Clock3 className="h-4 w-4" /> Expiré
+                                </span>
+                            )}
+                            {isAlmostExpired && !isExpired && (
+                                <span className="inline-flex animate-pulse items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-2 text-sm font-semibold text-amber-600 dark:text-amber-400">
+                                    <Zap className="h-4 w-4" /> Fin imminente !
+                                </span>
+                            )}
+                        </motion.div>
+                    </div>
                 </motion.div>
             </div>
         </section>

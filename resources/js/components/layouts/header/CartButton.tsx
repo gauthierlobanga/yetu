@@ -31,7 +31,7 @@ export function CartButton() {
                         size="icon"
                         className="relative h-9 w-9 cursor-pointer"
                         aria-label="Panier"
-                        onClick={() => setSheetOpen(true)}
+                        onClick={() => setSheetOpen(false)}
                     >
                         <ShoppingCart className="h-4 w-4" />
                         {itemCount > 0 && (

@@ -1,15 +1,11 @@
 import { Link, usePage } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, List, Menu } from 'lucide-react';
+import { ArrowRight,  Menu } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
-import AppLogoIcon from '@/components/app-logo-icon';
 import AppearanceToogle from '@/components/appearance-toogle';
 import { Breadcrumbs } from '@/components/breadcrumbs';
-import { ProductCategoryMenuContent } from '@/components/navigation/categorie-produits-explorer/ProductsMenuContent';
-import { CentreAcheteurs } from '@/components/navigation/CentreAcheteurs';
 import { ChooseYetuContent } from '@/components/navigation/ChooseYetuContent';
 import { ProductsMenuContent } from '@/components/navigation/ProductsMenuContent';
-import { Support } from '@/components/navigation/Support';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -25,6 +21,7 @@ import { HeaderActions } from './HeaderActions';
 import { MainNavigation } from './MainNavigation';
 import { MobileNavigation } from './MobileNavigation';
 import { UserNavigation } from './UserNavigation';
+import { VendorHeader } from './VendorHeader';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
@@ -55,26 +52,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         },
     ];
 
-    const tenantNavItems: NavItem[] = [
-        {
-            title: 'Explorer les catégories',
-            content: <ProductCategoryMenuContent />,
-            icon: List,
-            href: '',
-        },
-        {
-            title: "Centre d'acheteurs",
-            content: <CentreAcheteurs />,
-            href: '',
-        },
-        {
-            title: 'Support',
-            content: <Support />,
-            href: '',
-        },
-    ];
+    const mainNavItems = centralNavItems; // For Central only now
 
-    const mainNavItems = isTenant ? tenantNavItems : centralNavItems;
+    if (isTenant) {
+        return <VendorHeader breadcrumbs={breadcrumbs} />;
+    }
 
     return (
         <>
@@ -101,15 +83,14 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                             <SheetContent side="left" className="w-80 p-0">
                                 <SheetHeader className="border-b border-slate-200 p-5 dark:border-slate-700">
                                     <SheetTitle className="flex items-center gap-3">
-                                        <AppLogoIcon className="h-7 w-7" />
-                                        <span className="text-lg font-bold text-slate-800 dark:text-white">
-                                            Menu
-                                        </span>
+                                        <AppLogo/>
                                     </SheetTitle>
                                 </SheetHeader>
-                                <div className="flex h-full flex-col justify-between">
-                                    <MobileNavigation items={mainNavItems} />
-                                    <div className="border-t border-slate-200 p-5 dark:border-slate-700">
+                                <div className="flex h-full flex-col">
+                                    <div className="flex-1 overflow-y-auto">
+                                        <MobileNavigation items={mainNavItems} />
+                                    </div>
+                                    <div className="mt-auto shrink-0 border-t border-slate-200 p-5 dark:border-slate-700">
                                         {!isTenant && !auth.user && (
                                             <Button
                                                 asChild

@@ -1,6 +1,7 @@
 import DOMPurify from 'dompurify';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState, useEffect } from 'react';
+import AppLogoComment from './app-logo-comment';
 
 interface User {
     id: number;
@@ -97,11 +98,7 @@ export function CommentSection({
         <div className="space-y-6">
             {/* Formulaire principal */}
             <form onSubmit={handleSubmit} className="group flex gap-3">
-                <img
-                    src="https://ui-avatars.com/api/?name=User&background=random"
-                    alt="Vous"
-                    className="mt-0.5 h-10 w-10 shrink-0 rounded-full object-cover shadow-sm ring-2 ring-white dark:ring-slate-900"
-                />
+                <AppLogoComment />
                 <div className="flex-1 space-y-2">
                     <div className="relative">
                         <textarea
@@ -229,9 +226,6 @@ export function CommentSection({
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             ></path>
                         </svg>
-                        <span className="text-sm font-medium">
-                            Chargement des commentaires...
-                        </span>
                     </div>
                 </div>
             ) : comments.length === 0 ? (
@@ -261,13 +255,18 @@ export function CommentSection({
                     <div
                         className={`space-y-4 ${
                             comments.length > 5
-                                ? 'max-h-150 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400 dark:scrollbar-thumb-slate-600 dark:hover:scrollbar-thumb-slate-500'
+                                ? 'max-h-150 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent overflow-y-auto pr-2 hover:scrollbar-thumb-slate-400 dark:scrollbar-thumb-slate-600 dark:hover:scrollbar-thumb-slate-500'
                                 : ''
                         }`}
-                        style={comments.length > 5 ? {
-                            scrollbarWidth: 'thin',
-                            scrollbarColor: 'rgb(203 213 225) transparent',
-                        } : undefined}
+                        style={
+                            comments.length > 5
+                                ? {
+                                      scrollbarWidth: 'thin',
+                                      scrollbarColor:
+                                          'rgb(203 213 225) transparent',
+                                  }
+                                : undefined
+                        }
                     >
                         {comments.map((comment) => (
                             <CommentItem
@@ -410,11 +409,11 @@ function CommentItem({
                     `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.user.name)}&background=random`
                 }
                 alt={comment.user.name}
-                className="mt-0.5 h-8 w-8 shrink-0 rounded-full object-cover shadow-sm ring-2 ring-white dark:ring-slate-900"
+                className="mt-0.5 h-8 w-8 shrink-0 rounded-full object-cover ring-2 ring-white dark:ring-slate-900"
             />
 
             <div className="min-w-0 flex-1">
-                <div className="group relative inline-block max-w-full rounded-2xl bg-white/80 px-4 py-3 text-sm text-slate-800 shadow-md shadow-slate-200/40 backdrop-blur-md transition-all duration-200 hover:shadow-lg hover:shadow-slate-200/60 dark:bg-slate-800/80 dark:text-slate-200 dark:shadow-slate-900/40 dark:hover:shadow-slate-900/60">
+                <div className="group relative inline-block max-w-full rounded-2xl bg-transparent px-4 py-3 text-sm text-slate-800 transition-all duration-200 dark:bg-transparent dark:text-slate-200">
                     <span className="mb-1.5 block text-xs font-semibold tracking-tight text-emerald-700 dark:text-emerald-400">
                         {comment.user.name}
                     </span>
@@ -481,11 +480,7 @@ function CommentItem({
                             className="overflow-hidden"
                         >
                             <div className="flex max-w-lg items-start gap-3">
-                                <img
-                                    src="https://ui-avatars.com/api/?name=User&background=random"
-                                    alt="Vous"
-                                    className="mt-0.5 h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-white dark:ring-slate-900"
-                                />
+                                <AppLogoComment />
                                 <div className="flex-1">
                                     <div className="relative">
                                         <textarea
@@ -508,7 +503,7 @@ function CommentItem({
                                                 }
 
                                                 if (e.key === 'Escape') {
-                                                    handleCloseReplyForm(); // ← au lieu de setShowReplyForm(false)
+                                                    handleCloseReplyForm();
                                                 }
                                             }}
                                             placeholder="Écrivez une réponse..."

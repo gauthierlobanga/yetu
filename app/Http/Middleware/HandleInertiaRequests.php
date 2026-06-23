@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
 use Nnjeim\World\Models\Country;
 use Nnjeim\World\Models\Currency;
@@ -96,13 +97,13 @@ class HandleInertiaRequests extends Middleware
                 ];
             },
             // Données SEO globales partagées avec toutes les pages React.
-            // Le favicon est résolu dynamiquement via Favicon::currentUrl() pour 
+            // Le favicon est résolu dynamiquement via Favicon::currentUrl() pour
             // correspondre au logo du locataire actuel (vendeur) ou du site central.
             'seo' => [
                 'appName' => config('app.name', 'Yetu'),
                 'appUrl' => config('app.url', 'http://localhost:8000'),
                 'defaultDescription' => 'Bienvenue sur ' . config('app.name', 'Yetu'),
-                'defaultImage' => asset('default-share-image.jpg'),
+                'defaultImage' => Storage::url('images/default.png'),
                 'favicon' => \App\Support\Branding\Favicon::currentUrl(),
             ],
         ];
@@ -456,7 +457,7 @@ class HandleInertiaRequests extends Middleware
         try {
             return ProductCategory::with([
                 'products' => function ($q) {
-                    $q->limit(20);
+                    $q->limit(50);
                 },
                 'children',
             ])
@@ -479,7 +480,7 @@ class HandleInertiaRequests extends Middleware
                                 'nom' => $prod->nom,
                                 'prix' => $prod->prix_actuel,
                                 'slug' => $prod->slug,
-                                'image_principale' => $prod->getImageUrl('thumb') ?? '/storage/images/Vue-Storefront.png',
+                                'image_principale' => $prod->getImageUrl('thumb') ?? '/storage/images/loafers-leaning-along-white-wall.jpg',
                             ];
                         })->values()->toArray(),
                         'sous_categories' => $cat->children->pluck('nom')->toArray(),

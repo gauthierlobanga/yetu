@@ -34,7 +34,7 @@ class CommentsTable
                     ->searchable(query: function ($query, $search) {
                         return $query->where('content', 'like', "%{$search}%");
                     })
-                    ->limit(80)
+                    ->limit(30)
                     ->tooltip(fn ($record) => strip_tags($record->content))
                     ->toggleable(),
 
@@ -88,16 +88,6 @@ class CommentsTable
                     ->badge()
                     ->color('danger')
                     ->toggleable(),
-
-                // Ajoutez cette colonne
-                // TextColumn::make('comments_count')
-                //     ->label('💬')
-                //     ->counts('comments')
-                //     ->sortable()
-                //     ->alignCenter()
-                //     ->badge()
-                //     ->color('info')
-                //     ->toggleable(),
 
                 // Statut
                 TextColumn::make('status')

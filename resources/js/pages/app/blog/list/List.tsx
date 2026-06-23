@@ -29,7 +29,14 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+} from '@/components/ui/carousel';
 import { Input } from '@/components/ui/input';
 import {
     Pagination,
@@ -46,6 +53,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 // Import Swiper React components
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -59,7 +67,7 @@ import blog from '@/routes/blog';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Blog',
-        href: blog.index().url,
+        href: blog.index().url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/',
     },
 ];
 
@@ -184,32 +192,35 @@ export default function List({
             return '';
         }
 
-        let text = '';
+        let parsedData = excerpt;
 
         if (typeof excerpt === 'string') {
-            if (excerpt.trim().startsWith('{')) {
+            if (excerpt.trim().startsWith('{') || excerpt.trim().startsWith('[')) {
                 try {
-                    const parsed = JSON.parse(excerpt) as Record<
-                        string,
-                        unknown
-                    >;
-                    text = (parsed.html ||
-                        parsed.content ||
-                        parsed.text ||
-                        excerpt) as string;
-                } catch {
-                    text = excerpt;
+                    parsedData = JSON.parse(excerpt);
+                } catch (e) {
+                    // keep as string
                 }
-            } else {
-                text = excerpt;
             }
-        } else if (typeof excerpt === 'object') {
-            text = (excerpt.html ||
-                excerpt.content ||
-                excerpt.text ||
-                JSON.stringify(excerpt)) as string;
+        }
+
+        let text = '';
+
+        if (Array.isArray(parsedData)) {
+            text = parsedData.map((b: any) => b.data?.text || b.text || b.content || '').join(' ');
+        } else if (typeof parsedData === 'object' && parsedData !== null) {
+            if (Array.isArray((parsedData as any).blocks)) {
+                text = (parsedData as any).blocks.map((b: any) => b.data?.text || '').join(' ');
+            } else {
+                text = String(
+                    (parsedData as any).html ||
+                    (parsedData as any).content ||
+                    (parsedData as any).text ||
+                    JSON.stringify(parsedData)
+                );
+            }
         } else {
-            text = String(excerpt);
+            text = String(parsedData);
         }
 
         const cleanText = DOMPurify.sanitize(text, {
@@ -306,7 +317,7 @@ export default function List({
 
             previousFiltersRef.current = filterKey;
 
-            router.get(blog.index().url, params as any, {
+            router.get(blog.index().url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/', params as any, {
                 async: true,
                 preserveState: true,
                 preserveScroll: true,
@@ -488,7 +499,7 @@ export default function List({
 
     const PostCard = ({ post }: { post: ProcessedPost }) => (
         <Link
-            href={blog.show(post.slug).url}
+            href={blog.show(post.slug).url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/'}
             className="group block h-full"
         >
             <Card className="h-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-primary/10">
@@ -622,6 +633,126 @@ export default function List({
             <section className="py-8">
                 <div className="mx-auto max-w-7xl px-4">
                     <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+                        {/* <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+                            <div className="flex w-full flex-col gap-3 lg:w-auto lg:flex-row lg:items-center">
+                                <div className="flex items-center gap-2">
+                                    <FilterIcon className="h-6 w-6 text-muted-foreground" />
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                        Filtres :
+                                    </span>
+                                </div>
+
+                                <div className="relative w-full lg:w-auto">
+                                    <Carousel
+                                        opts={{
+                                            align: 'start',
+                                            dragFree: true,
+                                            containScroll: 'trimSnaps',
+                                        }}
+                                        className="w-full lg:max-w-2xl"
+                                    >
+                                        <CarouselContent className="-ml-2 py-1">
+                                            <CarouselItem className="basis-auto pl-2">
+                                                <Badge
+                                                    variant={
+                                                        selectedCategory ===
+                                                        'all'
+                                                            ? 'default'
+                                                            : 'outline'
+                                                    }
+                                                    className="cursor-pointer gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-105 hover:shadow-md"
+                                                    onClick={() =>
+                                                        handleCategoryChange(
+                                                            'all',
+                                                        )
+                                                    }
+                                                >
+                                                    Tous
+                                                </Badge>
+                                            </CarouselItem>
+
+                                            {categories.data.map((category) => (
+                                                <CarouselItem
+                                                    key={category.id}
+                                                    className="basis-auto pl-2"
+                                                >
+                                                    <Badge
+                                                        variant={
+                                                            selectedCategory ===
+                                                            category.slug
+                                                                ? 'default'
+                                                                : 'outline'
+                                                        }
+                                                        className="cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 hover:scale-105 hover:shadow-md"
+                                                        style={{
+                                                            backgroundColor:
+                                                                selectedCategory ===
+                                                                category.slug
+                                                                    ? category.color ||
+                                                                      undefined
+                                                                    : undefined,
+                                                            borderColor:
+                                                                category.color ||
+                                                                undefined,
+                                                        }}
+                                                        onClick={() =>
+                                                            handleCategoryChange(
+                                                                category.slug,
+                                                            )
+                                                        }
+                                                    >
+                                                        {category.nom}
+                                                    </Badge>
+                                                </CarouselItem>
+                                            ))}
+                                        </CarouselContent>
+                                        <CarouselPrevious className="absolute top-1/2 -left-4 h-8 w-8 -translate-y-1/2 rounded-full border-0 bg-background/80 shadow-md backdrop-blur-sm hover:bg-background" />
+                                        <CarouselNext className="absolute top-1/2 -right-4 h-8 w-8 -translate-y-1/2 rounded-full border-0 bg-background/80 shadow-md backdrop-blur-sm hover:bg-background" />
+                                    </Carousel>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <Select
+                                    value={selectedSort}
+                                    onValueChange={handleSortChange}
+                                >
+                                    <SelectTrigger className="h-9 w-44 rounded-full border-border/50 text-sm">
+                                        <SelectValue>
+                                            {activeSortLabel}
+                                        </SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {sortOptions.map((option) => {
+                                            const IconComponent = option.icon;
+
+                                            return (
+                                                <SelectItem
+                                                    key={option.value}
+                                                    value={option.value}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <IconComponent className="h-3.5 w-3.5" />
+                                                        {option.label}
+                                                    </div>
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
+
+                                {hasActiveFilters && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={clearFilters}
+                                        className="h-9 cursor-pointer gap-1.5 rounded-full text-sm transition-all hover:bg-destructive/10 hover:text-destructive"
+                                    >
+                                        <RefreshCw className="h-5 w-5" />
+                                    </Button>
+                                )}
+                            </div>
+                        </div> */}
                         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                             {/* Filtre par catégories avec Slider Swiper natif */}
                             <div className="flex w-full items-center gap-3 sm:w-auto">

@@ -59,8 +59,7 @@ class CommentReportsTable
                         'heroicon-o-clock' => 'pending',
                         'heroicon-o-check-circle' => 'resolved',
                         'heroicon-o-x-circle' => 'rejected',
-                    ])
-                    ->formatStateUsing(fn ($state) => ucfirst($state)),
+                    ]),
 
                 TextColumn::make('created_at')
                     ->label('Signalé le')

@@ -63,7 +63,7 @@ class SearchController extends Controller
                     'id' => $p->id,
                     'title' => $p->nom,
                     'slug' => $p->slug,
-                    'image' => $p->getImageUrl('thumb') ?? '/storage/images/Vue-Storefront.png',
+                    'image' => $p->getImageUrl('thumb') ?? '/storage/images/loafers-leaning-along-white-wall.jpg',
                     'url' => route('tenant.product.show', $p->slug),
                     'price' => number_format($p->prix_actuel, 2, ',', ' ').' €',
                     'type' => 'product',

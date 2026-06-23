@@ -63,6 +63,14 @@ import getToastStyle from '@/lib/toast-style';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 import { SubscriptionReminderBanner } from '@/components/ecommerce/others/SubscriptionReminderBanner';
 import { cn } from '@/lib/utils';
+import Stats07 from '@/components/stat-cards-06';
+import Stats06 from '@/components/stat-cards-05';
+import Stats05 from '@/components/stat-cards-05';
+import Stats04 from '@/components/stat-cards-04';
+import Stats03 from '@/components/stat-cards-03';
+import Stats02 from '@/components/stat-cards-02';
+import Stats08 from '@/components/stat-cards-08';
+import Table02 from '@/components/tables-01';
 
 type QuickActionColor =
     | 'emerald'
@@ -276,439 +284,459 @@ export default function VendorDashboard({
             }
         >
             <VendorSidebar tenant={tenant} />
-            <SidebarInset className="flex flex-col min-h-0">
+            <SidebarInset className="flex min-h-0 flex-col">
                 <SiteHeader />
-                <ScrollArea className="flex-1 min-h-0">
-                <div ref={containerRef} className="bg-white dark:bg-slate-950">
-                    <Head title={`Gérer ${tenant.raison_sociale}`} />
-                    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-                        {/* En-tête */}
-                        <div className="dashboard-section mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
-                                    {tenant.raison_sociale}
-                                </h1>
-                                <p className="mt-1 text-slate-500 dark:text-slate-400">
-                                    {tenant.description ||
-                                        'Bienvenue dans votre espace de gestion'}
-                                </p>
-                            </div>
-                            <div className="flex gap-2">
-                                <span
-                                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                                        tenant.is_active
-                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                            : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                    }`}
-                                >
-                                    {tenant.is_active
-                                        ? 'Boutique active'
-                                        : 'Inactive'}
-                                </span>
-                                {tenant.plan && (
-                                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                        <CreditCard className="h-4 w-4" />
-                                        {tenant.plan.name}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-
-                        <TrialCountdown trial={trial ?? null} />
-
-                        {aiEnabled && <ChatIA />}
-
-                        {/* ======<<<< Actions rapides premium >>>>==========*/}
-                        <section className="dashboard-section my-10">
-                            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <ScrollArea className="min-h-0 flex-1">
+                    <div
+                        ref={containerRef}
+                        className="bg-white dark:bg-slate-950"
+                    >
+                        <Head title={`Gérer ${tenant.raison_sociale}`} />
+                        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+                            {/* En-tête */}
+                            <div className="dashboard-section mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
-                                    <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                        Actions rapides
-                                    </h2>
-                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                        Accédez instantanément aux
-                                        fonctionnalités essentielles de votre
-                                        boutique.
+                                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                                        {tenant.raison_sociale}
+                                    </h1>
+                                    <p className="mt-1 text-slate-500 dark:text-slate-400">
+                                        {tenant.description ||
+                                            'Bienvenue dans votre espace de gestion'}
                                     </p>
                                 </div>
-
-                                <Badge className="border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-                                    <Rocket className="mr-1.5 h-3.5 w-3.5" />
-                                    Accès rapide
-                                </Badge>
+                                <div className="flex gap-2">
+                                    <span
+                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                                            tenant.is_active
+                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                        }`}
+                                    >
+                                        {tenant.is_active
+                                            ? 'Boutique active'
+                                            : 'Inactive'}
+                                    </span>
+                                    {tenant.plan && (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                            <CreditCard className="h-4 w-4" />
+                                            {tenant.plan.name}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
-                                <QuickActionCard
-                                    href={tenant.admin_url}
-                                    icon={Rocket}
-                                    label="Dashboard"
-                                    description="Administration"
-                                    external
-                                    color="emerald"
-                                />
+                            <TrialCountdown trial={trial ?? null} />
 
-                                <QuickActionCard
-                                    href={route('vendor.configure')}
-                                    icon={Settings}
-                                    label="Paramètres"
-                                    description="Configuration"
-                                    color="slate"
-                                />
+                            {/* {aiEnabled && <ChatIA />} */}
 
-                                <QuickActionCard
-                                    href={tenant.url}
-                                    icon={Globe}
-                                    label="Voir le site"
-                                    description="Boutique publique"
-                                    external
-                                    color="blue"
-                                />
-
-                                <QuickActionCard
-                                    href={route('subscription.show')}
-                                    icon={CreditCard}
-                                    label="Abonnement"
-                                    description="Plan & facturation"
-                                    color="violet"
-                                />
-
-                                <QuickActionCard
-                                    href={`${tenant.admin_url}/produits/create`}
-                                    icon={PenLine}
-                                    label="Produit"
-                                    description="Ajouter"
-                                    external
-                                    color="amber"
-                                />
-
-                                <QuickActionCard
-                                    href={`${tenant.admin_url}/commandes`}
-                                    icon={ClipboardList}
-                                    label="Commandes"
-                                    description={`${stats.orders_count ?? 0} commandes`}
-                                    external
-                                    color="rose"
-                                />
-
-                                <QuickActionCard
-                                    href={`${tenant.admin_url}/clients`}
-                                    icon={Users}
-                                    label="Clients"
-                                    description={`${stats.customers_count ?? 0} clients`}
-                                    external
-                                    color="cyan"
-                                />
-
-                                <QuickActionCard
-                                    href={`${tenant.admin_url}/statistiques`}
-                                    icon={BarChart3}
-                                    label="Statistiques"
-                                    description="Performance"
-                                    external
-                                    color="indigo"
-                                />
-                            </div>
-                        </section>
-
-                        {/* ======<<<<     Centre de contrôle   >>>>======== */}
-                        <section className="dashboard-section mb-12">
-                            <div className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/80">
-                                <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-400/70 to-transparent" />
-                                <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
-                                <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-slate-500/10 blur-3xl" />
-
-                                <div className="relative border-b border-slate-100 px-6 py-5 dark:border-slate-800">
-                                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                        <div>
-                                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                                                Centre de contrôle
-                                            </h3>
-                                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                                Gérez rapidement les paramètres
-                                                stratégiques de votre boutique.
-                                            </p>
-                                        </div>
-
-                                        <Badge className="w-fit border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-                                            <Settings className="mr-1.5 h-3.5 w-3.5" />
-                                            Configuration avancée
-                                        </Badge>
+                            {/* ======<<<< Actions rapides premium >>>>==========*/}
+                            <section className="dashboard-section my-10">
+                                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                            Actions rapides
+                                        </h2>
+                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                            Accédez instantanément aux
+                                            fonctionnalités essentielles de
+                                            votre boutique.
+                                        </p>
                                     </div>
+
+                                    <Badge className="border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                        <Rocket className="mr-1.5 h-3.5 w-3.5" />
+                                        Accès rapide
+                                    </Badge>
                                 </div>
 
-                                <div className="relative p-6">
-                                    <TenantControlPanel
-                                        tenant={{
-                                            id: tenant.id,
-                                            raison_sociale:
-                                                tenant.raison_sociale,
-                                            slug: tenant.slug,
-                                            produits_count:
-                                                stats.products_count ?? 0,
-                                            categories_count:
-                                                stats.categories_count ?? 0,
-                                            ai_enabled: aiEnabled,
-                                            plan: tenant.plan ?? null,
-                                        }}
-                                        onToggleAI={(enabled) => {
-                                            router.post(
-                                                route('ai.toggle'),
-                                                { enabled },
-                                                {
-                                                    preserveScroll: true,
-                                                    preserveState: true,
-                                                    showProgress: false,
-                                                    onSuccess: () => {
-                                                        router.reload({
-                                                            only: ['tenant'],
-                                                        });
-                                                        toast.success(
-                                                            'Paramètre IA mis à jour',
-                                                            {
-                                                                description:
-                                                                    enabled
-                                                                        ? 'IA activée'
-                                                                        : 'IA désactivée',
-                                                                duration: 2500,
-                                                                style: getToastStyle(
-                                                                    'success',
-                                                                ),
-                                                            },
-                                                        );
-                                                    },
-                                                },
-                                            );
-                                        }}
+                                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
+                                    <QuickActionCard
+                                        href={tenant.admin_url}
+                                        icon={Rocket}
+                                        label="Dashboard"
+                                        description="Administration"
+                                        external
+                                        color="emerald"
+                                    />
+
+                                    <QuickActionCard
+                                        href={route('vendor.configure')}
+                                        icon={Settings}
+                                        label="Paramètres"
+                                        description="Configuration"
+                                        color="slate"
+                                    />
+
+                                    <QuickActionCard
+                                        href={tenant.url}
+                                        icon={Globe}
+                                        label="Voir le site"
+                                        description="Boutique publique"
+                                        external
+                                        color="blue"
+                                    />
+
+                                    <QuickActionCard
+                                        href={route('subscription.show')}
+                                        icon={CreditCard}
+                                        label="Abonnement"
+                                        description="Plan & facturation"
+                                        color="violet"
+                                    />
+
+                                    <QuickActionCard
+                                        href={`${tenant.admin_url}/produits/create`}
+                                        icon={PenLine}
+                                        label="Produit"
+                                        description="Ajouter"
+                                        external
+                                        color="amber"
+                                    />
+
+                                    <QuickActionCard
+                                        href={`${tenant.admin_url}/commandes`}
+                                        icon={ClipboardList}
+                                        label="Commandes"
+                                        description={`${stats.orders_count ?? 0} commandes`}
+                                        external
+                                        color="rose"
+                                    />
+
+                                    <QuickActionCard
+                                        href={`${tenant.admin_url}/clients`}
+                                        icon={Users}
+                                        label="Clients"
+                                        description={`${stats.customers_count ?? 0} clients`}
+                                        external
+                                        color="cyan"
+                                    />
+
+                                    <QuickActionCard
+                                        href={`${tenant.admin_url}/statistiques`}
+                                        icon={BarChart3}
+                                        label="Statistiques"
+                                        description="Performance"
+                                        external
+                                        color="indigo"
                                     />
                                 </div>
-                            </div>
-                        </section>
+                            </section>
 
-                        {/* Plans disponibles */}
-                        <div className="dashboard-section mt-10 mb-12">
-                            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                                <div>
-                                    <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                        Plans disponibles
-                                    </h2>
-                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                        Comparez les fonctionnalités et
-                                        choisissez l’offre la plus adaptée à
-                                        votre activité.
-                                    </p>
+                            {/* ======<<<<     Centre de contrôle   >>>>======== */}
+                            <section className="dashboard-section mb-12">
+                                <div className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/80">
+                                    <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-400/70 to-transparent" />
+                                    <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
+                                    <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-slate-500/10 blur-3xl" />
+
+                                    <div className="relative border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                                    Centre de contrôle
+                                                </h3>
+                                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                    Gérez rapidement les
+                                                    paramètres stratégiques de
+                                                    votre boutique.
+                                                </p>
+                                            </div>
+
+                                            <Badge className="w-fit border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                                <Settings className="mr-1.5 h-3.5 w-3.5" />
+                                                Configuration avancée
+                                            </Badge>
+                                        </div>
+                                    </div>
+
+                                    <div className="relative p-6">
+                                        <TenantControlPanel
+                                            tenant={{
+                                                id: tenant.id,
+                                                raison_sociale:
+                                                    tenant.raison_sociale,
+                                                slug: tenant.slug,
+                                                produits_count:
+                                                    stats.products_count ?? 0,
+                                                categories_count:
+                                                    stats.categories_count ?? 0,
+                                                ai_enabled: aiEnabled,
+                                                plan: tenant.plan ?? null,
+                                            }}
+                                            onToggleAI={(enabled) => {
+                                                router.post(
+                                                    route('ai.toggle'),
+                                                    { enabled },
+                                                    {
+                                                        preserveScroll: true,
+                                                        preserveState: true,
+                                                        showProgress: false,
+                                                        onSuccess: () => {
+                                                            router.reload({
+                                                                only: [
+                                                                    'tenant',
+                                                                ],
+                                                            });
+                                                            toast.success(
+                                                                'Paramètre IA mis à jour',
+                                                                {
+                                                                    description:
+                                                                        enabled
+                                                                            ? 'IA activée'
+                                                                            : 'IA désactivée',
+                                                                    duration: 2500,
+                                                                    style: getToastStyle(
+                                                                        'success',
+                                                                    ),
+                                                                },
+                                                            );
+                                                        },
+                                                    },
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Plans disponibles */}
+                            <div className="dashboard-section mt-10 mb-12">
+                                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                                    <div>
+                                        <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                            Plans disponibles
+                                        </h2>
+                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                            Comparez les fonctionnalités et
+                                            choisissez l’offre la plus adaptée à
+                                            votre activité.
+                                        </p>
+                                    </div>
+
+                                    <Badge className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
+                                        <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+                                        Offres évolutives
+                                    </Badge>
                                 </div>
 
-                                <Badge className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
-                                    <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-                                    Offres évolutives
-                                </Badge>
-                            </div>
+                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+                                    {Object.entries(allPlansFeatures).map(
+                                        ([planName, features], index) => {
+                                            const isCurrentPlan =
+                                                (
+                                                    tenant.plan?.name ??
+                                                    'gratuit'
+                                                ).toLowerCase() ===
+                                                planName.toLowerCase();
 
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
-                                {Object.entries(allPlansFeatures).map(
-                                    ([planName, features], index) => {
-                                        const isCurrentPlan =
-                                            (
-                                                tenant.plan?.name ?? 'gratuit'
-                                            ).toLowerCase() ===
-                                            planName.toLowerCase();
+                                            const isPopular =
+                                                planName
+                                                    .toLowerCase()
+                                                    .includes('pro') ||
+                                                planName
+                                                    .toLowerCase()
+                                                    .includes('business');
 
-                                        const isPopular =
-                                            planName
-                                                .toLowerCase()
-                                                .includes('pro') ||
-                                            planName
-                                                .toLowerCase()
-                                                .includes('business');
-
-                                        return (
-                                            <motion.div
-                                                key={planName}
-                                                initial={{ opacity: 0, y: 24 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{
-                                                    duration: 0.4,
-                                                    delay: index * 0.06,
-                                                }}
-                                                className="h-full"
-                                            >
-                                                <Card
-                                                    className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
-                                                        isCurrentPlan
-                                                            ? 'border-emerald-300 bg-linear-to-br from-emerald-50 via-white to-emerald-50/40 shadow-[0_20px_60px_rgba(16,185,129,0.15)] dark:border-emerald-700/50 dark:from-emerald-950/30 dark:via-slate-950 dark:to-emerald-950/10'
-                                                            : 'border-slate-200/80 bg-white/90 shadow-[0_10px_40px_rgba(15,23,42,0.06)] hover:border-emerald-200 dark:border-slate-800 dark:bg-slate-950/80 dark:hover:border-emerald-800/50'
-                                                    }`}
+                                            return (
+                                                <motion.div
+                                                    key={planName}
+                                                    initial={{
+                                                        opacity: 0,
+                                                        y: 24,
+                                                    }}
+                                                    animate={{
+                                                        opacity: 1,
+                                                        y: 0,
+                                                    }}
+                                                    transition={{
+                                                        duration: 0.4,
+                                                        delay: index * 0.06,
+                                                    }}
+                                                    className="h-full"
                                                 >
-                                                    <div className="absolute -top-10 -right-10 h-28 w-28 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/5" />
+                                                    <Card
+                                                        className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+                                                            isCurrentPlan
+                                                                ? 'border-emerald-300 bg-linear-to-br from-emerald-50 via-white to-emerald-50/40 shadow-[0_20px_60px_rgba(16,185,129,0.15)] dark:border-emerald-700/50 dark:from-emerald-950/30 dark:via-slate-950 dark:to-emerald-950/10'
+                                                                : 'border-slate-200/80 bg-white/90 shadow-[0_10px_40px_rgba(15,23,42,0.06)] hover:border-emerald-200 dark:border-slate-800 dark:bg-slate-950/80 dark:hover:border-emerald-800/50'
+                                                        }`}
+                                                    >
+                                                        <div className="absolute -top-10 -right-10 h-28 w-28 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/5" />
 
-                                                    {isCurrentPlan && (
-                                                        <div className="absolute top-4 right-4 z-10">
-                                                            <Badge className="rounded-full border border-emerald-200 bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow-lg shadow-emerald-500/25 dark:border-emerald-500/30">
-                                                                Votre plan
-                                                            </Badge>
-                                                        </div>
-                                                    )}
-
-                                                    {!isCurrentPlan &&
-                                                        isPopular && (
+                                                        {isCurrentPlan && (
                                                             <div className="absolute top-4 right-4 z-10">
-                                                                <Badge className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
-                                                                    ⭐ Populaire
+                                                                <Badge className="rounded-full border border-emerald-200 bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow-lg shadow-emerald-500/25 dark:border-emerald-500/30">
+                                                                    Votre plan
                                                                 </Badge>
                                                             </div>
                                                         )}
 
-                                                    <CardHeader className="pb-4">
-                                                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400">
-                                                            <Sparkles className="h-6 w-6" />
-                                                        </div>
-
-                                                        <CardTitle className="text-xl font-bold tracking-tight text-slate-900 capitalize dark:text-white">
-                                                            {planName}
-                                                        </CardTitle>
-
-                                                        <CardDescription className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                                            {features
-                                                                .slice(0, 3)
-                                                                .join(' • ')}
-                                                        </CardDescription>
-                                                    </CardHeader>
-
-                                                    <CardContent className="flex-1 pt-0">
-                                                        <ul className="space-y-3">
-                                                            {features
-                                                                .slice(0, 5)
-                                                                .map(
-                                                                    (
-                                                                        feature,
-                                                                        i,
-                                                                    ) => (
-                                                                        <li
-                                                                            key={
-                                                                                i
-                                                                            }
-                                                                            className="flex items-start gap-3"
-                                                                        >
-                                                                            <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                                                                                <CheckCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                                                                            </div>
-
-                                                                            <span className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                                                                {
-                                                                                    feature
-                                                                                }
-                                                                            </span>
-                                                                        </li>
-                                                                    ),
-                                                                )}
-
-                                                            {features.length >
-                                                                5 && (
-                                                                <li className="pt-1 text-xs font-medium text-slate-400 dark:text-slate-500">
-                                                                    +
-                                                                    {features.length -
-                                                                        5}{' '}
-                                                                    autres
-                                                                    fonctionnalités
-                                                                </li>
+                                                        {!isCurrentPlan &&
+                                                            isPopular && (
+                                                                <div className="absolute top-4 right-4 z-10">
+                                                                    <Badge className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
+                                                                        ⭐
+                                                                        Populaire
+                                                                    </Badge>
+                                                                </div>
                                                             )}
-                                                        </ul>
-                                                    </CardContent>
 
-                                                    <CardFooter className="pt-2">
-                                                        {isCurrentPlan ? (
-                                                            <div className="w-full rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
-                                                                Plan
-                                                                actuellement
-                                                                actif
+                                                        <CardHeader className="pb-4">
+                                                            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400">
+                                                                <Sparkles className="h-6 w-6" />
                                                             </div>
-                                                        ) : (
-                                                            <Button
-                                                                asChild
-                                                                className="w-full rounded-2xl bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all duration-300 hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-500/25"
-                                                            >
-                                                                <Link
-                                                                    href={route(
-                                                                        'subscription.show',
+
+                                                            <CardTitle className="text-xl font-bold tracking-tight text-slate-900 capitalize dark:text-white">
+                                                                {planName}
+                                                            </CardTitle>
+
+                                                            <CardDescription className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                                                {features
+                                                                    .slice(0, 3)
+                                                                    .join(
+                                                                        ' • ',
                                                                     )}
+                                                            </CardDescription>
+                                                        </CardHeader>
+
+                                                        <CardContent className="flex-1 pt-0">
+                                                            <ul className="space-y-3">
+                                                                {features
+                                                                    .slice(0, 5)
+                                                                    .map(
+                                                                        (
+                                                                            feature,
+                                                                            i,
+                                                                        ) => (
+                                                                            <li
+                                                                                key={
+                                                                                    i
+                                                                                }
+                                                                                className="flex items-start gap-3"
+                                                                            >
+                                                                                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                                                                                    <CheckCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                                                                                </div>
+
+                                                                                <span className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+                                                                                    {
+                                                                                        feature
+                                                                                    }
+                                                                                </span>
+                                                                            </li>
+                                                                        ),
+                                                                    )}
+
+                                                                {features.length >
+                                                                    5 && (
+                                                                    <li className="pt-1 text-xs font-medium text-slate-400 dark:text-slate-500">
+                                                                        +
+                                                                        {features.length -
+                                                                            5}{' '}
+                                                                        autres
+                                                                        fonctionnalités
+                                                                    </li>
+                                                                )}
+                                                            </ul>
+                                                        </CardContent>
+
+                                                        <CardFooter className="pt-2">
+                                                            {isCurrentPlan ? (
+                                                                <div className="w-full rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
+                                                                    Plan
+                                                                    actuellement
+                                                                    actif
+                                                                </div>
+                                                            ) : (
+                                                                <Button
+                                                                    asChild
+                                                                    className="w-full rounded-2xl bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all duration-300 hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-500/25"
                                                                 >
-                                                                    <Sparkles className="mr-2 h-4 w-4" />
-                                                                    Choisir ce
-                                                                    plan
-                                                                </Link>
-                                                            </Button>
-                                                        )}
-                                                    </CardFooter>
-                                                </Card>
-                                            </motion.div>
-                                        );
-                                    },
-                                )}
+                                                                    <Link
+                                                                        href={route(
+                                                                            'subscription.show',
+                                                                        )}
+                                                                    >
+                                                                        <Sparkles className="mr-2 h-4 w-4" />
+                                                                        Choisir
+                                                                        ce plan
+                                                                    </Link>
+                                                                </Button>
+                                                            )}
+                                                        </CardFooter>
+                                                    </Card>
+                                                </motion.div>
+                                            );
+                                        },
+                                    )}
+                                </div>
                             </div>
+
+                            <Table02 />
+
+                            {aiEnabled && <FloatingChatWidget />}
                         </div>
 
-                        {aiEnabled && <FloatingChatWidget />}
+                        <SubscriptionReminderBanner
+                            trial={trial ?? null}
+                            subscription={subscription ?? null}
+                        />
+
+                        <AlertDialog
+                            open={deleteProductId !== null}
+                            onOpenChange={() => setDeleteProductId(null)}
+                        >
+                            <AlertDialogContent className="sm:max-w-md">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                        Supprimer le produit ?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Cette action est irréversible. Le
+                                        produit sera définitivement supprimé.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                        Annuler
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                        className="bg-red-600 hover:bg-red-700"
+                                        onClick={() => {
+                                            if (deleteProductId) {
+                                                router.delete(
+                                                    route(
+                                                        'tenant.product.delete',
+                                                        deleteProductId,
+                                                    ),
+                                                    {
+                                                        onSuccess: () => {
+                                                            toast.success(
+                                                                'Produit supprimé',
+                                                            );
+                                                            setDeleteProductId(
+                                                                null,
+                                                            );
+                                                        },
+                                                        onError: () => {
+                                                            toast.error(
+                                                                'Erreur lors de la suppression',
+                                                            );
+                                                            setDeleteProductId(
+                                                                null,
+                                                            );
+                                                        },
+                                                    },
+                                                );
+                                            }
+                                        }}
+                                    >
+                                        Supprimer
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
-
-                    <SubscriptionReminderBanner
-                        trial={trial ?? null}
-                        subscription={subscription ?? null}
-                    />
-
-                    <AlertDialog
-                        open={deleteProductId !== null}
-                        onOpenChange={() => setDeleteProductId(null)}
-                    >
-                        <AlertDialogContent className="sm:max-w-md">
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                    Supprimer le produit ?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Cette action est irréversible. Le produit
-                                    sera définitivement supprimé.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                <AlertDialogAction
-                                    className="bg-red-600 hover:bg-red-700"
-                                    onClick={() => {
-                                        if (deleteProductId) {
-                                            router.delete(
-                                                route(
-                                                    'tenant.product.delete',
-                                                    deleteProductId,
-                                                ),
-                                                {
-                                                    onSuccess: () => {
-                                                        toast.success(
-                                                            'Produit supprimé',
-                                                        );
-                                                        setDeleteProductId(
-                                                            null,
-                                                        );
-                                                    },
-                                                    onError: () => {
-                                                        toast.error(
-                                                            'Erreur lors de la suppression',
-                                                        );
-                                                        setDeleteProductId(
-                                                            null,
-                                                        );
-                                                    },
-                                                },
-                                            );
-                                        }
-                                    }}
-                                >
-                                    Supprimer
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </div>
                 </ScrollArea>
             </SidebarInset>
         </SidebarProvider>

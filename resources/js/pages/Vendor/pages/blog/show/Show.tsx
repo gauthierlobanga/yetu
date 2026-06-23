@@ -46,6 +46,7 @@ import {
 import { useInitials } from '@/hooks/use-initials';
 import NewsletterSectionVendeur from '@/layouts/app/app-newsletters';
 import MainLayout from '@/layouts/main-layout';
+import { getToastStyles } from '@/lib/toast-style';
 import { home } from '@/routes';
 import blog from '@/routes/tenant/blog';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
@@ -363,19 +364,26 @@ export default function Show({
                 if (data.message === 'Authentification requise') {
                     toast.error(
                         'Vous devez être connecté pour aimer un article',
+                        { style: getToastStyles('error') },
                     );
                 } else {
                     toast.success(
                         data.is_liked ? 'Article aimé' : "J'aime retiré",
+                        { style: getToastStyles() },
                     );
                 }
             } else if (response.status === 401) {
-                toast.error('Vous devez être connecté pour aimer un article');
+                toast.error('Vous devez être connecté pour aimer un article', {
+                    style: getToastStyles('error'),
+                });
             }
         } catch (error) {
-            toast.error('Une erreur est survenue');
+            toast.error('Une erreur est survenue', {
+                style: getToastStyles('error'),
+            });
         }
     };
+
     const handleBookmark = async () => {
         try {
             const response = await fetch(blog.bookmark(post.data.slug).url, {
@@ -394,23 +402,29 @@ export default function Show({
                 if (data.message === 'Authentification requise') {
                     toast.error(
                         'Vous devez être connecté pour sauvegarder un article',
+                        { style: getToastStyles() },
                     );
                 } else {
                     toast.success(
                         data.is_bookmarked
                             ? 'Article sauvegardé'
                             : 'Article retiré des favoris',
+                        { style: getToastStyles() },
                     );
                 }
             } else if (response.status === 401) {
                 toast.error(
                     'Vous devez être connecté pour sauvegarder un article',
+                    { style: getToastStyles('error') },
                 );
             }
         } catch (error) {
-            toast.error('Une erreur est survenue');
+            toast.error('Une erreur est survenue', {
+                style: getToastStyles('error'),
+            });
         }
     };
+
     const handleShare = async () => {
         if (navigator.share) {
             try {
@@ -426,7 +440,9 @@ export default function Show({
             }
         } else {
             navigator.clipboard.writeText(window.location.href);
-            toast.success('Lien copié dans le presse-papiers');
+            toast.success('Lien copié dans le presse-papiers', {
+                style: getToastStyles(),
+            });
         }
     };
 
@@ -435,6 +451,7 @@ export default function Show({
         typeof window !== 'undefined'
             ? window.location.origin
             : seo?.appUrl || '';
+
     const getAbsoluteUrl = (path: string) => {
         if (!path) {
             return '';
@@ -445,6 +462,7 @@ export default function Show({
         }
 
         const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+
         const fullPath = cleanPath.startsWith('storage/')
             ? cleanPath
             : `storage/${cleanPath}`;
@@ -817,7 +835,6 @@ export default function Show({
                     <div className="border-t border-slate-100 bg-linear-to-b from-slate-50/50 to-white dark:border-slate-800 dark:from-slate-950/50 dark:to-slate-950">
                         <div className="container mx-auto max-w-6xl px-4 py-12">
                             <div className="mb-8 flex items-center gap-2">
-                                <Sparkles className="h-5 w-5 text-emerald-500" />
                                 <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
                                     Articles similaires
                                 </h2>
@@ -897,7 +914,7 @@ export default function Show({
                         </div>
                         <Separator className="mb-5 bg-slate-100 dark:bg-slate-800" />
                         <CommentSection
-                            commentableType={"App\\Models\\Post"}
+                            commentableType={'App\\Models\\Post'}
                             commentableId={String(post.data.id)}
                         />
                     </div>

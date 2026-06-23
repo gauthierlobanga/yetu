@@ -99,6 +99,12 @@ interface Props extends PageProps {
         string,
         { gain: number; utilisation: number }
     > | null;
+    abandonedCart?: {
+        id: string;
+        total_general: number;
+        items_count: number;
+        date_abandon: string;
+    } | null;
 }
 
 /* ---------- Constantes ---------- */
@@ -215,6 +221,7 @@ export default function DashboardCustomerBuyer() {
         loyaltyHistory,
         weeklySpending,
         topCategories,
+        abandonedCart,
     } = usePage<Props>().props;
 
     // Données des graphiques
@@ -288,6 +295,40 @@ export default function DashboardCustomerBuyer() {
                                 </Badge>
                             </div>
                         </div>
+
+                        {/* Bannière Panier Abandonné */}
+                        {abandonedCart && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="relative overflow-hidden rounded-2xl border border-amber-200 bg-linear-to-r from-amber-50 to-orange-50 p-6 shadow-sm dark:border-amber-900/50 dark:from-amber-950/30 dark:to-orange-950/20"
+                            >
+                                <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-amber-400/10 blur-3xl" />
+                                
+                                <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400">
+                                            <ShoppingCart className="h-6 w-6" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-amber-900 dark:text-amber-100">
+                                                Vous avez oublié quelque chose ?
+                                            </h3>
+                                            <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
+                                                Votre panier de {formatPrice(abandonedCart.total_general)} contenant {abandonedCart.items_count} article(s) vous attend depuis {abandonedCart.date_abandon}.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Link
+                                        href={route('tenant.cart.recover', { relance: abandonedCart.id })}
+                                        className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 dark:bg-amber-600 dark:hover:bg-amber-500"
+                                    >
+                                        Terminer ma commande
+                                        <ArrowRight className="h-4 w-4" />
+                                    </Link>
+                                </div>
+                            </motion.div>
+                        )}
 
                         {/* KPI principaux */}
                         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

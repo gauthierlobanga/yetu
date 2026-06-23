@@ -3,7 +3,7 @@
 namespace App\Filament\Vendeur\Resources\Comments\Pages;
 
 use App\Filament\Vendeur\Resources\Comments\CommentResource;
-use App\Filament\Vendeur\Widgets\CommentStats;
+use App\Filament\Vendeur\Resources\Comments\Widgets\CommentStats;
 use App\Models\Comment;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;

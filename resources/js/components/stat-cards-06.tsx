@@ -29,7 +29,7 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
-export default function Stats07() {
+export default function Stats06() {
     return (
         <div className="flex items-center justify-center px-4 py-10 lg:py-20">
             <dl className="grid w-full max-w-lg grid-cols-1 gap-4 lg:grid-cols-2">

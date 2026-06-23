@@ -97,10 +97,10 @@ class Post extends Model implements HasMedia, Sitemapable
         ];
     }
 
-    protected $attributes = [
-        'content' => '{"type":"doc","content":[]}',
-        'excerpt' => '{"type":"doc","content":[]}',
-    ];
+    // protected $attributes = [
+    //     'content' => '{"type":"doc","content":[]}',
+    //     'excerpt' => '{"type":"doc","content":[]}',
+    // ];
 
     // Constantes de statut
     public const string STATUS_DRAFT = 'draft';
@@ -789,7 +789,7 @@ class Post extends Model implements HasMedia, Sitemapable
             ->first();
     }
 
-    public function getRelatedPosts(int $limit = 3)
+    public function getRelatedPosts(int $limit = 6)
     {
         $categoryIds = $this->categories()->pluck('posts_categories.id');
 

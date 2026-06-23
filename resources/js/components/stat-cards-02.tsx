@@ -54,7 +54,7 @@ const pipelineData = [
 const totalValue = pipelineData.reduce((sum, stage) => sum + stage.value, 0);
 const totalCount = pipelineData.reduce((sum, stage) => sum + stage.count, 0);
 
-export default function CardStat() {
+export default function Stats02() {
     return (
         <div className="mx-auto p-4 md:w-100 lg:py-10">
             <Card>

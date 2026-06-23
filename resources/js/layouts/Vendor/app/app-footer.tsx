@@ -77,6 +77,8 @@ const footerSections = [
                 name: 'Meilleures ventes',
                 href: route('tenant.product.index', { sort: 'bestseller' }),
             },
+            { name: 'Suivi de commande', href: route('tenant.orders.index') },
+            { name: 'Retours', href: route('tenant.return.index') },
         ],
     },
     {
@@ -84,7 +86,8 @@ const footerSections = [
         links: [
             { name: 'À propos', href: route('tenant.page.about') },
             { name: 'Blog', href: route('tenant.blog.index') },
-            { name: 'Devenir vendeur', href: route('vendor.register') },
+            { name: 'Contactez-nous', href: route('tenant.page.contact') },
+            { name: 'Newsletter', href: route('vendor.register') },
         ],
     },
     {
@@ -92,8 +95,7 @@ const footerSections = [
         links: [
             { name: 'Contact', href: route('tenant.page.contact') },
             { name: 'FAQ', href: route('tenant.page.faq') },
-            { name: 'Suivi de commande', href: route('tenant.orders.index') },
-            { name: 'Retours', href: route('tenant.return.index') },
+            { name: 'Help', href: route('tenant.page.help') },
         ],
     },
     {
@@ -133,7 +135,6 @@ export default function FooterSectionVendeur() {
             ref={ref}
             className="relative w-full overflow-hidden border-t border-slate-200/70 bg-white dark:border-slate-800/70 dark:bg-slate-950"
         >
-
             {/* Guarantees – pleine largeur, contenu centré */}
             <motion.div
                 variants={containerVariants}

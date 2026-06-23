@@ -6,9 +6,10 @@ import type { NavItem } from '@/types';
 
 type Props = {
     items: NavItem[];
+    topClass?: string;
 };
 
-export function MainNavigation({ items }: Props) {
+export function MainNavigation({ items, topClass }: Props) {
     const [openIndex, setOpenIndex] = useState<number | null>(null);
     const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -27,7 +28,7 @@ export function MainNavigation({ items }: Props) {
     const handleMouseLeave = () => {
         closeTimeout.current = setTimeout(() => {
             setOpenIndex(null);
-        }, 200);
+        }, 100);
     };
 
     useEffect(() => {
@@ -65,14 +66,21 @@ export function MainNavigation({ items }: Props) {
                                     <>
                                         <div className="absolute top-full h-5 w-full" />
                                         <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            transition={{
-                                                duration: 0.2,
-                                                ease: 'easeOut',
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ 
+                                                height: 0, 
+                                                opacity: 0,
+                                                transition: { 
+                                                    height: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
+                                                    opacity: { duration: 0.3, delay: 0.05 } 
+                                                }
                                             }}
-                                            className="fixed top-16 left-0 w-full border-b border-border/40 bg-background shadow-xs backdrop-blur-md"
+                                            transition={{
+                                                duration: 0.4,
+                                                ease: [0.16, 1, 0.3, 1],
+                                            }}
+                                            className={`fixed left-0 w-full overflow-hidden border-b border-border/40 bg-background shadow-xs backdrop-blur-md ${topClass || 'top-16'}`}
                                             onMouseEnter={clearTimer}
                                         >
                                             <div className="mx-auto">

@@ -45,7 +45,9 @@ import {
 } from '@/components/ui/tooltip';
 import { useInitials } from '@/hooks/use-initials';
 import NewsletterSectionVendeur from '@/layouts/app/app-newsletters';
+import NewsletterSectionCentral from '@/layouts/app/app-newsletters';
 import MainLayout from '@/layouts/main-layout';
+import { getToastStyles } from '@/lib/toast-style';
 import { home } from '@/routes';
 import blog from '@/routes/tenant/blog';
 import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
@@ -250,33 +252,81 @@ const ScrollToTop = () => {
 const extractText = (
     data: any,
     preferredField: 'text' | 'body' | 'excerpt' = 'text',
+    asHtml: boolean = false
 ): string => {
     if (!data) {
-        return '';
-    }
+return '';
+}
 
     let parsedData = data;
 
     if (typeof data === 'string') {
-        try {
-            parsedData = JSON.parse(data);
-        } catch (e) {
-            // Not JSON, return as is
-            return data;
+        if (data.trim().startsWith('{') || data.trim().startsWith('[')) {
+            try {
+                parsedData = JSON.parse(data);
+            } catch (e) {
+                return asHtml ? data : DOMPurify.sanitize(data, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+            }
+        } else {
+            return asHtml ? data : DOMPurify.sanitize(data, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
         }
     }
 
-    if (typeof parsedData === 'object' && parsedData !== null) {
-        return (
-            parsedData[preferredField] ||
-            parsedData.text ||
-            parsedData.body ||
-            parsedData.excerpt ||
-            JSON.stringify(parsedData)
-        );
+    let result = '';
+
+    if (Array.isArray(parsedData)) {
+        result = parsedData.map((b: any) => {
+            const txt = b.data?.text || b.text || b.content || '';
+
+            return asHtml ? `<p>${txt}</p>` : txt;
+        }).join(asHtml ? '' : ' ');
+    } else if (typeof parsedData === 'object' && parsedData !== null) {
+        if (Array.isArray(parsedData.blocks)) {
+            result = parsedData.blocks.map((block: any) => {
+                const text = block.data?.text || '';
+
+                if (asHtml) {
+                    const type = block.type;
+
+                    if (type === 'header') {
+                        const level = block.data?.level || 2;
+
+                        return `<h${level}>${text}</h${level}>`;
+                    }
+
+                    if (type === 'list') {
+                        const style = block.data?.style === 'ordered' ? 'ol' : 'ul';
+                        const items = (block.data?.items || []).map((item: string) => `<li>${item}</li>`).join('');
+
+                        return `<${style}>${items}</${style}>`;
+                    }
+
+                    if (type === 'image') {
+                        const url = block.data?.file?.url || block.data?.url || '';
+
+                        return `<img src="${url}" alt="${block.data?.caption || ''}" />`;
+                    }
+
+                    return `<p>${text}</p>`;
+                }
+
+                return text;
+            }).join(asHtml ? '' : ' ');
+        } else {
+            result = String(
+                parsedData[preferredField] ||
+                parsedData.html ||
+                parsedData.text ||
+                parsedData.body ||
+                parsedData.excerpt ||
+                JSON.stringify(parsedData)
+            );
+        }
+    } else {
+        result = String(parsedData);
     }
 
-    return String(parsedData);
+    return asHtml ? result : DOMPurify.sanitize(result, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
 };
 
 // Composant contenu riche avec style amélioré
@@ -338,16 +388,16 @@ export default function Show({
 
     const breadcrumbs: BreadcrumbItemType[] = [
         { title: 'Accueil', href: home() },
-        { title: 'Blog', href: blog.index().url },
+        { title: 'Blog', href: blog.index().url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/' },
         {
             title: post.data.title,
-            href: post.data.slug ? blog.show(post.data.slug).url : '#',
+            href: post.data.slug ? blog.show(post.data.slug).url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/' : '#',
         },
     ];
 
     const handleLike = async () => {
         try {
-            const response = await fetch(blog.like(post.data.slug).url, {
+            const response = await fetch(blog.like(post.data.slug).url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -363,23 +413,29 @@ export default function Show({
                 if (data.message === 'Authentification requise') {
                     toast.error(
                         'Vous devez être connecté pour aimer un article',
+                        { style: getToastStyles('error') },
                     );
                 } else {
                     toast.success(
                         data.is_liked ? 'Article aimé' : "J'aime retiré",
+                        { style: getToastStyles() },
                     );
                 }
             } else if (response.status === 401) {
-                toast.error('Vous devez être connecté pour aimer un article');
+                toast.error('Vous devez être connecté pour aimer un article', {
+                    style: getToastStyles('error'),
+                });
             }
         } catch (error) {
-            toast.error('Une erreur est survenue');
+            toast.error('Une erreur est survenue', {
+                style: getToastStyles('error'),
+            });
         }
     };
 
     const handleBookmark = async () => {
         try {
-            const response = await fetch(blog.bookmark(post.data.slug).url, {
+            const response = await fetch(blog.bookmark(post.data.slug).url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -395,21 +451,26 @@ export default function Show({
                 if (data.message === 'Authentification requise') {
                     toast.error(
                         'Vous devez être connecté pour sauvegarder un article',
+                        { style: getToastStyles() },
                     );
                 } else {
                     toast.success(
                         data.is_bookmarked
                             ? 'Article sauvegardé'
                             : 'Article retiré des favoris',
+                        { style: getToastStyles() },
                     );
                 }
             } else if (response.status === 401) {
                 toast.error(
                     'Vous devez être connecté pour sauvegarder un article',
+                    { style: getToastStyles('error') },
                 );
             }
         } catch (error) {
-            toast.error('Une erreur est survenue');
+            toast.error('Une erreur est survenue', {
+                style: getToastStyles('error'),
+            });
         }
     };
 
@@ -428,7 +489,9 @@ export default function Show({
             }
         } else {
             navigator.clipboard.writeText(window.location.href);
-            toast.success('Lien copié dans le presse-papiers');
+            toast.success('Lien copié dans le presse-papiers', {
+                style: getToastStyles(),
+            });
         }
     };
 
@@ -448,6 +511,7 @@ export default function Show({
         }
 
         const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+
         const fullPath = cleanPath.startsWith('storage/')
             ? cleanPath
             : `storage/${cleanPath}`;
@@ -524,7 +588,7 @@ export default function Show({
                                                     query: {
                                                         tag: category.slug,
                                                     },
-                                                }).url
+                                                }).url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/'
                                             }
                                             className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-md transition-all hover:bg-white/20 hover:text-emerald-300"
                                         >
@@ -604,6 +668,7 @@ export default function Show({
                                     content={extractText(
                                         post.data.content,
                                         'body',
+                                        true
                                     )}
                                 />
                             </div>
@@ -694,6 +759,7 @@ export default function Show({
                                         content={extractText(
                                             post.data.content,
                                             'body',
+                                            true
                                         )}
                                     />
                                 )}
@@ -730,7 +796,7 @@ export default function Show({
                                                     previousPost.slug
                                                         ? blog.show(
                                                               previousPost.slug,
-                                                          ).url
+                                                          ).url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/'
                                                         : '#'
                                                 }
                                                 className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-emerald-700"
@@ -749,7 +815,7 @@ export default function Show({
                                                     nextPost.slug
                                                         ? blog.show(
                                                               nextPost.slug,
-                                                          ).url
+                                                          ).url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/'
                                                         : '#'
                                                 }
                                                 className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 text-right transition-all hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-emerald-700"
@@ -774,6 +840,7 @@ export default function Show({
                                     content={extractText(
                                         post.data.content,
                                         'body',
+                                        true
                                     )}
                                 />
 
@@ -820,7 +887,6 @@ export default function Show({
                     <div className="border-t border-slate-100 bg-linear-to-b from-slate-50/50 to-white dark:border-slate-800 dark:from-slate-950/50 dark:to-slate-950">
                         <div className="container mx-auto max-w-6xl px-4 py-12">
                             <div className="mb-8 flex items-center gap-2">
-                                <Sparkles className="h-5 w-5 text-emerald-500" />
                                 <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
                                     Articles similaires
                                 </h2>
@@ -832,7 +898,7 @@ export default function Show({
                                         href={
                                             relatedPost.slug
                                                 ? blog.show(relatedPost.slug)
-                                                      .url
+                                                      .url.replace(/^(?:https?:)?\/\/[^/]+/, '') || '/'
                                                 : '#'
                                         }
                                         className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60"
@@ -883,37 +949,10 @@ export default function Show({
                     </div>
                 )}
 
-                {/* Commentaires
-                <div className="border-t border-slate-100 dark:border-slate-800">
-                    <div className="container mx-auto max-w-6xl px-4 py-12">
-                        <div className="mb-6 flex items-center justify-between">
-                            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
-                                Commentaires
-                            </h2>
-                            <Badge
-                                variant="outline"
-                                className="border-emerald-200 px-3 py-1 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400"
-                            >
-                                <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
-                                {post.data.comments_count || 0}
-                            </Badge>
-                        </div>
-                        <Separator className="mb-8 bg-slate-100 dark:bg-slate-800" />
-                        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900/60">
-                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-950/30">
-                                <MessageCircle className="h-8 w-8 text-emerald-500" />
-                            </div>
-                            <h3 className="mb-2 text-xl font-semibold text-slate-800 dark:text-slate-200">
-                                Laissez un commentaire
-                            </h3>
-                        </div>
-                    </div>
-                </div> */}
-
                 {/* Commentaires */}
                 <div className="border-t border-slate-100 dark:border-slate-800">
                     <div className="container mx-auto max-w-6xl px-4 py-12">
-                        <div className="mb-6 flex items-center justify-between">
+                        <div className="mb-3 flex items-center justify-between">
                             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
                                 Commentaires
                             </h2>
@@ -925,15 +964,15 @@ export default function Show({
                                 {post.data.comments_count || 0}
                             </Badge>
                         </div>
-                        <Separator className="mb-8 bg-slate-100 dark:bg-slate-800" />
+                        <Separator className="mb-5 bg-slate-100 dark:bg-slate-800" />
                         <CommentSection
-                            commentableType={"App\\Models\\Post"}
-                            commentableId={post.data.id} // UUID
+                            commentableType={'App\\Models\\Post'}
+                            commentableId={String(post.data.id)}
                         />
                     </div>
                 </div>
             </article>
-            <NewsletterSectionVendeur />
+            <NewsletterSectionCentral />
         </MainLayout>
     );
 }

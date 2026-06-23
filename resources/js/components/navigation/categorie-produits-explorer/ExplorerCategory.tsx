@@ -154,19 +154,22 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
     const hasProducts = selectedCat.produits?.length > 0;
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="relative w-full overflow-hidden border-x border-b border-slate-200/70 bg-white/95 shadow-[0_30px_80px_-20px_rgba(15,23,42,0.18)] backdrop-blur-2xl dark:border-slate-700/60 dark:bg-slate-900/95 dark:shadow-[0_30px_80px_-20px_rgba(0,0,0,0.65)]"
+        <div
+            className={cn(
+                'relative w-full overflow-hidden',
+                'border-none lg:border-x lg:border-b lg:border-slate-200/70',
+                'bg-transparent lg:bg-white/95 backdrop-blur-none lg:backdrop-blur-2xl',
+                'shadow-none lg:shadow-[0_30px_80px_-20px_rgba(15,23,42,0.18)]',
+                'dark:border-none lg:dark:border-slate-700/60',
+                'dark:bg-transparent lg:dark:bg-slate-900/95',
+                'dark:shadow-none lg:dark:shadow-[0_30px_80px_-20px_rgba(0,0,0,0.65)]',
+            )}
         >
             {/* Glow décoratif */}
-            <div className="pointer-events-none absolute -top-24 left-10 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
+            <div className="pointer-events-none absolute -top-24 left-10 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl hidden lg:block" />
             <div className="pointer-events-none absolute top-1/2 right-0 h-72 w-72 -translate-y-1/2 rounded-full bg-slate-400/10 blur-3xl dark:bg-emerald-400/5" />
 
-            {/* Liseré supérieur */}
-            <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-400/60 to-transparent" />
+
 
             <div className="grid w-full grid-cols-12">
                 {/* Sidebar catégories */}
@@ -186,13 +189,16 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
                     </div>
 
                     <div className="max-h-96 space-y-2 overflow-y-auto pr-1">
-                        {categories.map((category) => {
+                        {categories.map((category, index) => {
                             const Icon = getCategoryIcon(category);
                             const isSelected = selectedCat.id === category.id;
 
                             return (
-                                <button
+                                <motion.button
                                     key={category.id}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.3, delay: index * 0.03, ease: [0.16, 1, 0.3, 1] }}
                                     type="button"
                                     disabled={isTransitioning}
                                     onClick={() =>
@@ -242,7 +248,7 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
                                                 : 'translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100',
                                         )}
                                     />
-                                </button>
+                                </motion.button>
                             );
                         })}
                     </div>
@@ -291,29 +297,35 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
                         <div className="grid max-h-128 grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
                             {selectedCat.produits
                                 .slice(0, 12)
-                                .map((product) => (
-                                    <Link
+                                .map((product, index) => (
+                                    <motion.div
                                         key={product.id}
-                                        href={`/product/${product.slug}`}
-                                        className="group flex flex-col overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-sm transition-all duration-200 hover:border-emerald-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/70 dark:hover:border-emerald-800"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3, delay: index * 0.04 + 0.1, ease: [0.16, 1, 0.3, 1] }}
                                     >
-                                        <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
-                                            <img
-                                                src={
-                                                    product.image_principale ||
-                                                    '/storage/images/Vue-Storefront.png'
-                                                }
-                                                alt={product.nom}
-                                                loading="lazy"
-                                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                            />
-                                        </div>
-                                        <div className="flex flex-1 flex-col justify-between p-2.5">
-                                            <h4 className="line-clamp-2 text-xs leading-tight font-medium text-slate-800 dark:text-slate-200">
-                                                {product.nom}
-                                            </h4>
-                                        </div>
-                                    </Link>
+                                        <Link
+                                            href={`/product/${product.slug}`}
+                                            className="group flex flex-col overflow-hidden rounded-xl border border-slate-200/70 bg-white shadow-sm transition-all duration-200 hover:border-emerald-200 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/70 dark:hover:border-emerald-800"
+                                        >
+                                            <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
+                                                <img
+                                                    src={
+                                                        product.image_principale ||
+                                                        '/storage/images/loafers-leaning-along-white-wall.jpg'
+                                                    }
+                                                    alt={product.nom}
+                                                    loading="lazy"
+                                                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                />
+                                            </div>
+                                            <div className="flex flex-1 flex-col justify-between p-2.5">
+                                                <h4 className="line-clamp-2 text-xs leading-tight font-medium text-slate-800 dark:text-slate-200">
+                                                    {product.nom}
+                                                </h4>
+                                            </div>
+                                        </Link>
+                                    </motion.div>
                                 ))}
                         </div>
                     ) : (
@@ -344,6 +356,6 @@ export function ProductsMegaMenu({ categories = [] }: Props) {
                     </div>
                 </section>
             </div>
-        </motion.div>
+        </div>
     );
 }

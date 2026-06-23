@@ -30,7 +30,7 @@ const data = [
     },
 ];
 
-export default function Stats09() {
+export default function Stats07() {
     return (
         <div className="flex w-full items-center justify-center p-10">
             <dl className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

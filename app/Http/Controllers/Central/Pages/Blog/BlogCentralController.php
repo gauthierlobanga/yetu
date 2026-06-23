@@ -142,7 +142,7 @@ class BlogCentralController extends Controller
 
         $previousPost = $post->getPreviousPublished();
         $nextPost = $post->getNextPublished();
-        $relatedPosts = $post->getRelatedPosts(3);
+        $relatedPosts = $post->getRelatedPosts();
 
         $postResource = (new PostResource($post))->resolve();
 
@@ -177,10 +177,14 @@ class BlogCentralController extends Controller
     /**
      * Gère la soumission d'un commentaire sur un article.
      *
-     * (Méthode actuellement vide, à implémenter pour le support des commentaires)
      */
-    public function blogComment() {}
+    public function blogComment(Request $request, Post $post)
+    {
+        $request->validate(['content' => 'required|string|max:5000']);
+        $comment = $post->addComment($request->user(), $request->content);
 
+        return response()->json(['comment' => $comment->load('user')]);
+    }
     /**
      * Ajoute ou retire un "J'aime" (Like) sur un article de blog.
      *

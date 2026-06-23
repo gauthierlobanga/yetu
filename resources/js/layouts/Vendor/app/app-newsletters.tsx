@@ -61,7 +61,7 @@ export default function NewsletterSectionVendeur() {
                             className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 shadow-sm dark:bg-emerald-900/40 dark:text-emerald-300"
                         >
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            Stay Updated
+                            Restez Informé
                         </motion.div>
 
                         <motion.h2
@@ -71,10 +71,10 @@ export default function NewsletterSectionVendeur() {
                             transition={{ duration: 0.5, delay: 0.3 }}
                             className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl dark:text-white"
                         >
-                            Join Our
+                            Rejoignez Notre
                             <span className="bg-linear-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-200">
                                 {' '}
-                                Community
+                                Communauté
                             </span>
                         </motion.h2>
 
@@ -85,9 +85,9 @@ export default function NewsletterSectionVendeur() {
                             transition={{ duration: 0.5, delay: 0.4 }}
                             className="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
                         >
-                            Subscribe to our newsletter to get the latest
-                            updates, exclusive content, and special offers
-                            directly in your inbox.
+                            Abonnez-vous à notre newsletter pour recevoir les dernières 
+                            mises à jour, du contenu exclusif et des offres spéciales 
+                            directement dans votre boîte de réception.
                         </motion.p>
 
                         <motion.div

@@ -297,6 +297,16 @@ class AccountDashboardController extends Controller
                     'total' => (int) $category->total,
                 ];
             });
+        /*
+        |--------------------------------------------------------------------------
+        | Panier Abandonné (Relance)
+        |--------------------------------------------------------------------------
+        */
+        $abandonedCart = \App\Models\Panier::where('client_id', $client->id)
+            ->where('statut', \App\Models\Panier::STATUT_ABANDONNE)
+            ->withCount('items')
+            ->latest('date_abandon')
+            ->first();
 
         /*
         |--------------------------------------------------------------------------
@@ -341,6 +351,13 @@ class AccountDashboardController extends Controller
                 'recentOrders' => $recentOrders,
 
                 'wishlist' => $wishlist,
+
+                'abandonedCart' => $abandonedCart ? [
+                    'id' => $abandonedCart->id,
+                    'total_general' => (float) $abandonedCart->total_general,
+                    'items_count' => $abandonedCart->items_count,
+                    'date_abandon' => $abandonedCart->date_abandon?->diffForHumans(),
+                ] : null,
 
                 'loyalty' => $compteFidelite,
 

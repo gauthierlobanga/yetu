@@ -1,40 +1,96 @@
 // resources/js/components/ecommerce/products/TrendingProducts.tsx
 import { Link } from '@inertiajs/react';
-import { ChevronRight, TrendingUp } from 'lucide-react';
+import { ChevronRight, TrendingUp, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/types/ecommerce/products';
 import ProductCard from './ProductCard';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface TrendingProductsProps {
     products: Product[];
 }
 
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.1,
+        },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 100,
+            damping: 15,
+        },
+    },
+};
+
+const headerVariants = {
+    hidden: { opacity: 0, y: -20 },
+    show: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 80,
+            damping: 20,
+        },
+    },
+};
+
 export default function TrendingProducts({ products }: TrendingProductsProps) {
     return (
         <section className="relative overflow-hidden py-16 lg:py-24">
-            {/* Dégradé de fond clair (clair / sombre agréable) */}
-            <div className="absolute inset-0 bg-linear-to-b from-emerald-50/40 via-white to-emerald-50/20 dark:from-emerald-950/20 dark:via-gray-950 dark:to-emerald-950/10" />
+            {/* Dégradé de fond clair (clair / sombre agréable) avec Tailwind v4 */}
+            <div className="absolute inset-0 bg-linear-to-b from-emerald-50/50 via-white to-emerald-50/10 dark:from-emerald-950/20 dark:via-gray-950 dark:to-emerald-950/10" />
+            
+            {/* Subtle animated background glowing blobs */}
+            <div className="pointer-events-none absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-emerald-500/10 blur-3xl" />
+            <div className="pointer-events-none absolute bottom-0 left-0 -ml-20 -mb-20 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
 
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <header className="mb-10 flex items-end justify-between">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+                <motion.header 
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, margin: "-100px" }}
+                    variants={headerVariants}
+                    className="mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end"
+                >
+                    <div className="max-w-2xl">
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ delay: 0.1, duration: 0.4 }}
+                            className="flex items-center gap-2"
+                        >
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/50 bg-linear-to-r from-emerald-100 to-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 shadow-xs dark:border-emerald-800/50 dark:from-emerald-900/40 dark:to-emerald-900/20 dark:text-emerald-400">
                                 <TrendingUp className="h-3.5 w-3.5" />
                                 Populaires
                             </span>
-                        </div>
-                        <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-                            Tendances actuelles
+                        </motion.div>
+                        <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl">
+                            Tendances <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300">actuelles</span>
                         </h2>
-                        <p className="mt-2 text-muted-foreground">
-                            Les produits les plus populaires du moment
+                        <p className="mt-3 text-base text-muted-foreground md:text-lg">
+                            Découvrez les produits les plus populaires et les plus recherchés du moment par notre communauté.
                         </p>
                     </div>
+                    
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="gap-1 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                        className="group gap-2 rounded-full font-medium text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/50 dark:hover:text-emerald-300"
                         asChild
                     >
                         <Link
@@ -42,24 +98,59 @@ export default function TrendingProducts({ products }: TrendingProductsProps) {
                                 sort: 'popular',
                             })}
                         >
-                            Voir plus
-                            <ChevronRight className="h-4 w-4" />
+                            Voir la collection
+                            <motion.div
+                                whileHover={{ x: 4 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </motion.div>
                         </Link>
                     </Button>
-                </header>
+                </motion.header>
 
                 {products.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6">
-                        {products.map((product) => (
-                            <ProductCard key={product.id} product={product} />
-                        ))}
-                    </div>
+                    <motion.div 
+                        variants={containerVariants}
+                        initial="hidden"
+                        whileInView="show"
+                        viewport={{ once: true, margin: "-100px" }}
+                        className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6"
+                    >
+                        {products.map((product) => {
+                            const inStock = (product.quantite_stock ?? product.stock_disponible ?? 0) > 0;
+                            
+                            return (
+                                <motion.div 
+                                    key={product.id} 
+                                    variants={itemVariants}
+                                    className={cn(
+                                        "group relative h-full transition-opacity duration-300", 
+                                        !inStock && "opacity-80 hover:opacity-100"
+                                    )}
+                                >
+                                    <ProductCard product={product} />
+                                </motion.div>
+                            );
+                        })}
+                    </motion.div>
                 ) : (
-                    <div className="flex min-h-50 items-center justify-center rounded-xl border border-dashed border-border bg-card/50 text-muted-foreground">
-                        <p className="text-sm">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-dashed border-border/60 bg-card/40 text-center text-muted-foreground backdrop-blur-xs"
+                    >
+                        <div className="mb-4 rounded-full bg-emerald-100/50 p-4 dark:bg-emerald-900/20">
+                            <Sparkles className="h-8 w-8 text-emerald-600/60 dark:text-emerald-400/60" />
+                        </div>
+                        <p className="text-base font-medium">
                             Aucune tendance pour le moment.
                         </p>
-                    </div>
+                        <p className="mt-1 text-sm text-muted-foreground/80">
+                            Revenez plus tard pour découvrir nos nouveautés.
+                        </p>
+                    </motion.div>
                 )}
             </div>
         </section>

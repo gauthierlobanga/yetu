@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 Schedule::command('wishlist:send-reminders --days=30')->daily();
 Schedule::command('visitors:clean')->daily();
 Schedule::command('cart:abandon')->hourly();
+Schedule::command('cart:remind')->everyFourHours();

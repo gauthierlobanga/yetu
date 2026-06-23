@@ -5,7 +5,7 @@ import type { SubmitEventHandler } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getToastStyles } from '@/lib/toast-style';
+import getToastStyles from '@/lib/toast-style';
 import { cn } from '@/lib/utils';
 
 export default function NewsletterSectionCentral() {
@@ -28,15 +28,15 @@ export default function NewsletterSectionCentral() {
             onError: () => {
                 toast.error(errors.email || 'Error during subscription.', {
                     description: errors.email || 'Please try again.',
-                    style: getToastStyles('error')
+                     style: getToastStyles('error')
                 });
             },
         });
     };
 
     return (
-        <section className="relative w-full overflow-hidden bg-white py-16 lg:py-24 dark:bg-slate-950">
-            {/* Fond décoratif moderne – formes douces */}
+        <section className="relative w-full overflow-hidden bg-white py-18 lg:py-24 dark:bg-slate-950">
+            {/* Décor d'arrière-plan doux */}
             <div className="pointer-events-none absolute inset-0 -z-10">
                 <div className="absolute top-0 right-0 h-96 w-96 translate-x-1/3 -translate-y-1/3 rounded-full bg-emerald-200/30 blur-3xl dark:bg-emerald-900/10" />
                 <div className="absolute bottom-0 left-0 h-80 w-80 -translate-x-1/4 translate-y-1/4 rounded-full bg-slate-200/40 blur-3xl dark:bg-slate-800/10" />
@@ -50,7 +50,7 @@ export default function NewsletterSectionCentral() {
                 transition={{ duration: 0.6, ease: 'easeOut' }}
                 className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8"
             >
-                <div className="grid items-center gap-12 overflow-hidden rounded-3xl border border-white/20 bg-white/70 p-8 md:grid-cols-5 md:p-12 lg:p-16 dark:border-slate-800/50 dark:bg-slate-900/60">
+                <div className="grid items-center gap-12 overflow-hidden rounded border border-white/20 bg-white/70 p-8 md:grid-cols-5 md:p-12 lg:p-16 dark:border-slate-800/50 dark:bg-slate-900/60 dark:shadow-slate-900/40">
                     {/* Colonne texte (3/5) */}
                     <div className="space-y-6 md:col-span-3">
                         <motion.div
@@ -61,7 +61,7 @@ export default function NewsletterSectionCentral() {
                             className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 shadow-sm dark:bg-emerald-900/40 dark:text-emerald-300"
                         >
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                            Stay Updated
+                            Restez Informé
                         </motion.div>
 
                         <motion.h2
@@ -71,10 +71,10 @@ export default function NewsletterSectionCentral() {
                             transition={{ duration: 0.5, delay: 0.3 }}
                             className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl dark:text-white"
                         >
-                            Join Our
+                            Rejoignez Notre
                             <span className="bg-linear-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent dark:from-emerald-400 dark:to-emerald-200">
                                 {' '}
-                                Community
+                                Communauté
                             </span>
                         </motion.h2>
 
@@ -85,9 +85,9 @@ export default function NewsletterSectionCentral() {
                             transition={{ duration: 0.5, delay: 0.4 }}
                             className="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
                         >
-                            Subscribe to our newsletter to get the latest
-                            updates, exclusive content, and special offers
-                            directly in your inbox.
+                            Abonnez-vous à notre newsletter pour recevoir les dernières 
+                            mises à jour, du contenu exclusif et des offres spéciales 
+                            directement dans votre boîte de réception.
                         </motion.p>
 
                         <motion.div
@@ -117,7 +117,7 @@ export default function NewsletterSectionCentral() {
                         transition={{ duration: 0.5, delay: 0.3 }}
                         className="md:col-span-2"
                     >
-                        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-100/40 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950 dark:shadow-none">
+                        <div className="rounded border border-slate-100 bg-white p-6 shadow-lg shadow-slate-100/40 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950 dark:shadow-none">
                             <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-sm dark:bg-emerald-900/40 dark:text-emerald-400">
                                 <Mail className="h-6 w-6" />
                             </div>
@@ -140,17 +140,17 @@ export default function NewsletterSectionCentral() {
                                             }
                                             placeholder="you@example.com"
                                             className={cn(
-                                                'h-12 rounded-xl border px-3 pl-10 text-base transition-all duration-200',
-                                                'border-slate-200 bg-white/80 text-slate-900 shadow-sm backdrop-blur placeholder:text-slate-400',
+                                                'h-12 rounded px-3 pl-10 text-base transition-all duration-200',
+                                                'border-slate-200 bg-white/80 text-slate-900 placeholder:text-slate-400',
                                                 'hover:border-emerald-300 hover:bg-white',
-                                                'focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20',
+                                                // 'focus:border-emerald-500 focus:ring-0 focus:ring-emerald-500/20',
                                                 'dark:border-slate-700 dark:bg-slate-900/80 dark:text-white dark:placeholder:text-slate-500',
                                                 'dark:hover:border-emerald-700 dark:hover:bg-slate-900',
                                                 'dark:focus:border-emerald-400 dark:focus:ring-emerald-400/20',
                                                 errors.email
                                                     ? 'border-red-400 focus-visible:ring-red-400'
                                                     : 'border-slate-200 focus-visible:ring-emerald-500 dark:border-slate-800',
-                                                'dark:bg-slate-900 dark:text-white',
+                                                // 'dark:bg-slate-900 dark:text-white',
                                             )}
                                             disabled={processing}
                                             required

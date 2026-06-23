@@ -1,6 +1,6 @@
 import type { SyntheticEvent } from 'react';
 
-export const DEFAULT_MEDIA_FALLBACK = '/storage/images/Vue-Storefront.png';
+export const DEFAULT_MEDIA_FALLBACK = '/storage/images/loafers-leaning-along-white-wall.jpg';
 
 export function resolveImageUrl(
     image?: string | null,

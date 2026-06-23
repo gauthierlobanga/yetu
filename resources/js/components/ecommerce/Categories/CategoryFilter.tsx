@@ -129,8 +129,8 @@ export default function CategoryFilter() {
                                 </span>
                                 <SelectValue placeholder="Sort" />
                             </SelectTrigger>
-                            <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:start-auto [&_*[role=option]>span]:inset-e-2">
-                                {sortFilters.map((item, i) => (
+                            <SelectContent className="[&_*[role=option]]:ps-2 [&_*[role=option]]:pe-8 [&_*[role=option]>span]:inset-s-auto [&_*[role=option]>span]:inset-e-2">
+                                {sortFilters.map((item) => (
                                     <SelectItem key={item.key} value={item.key}>
                                         {item.name}
                                     </SelectItem>

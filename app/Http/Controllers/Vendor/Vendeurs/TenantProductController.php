@@ -47,7 +47,7 @@ class TenantProductController extends Controller
                     'color' => $cat->color ?? '#059669',
                     'image' => $cat->getFirstMediaUrl('icon')
                                ?: $cat->getFirstMediaUrl('image')
-                               ?: '/storage/images/Vue-Storefront.png',
+                               ?: '/storage/images/loafers-leaning-along-white-wall.jpg',
                     'products_count' => $cat->getProductsCountAttribute(), // accesseur existant
                     'url' => $tenant->admin_url.'/products/product-categories/'.$cat->id.'/edit',
                 ];

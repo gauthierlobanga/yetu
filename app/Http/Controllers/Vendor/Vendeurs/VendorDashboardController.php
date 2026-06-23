@@ -74,7 +74,7 @@ class VendorDashboardController extends Controller
                         'prix' => $p->prix_actuel,
                         'stock' => $p->quantite_stock,
                         'statut' => $p->statut,
-                        'image' => $p->getImageUrl('thumb') ?? '/storage/images/Vue-Storefront.png',
+                        'image' => $p->getImageUrl('thumb') ?? '/storage/images/loafers-leaning-along-white-wall.jpg',
                         'edit_url' => $adminUrl.'/produits/'.$p->id.'/edit',
                     ];
                 });

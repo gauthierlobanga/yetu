@@ -10,6 +10,7 @@ import {
     CornerDownLeft,
     SearchIcon,
     X,
+    Camera,
 } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -48,16 +49,23 @@ export interface SearchConfig {
     openResultsInNewTab?: boolean;
     onResultClick?: (result: SearchResult) => void;
     searchEndpoint?: string;
+    showImageSearch?: boolean;
+    onImageSearch?: (file: File) => void;
 }
 
 // ============================================================================
 // Search Button
 // ============================================================================
-interface SearchButtonProps extends React.ComponentProps<typeof Button> {}
+interface SearchButtonProps extends React.ComponentProps<typeof Button> {
+    showImageSearch?: boolean;
+    onImageSearch?: (file: File) => void;
+}
 
 export const SearchButton: React.FC<SearchButtonProps> = ({
     className,
     children,
+    showImageSearch,
+    onImageSearch,
     ...buttonProps
 }) => {
     const [modifierLabel, setModifierLabel] = useState('');
@@ -127,13 +135,36 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
                 />
                 <span className="hidden sm:inline">{children}</span>
             </span>
-            <div className="hidden gap-0.5 md:flex">
-                <kbd className="grid h-5 min-w-5 place-items-center rounded bg-slate-100 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">
+            <div className="flex items-center gap-2">
+                {showImageSearch && (
+                    <label 
+                        onClick={(e) => e.stopPropagation()} 
+                        className="cursor-pointer rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-emerald-600 dark:hover:bg-slate-700 dark:hover:text-emerald-400 transition-colors"
+                        title="Recherche par image"
+                    >
+                        <Camera size={18} />
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden" 
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files.length > 0) {
+                                    onImageSearch?.(e.target.files[0]);
+                                    // Reset input so the same file can be selected again
+                                    e.target.value = '';
+                                }
+                            }} 
+                        />
+                    </label>
+                )}
+                <div className="hidden gap-0.5 md:flex">
+                    <kbd className="grid h-5 min-w-5 place-items-center rounded bg-slate-100 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">
                     {modifierLabel}
                 </kbd>
                 <kbd className="grid h-5 min-w-5 place-items-center rounded bg-slate-100 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">
                     K
                 </kbd>
+            </div>
             </div>
         </Button>
     );
@@ -204,6 +235,8 @@ interface SearchInputFieldProps {
     onArrowUp?: () => void;
     onEnter?: () => void;
     isLoading?: boolean;
+    showImageSearch?: boolean;
+    onImageSearch?: (file: File) => void;
 }
 
 const SearchInputField = memo(function SearchInputField({
@@ -216,6 +249,8 @@ const SearchInputField = memo(function SearchInputField({
     onArrowUp,
     onEnter,
     isLoading,
+    showImageSearch,
+    onImageSearch,
 }: SearchInputFieldProps) {
     return (
         <div className="flex items-center gap-3 border-b border-slate-200/80 bg-white/80 px-4 py-3 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80">
@@ -246,6 +281,25 @@ const SearchInputField = memo(function SearchInputField({
             <div className="flex items-center gap-2">
                 {isLoading && (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+                )}
+                {showImageSearch && (
+                    <label 
+                        className="cursor-pointer rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-emerald-600 dark:hover:bg-slate-700 dark:hover:text-emerald-400 transition-colors"
+                        title="Recherche par image"
+                    >
+                        <Camera size={18} />
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden" 
+                            onChange={(e) => {
+                                if (e.target.files && e.target.files.length > 0) {
+                                    onImageSearch?.(e.target.files[0]);
+                                    e.target.value = '';
+                                }
+                            }} 
+                        />
+                    </label>
                 )}
                 {query && (
                     <Button
@@ -666,6 +720,8 @@ function SearchModal({ onClose, config }: SearchModalProps) {
                 onArrowUp={moveUp}
                 onEnter={handleActivateSelection}
                 isLoading={isLoading}
+                showImageSearch={config.showImageSearch}
+                onImageSearch={config.onImageSearch}
             />
 
             {isLoading && (
@@ -725,6 +781,8 @@ export default function SearchExperience(config: SearchConfig) {
         <>
             <SearchButton
                 onClick={() => setIsModalOpen(true)}
+                showImageSearch={config.showImageSearch}
+                onImageSearch={config.onImageSearch}
                 {...(config.buttonProps || {})}
             >
                 {config.buttonText || 'Rechercher'}

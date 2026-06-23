@@ -32,6 +32,7 @@ class VendeurPanelProvider extends PanelProvider
         return $panel
             ->id('vendeur')
             ->path('vendeur')
+            ->spa()
             ->brandLogo(function () {
                 $tenant = tenant();
                 if ($tenant) {

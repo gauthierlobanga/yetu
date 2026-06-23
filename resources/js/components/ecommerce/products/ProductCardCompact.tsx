@@ -1,14 +1,25 @@
-/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 // resources/js/components/ecommerce/products/ProductCardCompact.tsx
 import { Link } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingBag, Star, Sparkles, Eye } from 'lucide-react';
+import {
+    Heart,
+    ShoppingBag,
+    Star,
+    Sparkles,
+    Eye,
+    PackageOpen,
+    ShoppingCart,
+} from 'lucide-react';
 import { useCallback } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/ecommerce/use-cart';
 import { useWishlist } from '@/hooks/ecommerce/use-wishlist';
 import { handleImageFallback, resolveImageUrl } from '@/lib/media';
+import { getToastStyles } from '@/lib/toast-style';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/types/ecommerce/products';
 
@@ -31,6 +42,41 @@ function compactNumber(value: number): string {
     }
 
     return String(value);
+}
+
+/** Étoiles */
+function StarRating({
+    rating,
+    size = 'sm',
+}: {
+    rating: number;
+    size?: 'sm' | 'md';
+}) {
+    const iconClass = size === 'sm' ? 'h-3.5 w-3.5' : 'h-4 w-4';
+
+    return (
+        <div className="flex items-center">
+            {Array.from({ length: 5 }, (_, i) => (
+                <Star
+                    key={i}
+                    className={`${iconClass} ${
+                        i < Math.floor(rating)
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'fill-slate-200 text-slate-200 dark:fill-slate-700 dark:text-slate-700'
+                    }`}
+                />
+            ))}
+        </div>
+    );
+}
+
+/** Format devise */
+function formatCurrency(amount: number, currency = 'CDF'): string {
+    return new Intl.NumberFormat('fr-CD', {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: 0,
+    }).format(amount);
 }
 
 export default function ProductCardCompact({
@@ -58,193 +104,130 @@ export default function ProductCardCompact({
         ? Math.round(((oldPrice - currentPrice) / oldPrice) * 100)
         : product.reduction_pourcentage || 0;
 
-    const handleAddToCart = useCallback(
-        (e: React.MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
+    const formatSoldCount = (count: number) =>
+        count >= 1000
+            ? `${Math.floor(count / 1000)}k+ vendus`
+            : `${count} vendu${count > 1 ? 's' : ''}`;
 
-            if (!outOfStock) {
-                addToCart(product.id, 1);
-            }
-        },
-        [outOfStock, product.id, addToCart],
-    );
+    // const handleAddToCart = useCallback(
+    //     (e: React.MouseEvent) => {
+    //         e.preventDefault();
+    //         e.stopPropagation();
 
-    const handleToggleWishlist = useCallback(
-        (e: React.MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleWishlist(product.id);
-        },
-        [product.id, toggleWishlist],
-    );
+    //         if (!outOfStock) {
+    //             addToCart(product.id, 1);
+    //         }
+    //     },
+    //     [outOfStock, product.id, addToCart],
+    // );
+
+    // const handleToggleWishlist = useCallback(
+    //     (e: React.MouseEvent) => {
+    //         e.preventDefault();
+    //         e.stopPropagation();
+    //         toggleWishlist(product.id);
+    //     },
+    //     [product.id, toggleWishlist],
+    // );
+
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        addToCart(product.id, 1);
+        toast.success('Ajouté au panier',{style:getToastStyles()});
+    };
+
+    const handleToggleWishlist = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleWishlist(product.id);
+    };
 
     return (
-        <motion.div
-            layout
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-            className="group h-full"
-        >
-            <Link href={product.url} className="block h-full">
-                <article
-                    className={cn(
-                        'relative flex h-full flex-col overflow-hidden rounded-3xl',
-                        'border border-slate-200/70 bg-white/90 backdrop-blur-xl',
-                        'shadow-[0_8px_30px_rgb(15,23,42,0.06)]',
-                        'transition-all duration-500',
-                        'hover:-translate-y-1.5',
-                        'hover:border-emerald-200/80',
-                        'hover:shadow-[0_20px_60px_rgba(16,185,129,0.12)]',
-                        'dark:border-slate-800/80 dark:bg-slate-900/90',
-                        'dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)]',
-                        'dark:hover:border-emerald-800/60',
-                        'dark:hover:shadow-[0_20px_60px_rgba(16,185,129,0.08)]',
+        <div className="group relative overflow-hidden rounded-3xl bg-slate-100 dark:bg-slate-800 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-700/50 h-full">
+            <Link href={product.url || '#'} className="block relative aspect-square">
+                {/* Image */}
+                <img
+                    src={resolveImageUrl(product.image_principale)}
+                    alt={product.nom}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                    onError={handleImageFallback()}
+                />
+
+                {/* Gradient Overlay for text readability */}
+                <div className="absolute inset-0 bg-linear-to-t from-slate-900/90 via-slate-900/20 to-transparent transition-opacity duration-300 group-hover:from-slate-900/95" />
+
+                {/* Badges */}
+                <div className="absolute left-3 top-3 flex flex-col gap-2">
+                    {product.badge && (
+                        <Badge className="bg-white/90 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-slate-900 shadow-xs backdrop-blur-md">
+                            {product.badge}
+                        </Badge>
                     )}
+                    {showDiscountBadge && discount !== null && discount > 0 && (
+                        <Badge className="bg-rose-500/95 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-white shadow-xs backdrop-blur-md">
+                            -{discount}%
+                        </Badge>
+                    )}
+                    {outOfStock && (
+                        <Badge variant="destructive" className="bg-red-500/95 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-white shadow-xs backdrop-blur-md">
+                            Rupture
+                        </Badge>
+                    )}
+                </div>
+
+                {/* Wishlist Button */}
+                <button
+                    onClick={handleToggleWishlist}
+                    className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/20 text-white shadow-sm backdrop-blur-md transition-all hover:bg-white hover:text-rose-500 hover:scale-110"
                 >
-                    {/* Glow subtil */}
-                    <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-emerald-500/3 via-transparent to-cyan-500/3 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    <Heart className={`h-3.5 w-3.5 transition-colors ${isWishlisted ? "fill-rose-500 text-rose-500" : ""}`} />
+                </button>
 
-                    {/* Zone image */}
-                    <div className="relative">
-                        <div className="aspect-square overflow-hidden bg-slate-100 dark:bg-slate-800">
-                            <img
-                                src={resolveImageUrl(product.image_principale)}
-                                alt={product.nom}
-                                loading="lazy"
-                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                onError={handleImageFallback()}
-                            />
-                        </div>
+                {/* Content at Bottom */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col justify-end">
+                    <div className="mb-1.5 flex items-center gap-1 opacity-0 -translate-y-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+                        <StarRating rating={rating} />
+                        <span className="text-[10px] font-medium text-slate-300">
+                            {rating.toFixed(1)}
+                        </span>
+                        <span className="mx-1 text-slate-500">•</span>
+                        <span className="text-[10px] text-slate-400">{formatSoldCount(sold)}</span>
+                    </div>
 
-                        {/* Overlay linear */}
-                        <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/10 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    <h3 className="line-clamp-2 text-sm sm:text-base font-semibold leading-snug text-white mb-2 transition-colors group-hover:text-emerald-400">
+                        {product.nom}
+                    </h3>
 
-                        {/* Badges */}
-                        <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-                            {showDiscountBadge &&
-                                product.est_en_promotion &&
-                                discount > 0 && (
-                                    <Badge className="rounded-full border-0 bg-rose-500 px-2.5 py-1 text-[10px] font-semibold text-white shadow-lg shadow-rose-500/25">
-                                        -{discount}%
-                                    </Badge>
-                                )}
-                            {product.badge && (
-                                <Badge className="rounded-full border-0 bg-emerald-600 px-2.5 py-1 text-[10px] font-semibold text-white shadow-lg shadow-emerald-500/20">
-                                    <Sparkles className="mr-1 h-3 w-3" />
-                                    {product.badge}
-                                </Badge>
+                    <div className="flex items-end justify-between">
+                        <div className="flex flex-col">
+                            {oldPrice && (
+                                <span className="text-[10px] text-slate-400 line-through">
+                                    {formatCurrency(oldPrice)}
+                                </span>
                             )}
-                            {outOfStock && (
-                                <Badge
-                                    variant="secondary"
-                                    className="rounded-full bg-slate-900/85 px-2.5 py-1 text-[10px] font-medium text-white backdrop-blur"
-                                >
-                                    Rupture
-                                </Badge>
-                            )}
-                        </div>
-
-                        {/* Actions flottantes */}
-                        <div className="absolute top-3 right-3 z-10 flex flex-col gap-2">
-                            {/* Wishlist */}
-                            <button
-                                type="button"
-                                onClick={handleToggleWishlist}
-                                aria-label="Ajouter aux favoris"
-                                className={cn(
-                                    'flex h-10 w-10 items-center justify-center rounded-2xl',
-                                    'border border-white/70 bg-white/85 backdrop-blur-xl',
-                                    'shadow-lg shadow-slate-900/10',
-                                    'transition-all duration-300',
-                                    'hover:scale-105 hover:bg-white',
-                                    'dark:border-slate-700/70 dark:bg-slate-900/85',
-                                    isWishlisted &&
-                                        'border-rose-200 bg-rose-50 text-rose-500 dark:border-rose-800 dark:bg-rose-950/30',
-                                )}
-                            >
-                                <Heart
-                                    className={cn(
-                                        'h-4 w-4 transition-all',
-                                        isWishlisted && 'fill-current',
-                                    )}
-                                />
-                            </button>
-
-                            {/* Aperçu */}
-                            <span
-                                className={cn(
-                                    'flex h-10 w-10 items-center justify-center rounded-2xl',
-                                    'border border-white/70 bg-white/85 backdrop-blur-xl',
-                                    'text-slate-600 shadow-lg shadow-slate-900/10',
-                                    'opacity-0 transition-all duration-300',
-                                    'translate-y-2 group-hover:translate-y-0 group-hover:opacity-100',
-                                    'dark:border-slate-700/70 dark:bg-slate-900/85 dark:text-slate-300',
-                                )}
-                            >
-                                <Eye className="h-4 w-4" />
+                            <span className="text-sm sm:text-base font-bold tracking-tight text-white">
+                                {formatCurrency(currentPrice)}
                             </span>
                         </div>
 
-                        {/* CTA Ajouter au panier */}
-                        <div className="absolute inset-x-3 bottom-3 z-10 translate-y-4 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-                            <Button
-                                size="sm"
-                                onClick={handleAddToCart}
-                                disabled={outOfStock}
-                                className={cn(
-                                    'h-11 w-full rounded-2xl border-0',
-                                    'bg-linear-to-r from-emerald-600 via-emerald-500 to-teal-500',
-                                    'text-sm font-semibold text-white',
-                                    'shadow-lg shadow-emerald-500/25',
-                                    'transition-all duration-300',
-                                    'hover:shadow-xl hover:shadow-emerald-500/35',
-                                    'disabled:cursor-not-allowed disabled:opacity-60',
-                                )}
-                            >
-                                <ShoppingBag className="mr-2 h-4 w-4" />
-                                Ajouter au panier
-                            </Button>
-                        </div>
-                    </div>
-
-                    {/* Contenu */}
-                    <div className="flex flex-1 flex-col p-4">
-                        {/* Note + ventes */}
-                        <div className="mb-2 flex items-center gap-2 text-xs">
-                            <div className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
-                                <Star className="h-3 w-3 fill-current" />
-                                {rating.toFixed(1)}
+                        {/* Animated Cart Button inside the image */}
+                        <Button
+                            onClick={handleAddToCart}
+                            disabled={outOfStock}
+                            className={`group/cart-btn relative flex h-8 w-8 shrink-0 items-center justify-start overflow-hidden rounded-full transition-all duration-300 ease-out shadow-lg ${!outOfStock ? "bg-emerald-500 text-white hover:w-27.5 hover:bg-emerald-400" : "bg-slate-600/80 text-slate-300 cursor-not-allowed"}`}
+                        >
+                            <div className="absolute left-0 flex h-8 w-8 items-center justify-center">
+                                <ShoppingCart className="h-3.5 w-3.5 transition-transform duration-300 group-hover/cart-btn:scale-110" />
                             </div>
-                            {sold > 0 && (
-                                <span className="text-slate-500 dark:text-slate-400">
-                                    {compactNumber(sold)} vendus
-                                </span>
-                            )}
-                        </div>
-
-                        {/* Nom produit */}
-                        <h3 className="line-clamp-2 min-h-11 text-sm leading-5 font-semibold text-slate-900 transition-colors group-hover:text-emerald-700 dark:text-white dark:group-hover:text-emerald-400">
-                            {product.nom}
-                        </h3>
-
-                        {/* Prix */}
-                        <div className="mt-auto pt-3">
-                            <div className="flex flex-wrap items-end gap-2">
-                                <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
-                                    {formatPrice(currentPrice)}
-                                </span>
-                                {oldPrice && (
-                                    <span className="text-xs font-medium text-slate-400 line-through">
-                                        {formatPrice(oldPrice)}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
+                            <span className="ml-8 whitespace-nowrap pr-2 text-[10px] font-bold opacity-0 transition-opacity duration-300 group-hover/cart-btn:opacity-100">
+                                Ajouter
+                            </span>
+                        </Button>
                     </div>
-                </article>
+                </div>
             </Link>
-        </motion.div>
+        </div>
     );
 }

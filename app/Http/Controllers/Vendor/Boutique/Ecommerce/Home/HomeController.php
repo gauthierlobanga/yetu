@@ -237,6 +237,7 @@ class HomeController extends Controller
             'id' => $product->id,
             'nom' => $product->nom,
             'slug' => $product->slug,
+            'quantite_stock' => $product->quantite_stock,
             'prix_ttc' => (float) $product->prix_ttc,
             'prix_promotion' => $product->prix_promotion ? (float) $product->prix_promotion : null,
             'prix_actuel' => (float) $product->prix_actuel,
