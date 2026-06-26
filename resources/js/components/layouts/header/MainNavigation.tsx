@@ -68,12 +68,12 @@ export function MainNavigation({ items, topClass }: Props) {
                                         <motion.div
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ 
-                                                height: 0, 
+                                            exit={{
+                                                height: 0,
                                                 opacity: 0,
-                                                transition: { 
+                                                transition: {
                                                     height: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
-                                                    opacity: { duration: 0.3, delay: 0.05 } 
+                                                    opacity: { duration: 0.3, delay: 0.05 }
                                                 }
                                             }}
                                             transition={{

@@ -76,7 +76,7 @@ function FeaturedProductCard({ product }: { product: Product }) {
     };
 
     return (
-        <div className="group relative overflow-hidden rounded-3xl bg-slate-100 dark:bg-slate-800 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-700/50">
+        <div className="group relative overflow-hidden rounded-sm bg-slate-100 dark:bg-slate-800 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-700/50">
             <Link href={product.url || '#'} className="block relative aspect-square">
                 {/* Image */}
                 <img
@@ -206,7 +206,7 @@ export default function FeaturedProducts({
     return (
         <section className="py-16 lg:py-24 overflow-hidden relative">
 
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
+            <div className="mx-auto max-w-350 px-4 sm:px-6 lg:px-8 relative">
                 <header className="mb-12 flex flex-col items-center text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -272,7 +272,7 @@ export default function FeaturedProducts({
                     </motion.div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                             {products.map((product) => (
                                 <FeaturedProductCard
                                     key={product.id}

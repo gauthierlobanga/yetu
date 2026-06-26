@@ -6,6 +6,7 @@ import AppearanceToogle from '@/components/appearance-toogle';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ChooseYetuContent } from '@/components/navigation/ChooseYetuContent';
 import { ProductsMenuContent } from '@/components/navigation/ProductsMenuContent';
+import { Support } from '@/components/navigation/Support';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -40,6 +41,11 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
         {
             title: 'Produits',
             content: <ProductsMenuContent />,
+            href: '',
+        },
+        {
+            title: 'Support',
+            content:<Support />,
             href: '',
         },
         {

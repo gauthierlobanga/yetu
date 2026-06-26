@@ -119,9 +119,9 @@ export default function DailyOffers({
     dealOfTheDay,
 }: DailyOffersProps) {
     return (
-        <section className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
+        <section className="relative overflow-hidden py-16 sm:py-16 lg:py-18">
 
-            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="relative mx-auto max-w-350 px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <motion.div
                     variants={fadeUp}

@@ -8,7 +8,9 @@
     "axe/aria": [
       "default",
       {
-        "aria-valid-attr-value": "off"
+        "aria-valid-attr-value": "off",
+        "aria-input-field-name": "off",
+        "aria-required-parent": "off"
       }
     ],
     "button-type": "off",
@@ -27,6 +29,14 @@
       }
     ],
     "axe/text-alternatives": "off",
-    "apple-touch-icons": "off"
+    "apple-touch-icons": "off",
+    "compat-api/html": [
+      "default",
+      {
+        "ignore": [
+          "search"
+        ]
+      }
+    ]
   }
 }

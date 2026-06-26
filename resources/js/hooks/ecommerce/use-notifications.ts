@@ -26,6 +26,7 @@ export function useNotifications(): UseNotificationsReturn {
             {
                 preserveState: true,
                 preserveScroll: true,
+                showProgress: false,
             },
         );
     };
@@ -37,6 +38,7 @@ export function useNotifications(): UseNotificationsReturn {
             {
                 preserveState: true,
                 preserveScroll: true,
+                showProgress: false,
             },
         );
     };

@@ -6,7 +6,6 @@ import AppearanceToogle from '@/components/appearance-toogle';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { ProductCategoryMenuContent } from '@/components/navigation/categorie-produits-explorer/ProductsMenuContent';
 import { CentreAcheteurs } from '@/components/navigation/CentreAcheteurs';
-import { Support } from '@/components/navigation/Support';
 import SearchExperience from '@/components/search-my-input';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,9 +43,8 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
             href: '',
         },
         {
-            title: 'Support',
-            content: <Support />,
-            href: '',
+            title: 'Produits',
+            href: route('tenant.product.index'),
         },
         {
             title: 'Les fabricants',
@@ -64,7 +62,7 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                 className="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/80"
             >
                 {/* Ligne Supérieure : Logo, Recherche, Actions */}
-                <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto flex h-23 max-w-screen-2xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
                     {/* Menu mobile (hamburger) */}
                     <div className="lg:hidden">
                         <Sheet>
@@ -145,6 +143,7 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                                 // TODO: implémenter la logique d'envoi vers l'API d'IA
                             }}
                         />
+
                     </div>
 
                     {/* Actions à droite */}
@@ -207,13 +206,13 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                 </div>
 
                 {/* Ligne Inférieure : Navigation dropdown & Nouveaux liens */}
-                <div className="hidden border-t border-slate-100 lg:block dark:border-slate-800">
-                    <div className="mx-auto flex h-12 max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                <div className="hidden lg:block">
+                    <div className="mx-auto flex h-16 max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-8">
                         {/* Menus de gauche */}
                         <div className="flex h-full items-center">
                             <MainNavigation
                                 items={vendorNavItems}
-                                topClass="top-[113px]"
+                                topClass="top-[145px]"
                             />
                         </div>
 

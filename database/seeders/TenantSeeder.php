@@ -9,8 +9,8 @@ class TenantSeeder extends Seeder
     public function run()
     {
         $this->call([
-            ProduitCategorySeeder::class,
-            BrandSeeder::class,
+            // ProduitCategorySeeder::class,
+            // BrandSeeder::class,
             // ProductSeeder::class,
         ]);
     }

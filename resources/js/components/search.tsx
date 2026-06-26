@@ -679,7 +679,7 @@ const ResultsPanel = memo(function ResultsPanel({
             return;
         }
 
-         
+
         setHoverEnabled(false);
         const enable = () => setHoverEnabled(true);
         container.addEventListener('pointermove', enable, {

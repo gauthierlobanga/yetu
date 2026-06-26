@@ -43,7 +43,7 @@ function formatDate(date: Date): string {
 
 function CountdownUnit({ label, value }: { label: string; value: number }) {
     return (
-        <div className="flex min-w-[3.5rem] flex-col items-center justify-center rounded-xl border border-slate-200/50 bg-white/60 p-2 shadow-xs backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-800/60">
+        <div className="flex min-w-14 flex-col items-center justify-center rounded-xl border border-slate-200/50 bg-white/60 p-2 shadow-xs backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-800/60">
             <span className="text-xl font-bold tracking-tighter text-slate-900 tabular-nums md:text-2xl dark:text-white">
                 {formatNumber(value)}
             </span>
@@ -108,7 +108,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
     };
 
     return (
-        <section className="relative w-full overflow-hidden border-y border-slate-200/50 bg-white py-12 md:py-16 lg:py-20 dark:border-slate-800/50 dark:bg-slate-950">
+        <section className="relative w-full overflow-hidden border-y border-slate-200/50 bg-white py-10 md:py-14 lg:py-16 dark:border-slate-800/50 dark:bg-slate-950">
             {/* Animated Gradient Background */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
                 <motion.div
@@ -122,7 +122,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                         repeat: Infinity,
                         ease: 'linear'
                     }}
-                    className="absolute -left-1/4 -top-1/2 h-[800px] w-[800px] rounded-full bg-linear-to-tr from-emerald-500/20 to-teal-400/20 blur-[100px] mix-blend-multiply dark:mix-blend-screen"
+                    className="absolute -left-1/4 -top-1/2 h-200 w-200 rounded-full bg-linear-to-tr from-emerald-500/20 to-teal-400/20 blur-[100px] mix-blend-multiply dark:mix-blend-screen"
                 />
                 <motion.div
                     animate={{
@@ -135,7 +135,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                         repeat: Infinity,
                         ease: 'linear'
                     }}
-                    className="absolute -bottom-1/2 -right-1/4 h-[600px] w-[600px] rounded-full bg-linear-to-bl from-cyan-500/20 to-emerald-400/20 blur-[100px] mix-blend-multiply dark:mix-blend-screen"
+                    className="absolute -bottom-1/2 -right-1/4 h-150 w-150 rounded-full bg-linear-to-bl from-cyan-500/20 to-emerald-400/20 blur-[100px] mix-blend-multiply dark:mix-blend-screen"
                 />
             </div>
 
@@ -284,7 +284,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                                 href={route('tenant.promotions.index')}
                                 className="group relative inline-flex h-14 items-center justify-center gap-3 overflow-hidden rounded-xl bg-emerald-600 px-8 text-base font-semibold text-white shadow-[0_0_40px_-10px_rgba(16,185,129,0.4)] transition-all duration-300 hover:scale-[1.02] hover:bg-emerald-500 hover:shadow-[0_0_60px_-15px_rgba(16,185,129,0.6)] active:scale-[0.98]"
                             >
-                                <span className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-13deg)_translateX(-100%)] group-hover:duration-1000 group-hover:[transform:skew(-13deg)_translateX(100%)]">
+                                <span className="absolute inset-0 flex h-full w-full justify-center transform-[skew(-13deg)_translateX(-100%)] group-hover:duration-1000 group-hover:transform-[skew(-13deg)_translateX(100%)]">
                                     <div className="relative h-full w-8 bg-white/20" />
                                 </span>
                                 <span className="relative flex items-center gap-2">

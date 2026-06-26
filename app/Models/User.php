@@ -8,7 +8,7 @@ use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -37,7 +37,7 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @mixin HasRoles
  */
-class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, HasName, HasTenants, MustVerifyEmail // SyncMaster ,
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, HasName, HasTenants//, MustVerifyEmail // SyncMaster ,
 {
     use Billable;
 
@@ -537,7 +537,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
     {
         if ($this->hasRole('super_admin')) {
             return Tenant::query()
-                ->orderBy('raison_sociale')
+                ->orderBy('raison_sociale','asc')
                 ->get();
         }
 

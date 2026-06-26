@@ -53,7 +53,7 @@ export default function TrendingProducts({ products }: TrendingProductsProps) {
     return (
         <section className="relative overflow-hidden py-16 lg:py-24">
 
-            <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="relative mx-auto max-w-350 px-4 sm:px-6 lg:px-8">
                 <motion.header
                     initial="hidden"
                     whileInView="show"
@@ -110,7 +110,7 @@ export default function TrendingProducts({ products }: TrendingProductsProps) {
                         initial="hidden"
                         whileInView="show"
                         viewport={{ once: true, margin: "-100px" }}
-                        className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-6"
+                        className="grid grid-cols-2 gap-4 sm:grid-cols-3  md:grid-cols-4 lg:grid-cols-6 lg:gap-6"
                     >
                         {products.map((product) => {
                             const inStock = (product.quantite_stock ?? product.stock_disponible ?? 0) > 0;

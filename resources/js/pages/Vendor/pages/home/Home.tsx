@@ -2,8 +2,8 @@
 import { usePage } from '@inertiajs/react';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
-import CategoryTabs from '@/components/ecommerce/Categories/CategoryTabs';
 import FeaturedProducts from '@/components/ecommerce/products/FeaturedProducts';
+import ProductCategoriesPage from '@/components/ecommerce/products/ProductCategories';
 import PromoSection from '@/components/ecommerce/products/promo-sections-01';
 import TrendingProducts from '@/components/ecommerce/products/TrendingProducts';
 import MainLayout from '@/layouts/main-layout';
@@ -18,7 +18,6 @@ export default function Home() {
         featuredProducts,
         trendingProducts = [],
         categories = [],
-        productsByCategory = {},
         promo,
         bestSellers = [],
         dealOfTheDay = [],
@@ -50,10 +49,7 @@ export default function Home() {
                 dealOfTheDay={dealOfTheDay}
             />
 
-            <CategoryTabs
-                categories={categories}
-                productsByCategory={productsByCategory}
-            />
+             <ProductCategoriesPage />,
 
             {trendingProducts.length > 0 && (
                 <TrendingProducts products={trendingProducts} />

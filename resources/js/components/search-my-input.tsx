@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-/* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/components/search-my-input.tsx
 import axios from 'axios';
@@ -77,7 +76,6 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
             return;
         }
 
-        // CORRECTION: Assignation correcte du raccourci clavier selon l'OS
         setModifierLabel(
             /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl',
         );
@@ -122,7 +120,7 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
             variant="outline"
             type="button"
             className={cn(
-                'h-auto cursor-pointer justify-between gap-2 rounded-xl border-slate-200 bg-white/80 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm backdrop-blur transition-all hover:border-emerald-300 hover:bg-white hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-emerald-600 dark:hover:bg-slate-800',
+                'h-auto w-full cursor-pointer justify-between gap-2 rounded-xl border border-emerald-400 bg-white/80 px-4 py-2.5 text-sm font-medium text-slate-700 transition-all hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-emerald-600 dark:hover:bg-slate-800',
                 className,
             )}
             aria-label="Open search"
@@ -137,23 +135,23 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
             </span>
             <div className="flex items-center gap-2">
                 {showImageSearch && (
-                    <label 
-                        onClick={(e) => e.stopPropagation()} 
+                    <label
+                        onClick={(e) => e.stopPropagation()}
                         className="cursor-pointer rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-emerald-600 dark:hover:bg-slate-700 dark:hover:text-emerald-400 transition-colors"
                         title="Recherche par image"
                     >
                         <Camera size={18} />
-                        <input 
-                            type="file" 
-                            accept="image/*" 
-                            className="hidden" 
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
                             onChange={(e) => {
                                 if (e.target.files && e.target.files.length > 0) {
                                     onImageSearch?.(e.target.files[0]);
                                     // Reset input so the same file can be selected again
                                     e.target.value = '';
                                 }
-                            }} 
+                            }}
                         />
                     </label>
                 )}
@@ -283,21 +281,21 @@ const SearchInputField = memo(function SearchInputField({
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
                 )}
                 {showImageSearch && (
-                    <label 
+                    <label
                         className="cursor-pointer rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-emerald-600 dark:hover:bg-slate-700 dark:hover:text-emerald-400 transition-colors"
                         title="Recherche par image"
                     >
                         <Camera size={18} />
-                        <input 
-                            type="file" 
-                            accept="image/*" 
-                            className="hidden" 
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
                             onChange={(e) => {
                                 if (e.target.files && e.target.files.length > 0) {
                                     onImageSearch?.(e.target.files[0]);
                                     e.target.value = '';
                                 }
-                            }} 
+                            }}
                         />
                     </label>
                 )}

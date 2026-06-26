@@ -188,7 +188,7 @@ export default function ProductCard({
 
     // ──────── MODE GRILLE ────────
     return (
-        <div className="group relative overflow-hidden rounded-3xl bg-slate-100 dark:bg-slate-800 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-700/50">
+        <div className="group relative overflow-hidden rounded-sm bg-slate-100 dark:bg-slate-800 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ring-1 ring-slate-200/50 dark:ring-slate-700/50">
             <Link href={product.url || '#'} className="block relative aspect-square">
                 {/* Image */}
                 <img

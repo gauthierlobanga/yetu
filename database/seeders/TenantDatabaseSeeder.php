@@ -12,11 +12,11 @@ class TenantDatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            // BlogCategorySeeder::class,
+            BlogCategorySeeder::class,
             // PostSeeder::class,
             ProduitCategorySeeder::class,
-            BrandSeeder::class,
-            ProductSeeder::class,
+            // BrandSeeder::class,
+            // ProductSeeder::class,
         ]);
     }
 }

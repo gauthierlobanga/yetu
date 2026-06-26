@@ -54,6 +54,7 @@ class CreatedTenantUser implements ShouldQueue
                 'password' => $this->tenant->password, // Mot de passe du tenant
                 'email_verified_at' => $centralUser->email_verified_at,
                 'is_active' => true,
+                'email_verified' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
