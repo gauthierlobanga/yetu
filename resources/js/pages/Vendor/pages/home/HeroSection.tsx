@@ -61,11 +61,6 @@ export default function HeroSection({ categories }: HeroSectionProps) {
                     '-=0.4',
                 )
                 .from(
-                    '.hero-categories > *',
-                    { y: 10, opacity: 0, duration: 0.35, stagger: 0.04 },
-                    '-=0.3',
-                )
-                .from(
                     '.hero-visual',
                     { scale: 0.95, opacity: 0, duration: 1 },
                     '-=0.8',

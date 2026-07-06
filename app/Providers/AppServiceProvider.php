@@ -15,6 +15,7 @@ use App\Models\Produit;
 use App\Models\Promotion;
 use App\Models\Retour;
 use App\Models\User;
+use App\Observers\CommandeObserver;
 use App\Observers\TenantRealtimeActivityObserver;
 use App\Observers\UserObserver;
 use App\Policies\MediaPolicy;
@@ -60,7 +61,7 @@ class AppServiceProvider extends ServiceProvider
             User::observe(UserObserver::class);
         }
 
-        Commande::observe(\App\Observers\CommandeObserver::class);
+        Commande::observe(CommandeObserver::class);
 
         Event::listen(Login::class, RedirectVendorAfterLogin::class);
 

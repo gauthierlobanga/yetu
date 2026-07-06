@@ -591,7 +591,7 @@ class VendorRegistrationService
      */
     private function seedDefaultTenantRoles(): void
     {
- 
+
         $defaultRoles = [
             'owner' => 'Propriétaire de la boutique',
             'manager' => 'Gestionnaire de la boutique',

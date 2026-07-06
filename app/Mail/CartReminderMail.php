@@ -16,6 +16,7 @@ class CartReminderMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public RelancePanier $relance;
+
     public string $recoverUrl;
 
     public function __construct(RelancePanier $relance, string $recoverUrl)
@@ -27,6 +28,7 @@ class CartReminderMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         $firstName = $this->relance->abandonPanier->panier->client->prenom ?? 'client';
+
         return new Envelope(
             subject: "🎁 {$firstName}, vos articles vous attendent – offre spéciale à l’intérieur",
         );
@@ -38,7 +40,7 @@ class CartReminderMail extends Mailable implements ShouldQueue
         $panier->loadMissing([
             'items.produit.media',        // pour les images
             'items.variante',             // caractéristiques (couleur, taille…)
-            'client'
+            'client',
         ]);
 
         // On peut ajouter une recommandation de produit complémentaire si tu le souhaites
@@ -51,10 +53,10 @@ class CartReminderMail extends Mailable implements ShouldQueue
         return new Content(
             view: 'emails.cart.reminder',
             with: [
-                'relance'          => $this->relance,
-                'recoverUrl'       => $this->recoverUrl,
-                'panier'           => $panier,
-                'produitPhare'     => $produitPhare,   // nouveauté : cross-sell
+                'relance' => $this->relance,
+                'recoverUrl' => $this->recoverUrl,
+                'panier' => $panier,
+                'produitPhare' => $produitPhare,   // nouveauté : cross-sell
             ]
         );
     }

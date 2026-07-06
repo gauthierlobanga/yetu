@@ -171,7 +171,6 @@ class DomainsTable
                         }
                     }),
 
-
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -9,12 +9,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::connection('central')->table('tenants', function (Blueprint $table) {
-            if (!Schema::hasColumn('tenants', 'plan_id')) {
+            if (! Schema::hasColumn('tenants', 'plan_id')) {
                 $table->uuid('plan_id')->nullable()->after('user_id');
                 $table->foreign('plan_id')->references('id')->on('plans')->nullOnDelete();
             }
 
-            if (!Schema::hasColumn('tenants', 'description')) {
+            if (! Schema::hasColumn('tenants', 'description')) {
                 $table->text('description')->nullable()->after('slug');
             }
         });

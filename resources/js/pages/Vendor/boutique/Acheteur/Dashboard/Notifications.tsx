@@ -45,7 +45,7 @@ export default function Notifications({ notifications, activeTab }: Props) {
                             <NotificationManager
                                 notifications={notifications}
                                 activeTab={activeTab}
-                                detailRouteName="acheteur.notifications.show"
+                                detailRouteName="tenant.notifications.show"
                             />
                         </div>
                     </div>

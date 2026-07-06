@@ -28,7 +28,7 @@ class CommandeObserver
         if ($commande->isDirty('statut') && $commande->statut === Commande::STATUT_TERMINE) {
             $this->attribuerPointsFidelite($commande);
         }
-        
+
         // Retirer les points si la commande est annulée après coup
         if ($commande->isDirty('statut') && in_array($commande->statut, [Commande::STATUT_ANNULE, Commande::STATUT_REJETE])) {
             $this->annulerPointsFidelite($commande);
@@ -41,19 +41,19 @@ class CommandeObserver
     private function attribuerPointsFidelite(Commande $commande): void
     {
         $client = $commande->client;
-        if (!$client) {
+        if (! $client) {
             return;
         }
 
         // On récupère le programme de fidélité actif
         $programme = ProgrammeFidelite::actifs()->first();
-        if (!$programme) {
+        if (! $programme) {
             return; // Aucun programme de fidélité actif
         }
 
         $compte = $client->compteFidelite;
         // Créer le compte fidélité s'il n'existe pas
-        if (!$compte) {
+        if (! $compte) {
             $compte = $client->compteFidelite()->create([
                 'programme_fidelite_id' => $programme->id,
                 'points' => 0,
@@ -76,8 +76,8 @@ class CommandeObserver
 
         if ($pointsGagnes > 0) {
             $compte->ajouterPoints(
-                $pointsGagnes, 
-                "Points gagnés pour la commande #{$commande->numero_commande}", 
+                $pointsGagnes,
+                "Points gagnés pour la commande #{$commande->numero_commande}",
                 $commande
             );
         }
@@ -89,7 +89,7 @@ class CommandeObserver
     private function annulerPointsFidelite(Commande $commande): void
     {
         $client = $commande->client;
-        if (!$client || !$client->compteFidelite) {
+        if (! $client || ! $client->compteFidelite) {
             return;
         }
 
@@ -119,13 +119,13 @@ class CommandeObserver
                 'points' => -$transactionGain->points,
                 'raison' => "Annulation commande #{$commande->numero_commande}",
                 'metadata' => [
-                    'commande_id' => $commande->id, 
-                    'transaction_annulee_id' => $transactionGain->id
+                    'commande_id' => $commande->id,
+                    'transaction_annulee_id' => $transactionGain->id,
                 ],
                 'date_transaction' => now(),
             ]);
 
-            // Mettre à jour le solde (on diminue le solde courant, et on peut aussi diminuer les points cumulés 
+            // Mettre à jour le solde (on diminue le solde courant, et on peut aussi diminuer les points cumulés
             // pour ajuster la barre de progression, mais on le fait seulement si c'est pertinent)
             $compte->points = max(0, $compte->points - $transactionGain->points);
             $compte->points_cumules = max(0, $compte->points_cumules - $transactionGain->points);

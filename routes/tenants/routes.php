@@ -320,6 +320,7 @@ Route::middleware([
         Route::get('/terms', [TermController::class, 'terms'])->name('page.terms');
         Route::get('/privacy', [PrivacyController::class, 'privacy'])->name('page.privacy');
         Route::get('/cookies', [CookieController::class, 'cookies'])->name('page.cookies');
+        Route::post('/api/cookie-consent', [CookieController::class, 'storeConsent'])->name('api.cookie-consent');
         Route::get('/support', [SupportController::class, 'support'])->name('page.support');
         Route::get('/faq', [FaqController::class, 'faq'])->name('page.faq');
         Route::get('/testimonials', [TestimonialsController::class, 'testimonials'])->name('page.testimonials');

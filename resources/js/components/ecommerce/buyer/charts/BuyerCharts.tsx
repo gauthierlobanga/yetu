@@ -165,9 +165,9 @@ const interactiveChartConfig = {
 } satisfies ChartConfig
 
 export function ChartAreaInteractive({
-  dailySpending,
+  dailySpending = [],
 }: {
-  dailySpending: { date: string; count: number; total: number }[]
+  dailySpending?: { date: string; count: number; total: number }[]
 }) {
   const [timeRange, setTimeRange] = React.useState("90d")
 

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Cart\CartController;
 use App\Http\Controllers\Vendor\Boutique\Ecommerce\Product\ProductController;
+use App\Models\Announcement;
 use App\Models\Brand;
 use App\Models\ProductCategory;
 use App\Models\Produit;
@@ -86,6 +87,66 @@ class HandleInertiaRequests extends Middleware
             'tenantRoutePrefix' => $tenantRoutePrefix,
             ...$this->getRegionData($request),
             'megaMenuCategories' => $this->getMegaMenuCategories(),
+            'announcements' => function () use ($tenant, $isTenant, $request) {
+                // Determine target audiences
+                $targets = ['all'];
+                if ($isTenant) {
+                    $targets[] = 'buyers'; // Visitors on a shop are buyers
+                } else {
+                    // Central app
+                    // Simplification: assume if they are viewing /vendeur they are a vendor, otherwise they are a buyer on central or admin
+                    if ($request->is('vendeur*') || $request->is('admin*') || $request->is('dashboard*')) {
+                        // Let's rely on the URL or simple logic for now. A safer bet is sharing to all authenticated users appropriately
+                        // But for simplicity of the global view, anyone on central can see 'buyers' or 'all' announcements.
+                    }
+                }
+
+                // Active announcements logic
+                $now = now();
+                $query = Announcement::query()
+                    ->where('is_active', true)
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('starts_at')->orWhere('starts_at', '<=', $now);
+                    })
+                    ->where(function ($q) use ($now) {
+                        $q->whereNull('ends_at')->orWhere('ends_at', '>=', $now);
+                    });
+
+                if ($isTenant) {
+                    // On a tenant shop: show central announcements for all/buyers + tenant's own announcements for buyers
+                    $query->where(function ($q) use ($tenant) {
+                        $q->where(function ($subQ) {
+                            $subQ->whereNull('tenant_id')
+                                ->whereIn('target_audience', ['all', 'buyers']);
+                        })->orWhere(function ($subQ) use ($tenant) {
+                            $subQ->where('tenant_id', $tenant->id)
+                                ->where('target_audience', 'buyers');
+                        });
+                    });
+                } else {
+                    // On central app:
+                    if ($request->is('vendeur*')) {
+                        // Vendor dashboard
+                        $query->whereNull('tenant_id')
+                            ->whereIn('target_audience', ['all', 'vendors']);
+                    } else {
+                        // Central frontend or admin
+                        $query->whereNull('tenant_id')
+                            ->whereIn('target_audience', ['all', 'buyers']);
+                    }
+                }
+
+                return $query->get()->map(function ($announcement) {
+                    return [
+                        'id' => $announcement->id,
+                        'type' => $announcement->type,
+                        'title' => $announcement->title,
+                        'message' => $announcement->message,
+                        'action_url' => $announcement->action_url,
+                        'action_text' => $announcement->action_text,
+                    ];
+                });
+            },
             'subscription' => function () use ($tenant) {
                 if (! $tenant) {
                     return null;

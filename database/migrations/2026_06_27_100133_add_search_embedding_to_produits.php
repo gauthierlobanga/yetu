@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -10,7 +11,7 @@ return new class extends Migration
     {
         if (! Schema::hasColumn('produits', 'search_embedding')) {
             $dimension = (int) config('services.embedding.dimensions', 1536);
-            \Illuminate\Support\Facades\DB::statement("ALTER TABLE produits ADD COLUMN search_embedding public.vector({$dimension}) NULL");
+            DB::statement("ALTER TABLE produits ADD COLUMN search_embedding public.vector({$dimension}) NULL");
         }
     }
 

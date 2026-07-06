@@ -46,13 +46,30 @@ if (typeof window !== 'undefined') {
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+import { GlobalLayoutWrapper } from '@/components/global/GlobalLayoutWrapper';
+
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
-    resolve: (name) =>
-        resolvePageComponent(
+    resolve: (name) => {
+        const pagePromise = resolvePageComponent(
             `./pages/${name}.tsx`,
             import.meta.glob('./pages/**/*.tsx'),
-        ),
+        );
+
+        pagePromise.then((module: any) => {
+            const originalLayout = module.default.layout;
+            module.default.layout = (page: React.ReactNode) => {
+                const layout = originalLayout ? originalLayout(page) : page;
+                return (
+                    <GlobalLayoutWrapper>
+                        {layout}
+                    </GlobalLayoutWrapper>
+                );
+            };
+        });
+
+        return pagePromise;
+    },
     setup({ el, App, props }) {
         const root = createRoot(el);
         root.render(

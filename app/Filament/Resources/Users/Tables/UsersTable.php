@@ -66,7 +66,7 @@ class UsersTable
                         if (! $state) {
                             return 'Aucune';
                         }
-                        
+
                         $summary = [];
                         if (isset($state['locale'])) {
                             $summary[] = strtoupper($state['locale']);
@@ -77,7 +77,7 @@ class UsersTable
                         if (isset($state['currency'])) {
                             $summary[] = $state['currency'];
                         }
-                        
+
                         return implode(' | ', $summary) ?: 'Aucune';
                     })
                     ->badge()

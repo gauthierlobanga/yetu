@@ -24,9 +24,9 @@ class SystemNotificationResource extends Resource
 
     protected static \UnitEnum|string|null $navigationGroup = 'Notifications';
 
-    protected static ?string $modelLabel = 'Notification système';
+    protected static ?string $modelLabel = 'Système';
 
-    protected static ?string $pluralModelLabel = 'Notifications système';
+    protected static ?string $pluralModelLabel = 'Système';
 
     protected static ?string $recordTitleAttribute = 'type';
 

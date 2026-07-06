@@ -402,7 +402,7 @@ class ProductIntelligentSearch
         );
 
         return Produit::query()
-            ->whereNotNull('image_search_metadata',true)
+            ->whereNotNull('image_search_metadata', true)
             ->published()
             ->orderByVectorDistance('image_search_metadata', $embedding)
             ->limit($limit)

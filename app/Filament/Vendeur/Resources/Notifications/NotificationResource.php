@@ -26,9 +26,9 @@ class NotificationResource extends Resource
 
     protected static \UnitEnum|string|null $navigationGroup = 'Notifications';
 
-    protected static ?string $modelLabel = 'Notification de commande';
+    protected static ?string $modelLabel = 'Commande';
 
-    protected static ?string $pluralModelLabel = 'Notifications de commandes';
+    protected static ?string $pluralModelLabel = 'Commandes';
 
     protected static ?string $recordTitleAttribute = 'sujet';
 

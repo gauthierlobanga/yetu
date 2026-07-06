@@ -29,6 +29,7 @@ class TenantPropsService
             'is_active' => $tenant->is_active,
             'plan' => $this->formatPlan($tenant->plan),
             'ai_enabled' => $tenant->ai_enabled ?? false,
+            'cookie_settings' => $tenant->getConfiguration('cookie_settings'),
         ];
     }
 

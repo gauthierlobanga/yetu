@@ -76,42 +76,42 @@ class ProduitsStats extends StatsOverviewWidget
                 ->icon('heroicon-o-shopping-bag'),
 
             Stat::make('Publiés', $publies)
-                ->description($brouillons . ' brouillons, ' . $abandonnes . ' abandonnés')
+                ->description($brouillons.' brouillons, '.$abandonnes.' abandonnés')
                 ->descriptionIcon('heroicon-o-check-circle', 'before')
                 ->color('success')
                 ->icon('heroicon-o-check-circle'),
 
             Stat::make('Rupture de stock', $enRupture)
-                ->description($stockAlerte . ' produits sous seuil d\'alerte')
+                ->description($stockAlerte.' produits sous seuil d\'alerte')
                 ->descriptionIcon('heroicon-o-exclamation-circle', 'before')
                 ->color('danger')
                 ->icon('heroicon-o-exclamation-circle'),
 
             Stat::make('En promotion', $enPromotion)
-                ->description($dealDuJour . ' deals du jour')
+                ->description($dealDuJour.' deals du jour')
                 ->descriptionIcon('heroicon-o-tag', 'before')
                 ->color('warning')
                 ->icon('heroicon-o-tag'),
 
             Stat::make('Ventes totales', number_format($totalVentes))
-                ->description($noteMoyenne > 0 ? 'Note moyenne : ' . number_format($noteMoyenne, 1) . '/5' : 'Pas encore d\'avis')
+                ->description($noteMoyenne > 0 ? 'Note moyenne : '.number_format($noteMoyenne, 1).'/5' : 'Pas encore d\'avis')
                 ->descriptionIcon('heroicon-o-star', 'before')
                 ->color('blue')
                 ->icon('heroicon-o-arrow-trending-up'),
 
             Stat::make('Vues totales', number_format($totalVues))
-                ->description($aLaUne . ' à la une, ' . $nouveautes . ' nouveautés')
+                ->description($aLaUne.' à la une, '.$nouveautes.' nouveautés')
                 ->descriptionIcon('heroicon-o-eye', 'before')
                 ->color('indigo')
                 ->icon('heroicon-o-eye'),
 
             Stat::make('Produits avec images', $avecImages)
-                ->description(round(($avecImages / max($total, 1)) * 100) . '% du catalogue')
+                ->description(round(($avecImages / max($total, 1)) * 100).'% du catalogue')
                 ->descriptionIcon('heroicon-o-photo', 'before')
                 ->color('teal')
                 ->icon('heroicon-o-photo'),
 
-            Stat::make('Programmés / expirés', $enAttente . ' en attente, ' . $expires . ' expirés')
+            Stat::make('Programmés / expirés', $enAttente.' en attente, '.$expires.' expirés')
                 ->description('À surveiller')
                 ->descriptionIcon('heroicon-o-clock', 'before')
                 ->color('purple')

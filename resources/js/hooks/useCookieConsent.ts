@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 export interface CookiePreferences {
     necessary: boolean;
-    analytics: boolean;
-    marketing: boolean;
-    preferences: boolean;
+    [key: string]: boolean;
 }
 
 const STORAGE_KEY = 'yetu-cookie-consent';
@@ -37,7 +36,7 @@ export function useCookieConsent() {
         setIsLoaded(true);
     }, []);
 
-    const saveAndDispatch = (newPrefs: CookiePreferences) => {
+    const saveAndDispatch = async (newPrefs: CookiePreferences) => {
         // Ensure necessary is always true
         const prefsToSave = { ...newPrefs, necessary: true };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(prefsToSave));
@@ -46,6 +45,15 @@ export function useCookieConsent() {
         
         // Dispatch custom event for other scripts (e.g. Google Analytics)
         window.dispatchEvent(new CustomEvent('cookieConsentChange', { detail: prefsToSave }));
+
+        // Save to backend for GDPR compliance log
+        try {
+            await axios.post('/api/cookie-consent', {
+                preferences: prefsToSave
+            });
+        } catch (error) {
+            console.error('Failed to save cookie consent to server:', error);
+        }
     };
 
     const acceptAll = () => {

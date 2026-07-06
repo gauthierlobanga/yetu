@@ -12,6 +12,7 @@ use App\Models\Panier;
 use App\Models\Produit;
 use App\Models\Promotion;
 use App\Models\Retour;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Notifications\TenantDashboardActivityNotification;
 use Illuminate\Database\Eloquent\Model;
@@ -98,7 +99,7 @@ class TenantRealtimeActivityService
         return true;
     }
 
-    protected function resolveRecipients(\App\Models\Tenant $tenant): Collection
+    protected function resolveRecipients(Tenant $tenant): Collection
     {
         // En contexte multitenant, on vérifie si la méthode users existe.
         // On renvoie les utilisateurs liés à la boutique.

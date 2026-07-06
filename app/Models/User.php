@@ -37,7 +37,7 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @mixin HasRoles
  */
-class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, HasName, HasTenants//, MustVerifyEmail // SyncMaster ,
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, HasName, HasTenants // , MustVerifyEmail // SyncMaster ,
 {
     use Billable;
 
@@ -537,7 +537,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
     {
         if ($this->hasRole('super_admin')) {
             return Tenant::query()
-                ->orderBy('raison_sociale','asc')
+                ->orderBy('raison_sociale', 'asc')
                 ->get();
         }
 

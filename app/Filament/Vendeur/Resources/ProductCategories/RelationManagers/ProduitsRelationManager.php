@@ -12,7 +12,6 @@ use Filament\Actions\DetachBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
-use Filament\Tables;
 use Filament\Tables\Table;
 
 class ProduitsRelationManager extends RelationManager
@@ -44,6 +43,6 @@ class ProduitsRelationManager extends RelationManager
                     DetachBulkAction::make(),
                 ]),
             ])
-            ->modifyQueryUsing(fn ($query) => $query); 
+            ->modifyQueryUsing(fn ($query) => $query);
     }
 }
