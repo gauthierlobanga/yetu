@@ -35,6 +35,7 @@ Ce document décrit comment le système gère les abonnements des tenants et ass
 **Fichier**: `app/Http/Controllers/Auth/TenantSsoLoginController.php`
 
 **Nouvelles vérifications** (lignes 31-35):
+
 - Après validation du token SSO, vérifie que le tenant a une subscription active
 - Si pas d'abonnement: redirige vers `/subscription/none` au lieu de 403
 - Permet une expérience cohérente peu importe le point d'accès
@@ -53,6 +54,7 @@ Ce document décrit comment le système gère les abonnements des tenants et ass
 **Routes e-commerce publiques**: `Route::name('tenant.')->middleware(EnsureTenantSubscription::class)->group(...)`
 
 **Comportement**:
+
 - Clients sans abonnement voient: "Aucun abonnement"
 - Redirection automatique vers `/subscription/none`
 - Pages statiques (terms, privacy) restent publiques
@@ -63,6 +65,7 @@ Ce document décrit comment le système gère les abonnements des tenants et ass
 **Fichier**: `app/Http/Middleware/EnsureTenantSubscription.php`
 
 **Logique de vérification**:
+
 1. ✅ Abonnement actif → Accès autorisé
 2. ❌ Pas d'abonnement → `/subscription/none`
 3. ⚠️ Essai expiré → `/subscription/required`
@@ -72,6 +75,7 @@ Ce document décrit comment le système gère les abonnements des tenants et ass
 ## 4. Flux d'Accès
 
 ### 4.1 Page d'Accueil Publique
+
 ```
 Visite: http://shop.localhost:8000/
 ↓
@@ -81,6 +85,7 @@ Abonnement actif? → Oui: Page / Non: /subscription/none
 ```
 
 ### 4.2 Connexion SSO
+
 ```
 Clique lien SSO
 ↓
@@ -92,6 +97,7 @@ Subscription active? → Oui: Dashboard / Non: /subscription/none
 ```
 
 ### 4.3 Panel Filament Vendeur
+
 ```
 Visite: /vendeur
 ↓

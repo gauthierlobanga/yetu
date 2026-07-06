@@ -245,6 +245,29 @@ class AccountDashboardController extends Controller
 
         /*
         |--------------------------------------------------------------------------
+        | Dépenses quotidiennes (90 derniers jours)
+        |--------------------------------------------------------------------------
+        */
+        $dailySpending = $client->commandes()
+            ->selectRaw("
+                to_char(created_at, 'YYYY-MM-DD') as date,
+                COUNT(*) as count,
+                COALESCE(SUM(total), 0) as total
+            ")
+            ->where('created_at', '>=', now()->subDays(90)->startOfDay())
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => $item->date,
+                    'count' => (int) $item->count,
+                    'total' => (float) $item->total,
+                ];
+            });
+
+        /*
+        |--------------------------------------------------------------------------
         | Top catégories
         |--------------------------------------------------------------------------
         |
@@ -367,6 +390,8 @@ class AccountDashboardController extends Controller
                 'statusDistribution' => $statusDistribution,
 
                 'loyaltyHistory' => $loyaltyHistory,
+
+                'dailySpending' => $dailySpending,
             ]
         );
     }

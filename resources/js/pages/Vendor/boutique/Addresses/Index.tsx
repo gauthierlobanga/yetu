@@ -157,12 +157,18 @@ export default function ShopAddressesPage() {
 
     // Charger les villes quand le pays change
     useEffect(() => {
-        if (!data.pays) {
+        if (!data.pays || countries.length === 0) {
+            return;
+        }
+
+        const country = countries.find((c) => c.name === data.pays);
+        if (!country) {
+            setCities([]);
             return;
         }
 
         setLoadingCities(true);
-        fetch(route('tenant.addresses.cities', encodeURIComponent(data.pays)))
+        fetch(route('tenant.addresses.cities', country.id))
             .then((res) => res.json())
             .then((cityList: City[]) => {
                 setCities(cityList);
@@ -172,7 +178,7 @@ export default function ShopAddressesPage() {
                 setCities([]);
                 setLoadingCities(false);
             });
-    }, [data.pays]);
+    }, [data.pays, countries]);
 
     // Lorsque l'utilisateur change de pays, on réinitialise ville et code postal
     const handleCountryChange = (countryName: string) => {
@@ -192,11 +198,11 @@ export default function ShopAddressesPage() {
     // Quand une ville est sélectionnée, on peut pré-remplir le code postal
     const handleCityChange = (cityName: string) => {
         const city = cities.find((c) => c.name === cityName);
-        setData('ville', cityName);
-
-        if (city?.postal_code) {
-            setData('code_postal', city.postal_code);
-        }
+        setData({
+            ...data,
+            ville: cityName,
+            ...(city?.postal_code ? { code_postal: city.postal_code } : {}),
+        });
     };
 
     // Supprimer une adresse
@@ -254,9 +260,16 @@ export default function ShopAddressesPage() {
     const cancelEdit = () => {
         setEditingId(null);
         reset();
-        setData('pays', initialCountry);
-        setData('telephone', defaultPhoneCode || FALLBACK_PHONE_CODE);
-        setData('type', 'livraison');
+        setData({
+            rue: '',
+            complement: '',
+            code_postal: '',
+            ville: '',
+            pays: initialCountry,
+            telephone: defaultPhoneCode || FALLBACK_PHONE_CODE,
+            type: 'livraison',
+            est_defaut: false,
+        });
     };
 
     // Soumission (création ou mise à jour)
@@ -270,9 +283,16 @@ export default function ShopAddressesPage() {
                 setEditingId(null);
             }
 
-            setData('pays', initialCountry);
-            setData('telephone', defaultPhoneCode || FALLBACK_PHONE_CODE);
-            setData('type', 'livraison');
+            setData({
+                rue: '',
+                complement: '',
+                code_postal: '',
+                ville: '',
+                pays: initialCountry,
+                telephone: defaultPhoneCode || FALLBACK_PHONE_CODE,
+                type: 'livraison',
+                est_defaut: false,
+            });
             toast.success(
                 editingId ? 'Adresse mise à jour' : 'Adresse enregistrée',
                 { style: getToastStyle() },
@@ -510,7 +530,7 @@ export default function ShopAddressesPage() {
                                                         )
                                                     }
                                                     placeholder="Ex : 24 Avenue de la Paix"
-                                                    className="h-12 rounded-2xl border-slate-200 pl-11 shadow-sm focus-visible:ring-emerald-500 dark:border-slate-700"
+                                                    className="h-12 rounded-2xl border-slate-200/60 bg-slate-50/50 pl-11 shadow-xs transition-all duration-300 hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950"
                                                 />
                                             </div>
                                             <InputError message={errors.rue} />
@@ -534,7 +554,7 @@ export default function ShopAddressesPage() {
                                                         )
                                                     }
                                                     placeholder="Appartement, étage..."
-                                                    className="h-12 rounded-2xl border-slate-200 pl-11 shadow-sm dark:border-slate-700"
+                                                    className="h-12 rounded-2xl border-slate-200/60 bg-slate-50/50 pl-11 shadow-xs transition-all duration-300 hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950"
                                                 />
                                             </div>
                                             <InputError
@@ -542,123 +562,129 @@ export default function ShopAddressesPage() {
                                             />
                                         </div>
 
-                                        {/* Pays (combobox recherchable) */}
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                Pays
-                                            </label>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        role="combobox"
-                                                        className={cn(
-                                                            'h-12 w-full justify-start rounded-2xl border-slate-200 pl-11 text-left font-normal shadow-sm',
-                                                            'dark:border-slate-700',
-                                                            !data.pays &&
-                                                                'text-muted-foreground',
-                                                        )}
-                                                        disabled={
-                                                            loadingCountries
-                                                        }
-                                                    >
-                                                        <Globe className="absolute left-4 h-4 w-4 text-slate-400" />
-                                                        {data.pays
-                                                            ? countries.find(
-                                                                  (c) =>
-                                                                      c.name ===
-                                                                      data.pays,
-                                                              )?.name
-                                                            : 'Sélectionnez un pays'}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                                    <Command>
-                                                        <CommandInput placeholder="Rechercher un pays..." />
-                                                        <CommandList>
-                                                            <CommandEmpty>
-                                                                Aucun pays
-                                                                trouvé.
-                                                            </CommandEmpty>
-                                                            <CommandGroup>
-                                                                {countries.map(
-                                                                    (c) => (
-                                                                        <CommandItem
-                                                                            key={
-                                                                                c.id
-                                                                            }
-                                                                            value={
-                                                                                c.name
-                                                                            }
-                                                                            onSelect={(
-                                                                                currentValue,
-                                                                            ) => {
-                                                                                handleCountryChange(
+                                        {/* Ligne : Pays et Ville */}
+                                        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                                            {/* Pays (combobox recherchable) */}
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                    Pays
+                                                </label>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            role="combobox"
+                                                            className={cn(
+                                                                'h-12 w-full justify-start rounded-2xl border-slate-200/60 bg-slate-50/50 pl-4 text-left font-normal shadow-xs transition-all duration-300',
+                                                                'hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10',
+                                                                'dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950',
+                                                                !data.pays &&
+                                                                    'text-slate-400 dark:text-slate-500',
+                                                            )}
+                                                            disabled={
+                                                                loadingCountries
+                                                            }
+                                                        >
+                                                            {data.pays ? (
+                                                                <span className="truncate">
+                                                                    {countries.find((c) => c.name === data.pays)?.name}
+                                                                </span>
+                                                            ) : (
+                                                                'Sélectionnez un pays'
+                                                            )}
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-2xl border-slate-200/60 bg-white/90 backdrop-blur-xl shadow-xl dark:border-slate-800 dark:bg-slate-950/90">
+                                                        <Command className="bg-transparent">
+                                                            <CommandInput placeholder="Rechercher un pays..." className="border-none focus:ring-0" />
+                                                            <CommandList className="p-1 max-h-60">
+                                                                <CommandEmpty className="py-6 text-center text-sm text-slate-500">
+                                                                    Aucun pays
+                                                                    trouvé.
+                                                                </CommandEmpty>
+                                                                <CommandGroup>
+                                                                    {countries.map(
+                                                                        (c) => (
+                                                                            <CommandItem
+                                                                                key={
+                                                                                    c.id
+                                                                                }
+                                                                                value={
+                                                                                    c.name
+                                                                                }
+                                                                                className="mb-1 cursor-pointer rounded-xl px-3 py-2 transition-colors aria-selected:bg-emerald-50 aria-selected:text-emerald-900 last:mb-0 dark:aria-selected:bg-emerald-500/10 dark:aria-selected:text-emerald-100"
+                                                                                onSelect={(
                                                                                     currentValue,
-                                                                                );
-                                                                            }}
-                                                                        >
-                                                                            <Check
-                                                                                className={cn(
-                                                                                    'mr-2 h-4 w-4',
-                                                                                    data.pays ===
-                                                                                        c.name
-                                                                                        ? 'opacity-100'
-                                                                                        : 'opacity-0',
-                                                                                )}
-                                                                            />
-                                                                            {
-                                                                                c.name
-                                                                            }
-                                                                        </CommandItem>
-                                                                    ),
-                                                                )}
-                                                            </CommandGroup>
-                                                        </CommandList>
-                                                    </Command>
-                                                </PopoverContent>
-                                            </Popover>
-                                            <InputError message={errors.pays} />
-                                        </div>
+                                                                                ) => {
+                                                                                    handleCountryChange(
+                                                                                        currentValue,
+                                                                                    );
+                                                                                }}
+                                                                            >
+                                                                                <Check
+                                                                                    className={cn(
+                                                                                        'mr-2 h-4 w-4',
+                                                                                        data.pays ===
+                                                                                            c.name
+                                                                                            ? 'opacity-100 text-emerald-500'
+                                                                                            : 'opacity-0',
+                                                                                    )}
+                                                                                />
+                                                                                {
+                                                                                    c.name
+                                                                                }
+                                                                            </CommandItem>
+                                                                        ),
+                                                                    )}
+                                                                </CommandGroup>
+                                                            </CommandList>
+                                                        </Command>
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <InputError message={errors.pays} />
+                                            </div>
 
-                                        {/* Ville (combobox recherchable) */}
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                Ville
-                                            </label>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        role="combobox"
-                                                        className={cn(
-                                                            'h-12 w-full justify-start rounded-2xl border-slate-200 pl-11 text-left font-normal shadow-sm',
-                                                            'dark:border-slate-700',
-                                                            !data.ville &&
-                                                                'text-muted-foreground',
-                                                        )}
-                                                        disabled={
-                                                            loadingCities ||
-                                                            !data.pays
-                                                        }
-                                                    >
-                                                        <MapPinned className="absolute left-4 h-4 w-4 text-slate-400" />
-                                                        {data.ville
-                                                            ? cities.find(
-                                                                  (c) =>
-                                                                      c.name ===
-                                                                      data.ville,
-                                                              )?.name
-                                                            : loadingCities
-                                                              ? 'Chargement...'
-                                                              : 'Sélectionnez une ville'}
-                                                    </Button>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                                                    <Command>
-                                                        <CommandInput placeholder="Rechercher une ville..." />
-                                                        <CommandList>
-                                                            <CommandEmpty>
+                                            {/* Ville (combobox recherchable) */}
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                    Ville
+                                                </label>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <Button
+                                                            variant="outline"
+                                                            role="combobox"
+                                                            className={cn(
+                                                                'h-12 w-full justify-start rounded-2xl border-slate-200/60 bg-slate-50/50 pl-4 text-left font-normal shadow-xs transition-all duration-300',
+                                                                'hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10',
+                                                                'dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950',
+                                                                !data.ville &&
+                                                                    'text-slate-400 dark:text-slate-500',
+                                                            )}
+                                                            disabled={
+                                                                loadingCities ||
+                                                                !data.pays
+                                                            }
+                                                        >
+                                                            {data.ville ? (
+                                                                <span className="truncate">
+                                                                    {cities.find((c) => c.name === data.ville)?.name}
+                                                                </span>
+                                                            ) : loadingCities ? (
+                                                                <div className="flex items-center gap-2 text-slate-500">
+                                                                    <LoaderIcon className="h-4 w-4 animate-spin" />
+                                                                    Chargement...
+                                                                </div>
+                                                            ) : (
+                                                                'Sélectionnez une ville'
+                                                            )}
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-2xl border-slate-200/60 bg-white/90 backdrop-blur-xl shadow-xl dark:border-slate-800 dark:bg-slate-950/90">
+                                                    <Command className="bg-transparent">
+                                                        <CommandInput placeholder="Rechercher une ville..." className="border-none focus:ring-0" />
+                                                        <CommandList className="p-1 max-h-60">
+                                                            <CommandEmpty className="py-6 text-center text-sm text-slate-500">
                                                                 Aucune ville
                                                                 trouvée.
                                                             </CommandEmpty>
@@ -672,6 +698,7 @@ export default function ShopAddressesPage() {
                                                                             value={
                                                                                 city.name
                                                                             }
+                                                                            className="mb-1 cursor-pointer rounded-xl px-3 py-2 transition-colors aria-selected:bg-emerald-50 aria-selected:text-emerald-900 last:mb-0 dark:aria-selected:bg-emerald-500/10 dark:aria-selected:text-emerald-100"
                                                                             onSelect={(
                                                                                 currentValue,
                                                                             ) => {
@@ -685,7 +712,7 @@ export default function ShopAddressesPage() {
                                                                                     'mr-2 h-4 w-4',
                                                                                     data.ville ===
                                                                                         city.name
-                                                                                        ? 'opacity-100'
+                                                                                        ? 'opacity-100 text-emerald-500'
                                                                                         : 'opacity-0',
                                                                                 )}
                                                                             />
@@ -711,6 +738,7 @@ export default function ShopAddressesPage() {
                                                 message={errors.ville}
                                             />
                                         </div>
+                                        </div>
 
                                         {/* Code postal */}
                                         <div className="space-y-2">
@@ -718,7 +746,7 @@ export default function ShopAddressesPage() {
                                                 Code postal
                                             </label>
                                             <div className="relative">
-                                                <Landmark className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                                <Landmark className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-emerald-500 dark:text-emerald-400" />
                                                 <Input
                                                     value={data.code_postal}
                                                     onChange={(e) =>
@@ -727,8 +755,8 @@ export default function ShopAddressesPage() {
                                                             e.target.value,
                                                         )
                                                     }
-                                                    placeholder="Code postal"
-                                                    className="h-12 rounded-2xl border-slate-200 pl-11 shadow-sm dark:border-slate-700"
+                                                    placeholder="Ex: 1000"
+                                                    className="h-12 rounded-2xl border-slate-200/60 bg-slate-50/50 pl-11 shadow-xs transition-all duration-300 hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950"
                                                 />
                                             </div>
                                             <InputError
@@ -742,7 +770,14 @@ export default function ShopAddressesPage() {
                                                 Téléphone
                                             </label>
                                             <div className="relative">
-                                                <Phone className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                                <div className="absolute top-1/2 left-4 -translate-y-1/2 flex items-center gap-2">
+                                                    <Phone className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
+                                                    {countries.find((c) => c.name === data.pays)?.phone_code && (
+                                                        <span className="text-sm font-medium text-slate-500 border-r border-slate-200 dark:border-slate-700 pr-2 select-none">
+                                                            +{countries.find((c) => c.name === data.pays)?.phone_code}
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <Input
                                                     value={data.telephone ?? ''}
                                                     onChange={(e) =>
@@ -751,16 +786,13 @@ export default function ShopAddressesPage() {
                                                             e.target.value,
                                                         )
                                                     }
-                                                    placeholder={
-                                                        countries.find(
-                                                            (c) =>
-                                                                c.name ===
-                                                                data.pays,
-                                                        )?.phone_code
-                                                            ? `${countries.find((c) => c.name === data.pays)!.phone_code} ...`
-                                                            : 'Téléphone'
-                                                    }
-                                                    className="h-12 rounded-2xl border-slate-200 pl-11 shadow-sm dark:border-slate-700"
+                                                    placeholder="Numéro de téléphone"
+                                                    className={cn(
+                                                        "h-12 rounded-2xl border-slate-200/60 bg-slate-50/50 shadow-xs transition-all duration-300",
+                                                        "hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10",
+                                                        "dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950",
+                                                        countries.find((c) => c.name === data.pays)?.phone_code ? "pl-28" : "pl-11"
+                                                    )}
                                                 />
                                             </div>
                                             <InputError

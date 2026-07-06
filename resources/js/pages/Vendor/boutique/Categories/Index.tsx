@@ -225,31 +225,48 @@ export default function CategoriesIndex() {
 
                         <div className="flex flex-wrap items-center gap-3">
                             <Select value={sortBy} onValueChange={setSortBy}>
-                                <SelectTrigger className="h-11 w-40 rounded-xl border-slate-200/80 bg-white/80 text-sm shadow-inner transition-all hover:border-emerald-300 focus:ring-emerald-500/20 dark:border-slate-700/80 dark:bg-slate-800/80">
+                                <SelectTrigger
+                                    className={cn(
+                                        'h-11 w-36 rounded border px-3 text-sm font-normal transition-all duration-200',
+                                        'border-slate-200 bg-white/80 text-slate-700',
+                                        'hover:border-emerald-300 hover:bg-white',
+                                        'focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20',
+                                        'dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300',
+                                        'dark:hover:border-emerald-700 dark:hover:bg-slate-900',
+                                        'dark:focus:border-emerald-400 dark:focus:ring-emerald-400/20',
+                                    )}
+                                    // className="h-11 w-40 rounded-xl border-slate-200/80 bg-white/80 text-sm shadow-inner transition-all hover:border-emerald-300 focus:ring-emerald-500/20 dark:border-slate-700/80 dark:bg-slate-800/80"
+                                >
                                     <SelectValue placeholder="Trier par" />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-xl border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-800/90">
+                                <SelectContent
+                                    position="popper"
+                                    side="bottom"
+                                    align="start"
+                                    sideOffset={1}
+                                    className="rounded border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-800/90"
+                                >
                                     <SelectItem
                                         value="name_asc"
-                                        className="rounded-lg"
+                                        className="cursor-pointer px-3 py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
                                     >
                                         Nom A-Z
                                     </SelectItem>
                                     <SelectItem
                                         value="name_desc"
-                                        className="rounded-lg"
+                                        className="cursor-pointer px-3 py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
                                     >
                                         Nom Z-A
                                     </SelectItem>
                                     <SelectItem
                                         value="products_desc"
-                                        className="rounded-lg"
+                                        className="cursor-pointer px-3 py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
                                     >
                                         Plus de produits
                                     </SelectItem>
                                     <SelectItem
                                         value="products_asc"
-                                        className="rounded-lg"
+                                        className="cursor-pointer px-3 py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
                                     >
                                         Moins de produits
                                     </SelectItem>

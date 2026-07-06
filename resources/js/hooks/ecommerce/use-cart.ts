@@ -109,8 +109,8 @@ export function useCartItems() {
             {
                 preserveScroll: true,
                 preserveState: true,
-                only: ['cart'],
                 showProgress: false,
+                only: ['cart'],
                 // eslint-disable-next-line react-hooks/immutability
                 onSuccess: () => reloadCart(),
             },
@@ -121,8 +121,8 @@ export function useCartItems() {
         router.delete(route('tenant.cart.remove', itemId), {
             preserveScroll: true,
             preserveState: true,
-            only: ['cart'],
             showProgress: false,
+            only: ['cart'],
             onSuccess: () => {
                 reloadCart();
                 toast.success('Produit retiré du panier', {
@@ -149,8 +149,8 @@ export function useCartItems() {
                 {
                     preserveScroll: true,
                     preserveState: true,
-                    only: ['cart'],
                     showProgress: false,
+                    only: ['cart'],
                     onSuccess: () => {
                         reloadCart();
                         toast.success('Produit ajouté au panier', {
@@ -179,8 +179,8 @@ export function useCartItems() {
             {
                 preserveScroll: true,
                 preserveState: true,
-                only: ['cart'],
                 showProgress: false,
+                only: ['cart'],
                 onSuccess: () => {
                     reloadCart();
                     toast.success('Panier vidé');
@@ -321,6 +321,7 @@ export function useCart() {
             {},
             {
                 preserveScroll: true,
+                preserveState: true,
                 only: ['cart'],
                 showProgress: false,
                 onSuccess: () => {
@@ -337,6 +338,8 @@ export function useCart() {
             { code },
             {
                 preserveScroll: true,
+                preserveState: true,
+                showProgress: false,
                 onSuccess: () => {
                     router.reload({ only: ['cart'] });
                     toast.success('Code promo appliqué');
@@ -349,6 +352,8 @@ export function useCart() {
     const removeCoupon = useCallback(() => {
         router.delete(route('tenant.cart.remove-coupon'), {
             preserveScroll: true,
+            preserveState: true,
+            showProgress: false,
             onSuccess: () => {
                 router.reload({ only: ['cart'] });
                 toast.success('Code promo retiré');

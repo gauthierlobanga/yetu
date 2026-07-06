@@ -170,11 +170,13 @@ class DomainsTable
                             $action->halt();
                         }
                     }),
+
+
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
                     ForceDeleteBulkAction::make(),
+                    DeleteBulkAction::make(),
                     RestoreBulkAction::make(),
                 ]),
             ])

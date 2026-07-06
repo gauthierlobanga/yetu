@@ -2,10 +2,9 @@
 
 use Illuminate\Support\Facades\DB;
 
-it('lists all schemas and tables', function () {
+it('uses the configured PostgreSQL test database', function () {
     $schemas = DB::select('SELECT schema_name FROM information_schema.schemata');
-    dump('Schemas: '.implode(', ', collect($schemas)->pluck('schema_name')->toArray()));
 
-    $tables = DB::select("SELECT table_schema, table_name FROM information_schema.tables WHERE table_schema NOT IN ('information_schema', 'pg_catalog')");
-    dump($tables);
+    expect(DB::connection()->getDatabaseName())->toBe('yetu_test')
+        ->and(collect($schemas)->pluck('schema_name'))->toContain('public');
 });

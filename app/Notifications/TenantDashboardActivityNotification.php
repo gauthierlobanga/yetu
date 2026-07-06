@@ -41,7 +41,7 @@ class TenantDashboardActivityNotification extends Notification
 
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
-        return (new BroadcastMessage($this->filamentPayload()))->onConnection('sync');
+        return (new BroadcastMessage($this->filamentPayload()))->onConnection('redis');
     }
 
     public function tenantId(): ?string

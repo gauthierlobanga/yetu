@@ -111,6 +111,98 @@ const detectUserCountry = (countries: Country[]): Country | null => {
     return countries.find((c) => c.iso2 === (tzMap[city] || 'cd')) || null;
 };
 
+function FloatingTextarea({
+    id,
+    label,
+    icon: Icon,
+    value,
+    onChange,
+    placeholder,
+    error,
+    required,
+    rows = 3,
+    className,
+    ...props
+}: {
+    id?: string;
+    label: string;
+    icon?: React.ElementType;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+    placeholder?: string;
+    error?: string;
+    required?: boolean;
+    rows?: number;
+    className?: string;
+    [key: string]: any;
+}) {
+    const [focused, setFocused] = useState(false);
+    const hasValue = value.length > 0;
+
+    return (
+        <div className={cn('relative', className)}>
+            <div
+                className={cn(
+                    'relative rounded-2xl border bg-white/70 backdrop-blur-sm transition-all duration-300',
+                    'dark:bg-slate-900/80 dark:text-white',
+                    focused
+                        ? 'border-emerald-400 shadow-lg ring-4 shadow-emerald-500/5 ring-emerald-500/10 dark:border-emerald-500 dark:ring-emerald-500/20'
+                        : 'border-slate-200 dark:border-slate-700',
+                    error
+                        ? 'border-red-400 ring-red-500/10 dark:border-red-400'
+                        : '',
+                )}
+            >
+                {Icon && (
+                    <Icon
+                        className={cn(
+                            'absolute top-4 left-4 h-5 w-5 text-slate-400 transition-colors',
+                            focused && 'text-emerald-500 dark:text-emerald-400',
+                        )}
+                    />
+                )}
+                <textarea
+                    id={id}
+                    value={value}
+                    onChange={onChange}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    placeholder={placeholder}
+                    required={required}
+                    rows={rows}
+                    className={cn(
+                        'peer w-full resize-none bg-transparent px-4 pt-6 pb-2 text-sm placeholder-transparent focus:outline-none',
+                        'dark:text-white',
+                        Icon ? 'pl-12' : 'pl-4',
+                    )}
+                    {...props}
+                />
+                <label
+                    htmlFor={id}
+                    className={cn(
+                        'pointer-events-none absolute left-4 transition-all duration-200',
+                        Icon ? 'left-12' : 'left-4',
+                        focused || hasValue
+                            ? 'top-1.5 text-xs text-emerald-600 dark:text-emerald-400'
+                            : 'top-4 text-sm text-slate-400 dark:text-slate-500',
+                    )}
+                >
+                    {label}
+                    {required && <span className="ml-0.5 text-red-500">*</span>}
+                </label>
+            </div>
+            {error && (
+                <p
+                    className="mt-1.5 flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400"
+                    role="alert"
+                >
+                    <AlertCircle className="h-4 w-4" />
+                    {error}
+                </p>
+            )}
+        </div>
+    );
+}
 // ─── Composant FloatingLabelInput (correction dark + focus emerald) ───
 function FloatingLabelInput({
     id,
@@ -430,6 +522,7 @@ export default function VendorConfigure({
                             Accept: 'application/json',
                             'X-Requested-With': 'XMLHttpRequest',
                         },
+                        credentials: 'include',
                     },
                 );
 
@@ -1059,6 +1152,24 @@ export default function VendorConfigure({
                                                 )}
                                             </div>
                                         </div>
+                                        <div>
+                                            <FloatingTextarea
+                                                id="shop_description"
+                                                label="Description de la boutique (optionnelle)"
+                                                icon={Sparkles}
+                                                value={data.shop_description}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        'shop_description',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                placeholder="Décrivez brièvement votre boutique..."
+                                                error={errors.shop_description}
+                                                rows={3}
+                                            />
+                                        </div>
+
                                         <div className="flex justify-end pt-4">
                                             <Button
                                                 type="button"

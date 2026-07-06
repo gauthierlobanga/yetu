@@ -142,6 +142,8 @@ Route::middleware([
 
         Route::prefix('admin')->group(function () {
             Route::get('/dashboard', [DashboardController::class, 'adminDashboardIndex'])->name('dashboard');
+            Route::get('/notifications', [TenantDashboardNotificationController::class, 'index'])->name('admin.notifications.index');
+            Route::get('/notifications/{id}', [TenantDashboardNotificationController::class, 'show'])->name('admin.notifications.show');
 
             Route::prefix('subscriptions')->name('admin.subscriptions.')->group(function () {
                 Route::get('/', [AdminSubscriptionController::class, 'index'])->name('index');
@@ -158,6 +160,8 @@ Route::middleware([
 
         Route::prefix('acheteur')->name('acheteur.')->group(function () {
             Route::get('/account', [AccountDashboardController::class, 'AccountDashboardIndex'])->name('dashboard');
+            Route::get('/notifications', [TenantDashboardNotificationController::class, 'index'])->name('notifications.index');
+            Route::get('/notifications/{id}', [TenantDashboardNotificationController::class, 'show'])->name('acheteur.notifications.show');
 
             Route::prefix('settings')->group(function () {
                 Route::redirect('/', '/acheteur/settings/profile');
@@ -174,6 +178,11 @@ Route::middleware([
 
         Route::get('/vendor/dashboard', [VendorDashboardController::class, 'index'])
             ->name('vendor.dashboard');
+
+        Route::get('/vendor/notifications', [TenantDashboardNotificationController::class, 'index'])
+            ->name('vendor.notifications.index');
+        Route::get('/vendor/notifications/{id}', [TenantDashboardNotificationController::class, 'show'])
+            ->name('vendor.notifications.show');
 
         // Newsletter Vendor Admin Routes
         Route::prefix('vendor/newsletters')->name('vendor.newsletters.')->group(function () {
@@ -206,6 +215,10 @@ Route::middleware([
                 ->name('mark-as-read');
             Route::post('/mark-all-as-read', [TenantDashboardNotificationController::class, 'markAllAsRead'])
                 ->name('mark-all-as-read');
+            Route::delete('/{id}', [TenantDashboardNotificationController::class, 'destroy'])
+                ->name('destroy');
+            Route::delete('/', [TenantDashboardNotificationController::class, 'destroyAll'])
+                ->name('destroy-all');
         });
 
     });
@@ -295,8 +308,8 @@ Route::middleware([
         | ROUTES PAGES STATIQUES (aide, conditions, politique de confidentialité, etc.)
         |--------------------------------------------------------------------------
         */
-        Route::get('/api/search', [SearchController::class, 'shopSearch'])->name('search');
-        Route::get('/search', [SearchController::class, 'shopApi'])->name('api');
+        Route::get('/api/search', [SearchController::class, 'api'])->name('api');
+        Route::get('/search', [SearchController::class, 'page'])->name('search');
 
         // Route::prefix('page')->group(function () {
         Route::get('/contact', [ContactBoutiqueController::class, 'contactIndex'])->name('page.contact');
@@ -441,10 +454,8 @@ Route::middleware([
             });
 
             // Adresses
-            Route::prefix('addresses')->group(function () {
-                Route::resource('addresses', AddressController::class)->except(['edit', 'create']);
-                Route::post('/{address}/default', [AddressController::class, 'addressesSetDefault'])->name('addresses.default');
-            });
+            Route::resource('addresses', AddressController::class)->except(['edit', 'create']);
+            Route::post('/addresses/{address}/default', [AddressController::class, 'addressesSetDefault'])->name('addresses.default');
             // Paiements
 
             Route::prefix('payment')->group(function () {

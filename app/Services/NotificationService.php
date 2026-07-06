@@ -6,6 +6,7 @@ use App\Events\NotificationDispatched;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 
 class NotificationService
 {
@@ -266,7 +267,7 @@ class NotificationService
      */
     public function purgeOldNotifications(int $daysOld = 30): int
     {
-        return \DB::table('notifications')
+        return DB::table('notifications')
             ->where('created_at', '<', now()->subDays($daysOld))
             ->delete();
     }

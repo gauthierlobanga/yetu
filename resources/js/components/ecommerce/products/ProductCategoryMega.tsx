@@ -1,13 +1,15 @@
-// resources/js/components/navigation/ProductsMenuContent.tsx
 import { usePage } from '@inertiajs/react';
+import type { MegaMenuCategory } from './ExplorerProductCategory';
 import { ProductCategoriesMega } from './ExplorerProductCategory';
 
-export function ProductCategoryMega() {
-    const { megaMenuCategories } = usePage().props as any;
+interface ProductCategoryPageProps {
+    [key: string]: unknown;
+    megaMenuCategories?: MegaMenuCategory[];
+}
 
-    if (!megaMenuCategories || megaMenuCategories.length === 0) {
-        return null;
-    }
+export function ProductCategoryMega() {
+    const { megaMenuCategories = [] } =
+        usePage<ProductCategoryPageProps>().props;
 
     return <ProductCategoriesMega categories={megaMenuCategories} />;
 }

@@ -137,7 +137,12 @@ export default function CategoryShow({
         router.get(
             window.location.pathname,
             { sort: filters.sort },
-            { preserveState: true, preserveScroll: true, only: ['products'],showProgress: false },
+            {
+                preserveState: true,
+                preserveScroll: true,
+                only: ['products'],
+                showProgress: false,
+            },
         );
     };
 
@@ -181,7 +186,7 @@ export default function CategoryShow({
         router.get(
             window.location.pathname,
             { page, sort: filters.sort, search: searchQuery || undefined },
-            { preserveState: true, preserveScroll: true ,showProgress: false},
+            { preserveState: true, preserveScroll: true, showProgress: false },
         );
     };
 
@@ -381,24 +386,61 @@ export default function CategoryShow({
                                 value={filters.sort || 'newest'}
                                 onValueChange={updateSort}
                             >
-                                <SelectTrigger className="h-10 w-40 rounded-xl border-slate-200 bg-white/80 transition-all hover:border-emerald-300 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900/50">
+                                <SelectTrigger
+                                    className={cn(
+                                        'h-10 w-40 rounded border px-3 text-sm font-normal transition-all duration-200',
+                                        'border-slate-200 bg-white/80 text-slate-700',
+                                        'hover:border-emerald-300 hover:bg-white',
+                                        'focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20',
+                                        'dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-300',
+                                        'dark:hover:border-emerald-700 dark:hover:bg-slate-900',
+                                        'dark:focus:border-emerald-400 dark:focus:ring-emerald-400/20',
+                                    )}
+                                    // className="h-10 w-40 rounded-xl border-slate-200 bg-white/80 transition-all hover:border-emerald-300 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900/50"
+                                >
                                     <ArrowUpDown className="mr-2 h-4 w-4 text-slate-500" />
                                     <SelectValue placeholder="Trier" />
                                 </SelectTrigger>
-                                <SelectContent className="rounded-xl">
-                                    <SelectItem value="newest">
+                                <SelectContent
+                                    position="popper"
+                                    side="bottom"
+                                    align="start"
+                                    sideOffset={1}
+                                    className="rounded"
+                                >
+                                    <SelectItem
+                                        className="cursor-pointer px-3 py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
+
+                                        value="newest"
+                                    >
                                         Nouveautés
                                     </SelectItem>
-                                    <SelectItem value="popular">
+                                    <SelectItem
+                                        className="cursor-pointer px-3 py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
+
+                                        value="popular"
+                                    >
                                         Popularité
                                     </SelectItem>
-                                    <SelectItem value="price_asc">
+                                    <SelectItem
+                                        className="cursor-pointer px-3 py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
+
+                                        value="price_asc"
+                                    >
                                         Prix croissant
                                     </SelectItem>
-                                    <SelectItem value="price_desc">
+                                    <SelectItem
+                                        className="cursor-pointer px-3 py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
+
+                                        value="price_desc"
+                                    >
                                         Prix décroissant
                                     </SelectItem>
-                                    <SelectItem value="rating">
+                                    <SelectItem
+                                        className="cursor-pointer px-3 py-2 text-sm font-normal text-slate-700 transition-colors hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-300 dark:hover:bg-emerald-900/30 dark:hover:text-emerald-400"
+
+                                        value="rating"
+                                    >
                                         Meilleure note
                                     </SelectItem>
                                 </SelectContent>

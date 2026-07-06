@@ -7,9 +7,11 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Models\VendorRequest;
 use App\Notifications\VendorApproved;
+use App\Notifications\VendorPaymentReminder;
 use App\Notifications\VendorRejected;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
@@ -75,6 +77,181 @@ class VendorRegistrationService
     /**
      * Approuver une demande de vendeur et créer le tenant.
      */
+    // public function approve(VendorRequest $vendorRequest): Tenant
+    // {
+    //     $vendorRequest->loadMissing(['tenant', 'plan', 'user']);
+
+    //     if (
+    //         $vendorRequest->tenant
+    //         && $vendorRequest->status === VendorRequest::STATUS_APPROVED
+    //         && $vendorRequest->tenant->subscription
+    //     ) {
+    //         return $vendorRequest->tenant;
+    //     }
+
+    //     $plan = $vendorRequest->plan;
+    //     $user = $vendorRequest->user;
+    //     // Mot de passe par défaut sécurisé : forcer l'utilisateur à le changer via reset password
+    //     $password = Str::password(16);
+
+    //     // 1ère phase : créer le tenant (sans événements) et le domaine.
+    //     // La demande n'est marquée approuvée qu'une fois la base tenant prête.
+    //     // $tenant = $vendorRequest->tenant ?: DB::transaction(function () use ($vendorRequest, $plan, $user, $password) {
+    //     //     $tenantId = (string) Str::orderedUuid();
+    //     //     $tenant = Tenant::withoutEvents(function () use ($vendorRequest, $plan, $password, $tenantId, $user) {
+    //     //         return Tenant::create([
+    //     //             'id' => $tenantId,
+    //     //             'raison_sociale' => $vendorRequest->shop_name,
+    //     //             'slug' => $vendorRequest->shop_slug,
+    //     //             'description' => $vendorRequest->shop_description,
+    //     //             'email' => $vendorRequest->contact_email,
+    //     //             'password' => $password,
+    //     //             'telephone' => $vendorRequest->contact_phone,
+    //     //             'plan_id' => $plan->id,
+    //     //             'statut' => Tenant::STATUT_ACTIF,
+    //     //             'is_active' => true,
+    //     //             'user_id' => $user->id,
+    //     //         ]);
+    //     //     });
+
+    //     //     $tenant->domains()->create([
+    //     //         'id' => (string) Str::orderedUuid(),
+    //     //         'domain' => str_replace('_', '-', $vendorRequest->shop_slug).'.localhost',
+    //     //     ]);
+
+    //     //     $vendorRequest->update([
+    //     //         'tenant_id' => $tenant->id,
+    //     //     ]);
+
+    //     //     return $tenant;
+    //     // });
+    //     // Récupération de la connexion centrale
+    //     $centralConnection = config('tenancy.database.central_connection', config('database.default'));
+
+    //     $tenant = DB::connection($centralConnection)->transaction(function () use ($vendorRequest, $plan, $user, $password, $centralConnection) {
+    //         // 1. Générer l'UUID du tenant
+    //         $tenantId = (string) Str::orderedUuid();
+
+    //         // 2. Insérer directement dans la table `tenants` via le query builder
+    //         $inserted = DB::connection($centralConnection)
+    //             ->table('tenants')
+    //             ->insert([
+    //                 'id' => $tenantId,
+    //                 'raison_sociale' => $vendorRequest->shop_name,
+    //                 'slug' => $vendorRequest->shop_slug,
+    //                 'description' => $vendorRequest->shop_description,
+    //                 'email' => $vendorRequest->contact_email,
+    //                 'password' => Hash::make($password), // Ne pas oublier de hasher
+    //                 'telephone' => $vendorRequest->contact_phone,
+    //                 'plan_id' => $plan->id,
+    //                 'statut' => Tenant::STATUT_ACTIF,
+    //                 'is_active' => true,
+    //                 'user_id' => $user->id,
+    //                 'created_at' => now(),
+    //                 'updated_at' => now(),
+    //                 // Ajoutez tous les champs requis (date_activation, etc.) si nécessaire
+    //             ]);
+
+    //         if (! $inserted) {
+    //             throw new \Exception('Échec de l\'insertion du tenant dans la base centrale');
+    //         }
+
+    //         // 3. Récupérer le modèle Eloquent pour la suite
+    //         $tenant = Tenant::on($centralConnection)->find($tenantId);
+    //         if (! $tenant) {
+    //             throw new \Exception('Tenant introuvable après insertion');
+    //         }
+
+    //         // 4. Créer le domaine associé
+    //         $tenant->domains()->create([
+    //             'id' => (string) Str::orderedUuid(),
+    //             'domain' => str_replace('_', '-', $vendorRequest->shop_slug).'.localhost',
+    //         ]);
+
+    //         // 5. Mettre à jour la demande de vendeur
+    //         $vendorRequest->update(['tenant_id' => $tenant->id]);
+
+    //         return $tenant;
+    //     });
+
+    //     $this->ensureOwnerPivot($user, $tenant);
+
+    //     // 2ème phase : créer la base de données du tenant
+    //     if ($vendorRequest->status !== VendorRequest::STATUS_APPROVED) {
+    //         event(new TenantCreated($tenant));
+    //     }
+
+    //     // 3ème phase : attacher l'utilisateur et le reste (maintenant la base existe)
+    //     $user = $vendorRequest->user; // rafraîchir si besoin
+    //     $this->ensureOwnerPivot($user, $tenant);
+
+    //     if (! $plan->isFree() && $plan->trial_days > 0) {
+    //         $tenant->update([
+    //             'date_activation' => now(),
+    //             'date_expiration' => now()->addDays($plan->trial_days),
+    //         ]);
+    //     } else {
+    //         $tenant->update(['date_activation' => now()]);
+    //     }
+
+    //     $this->transferDocumentsToTenant($vendorRequest, $tenant);
+
+    //     // Transférer le logo (si présent)
+    //     if ($vendorRequest->hasMedia('tenant_avatar')) {
+    //         $media = $vendorRequest->getFirstMedia('tenant_avatar');
+    //         if ($media) {
+    //             $media->move($tenant, 'tenant_avatar');
+    //         }
+    //     }
+
+    //     // Synchronisation de l'utilisateur (Contexte Tenant)
+    //     try {
+    //         $tenant->run(function () use ($user) {
+    //             // Assurer que l'utilisateur existe dans la base du tenant
+    //             User::firstOrCreate(
+    //                 ['email' => $user->email],
+    //                 [
+    //                     'id' => $user->id,
+    //                     'name' => $user->name,
+    //                     'password' => $user->password,
+    //                     'email_verified_at' => $user->email_verified_at,
+    //                     'global_id' => $user->global_id ?? $user->id,
+    //                 ]
+    //             );
+    //         });
+    //     } catch (\Exception $e) {
+    //         Log::warning('Failed to sync user to tenant database', [
+    //             'tenant_id' => $tenant->id,
+    //             'error' => $e->getMessage(),
+    //         ]);
+    //     }
+
+    //     // Créer la subscription pour le plan
+    //     $this->subscriptionService->createSubscription($tenant, $plan, $user);
+
+    //     $vendorRequest->update([
+    //         'status' => VendorRequest::STATUS_APPROVED,
+    //         'approved_at' => $vendorRequest->approved_at ?? now(),
+    //     ]);
+
+    //     Log::info('Vendor approved', [
+    //         'vendor_request_id' => $vendorRequest->id,
+    //         'user_id' => $user->id,
+    //         'tenant_id' => $tenant->id,
+    //         'plan' => $plan->name,
+    //     ]);
+
+    //     try {
+    //         $user->notify(new VendorApproved($tenant));
+    //     } catch (\Exception $e) {
+    //         Log::error('Failed to send vendor approval notification', [
+    //             'error' => $e->getMessage(),
+    //             'user_id' => $user->id,
+    //         ]);
+    //     }
+
+    //     return $tenant;
+    // }
     public function approve(VendorRequest $vendorRequest): Tenant
     {
         $vendorRequest->loadMissing(['tenant', 'plan', 'user']);
@@ -89,51 +266,75 @@ class VendorRegistrationService
 
         $plan = $vendorRequest->plan;
         $user = $vendorRequest->user;
-        // Mot de passe par défaut sécurisé : forcer l'utilisateur à le changer via reset password
         $password = Str::password(16);
 
-        // 1ère phase : créer le tenant (sans événements) et le domaine.
-        // La demande n'est marquée approuvée qu'une fois la base tenant prête.
-        $tenant = $vendorRequest->tenant ?: DB::transaction(function () use ($vendorRequest, $plan, $user, $password) {
+        $centralConnection = config('tenancy.database.central_connection', config('database.default'));
+
+        // Force la connexion du modèle VendorRequest sur la centrale
+        $vendorRequest->setConnection($centralConnection);
+
+        $tenant = DB::connection($centralConnection)->transaction(function () use ($vendorRequest, $plan, $user, $password, $centralConnection) {
             $tenantId = (string) Str::orderedUuid();
-            $tenant = Tenant::withoutEvents(function () use ($vendorRequest, $plan, $password, $tenantId, $user) {
-                return Tenant::create([
+
+            // Insertion directe du tenant
+            $inserted = DB::connection($centralConnection)
+                ->table('tenants')
+                ->insert([
                     'id' => $tenantId,
                     'raison_sociale' => $vendorRequest->shop_name,
                     'slug' => $vendorRequest->shop_slug,
                     'description' => $vendorRequest->shop_description,
                     'email' => $vendorRequest->contact_email,
-                    'password' => $password,
+                    'password' => Hash::make($password),
                     'telephone' => $vendorRequest->contact_phone,
                     'plan_id' => $plan->id,
                     'statut' => Tenant::STATUT_ACTIF,
                     'is_active' => true,
                     'user_id' => $user->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
-            });
+
+            if (! $inserted) {
+                throw new \Exception('Échec de l\'insertion du tenant');
+            }
+
+            $tenant = Tenant::on($centralConnection)->find($tenantId);
+            if (! $tenant) {
+                throw new \Exception('Tenant introuvable après insertion');
+            }
 
             $tenant->domains()->create([
                 'id' => (string) Str::orderedUuid(),
                 'domain' => str_replace('_', '-', $vendorRequest->shop_slug).'.localhost',
             ]);
 
-            $vendorRequest->update([
-                'tenant_id' => $tenant->id,
-            ]);
+            $vendorRequest->update(['tenant_id' => $tenant->id]);
+
+            // Assurer le pivot propriétaire
+            DB::connection($centralConnection)
+                ->table('user_tenant')
+                ->updateOrInsert(
+                    [
+                        'user_id' => $user->id,
+                        'tenant_id' => $tenant->id,
+                    ],
+                    [
+                        'is_owner' => true,
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
+
+            if ($vendorRequest->status !== VendorRequest::STATUS_APPROVED) {
+                event(new TenantCreated($tenant));
+            }
 
             return $tenant;
         });
 
-        $this->ensureOwnerPivot($user, $tenant);
-
-        // 2ème phase : créer la base de données du tenant
-        if ($vendorRequest->status !== VendorRequest::STATUS_APPROVED) {
-            event(new TenantCreated($tenant));
-        }
-
-        // 3ème phase : attacher l'utilisateur et le reste (maintenant la base existe)
-        $user = $vendorRequest->user; // rafraîchir si besoin
-        $this->ensureOwnerPivot($user, $tenant);
+        // Rafraîchir l'utilisateur
+        $user = $vendorRequest->user;
 
         if (! $plan->isFree() && $plan->trial_days > 0) {
             $tenant->update([
@@ -146,7 +347,6 @@ class VendorRegistrationService
 
         $this->transferDocumentsToTenant($vendorRequest, $tenant);
 
-        // Transférer le logo (si présent)
         if ($vendorRequest->hasMedia('tenant_avatar')) {
             $media = $vendorRequest->getFirstMedia('tenant_avatar');
             if ($media) {
@@ -154,10 +354,8 @@ class VendorRegistrationService
             }
         }
 
-        // Synchronisation de l'utilisateur (Contexte Tenant)
         try {
             $tenant->run(function () use ($user) {
-                // Assurer que l'utilisateur existe dans la base du tenant
                 User::firstOrCreate(
                     ['email' => $user->email],
                     [
@@ -176,7 +374,6 @@ class VendorRegistrationService
             ]);
         }
 
-        // Créer la subscription pour le plan
         $this->subscriptionService->createSubscription($tenant, $plan, $user);
 
         $vendorRequest->update([
@@ -394,9 +591,7 @@ class VendorRegistrationService
      */
     private function seedDefaultTenantRoles(): void
     {
-        // Ne pas exécuter si les tables de permissions ne sont pas dans le schéma du tenant
-        // (selon votre configuration stancl/tenancy)
-
+ 
         $defaultRoles = [
             'owner' => 'Propriétaire de la boutique',
             'manager' => 'Gestionnaire de la boutique',

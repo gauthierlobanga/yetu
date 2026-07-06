@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
+use App\Jobs\GenerateProductEmbedding;
+use App\Support\Search\ProductIntelligentSearch;
 use App\Traits\HasComments;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +14,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Nnjeim\World\Models\Currency;
 use Spatie\Image\Enums\Fit;
@@ -21,6 +27,49 @@ use Spatie\Sitemap\Contracts\Sitemapable;
 use Spatie\Sitemap\Tags\Url;
 use Spatie\Tags\HasTags;
 
+/**
+ * Modèle Eloquent représentant un produit de la boutique e-commerce.
+ *
+ * Gère l'ensemble du cycle de vie d'un produit : prix, stock, promotions,
+ * images (via Spatie MediaLibrary), recherche (full-text + pgvector),
+ * SEO, variantes, et sitemap.
+ *
+ * @property string $id
+ * @property string|null $brand_id
+ * @property string $nom
+ * @property string $slug
+ * @property string|null $short_description
+ * @property string|null $description_longue
+ * @property float $prix_ht
+ * @property float $prix_ttc
+ * @property float|null $prix_promotion
+ * @property int $quantite_stock
+ * @property string|null $sku
+ * @property string|null $ean
+ * @property string $statut
+ * @property bool $is_featured
+ * @property bool $is_new
+ * @property bool $is_bestseller
+ * @property bool $is_deal_of_the_day
+ * @property int $views_count
+ * @property int $sold_count
+ * @property CarbonImmutable|null $published_at
+ * @property CarbonImmutable|null $expires_at
+ * @property CarbonImmutable|null $search_embedding_synced_at
+ * @property-read float $prix_actuel
+ * @property-read bool $est_en_promotion
+ * @property-read float|null $reduction_pourcentage
+ * @property-read int $stock_disponible
+ * @property-read bool $est_en_stock
+ * @property-read float $note_moyenne
+ * @property-read int $nombre_avis
+ * @property-read string $url
+ * @property-read string|null $image_principale
+ * @property-read array $images
+ *
+ * @see ProductIntelligentSearch
+ * @see GenerateProductEmbedding
+ */
 class Produit extends Model implements HasMedia, Sitemapable
 {
     use HasComments, HasFactory, HasTags;
@@ -79,11 +128,9 @@ class Produit extends Model implements HasMedia, Sitemapable
         'published_at',
         'scheduled_for',
         'expires_at',
-        'is_deal_of_the_day',   // ← ajout
-
-        // 'search_document',
-        // 'image_search_metadata',
-        // 'search_embedding_synced_at',
+        'is_deal_of_the_day',
+        'search_document',
+        'search_embedding_synced_at',
     ];
 
     protected $casts = [
@@ -110,9 +157,7 @@ class Produit extends Model implements HasMedia, Sitemapable
         'scheduled_for' => 'datetime',
         'expires_at' => 'datetime',
         'is_deal_of_the_day' => 'boolean',
-
-        // 'image_search_metadata' => 'array',
-        // 'search_embedding_synced_at' => 'datetime',
+        'search_embedding_synced_at' => 'datetime',
     ];
 
     protected $attributes = [
@@ -146,6 +191,11 @@ class Produit extends Model implements HasMedia, Sitemapable
         'zoom' => ['width' => 2000, 'height' => 2000, 'fit' => Fit::Max],
     ];
 
+    /**
+     * Retourne la liste des statuts possibles avec leurs libellés.
+     *
+     * @return array<string, string> Clés = valeurs en base, valeurs = libellés affichés
+     */
     public static function getStatuses(): array
     {
         return [
@@ -487,8 +537,21 @@ class Produit extends Model implements HasMedia, Sitemapable
         return $this->attributes['seo_description'] ?? Str::limit(strip_tags($this->short_description ?? $this->description_longue ?? ''), 160);
     }
 
+    /**
+     * Construit le document de recherche full-text concaténant tous les champs pertinents.
+     *
+     * Combine nom, référence, SKU, EAN, descriptions, marque, catégories
+     * et attributs en une seule chaîne normalisée pour l'indexation.
+     *
+     * @return string Le document de recherche concaténé et nettoyé
+     */
     public function buildSearchDocument(): string
     {
+        $this->loadMissing(['brand', 'categories']);
+
+        $productAttributes = $this->getAttribute('attributes');
+        $legacyAttributes = $this->getAttribute('attributs');
+
         return Str::squish(collect([
             $this->nom,
             $this->reference,
@@ -496,15 +559,21 @@ class Produit extends Model implements HasMedia, Sitemapable
             $this->ean,
             $this->short_description,
             $this->description_longue,
-            $this->brand?->nom,
+            $this->brand?->name,
             $this->categories->pluck('nom')->implode(' '),
-            collect($this->attributes ?? [])->flatten()->implode(' '),
-            collect($this->attributs ?? [])->flatten()->implode(' '),
+            collect(is_array($productAttributes) ? $productAttributes : [])->flatten()->implode(' '),
+            collect(is_array($legacyAttributes) ? $legacyAttributes : [])->flatten()->implode(' '),
         ])->filter()->implode(' '));
     }
 
     // ========== SCOPES ==========
 
+    /**
+     * Scope : filtre les produits publiés et non expirés.
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
     public function scopePublished($query)
     {
         return $query->where('statut', self::STATUS_PUBLISHED)
@@ -518,6 +587,12 @@ class Produit extends Model implements HasMedia, Sitemapable
             });
     }
 
+    /**
+     * Scope : filtre les produits en stock (quantité > 0).
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
     public function scopeInStock($query)
     {
         return $query->where('quantite_stock', '>', 0);
@@ -567,6 +642,13 @@ class Produit extends Model implements HasMedia, Sitemapable
         return $query->whereHas('categories', fn ($q) => $q->where('produit_categories.slug', $slug));
     }
 
+    /**
+     * Scope : recherche full-text sur les champs principaux du produit.
+     *
+     * @param  Builder  $query
+     * @param  string  $term  Le terme de recherche
+     * @return Builder
+     */
     public function scopeSearch($query, string $term)
     {
         return $query->where(function ($q) use ($term) {
@@ -581,11 +663,23 @@ class Produit extends Model implements HasMedia, Sitemapable
 
     // ========== MÉTHODES MÉTIER ==========
 
+    /**
+     * Vérifie si le stock disponible couvre la quantité demandée.
+     *
+     * @param  int  $quantity  La quantité requise
+     * @return bool True si le stock est suffisant
+     */
     public function hasSufficientStock(int $quantity): bool
     {
         return $this->stock_disponible >= $quantity;
     }
 
+    /**
+     * Réserve du stock pour une commande (décrémente la quantité).
+     *
+     * @param  int  $quantity  La quantité à réserver
+     * @return bool True si la réservation a réussi
+     */
     public function reserveStock(int $quantity): bool
     {
         if (! $this->hasSufficientStock($quantity)) {
@@ -598,6 +692,13 @@ class Produit extends Model implements HasMedia, Sitemapable
         return true;
     }
 
+    /**
+     * Libère du stock précédemment réservé.
+     *
+     * Remet le produit en statut publié s'il était en rupture.
+     *
+     * @param  int  $quantity  La quantité à libérer
+     */
     public function releaseStock(int $quantity): void
     {
         $this->quantite_stock += $quantity;
@@ -609,6 +710,14 @@ class Produit extends Model implements HasMedia, Sitemapable
         $this->save();
     }
 
+    /**
+     * Décrémente le stock après une vente et incrémente le compteur de ventes.
+     *
+     * Passe automatiquement le statut en rupture si le stock atteint zéro.
+     *
+     * @param  int  $quantity  La quantité vendue
+     * @return bool True si le décrément a réussi
+     */
     public function decrementerStock(int $quantity): bool
     {
         if (! $this->hasSufficientStock($quantity)) {
@@ -650,6 +759,12 @@ class Produit extends Model implements HasMedia, Sitemapable
         $this->save();
     }
 
+    /**
+     * Récupère les produits similaires basés sur les catégories communes.
+     *
+     * @param  int  $limit  Nombre maximum de produits similaires
+     * @return Collection<int, Produit>
+     */
     public function getRelatedProducts(int $limit = 6)
     {
         $categoryIds = $this->categories()->pluck('produit_categories.id');
@@ -667,6 +782,11 @@ class Produit extends Model implements HasMedia, Sitemapable
             ->get();
     }
 
+    /**
+     * Retourne les variations disponibles groupées par clé d'attribut.
+     *
+     * @return array<string, array<int, mixed>> Clés d'attributs vers valeurs uniques
+     */
     public function getVariations(): array
     {
         $variations = [];
@@ -687,6 +807,9 @@ class Produit extends Model implements HasMedia, Sitemapable
         return $variations;
     }
 
+    /**
+     * Invalide tous les caches d'images du produit.
+     */
     public function clearCache(): void
     {
         Cache::forget("product_{$this->id}_image_thumb");
@@ -741,13 +864,27 @@ class Produit extends Model implements HasMedia, Sitemapable
         });
 
         static::saved(function ($produit) {
-            // $searchDocument = $produit->buildSearchDocument();
+            if (! Schema::hasColumn($produit->getTable(), 'search_document')) {
+                $produit->clearCache();
 
-            // if ($produit->search_document !== $searchDocument) {
-            //     $produit->forceFill([
-            //         'search_document' => $searchDocument,
-            //     ])->saveQuietly();
-            // }
+                return;
+            }
+
+            $searchDocument = $produit->buildSearchDocument();
+            $shouldUpdateDocument = $produit->search_document !== $searchDocument;
+
+            if ($shouldUpdateDocument) {
+                $produit->forceFill([
+                    'search_document' => $searchDocument,
+                ])->saveQuietly();
+            }
+
+            if (
+                Schema::hasColumn($produit->getTable(), 'search_embedding_synced_at')
+                && ($shouldUpdateDocument || is_null($produit->search_embedding_synced_at))
+            ) {
+                GenerateProductEmbedding::dispatch($produit);
+            }
 
             $produit->clearCache();
         });

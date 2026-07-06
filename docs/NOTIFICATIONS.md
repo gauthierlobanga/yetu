@@ -3,6 +3,7 @@
 ## Vue d'Ensemble
 
 Le système de notifications a été complètement refactorisé pour supporter :
+
 - ✅ Notifications en temps réel avec Reverb
 - ✅ Différenciation Tenant (vendeurs) / Clients (acheteurs)
 - ✅ Notifications par email, base de données, et broadcast
@@ -160,7 +161,7 @@ Echo.private(`tenant.${tenantId}.users.${userId}`)
 
 ### Endpoints Disponibles
 
-```
+```powershell
 GET    /api/notifications                    # Toutes les notifications
 GET    /api/notifications/unread             # Non lues seulement
 GET    /api/notifications/unread-count       # Compte des non lues

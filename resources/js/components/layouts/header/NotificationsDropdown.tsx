@@ -160,9 +160,11 @@ export function NotificationsDropdown() {
         }
 
         const echoInstance = window.Echo ?? echo();
-        const privateChannel = echoInstance.private(
-            `App.Models.User.${user.id}`,
-        );
+        const channelName = tenantId 
+            ? `tenant.${tenantId}.users.${user.id}` 
+            : `App.Models.User.${user.id}`;
+            
+        const privateChannel = echoInstance.private(channelName);
         privateChannel.notification((payload: unknown) => {
             const notification = normalizeNotification(payload);
 
@@ -195,9 +197,9 @@ export function NotificationsDropdown() {
         });
 
         return () => {
-            echoInstance.leave(`App.Models.User.${user.id}`);
+            echoInstance.leave(channelName);
         };
-    }, [user?.id]);
+    }, [user?.id, tenantId]);
 
     // ─── 3. Fusion des notifications serveur + temps réel (inchangé) ───
     const allNotifications = useMemo(() => {

@@ -1,6 +1,6 @@
 # 🛍️ Yetufy - Plateforme E-Commerce Multi-Tenant
 
-**Une plateforme e-commerce moderne, multi-tenant et complète construite avec Laravel, React et Inertia.js**
+- **Une plateforme e-commerce moderne, multi-tenant et complète construite avec Laravel, React et Inertia.js**
 
 ## 📋 Vue d'Ensemble
 
@@ -91,7 +91,7 @@ Une commande Artisan qui injecte un service trop lourd dans son constructeur peu
 
 ## 📁 Structure du Projet
 
-```
+```text
 yetu/
 ├── app/                          # Code métier de l'application
 │   ├── Http/                    # Controllers, Middleware, Requests, Resources
@@ -221,7 +221,7 @@ yetu/
 
 ### Principaux Modèles
 
-```
+```text
 Users
   ├── Tenants (shops)
   ├── Addresses
@@ -267,7 +267,7 @@ Voir [database/README.md](./database/README.md) pour plus de détails.
 
 ### Routes Publiques
 
-```
+```text
 GET  /                          # Accueil
 GET  /product                   # Catalogue produits
 GET  /product/{product}         # Détail produit
@@ -278,7 +278,7 @@ GET  /register                  # Inscription
 
 ### Routes Authentifiées
 
-```
+```text
 GET  /acheteur/account          # Compte acheteur
 GET  /vendor/dashboard          # Dashboard vendeur
 GET  /checkout                  # Panier et checkout
@@ -287,7 +287,7 @@ GET  /orders                    # Mes commandes
 
 ### Routes Admin
 
-```
+```text
 /admin/dashboard                # Dashboard
 /admin/users                    # Gestion utilisateurs
 /admin/shops                    # Gestion boutiques

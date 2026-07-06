@@ -59,7 +59,7 @@ class NewsletterSend extends Model
     // Relations
     public function campaign(): BelongsTo
     {
-        return $this->belongsTo(NewsletterCampaign::class, 'campaign_id');
+        return $this->belongsTo(NewsletterCampaign::class);
     }
 
     public function newsletter(): BelongsTo

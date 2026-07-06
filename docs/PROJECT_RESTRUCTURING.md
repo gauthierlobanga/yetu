@@ -9,10 +9,12 @@ A major architectural restructuring has been performed to improve project organi
 Controllers have been reorganized from a flat structure in `app/Http/Controllers` to a hierarchical structure based on domains:
 
 ### 1. Central Domain (`app/Http/Controllers/Central`)
+
 - **Pages**: Static and marketing pages (Home, About, Contact, Blog).
 - **Auth**: Central authentication, Socialite, and Tenant selection.
 
 ### 2. Tenant/Vendor Domain (`app/Http/Controllers/Vendor`)
+
 - **Acheteurs**: Buyer-specific dashboards and features.
 - **Boutique**: E-commerce features for the storefront.
   - **Ecommerce**: Cart, Checkout, Products, Categories, Brands, etc.
@@ -21,9 +23,11 @@ Controllers have been reorganized from a flat structure in `app/Http/Controllers
 - **Config**: Core tenant configuration (Registration, Payment, Locations).
 
 ### 3. Admin Domain (`app/Http/Controllers/Admin`)
+
 - System-wide administration tools, global subscriptions, and statistics.
 
 ### 4. Shared/Other (`app/Http/Controllers/Others`)
+
 - Shared utilities like Search and Public Storage.
 
 ## 🛣️ Route Reorganization
@@ -37,6 +41,7 @@ Routes have been updated to reflect the new controller locations and improved na
 ## 🎨 UI Modernization
 
 ### Tenant Account Selection
+
 - Completely refactored `TenantAccountSelection.tsx` with a modern, glassmorphism-inspired UI.
 - Improved empty states and multi-tenant navigation.
 - Enhanced UX with motion animations and responsive layouts.
@@ -44,15 +49,18 @@ Routes have been updated to reflect the new controller locations and improved na
 ## 🔧 Core Logic Improvements
 
 ### 1. Subscription System
+
 - Enhanced integration with Stripe.
 - Improved middleware for tenant access control based on subscription status.
 - Added admin tools for manual subscription management (blocking, renewing, grace periods).
 
 ### 2. Notifications
+
 - Centralized notification handling.
 - Better separation between tenant-level and buyer-level notifications.
 
 ### 3. User & Tenant Models
+
 - Cleaned up models with better trait organization.
 - Improved relationships and UUID handling.
 

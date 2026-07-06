@@ -51,7 +51,7 @@ class TenantRealtimeActivityService
         }
 
         try {
-            $recipients = $this->resolveRecipients();
+            $recipients = $this->resolveRecipients($tenant);
 
             if ($recipients->isEmpty()) {
                 return;
@@ -98,11 +98,15 @@ class TenantRealtimeActivityService
         return true;
     }
 
-    protected function resolveRecipients(): Collection
+    protected function resolveRecipients(\App\Models\Tenant $tenant): Collection
     {
-        return User::query()
-            ->where('is_active', true)
-            ->get();
+        // En contexte multitenant, on vérifie si la méthode users existe.
+        // On renvoie les utilisateurs liés à la boutique.
+        if (method_exists($tenant, 'users')) {
+            return $tenant->users()->where('is_active', true)->get();
+        }
+
+        return collect();
     }
 
     /**

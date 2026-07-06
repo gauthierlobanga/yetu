@@ -25,7 +25,7 @@ class LocationController extends Controller
      */
     public function countries(): JsonResponse
     {
-        $countries = Country::select('id', 'iso2', 'name', 'emoji')
+        $countries = Country::select('id', 'iso2', 'name', 'emoji', 'phone_code')
             ->orderBy('name')
             ->get();
 

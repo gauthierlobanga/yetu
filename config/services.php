@@ -35,28 +35,19 @@ return [
         ],
     ],
 
-    'google' => [
-        'client_id' => env('GOOGLE_CLIENT_ID'),
-        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('GOOGLE_REDIRECT_URI'),
-    ],
-
-    'facebook' => [
-        'client_id' => env('FACEBOOK_CLIENT_ID'),
-        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
-        'redirect' => env('FACEBOOK_REDIRECT_URI'),
-    ],
-
-    'github' => [
-        'client_id' => env('GITHUB_CLIENT_ID'),
-        'client_secret' => env('GITHUB_CLIENT_SECRET'),
-        'redirect' => env('GITHUB_REDIRECT_URI'),
-    ],
-
     'stripe' => [
-        'key' => env('STRIPE_KEY'),
-        'secret' => env('STRIPE_SECRET'),
+        'key' => env('STRIPE_KEY',''),
+        'secret' => env('STRIPE_SECRET',''),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
+    'embedding' => [
+        'enabled' => env('EMBEDDING_IMAGE_ENABLED', false),
+        'endpoint' => env('EMBEDDING_SERVICE_URL', 'http://localhost:8001/embed-image'),
+        'timeout' => env('EMBEDDING_SERVICE_TIMEOUT', 30),
+        'connect_timeout' => env('EMBEDDING_SERVICE_CONNECT_TIMEOUT', 5),
+        'retries' => env('EMBEDDING_SERVICE_RETRIES', 2),
+        'dimensions' => env('EMBEDDING_VECTOR_DIMENSIONS', 1536),
     ],
 
 ];

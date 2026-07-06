@@ -5,12 +5,12 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { SiteHeader } from '@/components/site-header';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { VendorSidebar } from '@/components/VendorSidebar';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 
@@ -88,7 +88,7 @@ export default function SubscribersIndex({ tenant, subscribers, filters }: Subsc
                                             <Input
                                                 type="search"
                                                 placeholder="Rechercher un email..."
-                                                className="pl-9 w-full sm:w-[300px]"
+                                                className="pl-9 w-full sm:w-75"
                                                 value={search}
                                                 onChange={(e) => setSearch(e.target.value)}
                                             />

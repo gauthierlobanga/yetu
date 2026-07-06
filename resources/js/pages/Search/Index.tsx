@@ -1,130 +1,210 @@
-// resources/js/Pages/Search/Index.tsx
-
 import { Head, Link } from '@inertiajs/react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Badge, Calendar, Folder, User } from 'lucide-react';
+import { FolderTree, PackageSearch, SearchIcon } from 'lucide-react';
+import type { FormEvent } from 'react';
 import type { SearchResult } from '@/components/search-my-input';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import MainLayout from '@/layouts/main-layout';
-import { home } from '@/routes';
+import { handleImageFallback, resolveImageUrl } from '@/lib/media';
+import { home, search as searchPage } from '@/routes/tenant';
+import { show as productShow } from '@/routes/tenant/product';
+import {
+    index as categoryIndex,
+    show as categoryShow,
+} from '@/routes/tenant/product/category';
 
 interface Props {
     results: SearchResult[];
     query: string;
 }
 
+function formatPrice(price?: number | null): string | null {
+    if (typeof price !== 'number' || !Number.isFinite(price)) {
+        return null;
+    }
+
+    return new Intl.NumberFormat('fr-CD', {
+        style: 'currency',
+        currency: 'CDF',
+        maximumFractionDigits: 0,
+    }).format(price);
+}
+
+function resultType(result: SearchResult): 'product' | 'category' {
+    return result._type ?? result.type;
+}
+
+function resultUrl(result: SearchResult): string {
+    if (resultType(result) === 'product') {
+        return productShow.url(result.slug);
+    }
+
+    return categoryShow.url(result.slug);
+}
+
 export default function SearchIndex({ results, query }: Props) {
+    const trimmedQuery = query.trim();
     const breadcrumbs = [
-        { title: 'Accueil', href: home() },
-        { title: 'Recherche', href: '/search' },
-        { title: `"${query}"`, href: `/search?q=${query}` },
+        { title: 'Accueil', href: home.url() },
+        { title: 'Recherche', href: searchPage.url() },
+        ...(trimmedQuery
+            ? [
+                  {
+                      title: `"${trimmedQuery}"`,
+                      href: searchPage.url({ query: { q: trimmedQuery } }),
+                  },
+              ]
+            : []),
     ];
+
+    const submitSearch = (event: FormEvent<HTMLFormElement>) => {
+        const formData = new FormData(event.currentTarget);
+        const submittedQuery = String(formData.get('q') ?? '').trim();
+
+        if (submittedQuery.length < 2) {
+            event.preventDefault();
+        }
+    };
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Recherche: ${query}`} />
+            <Head
+                title={
+                    trimmedQuery
+                        ? `Recherche produits: ${trimmedQuery}`
+                        : 'Recherche produits'
+                }
+            />
 
-            <div className="container mx-auto max-w-4xl px-4 py-12">
-                <h1 className="mb-2 text-3xl font-bold">
-                    Résultats pour "{query}"
-                </h1>
-                <p className="mb-8 text-muted-foreground">
-                    {results.length} résultat{results.length > 1 ? 's' : ''}{' '}
-                    trouvé(s)
-                </p>
-
-                {results.length === 0 ? (
-                    <div className="rounded-lg border bg-muted/30 p-8 text-center">
-                        <p className="text-muted-foreground">
-                            Aucun résultat trouvé. Essayez une autre recherche.
+            <div className="container mx-auto max-w-5xl px-4 py-10">
+                <div className="mb-8 space-y-4">
+                    <div>
+                        <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl dark:text-slate-50">
+                            Recherche produits
+                        </h1>
+                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                            {trimmedQuery
+                                ? `${results.length} résultat${results.length > 1 ? 's' : ''} pour « ${trimmedQuery} »`
+                                : 'Recherchez un produit ou une catégorie produit.'}
                         </p>
                     </div>
+
+                    <form
+                        action={searchPage.url()}
+                        method="get"
+                        onSubmit={submitSearch}
+                        className="flex flex-col gap-3 sm:flex-row"
+                    >
+                        <label className="relative flex-1">
+                            <SearchIcon className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <input
+                                type="search"
+                                name="q"
+                                defaultValue={trimmedQuery}
+                                minLength={2}
+                                placeholder="Rechercher un produit, une catégorie..."
+                                className="h-11 w-full rounded-lg border border-slate-200 bg-white pr-3 pl-10 text-sm text-slate-900 transition outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-emerald-500 dark:focus:ring-emerald-900/40"
+                            />
+                        </label>
+                        <Button type="submit" className="h-11">
+                            Rechercher
+                        </Button>
+                    </form>
+                </div>
+
+                {results.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-slate-200 bg-slate-50 px-6 py-12 text-center dark:border-slate-700 dark:bg-slate-900/50">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm dark:bg-slate-800">
+                            <PackageSearch className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <p className="font-medium text-slate-800 dark:text-slate-100">
+                                Aucun produit trouvé
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                Essayez un autre mot-clé ou parcourez les
+                                catégories.
+                            </p>
+                        </div>
+                        <Button variant="outline" asChild>
+                            <Link href={categoryIndex.url()}>
+                                Voir les catégories
+                            </Link>
+                        </Button>
+                    </div>
                 ) : (
-                    <div className="space-y-6">
-                        {results.map((result) => (
-                            <Link
-                                key={`${result._type}-${result.id}`}
-                                href={
-                                    result._type === 'post'
-                                        ? `/blog/${result.slug}`
-                                        : result._type === 'category'
-                                          ? `/blog/category/${result.slug}`
-                                          : `/profile/${result.id}`
-                                }
-                                className="group block rounded-lg border bg-card p-6 transition-all hover:shadow-lg"
-                            >
-                                <div className="flex items-start gap-4">
-                                    {result._type === 'post' &&
-                                        result.featured_image_thumb && (
-                                            <img
-                                                src={
-                                                    result.featured_image_thumb
-                                                }
-                                                alt={result.title}
-                                                className="h-16 w-16 rounded-lg object-cover"
-                                            />
-                                        )}
-                                    <div className="flex-1">
-                                        <h2 className="text-xl font-semibold group-hover:text-blue-600">
-                                            {result.title ||
-                                                result.nom ||
-                                                result.name}
-                                        </h2>
-                                        {result._type === 'post' &&
-                                            result.excerpt && (
-                                                <p className="mt-1 text-muted-foreground">
-                                                    {result.excerpt}
-                                                </p>
+                    <div className="grid gap-3">
+                        {results.map((result) => {
+                            const type = resultType(result);
+                            const price = formatPrice(result.prix_actuel);
+
+                            return (
+                                <Link
+                                    key={`${type}-${result.id}`}
+                                    href={resultUrl(result)}
+                                    className="group flex gap-4 rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900/80 dark:hover:border-emerald-600"
+                                >
+                                    {type === 'product' ? (
+                                        <img
+                                            src={resolveImageUrl(
+                                                result.image_principale,
                                             )}
-                                        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                                            <Badge>
-                                                {result._type === 'post'
-                                                    ? 'Article'
-                                                    : result._type ===
-                                                        'category'
-                                                      ? 'Catégorie'
-                                                      : 'Auteur'}
+                                            alt={result.nom ?? 'Produit'}
+                                            onError={handleImageFallback()}
+                                            className="h-20 w-20 shrink-0 rounded-lg object-cover"
+                                        />
+                                    ) : (
+                                        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                            <FolderTree className="h-7 w-7" />
+                                        </div>
+                                    )}
+
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h2 className="truncate text-base font-semibold text-slate-900 group-hover:text-emerald-700 dark:text-slate-100 dark:group-hover:text-emerald-400">
+                                                {result.nom ?? result.name}
+                                            </h2>
+                                            <Badge
+                                                variant="outline"
+                                                className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                            >
+                                                {type === 'product'
+                                                    ? 'Produit'
+                                                    : 'Catégorie'}
                                             </Badge>
-                                            {result._type === 'post' &&
-                                                result.published_at && (
-                                                    <div className="flex items-center gap-1">
-                                                        <Calendar className="h-3 w-3" />
-                                                        <span>
-                                                            {format(
-                                                                new Date(
-                                                                    result.published_at,
-                                                                ),
-                                                                'dd MMM yyyy',
-                                                                { locale: fr },
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            {result._type === 'category' &&
-                                                result.posts_count && (
-                                                    <div className="flex items-center gap-1">
-                                                        <Folder className="h-3 w-3" />
-                                                        <span>
-                                                            {result.posts_count}{' '}
-                                                            articles
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            {result._type === 'user' &&
-                                                result.views_count && (
-                                                    <div className="flex items-center gap-1">
-                                                        <User className="h-3 w-3" />
-                                                        <span>
-                                                            {result.views_count}{' '}
-                                                            articles
-                                                        </span>
-                                                    </div>
+                                            {type === 'product' &&
+                                                result.badge && (
+                                                    <Badge>
+                                                        {result.badge}
+                                                    </Badge>
                                                 )}
                                         </div>
+
+                                        {result.description && (
+                                            <p className="mt-1 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
+                                                {result.description}
+                                            </p>
+                                        )}
+
+                                        <div className="mt-2 text-sm">
+                                            {type === 'product' && price ? (
+                                                <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                                                    {price}
+                                                </span>
+                                            ) : (
+                                                <span className="text-slate-500 dark:text-slate-400">
+                                                    {result.produits_count ?? 0}{' '}
+                                                    produit
+                                                    {result.produits_count !== 1
+                                                        ? 's'
+                                                        : ''}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            </Link>
-                        ))}
+                                </Link>
+                            );
+                        })}
                     </div>
                 )}
             </div>

@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, Factory } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Factory, Menu } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppearanceToogle from '@/components/appearance-toogle';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -30,7 +30,6 @@ type Props = {
 
 export function VendorHeader({ breadcrumbs = [] }: Props) {
     const { auth } = usePage().props as any;
-
     const vendorNavItems: NavItem[] = [
         {
             title: 'Explorer les catégories',
@@ -137,13 +136,10 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                     {/* Zone moderne de recherche (Centre) */}
                     <div className="hidden max-w-4xl flex-1 px-6 lg:block">
                         <SearchExperience
-                            showImageSearch={true}
-                            onImageSearch={(file) => {
-                                console.log('Image pour recherche:', file);
-                                // TODO: implémenter la logique d'envoi vers l'API d'IA
-                            }}
+                            buttonText="Rechercher un produit…"
+                            hitsPerPage={6}
+                            showImageSearch
                         />
-
                     </div>
 
                     {/* Actions à droite */}
@@ -197,9 +193,6 @@ export function VendorHeader({ breadcrumbs = [] }: Props) {
                     <div className="flex-1">
                         <SearchExperience
                             showImageSearch={true}
-                            onImageSearch={(file) => {
-                                console.log('Image pour recherche:', file);
-                            }}
                             buttonProps={{ className: 'w-full' }}
                         />
                     </div>

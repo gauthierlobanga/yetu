@@ -32,10 +32,9 @@ class NewsletterCampaignsTable
                     ->iconColor('primary')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold')
-                    ->size('lg')
-                    ->description(fn ($record) => $record->sujet)
-                    ->limit(35),
+                    ->size('md')
+                    ->description(fn ($record) => $record->sujet ? str()->limit($record->sujet, 25) : null)
+                    ->limit(25),
 
                 TextColumn::make('status')
                     ->label('Statut')

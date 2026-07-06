@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Jobs\GenerateProductEmbedding;
 use App\Listeners\RedirectVendorAfterLogin;
 use App\Models\Client;
 use App\Models\Commande;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -79,6 +81,22 @@ class AppServiceProvider extends ServiceProvider
                 $model->setAttribute('excerpt', $model->excerpt);
             }
         });
+
+        Media::saved(function (Media $media) {
+            $model = $media->model;
+
+            if (
+                $model instanceof Produit
+                && in_array($media->collection_name, ['image_principale', 'images'])
+                && Schema::hasColumn($model->getTable(), 'search_embedding_synced_at')
+            ) {
+                $model->forceFill([
+                    'search_embedding_synced_at' => null,
+                ])->saveQuietly();
+
+                GenerateProductEmbedding::dispatch($model);
+            }
+        });
     }
 
     /**
@@ -105,6 +123,12 @@ class AppServiceProvider extends ServiceProvider
         );
     }
 
+    /**
+     * Enregistre les observers de temps réel pour les modèles du tenant.
+     *
+     * Ces observers déclenchent des événements de diffusion en temps réel
+     * (via Echo/Reverb) pour mettre à jour le dashboard du vendeur.
+     */
     protected function registerTenantRealtimeObservers(): void
     {
         $observer = TenantRealtimeActivityObserver::class;
@@ -120,6 +144,12 @@ class AppServiceProvider extends ServiceProvider
         MouvementStock::observe($observer);
     }
 
+    /**
+     * Configure les redirections d'authentification (Fortify/Sanctum).
+     *
+     * Définit où rediriger les utilisateurs non-authentifiés (vers le login)
+     * et les utilisateurs déjà authentifiés (vers leur dashboard respectif).
+     */
     protected function configureAuthenticationRedirects(): void
     {
         // Redirection quand l'utilisateur N'EST PAS connecté
@@ -160,6 +190,15 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Vérifie si un utilisateur est propriétaire du tenant actuellement initialisé.
+     *
+     * Interroge la connexion centrale pour vérifier la relation user_tenant
+     * avec le flag `is_owner`.
+     *
+     * @param  string  $userId  L'identifiant de l'utilisateur à vérifier
+     * @return bool True si l'utilisateur est propriétaire du tenant courant
+     */
     protected function userOwnsCurrentTenant(string $userId): bool
     {
         $tenant = tenant();

@@ -1,43 +1,51 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// resources/js/components/search-my-input.tsx
-import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
+    AlertCircle,
     ArrowDown,
     ArrowUp,
+    Camera,
     CornerDownLeft,
+    FolderTree,
+    Loader2,
+    PackageSearch,
     SearchIcon,
     X,
-    Camera,
 } from 'lucide-react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useKeyboardNavigation } from '@/hooks/use-keyboard-navigation-app';
+import { handleImageFallback, resolveImageUrl } from '@/lib/media';
 import { cn } from '@/lib/utils';
+import { api as searchApi, search as searchPage } from '@/routes/tenant';
+import {
+    index as productIndex,
+    show as productShow,
+} from '@/routes/tenant/product';
+import { show as categoryShow } from '@/routes/tenant/product/category';
+import { byImage as searchByImage } from '@/routes/tenant/product/search';
 
-// Types
+type SearchResultType = 'product' | 'category';
+
 export interface SearchResult {
-    id: number;
-    title?: string;
+    id: number | string;
     nom?: string;
     name?: string;
     slug: string;
+    description?: string | null;
     excerpt?: string | null;
-    content?: string | null;
-    featured_image_thumb?: string | null;
-    avatar_url?: string | null;
-    categories?: Array<{ id: number; nom: string; slug: string }>;
-    user?: { id: number; name: string; avatar_url?: string | null };
-    _type?: 'post' | 'category' | 'user'; // Rendu optionnel pour plus de flexibilité
-    published_at?: string | null;
-    views_count?: number;
-    posts_count?: number;
+    url?: string;
+    image_principale?: string | null;
+    prix_actuel?: number | null;
+    prix_ttc?: number | null;
+    badge?: string | null;
+    produits_count?: number;
+    type: SearchResultType;
+    _type?: SearchResultType;
 }
 
 export interface SearchConfig {
@@ -52,12 +60,137 @@ export interface SearchConfig {
     onImageSearch?: (file: File) => void;
 }
 
-// ============================================================================
-// Search Button
-// ============================================================================
+interface ImageSearchResponse {
+    redirect_url?: string;
+    query?: string;
+    analysis?: Record<string, unknown>;
+    error?: string;
+    message?: string;
+}
+
+type ImageSearchState =
+    | { status: 'idle' }
+    | { status: 'loading'; fileName: string; previewUrl: string }
+    | {
+          status: 'error';
+          fileName?: string;
+          message: string;
+          previewUrl?: string;
+      };
+
+const MAX_IMAGE_SEARCH_SIZE = 5 * 1024 * 1024;
+const IMAGE_SEARCH_ACCEPT = 'image/jpeg,image/png,image/webp';
+
+function resultType(result: SearchResult): SearchResultType {
+    return result._type ?? result.type;
+}
+
+function resultTitle(result: SearchResult): string {
+    return result.nom ?? result.name ?? 'Résultat';
+}
+
+function resultUrl(result: SearchResult): string {
+    if (resultType(result) === 'product') {
+        return productShow.url(result.slug);
+    }
+
+    return categoryShow.url(result.slug);
+}
+
+function formatPrice(price?: number | null): string | null {
+    if (typeof price !== 'number' || !Number.isFinite(price)) {
+        return null;
+    }
+
+    return new Intl.NumberFormat('fr-CD', {
+        style: 'currency',
+        currency: 'CDF',
+        maximumFractionDigits: 0,
+    }).format(price);
+}
+
+function openUrl(url: string, newTab: boolean): void {
+    if (newTab) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+
+        return;
+    }
+
+    window.location.assign(url);
+}
+
+function csrfToken(): string {
+    return (
+        document
+            .querySelector<HTMLMetaElement>('meta[name="csrf-token"]')
+            ?.getAttribute('content') ?? ''
+    );
+}
+
+function revokeImagePreview(state: ImageSearchState): void {
+    if ('previewUrl' in state && state.previewUrl) {
+        URL.revokeObjectURL(state.previewUrl);
+    }
+}
+
+function imageValidationMessage(file: File): string | null {
+    if (!file.type.startsWith('image/')) {
+        return 'Sélectionnez une image valide.';
+    }
+
+    if (file.size > MAX_IMAGE_SEARCH_SIZE) {
+        return 'L’image doit peser 5 Mo maximum.';
+    }
+
+    return null;
+}
+
+function imageErrorMessage(payload: unknown, fallback: string): string {
+    if (payload && typeof payload === 'object') {
+        const response = payload as ImageSearchResponse;
+
+        return response.error ?? response.message ?? fallback;
+    }
+
+    return fallback;
+}
+
+async function uploadImageSearch(file: File): Promise<ImageSearchResponse> {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const token = csrfToken();
+    const response = await fetch(searchByImage.url(), {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            ...(token ? { 'X-CSRF-TOKEN': token } : {}),
+        },
+        body: formData,
+    });
+
+    const payload = (await response
+        .json()
+        .catch(() => ({}))) as ImageSearchResponse;
+
+    if (!response.ok) {
+        throw new Error(
+            imageErrorMessage(
+                payload,
+                'Impossible d’analyser cette image pour le moment.',
+            ),
+        );
+    }
+
+    return payload;
+}
+
 interface SearchButtonProps extends React.ComponentProps<typeof Button> {
     showImageSearch?: boolean;
     onImageSearch?: (file: File) => void;
+    isImageSearching?: boolean;
 }
 
 export const SearchButton: React.FC<SearchButtonProps> = ({
@@ -65,11 +198,10 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
     children,
     showImageSearch,
     onImageSearch,
+    isImageSearching,
     ...buttonProps
 }) => {
-    const [modifierLabel, setModifierLabel] = useState('');
-    const [isModifierPressed, setIsModifierPressed] = useState(false);
-    const [isKPressed, setIsKPressed] = useState(false);
+    const [modifierLabel, setModifierLabel] = useState('Ctrl');
 
     useEffect(() => {
         if (typeof navigator === 'undefined') {
@@ -77,42 +209,8 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
         }
 
         setModifierLabel(
-            /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl',
+            /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? 'Cmd' : 'Ctrl',
         );
-    }, []);
-
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.metaKey || event.ctrlKey) {
-                setIsModifierPressed(true);
-            }
-
-            if (event.key.toLowerCase() === 'k') {
-                setIsKPressed(true);
-            }
-        };
-        const handleKeyUp = (event: KeyboardEvent) => {
-            if (!event.metaKey && !event.ctrlKey) {
-                setIsModifierPressed(false);
-            }
-
-            if (event.key.toLowerCase() === 'k') {
-                setIsKPressed(false);
-            }
-        };
-        const resetKeys = () => {
-            setIsModifierPressed(false);
-            setIsKPressed(false);
-        };
-        document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('keyup', handleKeyUp);
-        window.addEventListener('blur', resetKeys);
-
-        return () => {
-            document.removeEventListener('keydown', handleKeyDown);
-            document.removeEventListener('keyup', handleKeyUp);
-            window.removeEventListener('blur', resetKeys);
-        };
     }, []);
 
     return (
@@ -123,54 +221,62 @@ export const SearchButton: React.FC<SearchButtonProps> = ({
                 'h-auto w-full cursor-pointer justify-between gap-2 rounded-xl border border-emerald-400 bg-white/80 px-4 py-2.5 text-sm font-medium text-slate-700 transition-all hover:border-emerald-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-emerald-600 dark:hover:bg-slate-800',
                 className,
             )}
-            aria-label="Open search"
+            aria-label="Ouvrir la recherche produits"
             {...buttonProps}
         >
-            <span className="flex items-center gap-2">
+            <span className="flex min-w-0 items-center gap-2">
                 <SearchIcon
                     size={18}
-                    className="text-slate-400 dark:text-slate-500"
+                    className="shrink-0 text-slate-400 dark:text-slate-500"
                 />
-                <span className="hidden sm:inline">{children}</span>
+                <span className="hidden truncate sm:inline">{children}</span>
             </span>
-            <div className="flex items-center gap-2">
+            <span className="flex items-center gap-2">
                 {showImageSearch && (
                     <label
-                        onClick={(e) => e.stopPropagation()}
-                        className="cursor-pointer rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-emerald-600 dark:hover:bg-slate-700 dark:hover:text-emerald-400 transition-colors"
+                        onClick={(event) => event.stopPropagation()}
+                        className={cn(
+                            'cursor-pointer rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-emerald-600 dark:hover:bg-slate-700 dark:hover:text-emerald-400',
+                            isImageSearching &&
+                                'pointer-events-none text-emerald-600 dark:text-emerald-400',
+                        )}
                         title="Recherche par image"
                     >
-                        <Camera size={18} />
+                        {isImageSearching ? (
+                            <Loader2 className="h-4.5 w-4.5 animate-spin" />
+                        ) : (
+                            <Camera size={18} />
+                        )}
+                        <span className="sr-only">Recherche par image</span>
                         <input
                             type="file"
-                            accept="image/*"
+                            accept={IMAGE_SEARCH_ACCEPT}
                             className="hidden"
-                            onChange={(e) => {
-                                if (e.target.files && e.target.files.length > 0) {
-                                    onImageSearch?.(e.target.files[0]);
-                                    // Reset input so the same file can be selected again
-                                    e.target.value = '';
+                            disabled={isImageSearching}
+                            onChange={(event) => {
+                                const file = event.target.files?.[0];
+
+                                if (file) {
+                                    onImageSearch?.(file);
+                                    event.target.value = '';
                                 }
                             }}
                         />
                     </label>
                 )}
-                <div className="hidden gap-0.5 md:flex">
-                    <kbd className="grid h-5 min-w-5 place-items-center rounded bg-slate-100 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">
-                    {modifierLabel}
-                </kbd>
-                <kbd className="grid h-5 min-w-5 place-items-center rounded bg-slate-100 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">
-                    K
-                </kbd>
-            </div>
-            </div>
+                <span className="hidden gap-0.5 md:flex">
+                    <kbd className="grid h-5 min-w-5 place-items-center rounded bg-slate-100 px-1 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">
+                        {modifierLabel}
+                    </kbd>
+                    <kbd className="grid h-5 min-w-5 place-items-center rounded bg-slate-100 px-1 text-xs text-slate-500 dark:bg-slate-700 dark:text-slate-400">
+                        K
+                    </kbd>
+                </span>
+            </span>
         </Button>
     );
 };
 
-// ============================================================================
-// Modal
-// ============================================================================
 interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -179,20 +285,23 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
     useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        const previousOverflow = document.body.style.overflow;
         const handleEscape = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 onClose();
             }
         };
 
-        if (isOpen) {
-            document.addEventListener('keydown', handleEscape);
-            document.body.style.overflow = 'hidden';
-        }
+        document.addEventListener('keydown', handleEscape);
+        document.body.style.overflow = 'hidden';
 
         return () => {
             document.removeEventListener('keydown', handleEscape);
-            document.body.style.overflow = 'unset';
+            document.body.style.overflow = previousOverflow;
         };
     }, [isOpen, onClose]);
 
@@ -206,12 +315,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
             onClick={onClose}
         >
             <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                initial={{ opacity: 0, scale: 0.97, y: -8 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                transition={{ duration: 0.2 }}
-                className="flex h-full w-full max-w-full flex-col overflow-hidden bg-white/95 shadow-2xl shadow-emerald-500/10 backdrop-blur-xl md:h-auto md:max-h-[80vh] md:w-[90%] md:max-w-2xl md:rounded-2xl dark:bg-slate-900/95 dark:shadow-emerald-900/20"
-                onClick={(e) => e.stopPropagation()}
+                exit={{ opacity: 0, scale: 0.97, y: -8 }}
+                transition={{ duration: 0.18 }}
+                className="flex h-full w-full max-w-full flex-col overflow-hidden bg-white shadow-2xl shadow-emerald-500/10 md:h-auto md:max-h-[80vh] md:w-[90%] md:max-w-2xl md:rounded-2xl dark:bg-slate-900 dark:shadow-emerald-900/20"
+                onClick={(event) => event.stopPropagation()}
             >
                 {children}
             </motion.div>
@@ -220,9 +329,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
     );
 };
 
-// ============================================================================
-// Search Input
-// ============================================================================
 interface SearchInputFieldProps {
     query: string;
     setQuery: (query: string) => void;
@@ -235,6 +341,7 @@ interface SearchInputFieldProps {
     isLoading?: boolean;
     showImageSearch?: boolean;
     onImageSearch?: (file: File) => void;
+    isImageSearching?: boolean;
 }
 
 const SearchInputField = memo(function SearchInputField({
@@ -249,51 +356,65 @@ const SearchInputField = memo(function SearchInputField({
     isLoading,
     showImageSearch,
     onImageSearch,
+    isImageSearching,
 }: SearchInputFieldProps) {
     return (
-        <div className="flex items-center gap-3 border-b border-slate-200/80 bg-white/80 px-4 py-3 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80">
+        <div className="flex items-center gap-3 border-b border-slate-200/80 bg-white px-4 py-3 dark:border-slate-700 dark:bg-slate-900">
             <SearchIcon className="h-5 w-5 shrink-0 text-slate-400 dark:text-slate-500" />
             <input
                 ref={inputRef}
-                type="text"
-                className="flex-1 bg-transparent text-lg font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
+                type="search"
+                inputMode="search"
+                className="min-w-0 flex-1 bg-transparent text-base font-medium text-slate-800 outline-none placeholder:text-slate-400 sm:text-lg dark:text-slate-100 dark:placeholder:text-slate-500"
                 placeholder={
-                    placeholder || 'Rechercher des articles, catégories...'
+                    placeholder ?? 'Rechercher un produit, une catégorie...'
                 }
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === 'ArrowDown') {
-                        e.preventDefault();
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                    if (event.key === 'ArrowDown') {
+                        event.preventDefault();
                         onArrowDown?.();
-                    } else if (e.key === 'ArrowUp') {
-                        e.preventDefault();
+                    } else if (event.key === 'ArrowUp') {
+                        event.preventDefault();
                         onArrowUp?.();
-                    } else if (e.key === 'Enter') {
-                        e.preventDefault();
+                    } else if (event.key === 'Enter') {
+                        event.preventDefault();
                         onEnter?.();
                     }
                 }}
                 autoFocus
             />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
                 {isLoading && (
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
                 )}
                 {showImageSearch && (
                     <label
-                        className="cursor-pointer rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-emerald-600 dark:hover:bg-slate-700 dark:hover:text-emerald-400 transition-colors"
+                        className={cn(
+                            'cursor-pointer rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-emerald-600 dark:hover:bg-slate-800 dark:hover:text-emerald-400',
+                            isImageSearching &&
+                                'pointer-events-none text-emerald-600 dark:text-emerald-400',
+                        )}
                         title="Recherche par image"
                     >
-                        <Camera size={18} />
+                        {isImageSearching ? (
+                            <Loader2 className="h-4.5 w-4.5 animate-spin" />
+                        ) : (
+                            <Camera size={18} />
+                        )}
+                        <span className="sr-only">Recherche par image</span>
                         <input
                             type="file"
-                            accept="image/*"
+                            accept={IMAGE_SEARCH_ACCEPT}
                             className="hidden"
-                            onChange={(e) => {
-                                if (e.target.files && e.target.files.length > 0) {
-                                    onImageSearch?.(e.target.files[0]);
-                                    e.target.value = '';
+                            disabled={isImageSearching}
+                            onChange={(event) => {
+                                const file = event.target.files?.[0];
+
+                                if (file) {
+                                    onImageSearch?.(file);
+                                    event.target.value = '';
                                 }
                             }}
                         />
@@ -309,6 +430,7 @@ const SearchInputField = memo(function SearchInputField({
                             setQuery('');
                             inputRef.current?.focus();
                         }}
+                        aria-label="Effacer la recherche"
                     >
                         <X className="h-4 w-4" />
                     </Button>
@@ -327,9 +449,69 @@ const SearchInputField = memo(function SearchInputField({
     );
 });
 
-// ============================================================================
-// Results Panel
-// ============================================================================
+const ImageSearchPanel = memo(function ImageSearchPanel({
+    state,
+    onClear,
+}: {
+    state: ImageSearchState;
+    onClear: () => void;
+}) {
+    if (state.status === 'idle') {
+        return null;
+    }
+
+    const isLoading = state.status === 'loading';
+
+    return (
+        <div className="border-b border-slate-200/80 bg-emerald-50/60 p-4 dark:border-slate-700 dark:bg-emerald-950/20">
+            <div className="flex items-center gap-3">
+                {state.previewUrl ? (
+                    <img
+                        src={state.previewUrl}
+                        alt={state.fileName ?? 'Image recherchée'}
+                        className="h-14 w-14 shrink-0 rounded-xl object-cover shadow-sm"
+                    />
+                ) : (
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm dark:bg-slate-800">
+                        <Camera className="h-6 w-6" />
+                    </div>
+                )}
+
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                        {isLoading ? (
+                            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-emerald-600 dark:text-emerald-400" />
+                        ) : (
+                            <AlertCircle className="h-4 w-4 shrink-0 text-red-500" />
+                        )}
+                        <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
+                            {isLoading
+                                ? 'Analyse de l’image en cours'
+                                : 'Recherche image interrompue'}
+                        </p>
+                    </div>
+                    <p className="mt-1 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
+                        {state.status === 'loading'
+                            ? 'Nous détectons les caractéristiques du produit pour ouvrir le catalogue filtré.'
+                            : state.message}
+                    </p>
+                </div>
+
+                {!isLoading && (
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={onClear}
+                    >
+                        Fermer
+                    </Button>
+                )}
+            </div>
+        </div>
+    );
+});
+
 interface ResultsPanelProps {
     results: SearchResult[];
     selectedIndex: number;
@@ -344,160 +526,17 @@ const ResultsPanel = memo(function ResultsPanel({
     onHoverIndex,
 }: ResultsPanelProps) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [hoverEnabled, setHoverEnabled] = useState(false);
 
     useEffect(() => {
         const container = containerRef.current;
-
-        if (!container) {
-            return;
-        }
-
-        const selectedEl = container.querySelector(
+        const selectedElement = container?.querySelector(
             '[aria-selected="true"]',
         ) as HTMLElement | null;
 
-        if (!selectedEl) {
-            return;
-        }
-
-        const padding = 8;
-        const cRect = container.getBoundingClientRect();
-        const iRect = selectedEl.getBoundingClientRect();
-
-        if (iRect.top < cRect.top + padding) {
-            container.scrollTop -= cRect.top + padding - iRect.top;
-        } else if (iRect.bottom > cRect.bottom - padding) {
-            container.scrollTop += iRect.bottom - (cRect.bottom - padding);
-        }
+        selectedElement?.scrollIntoView({
+            block: 'nearest',
+        });
     }, [selectedIndex]);
-
-    useEffect(() => {
-        const container = containerRef.current;
-
-        if (!container) {
-            return;
-        }
-
-        setHoverEnabled(false);
-        const enable = () => setHoverEnabled(true);
-        container.addEventListener('pointermove', enable, { once: true });
-
-        return () =>
-            container.removeEventListener('pointermove', enable as any);
-    }, []);
-
-    const renderResult = (result: SearchResult) => {
-        // CORRECTION : Déduction du type si le backend ne renvoie pas la propriété _type
-        const itemType =
-            result._type ||
-            (result.title
-                ? 'post'
-                : result.nom
-                  ? 'category'
-                  : result.name
-                    ? 'user'
-                    : 'unknown');
-
-        if (itemType === 'post') {
-            return (
-                <div className="flex items-start gap-3">
-                    {result.featured_image_thumb ? (
-                        <img
-                            src={result.featured_image_thumb}
-                            alt={result.title}
-                            className="h-12 w-12 rounded-xl object-cover shadow-sm"
-                        />
-                    ) : (
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
-                            <SearchIcon className="h-5 w-5 text-slate-400" />
-                        </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium text-slate-800 dark:text-slate-200">
-                            {result.title}
-                        </p>
-                        <p className="line-clamp-1 text-sm text-slate-500 dark:text-slate-400">
-                            {result.excerpt || 'Aucun extrait'}
-                        </p>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-                            <Badge
-                                variant="outline"
-                                className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400"
-                            >
-                                Article
-                            </Badge>
-                            {result.categories?.[0]?.nom && (
-                                <span>{result.categories[0].nom}</span>
-                            )}
-                            {result.published_at && (
-                                <span>
-                                    {new Date(
-                                        result.published_at,
-                                    ).toLocaleDateString('fr-FR')}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        if (itemType === 'category') {
-            return (
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
-                        #
-                    </div>
-                    <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium text-slate-800 dark:text-slate-200">
-                            {result.nom}
-                        </p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Catégorie • {result.posts_count || 0} articles
-                        </p>
-                    </div>
-                </div>
-            );
-        }
-
-        if (itemType === 'user') {
-            return (
-                <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 ring-2 ring-slate-200 dark:ring-slate-700">
-                        {result.avatar_url ? (
-                            <AvatarImage
-                                src={result.avatar_url}
-                                alt={result.name}
-                            />
-                        ) : (
-                            <AvatarFallback className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
-                                {result.name?.charAt(0).toUpperCase() || 'U'}
-                            </AvatarFallback>
-                        )}
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium text-slate-800 dark:text-slate-200">
-                            {result.name}
-                        </p>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Auteur
-                        </p>
-                    </div>
-                </div>
-            );
-        }
-
-        // Fallback par défaut si aucun type ne correspond, pour éviter que le composant ne disparaisse silencieusement
-        return (
-            <div className="flex items-center gap-3">
-                <SearchIcon className="h-5 w-5 text-slate-400" />
-                <span className="truncate font-medium text-slate-800 dark:text-slate-200">
-                    {result.title || result.nom || result.name || 'Résultat'}
-                </span>
-            </div>
-        );
-    };
 
     return (
         <div
@@ -505,14 +544,17 @@ const ResultsPanel = memo(function ResultsPanel({
             className="flex flex-1 flex-col gap-1 overflow-y-auto bg-slate-50/80 p-2 dark:bg-slate-800/30"
             role="listbox"
         >
-            {results.map((result, idx) => {
-                const isSelected = selectedIndex === idx;
+            {results.map((result, index) => {
+                const type = resultType(result);
+                const isSelected = selectedIndex === index;
+                const price = formatPrice(result.prix_actuel);
 
                 return (
-                    <div
-                        key={`result-${result.id || idx}`}
+                    <button
+                        key={`${type}-${result.id}`}
+                        type="button"
                         className={cn(
-                            'cursor-pointer rounded-xl p-3 transition-all duration-150',
+                            'w-full cursor-pointer rounded-xl p-3 text-left transition-all duration-150',
                             isSelected &&
                                 'bg-emerald-50/90 shadow-sm dark:bg-emerald-900/20',
                             !isSelected &&
@@ -521,23 +563,65 @@ const ResultsPanel = memo(function ResultsPanel({
                         role="option"
                         aria-selected={isSelected}
                         onClick={() => onResultClick(result)}
-                        onMouseEnter={() => {
-                            if (hoverEnabled) {
-                                onHoverIndex?.(idx);
-                            }
-                        }}
+                        onMouseEnter={() => onHoverIndex?.(index)}
                     >
-                        {renderResult(result)}
-                    </div>
+                        {type === 'product' ? (
+                            <div className="flex items-start gap-3">
+                                <img
+                                    src={resolveImageUrl(
+                                        result.image_principale,
+                                    )}
+                                    alt={resultTitle(result)}
+                                    onError={handleImageFallback()}
+                                    className="h-12 w-12 shrink-0 rounded-xl object-cover shadow-sm"
+                                />
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <p className="truncate font-medium text-slate-800 dark:text-slate-200">
+                                            {resultTitle(result)}
+                                        </p>
+                                        {result.badge && (
+                                            <Badge className="rounded-full bg-emerald-500 px-2 py-0 text-[10px] font-bold text-white">
+                                                {result.badge}
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    {result.description && (
+                                        <p className="line-clamp-1 text-sm text-slate-500 dark:text-slate-400">
+                                            {result.description}
+                                        </p>
+                                    )}
+                                    {price && (
+                                        <p className="mt-0.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                                            {price}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                    <FolderTree className="h-5 w-5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate font-medium text-slate-800 dark:text-slate-200">
+                                        {resultTitle(result)}
+                                    </p>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                                        Catégorie produit •{' '}
+                                        {result.produits_count ?? 0} produit
+                                        {result.produits_count !== 1 ? 's' : ''}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </button>
                 );
             })}
         </div>
     );
 });
 
-// ============================================================================
-// No Results
-// ============================================================================
 const NoResults = memo(function NoResults({
     query,
     onClear,
@@ -548,14 +632,14 @@ const NoResults = memo(function NoResults({
     return (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-slate-50/80 p-8 text-center dark:bg-slate-800/30">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 dark:bg-slate-700">
-                <SearchIcon className="h-6 w-6 text-slate-500 dark:text-slate-400" />
+                <PackageSearch className="h-6 w-6 text-slate-500 dark:text-slate-400" />
             </div>
             <div>
                 <p className="text-lg font-medium text-slate-700 dark:text-slate-200">
-                    Aucun résultat pour "{query}"
+                    Aucun résultat pour « {query} »
                 </p>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Essayez une autre recherche ou parcourez nos catégories
+                    Essayez un autre mot-clé ou parcourez les catégories.
                 </p>
             </div>
             <Button variant="outline" onClick={onClear}>
@@ -565,16 +649,13 @@ const NoResults = memo(function NoResults({
     );
 });
 
-// ============================================================================
-// Footer
-// ============================================================================
 const Footer = memo(function Footer({
     resultsCount,
 }: {
     resultsCount: number;
 }) {
     return (
-        <div className="flex items-center justify-between border-t border-slate-200/80 bg-white/80 px-4 py-3 text-xs text-slate-500 backdrop-blur dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-400">
+        <div className="flex items-center justify-between border-t border-slate-200/80 bg-white px-4 py-3 text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
             <div className="hidden items-center gap-4 sm:flex">
                 <div className="flex items-center gap-1.5">
                     <kbd className="flex h-6 items-center justify-center rounded-md bg-slate-100 px-2 font-medium dark:bg-slate-800">
@@ -605,72 +686,101 @@ const Footer = memo(function Footer({
     );
 });
 
-// ============================================================================
-// Search Modal Component
-// ============================================================================
 interface SearchModalProps {
     onClose: () => void;
     config: SearchConfig;
+    imageSearchState: ImageSearchState;
+    onImageSearch: (file: File) => void;
+    onClearImageSearch: () => void;
 }
 
-function SearchModal({ onClose, config }: SearchModalProps) {
+function normalizeResults(results: SearchResult[]): SearchResult[] {
+    return results
+        .map((result) => ({
+            ...result,
+            type: result._type ?? result.type,
+            _type: result._type ?? result.type,
+        }))
+        .filter(
+            (result) =>
+                result._type === 'product' || result._type === 'category',
+        );
+}
+
+function SearchModal({
+    onClose,
+    config,
+    imageSearchState,
+    onImageSearch,
+    onClearImageSearch,
+}: SearchModalProps) {
     const [query, setQuery] = useState('');
     const [results, setResults] = useState<SearchResult[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
-    const debouncedQuery = useDebounce(query, 300);
+    const debouncedQuery = useDebounce(query, 250);
+    const trimmedQuery = query.trim();
 
-    // CORRECTION : Vider immédiatement les résultats si la recherche est annulée
     useEffect(() => {
-        if (query.trim().length < 2) {
+        if (trimmedQuery.length < 2) {
             setResults([]);
+            setIsLoading(false);
         }
-    }, [query]);
+    }, [trimmedQuery]);
 
     useEffect(() => {
-        const fetchResults = async () => {
-            if (!debouncedQuery.trim() || debouncedQuery.trim().length < 2) {
-                setResults([]);
+        const searchTerm = debouncedQuery.trim();
 
-                return;
-            }
+        if (searchTerm.length < 2) {
+            return;
+        }
 
+        const controller = new AbortController();
+
+        async function fetchResults() {
             setIsLoading(true);
 
             try {
-                // Remplacement de `route()` par le endpoint (si route() n'est pas globalement défini)
-                const endpoint = config.searchEndpoint || '/search';
-                const response = await axios.get(endpoint, {
-                    params: {
-                        q: debouncedQuery.trim(),
-                        limit: config.hitsPerPage || 8,
-                    },
+                const endpoint = config.searchEndpoint ?? searchApi.url();
+                const url = new URL(endpoint, window.location.origin);
+                url.searchParams.set('q', searchTerm);
+                url.searchParams.set('limit', String(config.hitsPerPage ?? 8));
+
+                const response = await fetch(url.toString(), {
                     headers: {
                         Accept: 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
                     },
+                    signal: controller.signal,
                 });
 
-                // L’API renvoie { results: [...] }
-                const fetched = response.data?.results ?? [];
+                if (!response.ok) {
+                    throw new Error(`Search failed with ${response.status}`);
+                }
 
-                // Mapper le champ 'type' (envoyé par le contrôleur) en '_type' (attendu par l’UI)
-                const normalized: SearchResult[] = fetched.map((item: any) => ({
-                    ...item,
-                    _type: item.type ?? item._type, // priorité au champ 'type'
-                }));
-
-                setResults(normalized);
+                const payload = await response.json();
+                setResults(normalizeResults(payload.results ?? []));
             } catch (error) {
-                console.error('Erreur de recherche :', error);
+                if (
+                    error instanceof DOMException &&
+                    error.name === 'AbortError'
+                ) {
+                    return;
+                }
+
                 setResults([]);
             } finally {
-                setIsLoading(false);
+                if (!controller.signal.aborted) {
+                    setIsLoading(false);
+                }
             }
-        };
+        }
 
         fetchResults();
+
+        return () => controller.abort();
     }, [debouncedQuery, config.hitsPerPage, config.searchEndpoint]);
+
     const { selectedIndex, moveDown, moveUp, hoverIndex } =
         useKeyboardNavigation<SearchResult>(
             results,
@@ -680,31 +790,43 @@ function SearchModal({ onClose, config }: SearchModalProps) {
 
     const handleResultClick = useCallback(
         (result: SearchResult) => {
-            const url = config.onResultClick
-                ? undefined
-                : `/blog/${result.slug}`;
-
             if (config.onResultClick) {
                 config.onResultClick(result);
-            } else {
-                window.location.href = url!;
+                onClose();
+
+                return;
             }
+
+            openUrl(resultUrl(result), config.openResultsInNewTab ?? false);
         },
-        [config],
+        [config, onClose],
     );
 
     const handleActivateSelection = useCallback(() => {
         if (selectedIndex >= 0 && selectedIndex < results.length) {
             handleResultClick(results[selectedIndex]);
 
-            return true;
+            return;
         }
 
-        return false;
-    }, [selectedIndex, results, handleResultClick]);
+        if (trimmedQuery.length >= 2) {
+            openUrl(
+                searchPage.url({ query: { q: trimmedQuery } }),
+                config.openResultsInNewTab ?? false,
+            );
+        }
+    }, [
+        config.openResultsInNewTab,
+        handleResultClick,
+        results,
+        selectedIndex,
+        trimmedQuery,
+    ]);
 
-    const showResults = results.length > 0 && query.length >= 2;
-    const noResults = !isLoading && results.length === 0 && query.length >= 2;
+    const showResults = results.length > 0 && trimmedQuery.length >= 2;
+    const noResults =
+        !isLoading && results.length === 0 && trimmedQuery.length >= 2;
+    const isImageSearching = imageSearchState.status === 'loading';
 
     return (
         <div className="flex h-full max-h-[80vh] flex-col">
@@ -719,10 +841,16 @@ function SearchModal({ onClose, config }: SearchModalProps) {
                 onEnter={handleActivateSelection}
                 isLoading={isLoading}
                 showImageSearch={config.showImageSearch}
-                onImageSearch={config.onImageSearch}
+                onImageSearch={onImageSearch}
+                isImageSearching={isImageSearching}
             />
 
-            {isLoading && (
+            <ImageSearchPanel
+                state={imageSearchState}
+                onClear={onClearImageSearch}
+            />
+
+            {isLoading && !isImageSearching && (
                 <div className="flex-1 space-y-3 p-4">
                     <Skeleton className="h-16 w-full rounded-xl" />
                     <Skeleton className="h-16 w-full rounded-xl" />
@@ -730,7 +858,7 @@ function SearchModal({ onClose, config }: SearchModalProps) {
                 </div>
             )}
 
-            {showResults && !isLoading && (
+            {showResults && !isLoading && !isImageSearching && (
                 <ResultsPanel
                     results={results}
                     selectedIndex={selectedIndex}
@@ -739,9 +867,9 @@ function SearchModal({ onClose, config }: SearchModalProps) {
                 />
             )}
 
-            {noResults && (
+            {noResults && !isImageSearching && (
                 <NoResults
-                    query={query}
+                    query={trimmedQuery}
                     onClear={() => {
                         setQuery('');
                         inputRef.current?.focus();
@@ -749,16 +877,28 @@ function SearchModal({ onClose, config }: SearchModalProps) {
                 />
             )}
 
-            {!isLoading && <Footer resultsCount={results.length} />}
+            {!isLoading && !isImageSearching && (
+                <Footer resultsCount={results.length} />
+            )}
         </div>
     );
 }
 
-// ============================================================================
-// Export principal
-// ============================================================================
 export default function SearchExperience(config: SearchConfig) {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [imageSearchState, setImageSearchState] = useState<ImageSearchState>({
+        status: 'idle',
+    });
+    const imageSearchStateRef = useRef(imageSearchState);
+    const { onClick: buttonOnClick, ...buttonProps } = config.buttonProps ?? {};
+
+    const clearImageSearch = useCallback(() => {
+        setImageSearchState((current) => {
+            revokeImagePreview(current);
+
+            return { status: 'idle' };
+        });
+    }, []);
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -770,20 +910,120 @@ export default function SearchExperience(config: SearchConfig) {
                 setIsModalOpen(true);
             }
         };
+
         document.addEventListener('keydown', handleKeyDown);
 
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, []);
 
+    useEffect(() => {
+        imageSearchStateRef.current = imageSearchState;
+    }, [imageSearchState]);
+
+    useEffect(() => {
+        return () => revokeImagePreview(imageSearchStateRef.current);
+    }, []);
+
+    const handleImageSearch = useCallback(
+        async (file: File) => {
+            config.onImageSearch?.(file);
+
+            const validationMessage = imageValidationMessage(file);
+
+            if (validationMessage) {
+                setIsModalOpen(true);
+                setImageSearchState((current) => {
+                    revokeImagePreview(current);
+
+                    return {
+                        status: 'error',
+                        fileName: file.name,
+                        message: validationMessage,
+                    };
+                });
+
+                return;
+            }
+
+            const previewUrl = URL.createObjectURL(file);
+            setIsModalOpen(true);
+            setImageSearchState((current) => {
+                revokeImagePreview(current);
+
+                return {
+                    status: 'loading',
+                    fileName: file.name,
+                    previewUrl,
+                };
+            });
+
+            try {
+                const response = await uploadImageSearch(file);
+                const redirectUrl =
+                    response.redirect_url ??
+                    (response.query
+                        ? productIndex.url({
+                              query: {
+                                  search: response.query,
+                                  image_search: '1',
+                              },
+                          })
+                        : null);
+
+                if (!redirectUrl) {
+                    throw new Error(
+                        'Aucun terme exploitable n’a été trouvé dans cette image.',
+                    );
+                }
+
+                setImageSearchState((current) => {
+                    revokeImagePreview(current);
+
+                    return { status: 'idle' };
+                });
+
+                openUrl(redirectUrl, config.openResultsInNewTab ?? false);
+            } catch (error) {
+                setImageSearchState((current) => {
+                    if (
+                        'previewUrl' in current &&
+                        current.previewUrl &&
+                        current.previewUrl !== previewUrl
+                    ) {
+                        URL.revokeObjectURL(current.previewUrl);
+                    }
+
+                    return {
+                        status: 'error',
+                        fileName: file.name,
+                        previewUrl,
+                        message:
+                            error instanceof Error
+                                ? error.message
+                                : 'Impossible d’analyser cette image pour le moment.',
+                    };
+                });
+            }
+        },
+        [config],
+    );
+
     return (
         <>
             <SearchButton
-                onClick={() => setIsModalOpen(true)}
+                {...buttonProps}
+                onClick={(event) => {
+                    buttonOnClick?.(event);
+
+                    if (!event.defaultPrevented) {
+                        setIsModalOpen(true);
+                    }
+                }}
                 showImageSearch={config.showImageSearch}
-                onImageSearch={config.onImageSearch}
-                {...(config.buttonProps || {})}
+                onImageSearch={handleImageSearch}
+                isImageSearching={imageSearchState.status === 'loading'}
             >
-                {config.buttonText || 'Rechercher'}
+                {config.buttonText ?? 'Rechercher'}
             </SearchButton>
             <AnimatePresence>
                 {isModalOpen && (
@@ -794,6 +1034,9 @@ export default function SearchExperience(config: SearchConfig) {
                         <SearchModal
                             onClose={() => setIsModalOpen(false)}
                             config={config}
+                            imageSearchState={imageSearchState}
+                            onImageSearch={handleImageSearch}
+                            onClearImageSearch={clearImageSearch}
                         />
                     </Modal>
                 )}

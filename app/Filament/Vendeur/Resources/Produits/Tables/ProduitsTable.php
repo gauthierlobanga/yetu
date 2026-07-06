@@ -26,8 +26,21 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
+/**
+ * Configuration de la table Filament pour la gestion des produits.
+ *
+ * Définit les colonnes, filtres, actions et actions en masse
+ * pour l'interface d'administration des produits du vendeur.
+ * Inclut les colonnes d'embedding vectoriel (pgvector) pour la recherche sémantique.
+ */
 class ProduitsTable
 {
+    /**
+     * Configure et retourne la table Filament des produits.
+     *
+     * @param  Table  $table  L'instance de table Filament à configurer
+     * @return Table La table configurée avec colonnes, filtres et actions
+     */
     public static function configure(Table $table): Table
     {
         return $table
@@ -220,6 +233,42 @@ class ProduitsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
 
+                // Colonnes pour la recherche vectorielle (pgvector)
+                IconColumn::make('search_embedding')
+                    ->label('Emb. texte')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->state(fn ($record) => ! is_null($record->search_embedding))
+                    ->tooltip('Présence du vecteur de recherche textuelle')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                IconColumn::make('image_search_metadata')
+                    ->label('Embedding')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->state(fn ($record) => ! is_null($record->image_search_metadata))
+                    ->tooltip('Présence du vecteur de recherche d\'image')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('search_embedding_synced_at')
+                    ->label('Synchro. embedding')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->tooltip('Dernière synchronisation du vecteur'),
+
+                TextColumn::make('search_document')
+                    ->label('Document')
+                    ->limit(40)
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->tooltip('Contenu indexé pour la recherche textuelle'),
                 // Dates
                 TextColumn::make('published_at')
                     ->label('Publié le')

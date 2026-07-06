@@ -1,6 +1,5 @@
 // resources/js/Pages/main/home/Home.tsx
-import { usePage } from '@inertiajs/react';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import FeaturedProducts from '@/components/ecommerce/products/FeaturedProducts';
 import ProductCategoriesPage from '@/components/ecommerce/products/ProductCategories';
@@ -49,7 +48,7 @@ export default function Home() {
                 dealOfTheDay={dealOfTheDay}
             />
 
-             <ProductCategoriesPage />,
+            <ProductCategoriesPage />
 
             {trendingProducts.length > 0 && (
                 <TrendingProducts products={trendingProducts} />

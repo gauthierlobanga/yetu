@@ -17,7 +17,7 @@ class PlanFactory extends Factory
 
     public function definition(): array
     {
-        $name = fake()->unique()->randomElement([
+        $name = fake()->randomElement([
             'Gratuit',
             'Starter',
             'Pro',
@@ -35,7 +35,7 @@ class PlanFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
+            'slug' => Str::slug($name).'-'.fake()->unique()->bothify('####??'),
             'description' => fake()->sentence(),
             'highlight' => null,
             'price' => $prices[$name] ?? 0,
@@ -166,6 +166,8 @@ class PlanFactory extends Factory
     public function free(): static
     {
         return $this->state(fn (array $attributes) => [
+            'name' => 'Gratuit '.fake()->unique()->numerify('####'),
+            'slug' => 'gratuit-'.fake()->unique()->bothify('####??'),
             'price' => 0,
             'trial_days' => 0,
         ]);

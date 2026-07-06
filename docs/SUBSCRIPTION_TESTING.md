@@ -22,7 +22,7 @@ php artisan test --env=testing --coverage
 
 ### 1. Free Plan Registration & Activation
 
-**Scenario: Free plan → Immediate access**
+- **Scenario: Free plan → Immediate access**
 
 Steps:
 
@@ -42,7 +42,7 @@ Steps:
 
 **Expected Database State:**
 
-```
+```text
 Subscription:
   - stripe_status = 'active'
   - trial_ends_at = NULL
@@ -63,7 +63,7 @@ Tenant:
 
 ### 2. Paid Plan Registration & Stripe Checkout
 
-**Scenario: Paid plan → Checkout → Payment → Subscription with trial**
+- **Scenario: Paid plan → Checkout → Payment → Subscription with trial**
 
 Steps:
 
@@ -95,7 +95,7 @@ Steps:
 
 **Expected Database State:**
 
-```
+```text
 Subscription:
   - stripe_status = 'trialing'
   - trial_started_at = NOW
@@ -121,7 +121,7 @@ Tenant:
 
 ### 3. Trial Expiration → Grace Period
 
-**Scenario: Trial expires but grace period active**
+- **Scenario: Trial expires but grace period active**
 
 Prerequisites:
 
@@ -156,7 +156,7 @@ php artisan tinker
 
 ### 4. Grace Period Expiration → Complete Block
 
-**Scenario: Grace period ends, access completely blocked**
+- **Scenario: Grace period ends, access completely blocked**
 
 Prerequisites:
 
@@ -194,7 +194,7 @@ curl -H "Cookie: LARAVEL_SESSION=..." http://tenant.localhost/vendor/dashboard
 
 ### 5. Admin Manual Blocking
 
-**Scenario: Admin blocks tenant for policy violation**
+- **Scenario: Admin blocks tenant for policy violation**
 
 Steps:
 

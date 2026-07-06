@@ -10,11 +10,13 @@ use App\Models\Produit;
 use App\Support\Search\ProductIntelligentSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 /**
  * Contrôleur d'affichage et de recherche des produits de la boutique.
@@ -28,10 +30,21 @@ class ProductController extends Controller
         protected ProductIntelligentSearch $intelligentSearch,
     ) {}
 
+    /**
+     * Recherche des produits par analyse d'image uploadée.
+     *
+     * Supporte deux modes :
+     * - `similarity` : comparaison vectorielle directe d'image
+     * - `hybrid` (défaut) : analyse IA + OCR + recherche textuelle/sémantique
+     *
+     * @param  Request  $request  Requête contenant l'image et le mode optionnel
+     * @return JsonResponse|RedirectResponse Résultats JSON ou redirection vers le catalogue
+     */
     public function searchByImage(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|max:5120',
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'mode' => ['sometimes', 'in:hybrid,similarity'],
         ]);
 
         $image = $request->file('image');
@@ -39,18 +52,27 @@ class ProductController extends Controller
         $fullPath = Storage::disk('public')->path($path);
 
         try {
+            $mode = $request->input('mode', 'hybrid');
+
+            if ($mode === 'similarity') {
+                $ids = $this->intelligentSearch->searchByImageSimilarity($fullPath, 48);
+                // Récupérer les produits correspondants
+                $products = Produit::whereIn('id', $ids)->get()->map(fn ($p) => $this->formatProduct($p));
+
+                return response()->json(['results' => $products]);
+            }
+
+            // Mode hybride existant
             $result = $this->intelligentSearch->searchByImage(
                 $this->buildProductQuery(),
                 $fullPath,
-                48,
+                48
             );
-
-            Storage::disk('public')->delete($path);
 
             if (blank($result['query'])) {
                 $message = 'Aucun produit exploitable n’a pu être détecté dans cette image.';
 
-                return $request->expectsJson()
+                return $request->expectsJson() || $request->ajax()
                     ? response()->json(['error' => $message], 422)
                     : back()->with('error', $message);
             }
@@ -69,10 +91,16 @@ class ProductController extends Controller
             }
 
             return redirect()->to($redirectUrl)->with('image_search_analysis', $result['analysis']);
-        } catch (\Throwable $e) {
-            Storage::disk('public')->delete($path);
+        } catch (Throwable $e) {
+            report($e);
 
-            return back()->with('error', 'Impossible de traiter l\'image. Veuillez réessayer.');
+            $message = 'Impossible de traiter l\'image. Veuillez réessayer.';
+
+            return $request->expectsJson() || $request->ajax()
+                ? response()->json(['error' => $message], 500)
+                : back()->with('error', $message);
+        } finally {
+            Storage::disk('public')->delete($path);
         }
     }
 

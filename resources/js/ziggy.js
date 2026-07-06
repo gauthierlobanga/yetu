@@ -3,7 +3,24 @@ const Ziggy = {
     port: 8000,
     defaults: {},
     routes: {
+        sitemap: {
+            uri: 'sitemap.xml',
+            methods: ['GET', 'HEAD'],
+            domain: 'localhost',
+        },
         home: { uri: '\/', methods: ['GET', 'HEAD'], domain: 'localhost' },
+        'preferences.update': {
+            uri: 'preferences',
+            methods: ['POST'],
+            domain: 'localhost',
+        },
+        'tenant.favicon': {
+            uri: 'tenant\/{tenant}\/favicon',
+            methods: ['GET', 'HEAD'],
+            domain: 'localhost',
+            parameters: ['tenant'],
+            bindings: { tenant: 'slug' },
+        },
         'central.login': {
             uri: 'login',
             methods: ['GET', 'HEAD'],
@@ -35,6 +52,16 @@ const Ziggy = {
             methods: ['GET', 'HEAD'],
             domain: 'localhost',
             parameters: ['id', 'hash'],
+        },
+        'posts.reorder': {
+            uri: 'dashboard\/posts\/reorder',
+            methods: ['POST'],
+            domain: 'localhost',
+        },
+        'admin.dashboard': {
+            uri: 'admin\/dashboard',
+            methods: ['GET', 'HEAD'],
+            domain: 'localhost',
         },
         'tenant.sso.central': {
             uri: 'auth\/tenant-sso',
@@ -82,6 +109,7 @@ const Ziggy = {
             methods: ['POST'],
             domain: 'localhost',
             parameters: ['post'],
+            bindings: { post: 'slug' },
         },
         'blog.like': {
             uri: 'blog\/{post}\/like',
@@ -90,52 +118,36 @@ const Ziggy = {
             parameters: ['post'],
             bindings: { post: 'slug' },
         },
-        'page.contact': {
+        contact: {
             uri: 'contact',
             methods: ['GET', 'HEAD'],
             domain: 'localhost',
         },
-        'page.contact.store': {
+        'contact.store': {
             uri: 'contact',
             methods: ['POST'],
             domain: 'localhost',
         },
-        'page.help': {
-            uri: 'help',
-            methods: ['GET', 'HEAD'],
-            domain: 'localhost',
-        },
-        'page.about': {
-            uri: 'about',
-            methods: ['GET', 'HEAD'],
-            domain: 'localhost',
-        },
-        'page.terms': {
-            uri: 'terms',
-            methods: ['GET', 'HEAD'],
-            domain: 'localhost',
-        },
-        'page.privacy': {
+        help: { uri: 'help', methods: ['GET', 'HEAD'], domain: 'localhost' },
+        about: { uri: 'about', methods: ['GET', 'HEAD'], domain: 'localhost' },
+        terms: { uri: 'terms', methods: ['GET', 'HEAD'], domain: 'localhost' },
+        privacy: {
             uri: 'privacy',
             methods: ['GET', 'HEAD'],
             domain: 'localhost',
         },
-        'page.cookies': {
+        cookies: {
             uri: 'cookies',
             methods: ['GET', 'HEAD'],
             domain: 'localhost',
         },
-        'page.support': {
+        support: {
             uri: 'support',
             methods: ['GET', 'HEAD'],
             domain: 'localhost',
         },
-        'page.faq': {
-            uri: 'faq',
-            methods: ['GET', 'HEAD'],
-            domain: 'localhost',
-        },
-        'page.testimonials': {
+        faq: { uri: 'faq', methods: ['GET', 'HEAD'], domain: 'localhost' },
+        testimonials: {
             uri: 'testimonials',
             methods: ['GET', 'HEAD'],
             domain: 'localhost',
@@ -171,6 +183,12 @@ const Ziggy = {
             uri: 'devenir-vendeur\/suggest-domain',
             methods: ['POST'],
             domain: 'localhost',
+        },
+        'vendor.status': {
+            uri: 'devenir-vendeur\/status\/{id}',
+            methods: ['GET', 'HEAD'],
+            domain: 'localhost',
+            parameters: ['id'],
         },
         'vendor.payment': {
             uri: 'devenir-vendeur\/paiement',
@@ -210,11 +228,6 @@ const Ziggy = {
         'admin.stats.visitors': {
             uri: 'admin\/stats\/visitors',
             methods: ['GET', 'HEAD'],
-            domain: 'localhost',
-        },
-        'track.duration': {
-            uri: 'track-duration',
-            methods: ['POST'],
             domain: 'localhost',
         },
         'webpush.subscribe': { uri: 'webpush\/subscribe', methods: ['POST'] },
@@ -469,6 +482,36 @@ const Ziggy = {
             methods: ['GET', 'HEAD'],
             parameters: ['record'],
         },
+        'filament.admin.resources.newsletter-campaigns.index': {
+            uri: 'admin\/newsletter-campaigns',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.admin.resources.newsletter-campaigns.create': {
+            uri: 'admin\/newsletter-campaigns\/create',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.admin.resources.newsletter-campaigns.edit': {
+            uri: 'admin\/newsletter-campaigns\/{record}\/edit',
+            methods: ['GET', 'HEAD'],
+            parameters: ['record'],
+        },
+        'filament.admin.resources.newsletter-sends.index': {
+            uri: 'admin\/newsletter-sends',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.admin.resources.newsletters.index': {
+            uri: 'admin\/newsletters',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.admin.resources.newsletters.create': {
+            uri: 'admin\/newsletters\/create',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.admin.resources.newsletters.edit': {
+            uri: 'admin\/newsletters\/{record}\/edit',
+            methods: ['GET', 'HEAD'],
+            parameters: ['record'],
+        },
         'filament.admin.resources.permissions.index': {
             uri: 'admin\/permissions',
             methods: ['GET', 'HEAD'],
@@ -492,6 +535,32 @@ const Ziggy = {
         },
         'filament.admin.resources.plans.edit': {
             uri: 'admin\/plans\/{record}\/edit',
+            methods: ['GET', 'HEAD'],
+            parameters: ['record'],
+        },
+        'filament.admin.posts.resources.post-book-marks.index': {
+            uri: 'admin\/posts\/post-book-marks',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.admin.posts.resources.post-book-marks.create': {
+            uri: 'admin\/posts\/post-book-marks\/create',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.admin.posts.resources.post-book-marks.edit': {
+            uri: 'admin\/posts\/post-book-marks\/{record}\/edit',
+            methods: ['GET', 'HEAD'],
+            parameters: ['record'],
+        },
+        'filament.admin.posts.resources.post-likes.index': {
+            uri: 'admin\/posts\/post-likes',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.admin.posts.resources.post-likes.create': {
+            uri: 'admin\/posts\/post-likes\/create',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.admin.posts.resources.post-likes.edit': {
+            uri: 'admin\/posts\/post-likes\/{record}\/edit',
             methods: ['GET', 'HEAD'],
             parameters: ['record'],
         },
@@ -616,6 +685,18 @@ const Ziggy = {
             uri: 'admin\/vendor-requests\/{record}\/edit',
             methods: ['GET', 'HEAD'],
             parameters: ['record'],
+        },
+        'filament.admin.resources.visitor-events.index': {
+            uri: 'admin\/visitor-events',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.admin.resources.visits.index': {
+            uri: 'admin\/visits',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.auth.login': {
+            uri: 'vendeur\/login',
+            methods: ['GET', 'HEAD'],
         },
         'filament.vendeur.auth.logout': {
             uri: 'vendeur\/logout',
@@ -1033,6 +1114,36 @@ const Ziggy = {
             methods: ['GET', 'HEAD'],
             parameters: ['record'],
         },
+        'filament.vendeur.resources.newsletter-campaigns.index': {
+            uri: 'vendeur\/newsletter-campaigns',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.resources.newsletter-campaigns.create': {
+            uri: 'vendeur\/newsletter-campaigns\/create',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.resources.newsletter-campaigns.edit': {
+            uri: 'vendeur\/newsletter-campaigns\/{record}\/edit',
+            methods: ['GET', 'HEAD'],
+            parameters: ['record'],
+        },
+        'filament.vendeur.resources.newsletter-sends.index': {
+            uri: 'vendeur\/newsletter-sends',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.resources.newsletters.index': {
+            uri: 'vendeur\/newsletters',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.resources.newsletters.create': {
+            uri: 'vendeur\/newsletters\/create',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.resources.newsletters.edit': {
+            uri: 'vendeur\/newsletters\/{record}\/edit',
+            methods: ['GET', 'HEAD'],
+            parameters: ['record'],
+        },
         'filament.vendeur.inventor.resources.paiements.index': {
             uri: 'vendeur\/inventor\/paiements',
             methods: ['GET', 'HEAD'],
@@ -1072,6 +1183,32 @@ const Ziggy = {
             methods: ['GET', 'HEAD'],
             parameters: ['record'],
         },
+        'filament.vendeur.posts.resources.post-book-marks.index': {
+            uri: 'vendeur\/posts\/post-book-marks',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.posts.resources.post-book-marks.create': {
+            uri: 'vendeur\/posts\/post-book-marks\/create',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.posts.resources.post-book-marks.edit': {
+            uri: 'vendeur\/posts\/post-book-marks\/{record}\/edit',
+            methods: ['GET', 'HEAD'],
+            parameters: ['record'],
+        },
+        'filament.vendeur.posts.resources.post-likes.index': {
+            uri: 'vendeur\/posts\/post-likes',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.posts.resources.post-likes.create': {
+            uri: 'vendeur\/posts\/post-likes\/create',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.posts.resources.post-likes.edit': {
+            uri: 'vendeur\/posts\/post-likes\/{record}\/edit',
+            methods: ['GET', 'HEAD'],
+            parameters: ['record'],
+        },
         'filament.vendeur.posts.resources.posts.index': {
             uri: 'vendeur\/posts\/posts',
             methods: ['GET', 'HEAD'],
@@ -1097,6 +1234,10 @@ const Ziggy = {
             uri: 'vendeur\/products\/product-categories\/{record}\/edit',
             methods: ['GET', 'HEAD'],
             parameters: ['record'],
+        },
+        'filament.vendeur.resources.product-views.index': {
+            uri: 'vendeur\/product-views',
+            methods: ['GET', 'HEAD'],
         },
         'filament.vendeur.products.resources.produit-fournisseurs.index': {
             uri: 'vendeur\/products\/produit-fournisseurs',
@@ -1324,6 +1465,14 @@ const Ziggy = {
             methods: ['GET', 'HEAD'],
             parameters: ['record'],
         },
+        'filament.vendeur.resources.visitor-events.index': {
+            uri: 'vendeur\/visitor-events',
+            methods: ['GET', 'HEAD'],
+        },
+        'filament.vendeur.resources.visits.index': {
+            uri: 'vendeur\/visits',
+            methods: ['GET', 'HEAD'],
+        },
         'filament.vendeur.wishlists.resources.wishlist-items.index': {
             uri: 'vendeur\/wishlists\/wishlist-items',
             methods: ['GET', 'HEAD'],
@@ -1349,6 +1498,10 @@ const Ziggy = {
             uri: 'vendeur\/wishlists\/wishlists\/{record}\/edit',
             methods: ['GET', 'HEAD'],
             parameters: ['record'],
+        },
+        'boost.browser-logs': {
+            uri: '_boost\/browser-logs',
+            methods: ['POST'],
         },
         'cashier.payment': {
             uri: 'stripe\/payment\/{id}',
@@ -1481,6 +1634,11 @@ const Ziggy = {
             methods: ['GET', 'HEAD'],
             parameters: ['prefix'],
         },
+        'geolocate.index': {
+            uri: '{prefix?}\/geolocate',
+            methods: ['GET', 'HEAD'],
+            parameters: ['prefix'],
+        },
         'stancl.tenancy.asset': {
             uri: 'tenancy\/assets\/{path?}',
             methods: ['GET', 'HEAD'],
@@ -1492,6 +1650,8 @@ const Ziggy = {
             methods: ['GET', 'HEAD'],
         },
         'tenant.home': { uri: '\/', methods: ['GET', 'HEAD'] },
+        'tenant.sitemap': { uri: 'sitemap.xml', methods: ['GET', 'HEAD'] },
+        'tenant.preferences.update': { uri: 'preferences', methods: ['POST'] },
         'tenant.sso.login': {
             uri: 'tenant-sso-login',
             methods: ['GET', 'HEAD'],
@@ -1547,11 +1707,97 @@ const Ziggy = {
             uri: 'acheteur\/account',
             methods: ['GET', 'HEAD'],
         },
+        'acheteur.': {
+            uri: 'acheteur\/settings',
+            methods: [
+                'GET',
+                'HEAD',
+                'POST',
+                'PUT',
+                'PATCH',
+                'DELETE',
+                'OPTIONS',
+            ],
+        },
+        'acheteur.profile.edit': {
+            uri: 'acheteur\/settings\/profile',
+            methods: ['GET', 'HEAD'],
+        },
+        'acheteur.profile.update': {
+            uri: 'acheteur\/settings\/profile',
+            methods: ['PATCH'],
+        },
+        'acheteur.profile.destroy': {
+            uri: 'acheteur\/settings\/profile',
+            methods: ['DELETE'],
+        },
+        'acheteur.security.edit': {
+            uri: 'acheteur\/settings\/security',
+            methods: ['GET', 'HEAD'],
+        },
+        'acheteur.password.update': {
+            uri: 'acheteur\/settings\/password',
+            methods: ['PUT'],
+        },
+        'acheteur.appearance.edit': {
+            uri: 'acheteur\/settings\/appearance',
+            methods: ['GET', 'HEAD'],
+        },
         'vendor.dashboard': {
             uri: 'vendor\/dashboard',
             methods: ['GET', 'HEAD'],
         },
+        'vendor.newsletters.subscribers.index': {
+            uri: 'vendor\/newsletters\/subscribers',
+            methods: ['GET', 'HEAD'],
+        },
+        'vendor.newsletters.subscribers.destroy': {
+            uri: 'vendor\/newsletters\/subscribers\/{id}',
+            methods: ['DELETE'],
+            parameters: ['id'],
+        },
+        'vendor.newsletters.campaigns.index': {
+            uri: 'vendor\/newsletters\/campaigns',
+            methods: ['GET', 'HEAD'],
+        },
+        'vendor.newsletters.campaigns.create': {
+            uri: 'vendor\/newsletters\/campaigns\/create',
+            methods: ['GET', 'HEAD'],
+        },
+        'vendor.newsletters.campaigns.store': {
+            uri: 'vendor\/newsletters\/campaigns',
+            methods: ['POST'],
+        },
+        'vendor.newsletters.campaigns.show': {
+            uri: 'vendor\/newsletters\/campaigns\/{id}',
+            methods: ['GET', 'HEAD'],
+            parameters: ['id'],
+        },
+        'vendor.newsletters.campaigns.edit': {
+            uri: 'vendor\/newsletters\/campaigns\/{id}\/edit',
+            methods: ['GET', 'HEAD'],
+            parameters: ['id'],
+        },
+        'vendor.newsletters.campaigns.update': {
+            uri: 'vendor\/newsletters\/campaigns\/{id}',
+            methods: ['PUT'],
+            parameters: ['id'],
+        },
+        'vendor.newsletters.campaigns.destroy': {
+            uri: 'vendor\/newsletters\/campaigns\/{id}',
+            methods: ['DELETE'],
+            parameters: ['id'],
+        },
+        'vendor.newsletters.campaigns.send-test': {
+            uri: 'vendor\/newsletters\/campaigns\/{id}\/send-test',
+            methods: ['POST'],
+            parameters: ['id'],
+        },
         'subscription.show': { uri: 'subscription', methods: ['GET', 'HEAD'] },
+        'subscription.portal': {
+            uri: 'subscription\/portal',
+            methods: ['GET', 'HEAD'],
+        },
         'subscription.upgrade': {
             uri: 'subscription\/upgrade',
             methods: ['POST'],
@@ -1640,6 +1886,7 @@ const Ziggy = {
             uri: 'vendor\/stats\/visitors',
             methods: ['GET', 'HEAD'],
         },
+        'blog.stats': { uri: 'blog\/stats', methods: ['GET', 'HEAD'] },
         'tenant.analytics.dashboard': {
             uri: 'analytics',
             methods: ['GET', 'HEAD'],
@@ -1685,34 +1932,19 @@ const Ziggy = {
             parameters: ['country'],
             bindings: { country: 'id' },
         },
-        'tenant.search': { uri: 'api\/search', methods: ['GET', 'HEAD'] },
-        'tenant.api': { uri: 'search', methods: ['GET', 'HEAD'] },
-        'tenant.page.contact': {
-            uri: 'page\/contact',
-            methods: ['GET', 'HEAD'],
-        },
-        'tenant.page.contact.store': {
-            uri: 'page\/contact',
-            methods: ['POST'],
-        },
-        'tenant.page.help': { uri: 'page\/help', methods: ['GET', 'HEAD'] },
-        'tenant.page.about': { uri: 'page\/about', methods: ['GET', 'HEAD'] },
-        'tenant.page.terms': { uri: 'page\/terms', methods: ['GET', 'HEAD'] },
-        'tenant.page.privacy': {
-            uri: 'page\/privacy',
-            methods: ['GET', 'HEAD'],
-        },
-        'tenant.page.cookies': {
-            uri: 'page\/cookies',
-            methods: ['GET', 'HEAD'],
-        },
-        'tenant.page.support': {
-            uri: 'page\/support',
-            methods: ['GET', 'HEAD'],
-        },
-        'tenant.page.faq': { uri: 'page\/faq', methods: ['GET', 'HEAD'] },
+        'tenant.api': { uri: 'api\/search', methods: ['GET', 'HEAD'] },
+        'tenant.search': { uri: 'search', methods: ['GET', 'HEAD'] },
+        'tenant.page.contact': { uri: 'contact', methods: ['GET', 'HEAD'] },
+        'tenant.page.contact.store': { uri: 'contact', methods: ['POST'] },
+        'tenant.page.help': { uri: 'help', methods: ['GET', 'HEAD'] },
+        'tenant.page.about': { uri: 'about', methods: ['GET', 'HEAD'] },
+        'tenant.page.terms': { uri: 'terms', methods: ['GET', 'HEAD'] },
+        'tenant.page.privacy': { uri: 'privacy', methods: ['GET', 'HEAD'] },
+        'tenant.page.cookies': { uri: 'cookies', methods: ['GET', 'HEAD'] },
+        'tenant.page.support': { uri: 'support', methods: ['GET', 'HEAD'] },
+        'tenant.page.faq': { uri: 'faq', methods: ['GET', 'HEAD'] },
         'tenant.page.testimonials': {
-            uri: 'page\/testimonials',
+            uri: 'testimonials',
             methods: ['GET', 'HEAD'],
         },
         'tenant.blog.index': { uri: 'blog', methods: ['GET', 'HEAD'] },
@@ -1732,6 +1964,7 @@ const Ziggy = {
             uri: 'blog\/{post}\/comment',
             methods: ['POST'],
             parameters: ['post'],
+            bindings: { post: 'slug' },
         },
         'tenant.blog.like': {
             uri: 'blog\/{post}\/like',
@@ -1846,6 +2079,12 @@ const Ziggy = {
             methods: ['DELETE'],
         },
         'tenant.cart.calculate': { uri: 'cart\/calculate', methods: ['POST'] },
+        'tenant.cart.recover': {
+            uri: 'cart\/recover\/{relance}',
+            methods: ['GET', 'HEAD'],
+            parameters: ['relance'],
+            bindings: { relance: 'id' },
+        },
         'tenant.wishlist.index': { uri: 'wishlist', methods: ['GET', 'HEAD'] },
         'tenant.wishlist.toggle': {
             uri: 'wishlist\/toggle\/{produit}',
@@ -2000,7 +2239,22 @@ const Ziggy = {
             uri: 'subscription\/required',
             methods: ['GET', 'HEAD'],
         },
+        'tenant.newsletter.track.open': {
+            uri: 'newsletter\/track\/open\/{send_id}',
+            methods: ['GET', 'HEAD'],
+            parameters: ['send_id'],
+        },
+        'tenant.newsletter.track.click': {
+            uri: 'newsletter\/track\/click\/{send_id}',
+            methods: ['GET', 'HEAD'],
+            parameters: ['send_id'],
+        },
+        'tenant.subscription.none': {
+            uri: 'required',
+            methods: ['GET', 'HEAD'],
+        },
         'flash.clear': { uri: 'flash\/clear', methods: ['POST'] },
+        'track.duration': { uri: 'track-duration', methods: ['POST'] },
         'tenant.storage': {
             uri: 'tenant-storage\/{tenant}\/{path}',
             methods: ['GET', 'HEAD'],
@@ -2028,9 +2282,7 @@ const Ziggy = {
         },
     },
 };
-
 if (typeof window !== 'undefined' && typeof window.Ziggy !== 'undefined') {
     Object.assign(Ziggy.routes, window.Ziggy.routes);
 }
-
 export { Ziggy };
