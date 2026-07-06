@@ -18,6 +18,7 @@ import {
     Crown,
     Eye,
     ListTodo,
+    Bell,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -177,6 +178,11 @@ export function VendorSidebar({ tenant }: { tenant: Tenant }) {
             title: 'Vue en direct',
             icon: Eye,
             href: route('tenant.analytics.avance'),
+        },
+        {
+            title: 'Notifications',
+            icon: Bell,
+            href: route('vendor.notifications.index'),
         },
         {
             title: 'Paramètres',

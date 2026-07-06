@@ -60,6 +60,8 @@ class AppServiceProvider extends ServiceProvider
             User::observe(UserObserver::class);
         }
 
+        Commande::observe(\App\Observers\CommandeObserver::class);
+
         Event::listen(Login::class, RedirectVendorAfterLogin::class);
 
         Authenticate::redirectUsing(function ($request) {

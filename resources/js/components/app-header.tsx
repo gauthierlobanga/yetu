@@ -231,24 +231,28 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="ghost"
-                                    className="size-10 rounded-full p-1"
+                                    className="size-10 rounded-full p-1 transition-all duration-300 hover:ring-2 hover:ring-slate-200 dark:hover:ring-slate-700"
                                 >
-                                    <Avatar className="size-8 overflow-hidden rounded-full">
-                                        {/* Utilisation sécurisée */}
+                                    <Avatar className="size-8 overflow-hidden rounded-full border border-slate-200/50 shadow-xs dark:border-slate-800">
                                         {avatarUrl ? (
                                             <AvatarImage
                                                 src={avatarUrl}
                                                 alt={userName}
+                                                className="object-cover"
                                             />
                                         ) : (
-                                            <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                            <AvatarFallback className="rounded-full bg-linear-to-br from-emerald-50 to-teal-100 font-semibold text-emerald-800 dark:from-emerald-950 dark:to-teal-900 dark:text-emerald-300">
                                                 {userInitials}
                                             </AvatarFallback>
                                         )}
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end">
+                            <DropdownMenuContent
+                                className="w-80 overflow-hidden rounded-2xl border border-slate-200/70 bg-white/95 shadow-xl shadow-slate-900/5 backdrop-blur-xl dark:border-slate-800/70 dark:bg-slate-950/95 dark:shadow-slate-950/50 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
+                                align="end"
+                                sideOffset={8}
+                            >
                                 <UserMenuContent user={auth.user} />
                             </DropdownMenuContent>
                         </DropdownMenu>

@@ -1,5 +1,5 @@
 // resources/js/components/layout/header/NotificationsDropdown.tsx
-import { router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { echo } from '@laravel/echo-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Bell, BellRing, CheckCircle } from 'lucide-react';
@@ -113,6 +113,17 @@ export function NotificationsDropdown() {
     const user = auth?.user;
     const tenantId = tenant?.id ? String(tenant.id) : null;
 
+    const isVendor = user?.tenants?.length > 0;
+    const isAdmin = user?.roles?.some(
+        (r: any) => r.name === 'super_admin' || r.name === 'manager',
+    );
+
+    const allNotificationsUrl = isAdmin
+        ? route('admin.notifications.index')
+        : isVendor
+          ? route('vendor.notifications.index')
+          : route('acheteur.notifications.index');
+
     const [notifOpen, setNotifOpen] = useState(false);
     const [realtimeNotifications, setRealtimeNotifications] = useState<
         DashboardNotification[]
@@ -218,10 +229,12 @@ export function NotificationsDropdown() {
             (n) => !existingIds.has(n.id),
         );
 
-        return [...realtimeOnly, ...server].map((n) => ({
-            ...n,
-            read_at: localReadAt[n.id] ?? n.read_at,
-        }));
+        return [...realtimeOnly, ...server]
+            .map((n) => ({
+                ...n,
+                read_at: localReadAt[n.id] ?? n.read_at,
+            }))
+            .slice(0, 50); // Keep up to 50 notifications, whether read or unread
     }, [serverNotifications, realtimeNotifications, localReadAt]);
 
     const unreadCount = allNotifications.filter((n) => !n.read_at).length;
@@ -367,6 +380,9 @@ export function NotificationsDropdown() {
                                             : ''
                                     }`}
                                     onClick={() => {
+                                        if (!notification.read_at) {
+                                            markAsRead(notification.id);
+                                        }
                                         if (notification.url) {
                                             router.visit(notification.url);
                                         }
@@ -429,7 +445,7 @@ export function NotificationsDropdown() {
                 </div>
 
                 {allNotifications.length > 0 && (
-                    <div className="border-t border-slate-100 px-5 py-3 dark:border-slate-800">
+                    <div className="border-t border-slate-100 px-5 py-3 dark:border-slate-800 grid grid-cols-2 gap-2">
                         <Button
                             variant="ghost"
                             size="sm"
@@ -437,6 +453,17 @@ export function NotificationsDropdown() {
                             onClick={() => setNotifOpen(false)}
                         >
                             Fermer
+                        </Button>
+                        <Button
+                            asChild
+                            variant="default"
+                            size="sm"
+                            className="w-full justify-center text-xs font-medium"
+                            onClick={() => setNotifOpen(false)}
+                        >
+                            <Link href={allNotificationsUrl}>
+                                Voir tout
+                            </Link>
                         </Button>
                     </div>
                 )}

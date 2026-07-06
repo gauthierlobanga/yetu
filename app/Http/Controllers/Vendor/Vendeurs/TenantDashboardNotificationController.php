@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Log;
 
 class TenantDashboardNotificationController extends Controller
 {
@@ -22,7 +21,7 @@ class TenantDashboardNotificationController extends Controller
         $tab = $request->input('tab', 'all'); // 'all' or 'unread'
 
         $query = $user->notifications();
-        
+
         if ($tab === 'unread') {
             $query->whereNull('read_at');
         }
@@ -35,7 +34,27 @@ class TenantDashboardNotificationController extends Controller
                 'type' => $n->data['type'] ?? 'info',
                 'title' => $n->data['title'] ?? 'Notification',
                 'message' => $n->data['message'] ?? '',
-                'url' => $n->data['url'] ?? null,
+                'url' => (function ($url) {
+                    if (! $url) {
+                        return null;
+                    }
+                    if (! str_starts_with($url, 'http')) {
+                        return $url;
+                    }
+                    $parsed = parse_url($url);
+                    if (! isset($parsed['host'])) {
+                        return $url;
+                    }
+                    if ($parsed['host'] === 'localhost' || $parsed['host'] === '127.0.0.1' || str_starts_with($url, config('app.url'))) {
+                        $path = $parsed['path'] ?? '';
+                        $query = isset($parsed['query']) ? '?'.$parsed['query'] : '';
+                        $fragment = isset($parsed['fragment']) ? '#'.$parsed['fragment'] : '';
+
+                        return request()->getSchemeAndHttpHost().$path.$query.$fragment;
+                    }
+
+                    return $url;
+                })($n->data['url'] ?? null),
                 'read_at' => $n->read_at,
                 'created_at' => $n->created_at->toISOString(),
                 'data' => $n->data,
@@ -114,7 +133,27 @@ class TenantDashboardNotificationController extends Controller
             'type' => $n->data['type'] ?? 'info',
             'title' => $n->data['title'] ?? 'Notification',
             'message' => $n->data['message'] ?? '',
-            'url' => $n->data['url'] ?? null,
+            'url' => (function ($url) {
+                if (! $url) {
+                    return null;
+                }
+                if (! str_starts_with($url, 'http')) {
+                    return $url;
+                }
+                $parsed = parse_url($url);
+                if (! isset($parsed['host'])) {
+                    return $url;
+                }
+                if ($parsed['host'] === 'localhost' || $parsed['host'] === '127.0.0.1' || str_starts_with($url, config('app.url'))) {
+                    $path = $parsed['path'] ?? '';
+                    $query = isset($parsed['query']) ? '?'.$parsed['query'] : '';
+                    $fragment = isset($parsed['fragment']) ? '#'.$parsed['fragment'] : '';
+
+                    return request()->getSchemeAndHttpHost().$path.$query.$fragment;
+                }
+
+                return $url;
+            })($n->data['url'] ?? null),
             'read_at' => $n->read_at,
             'created_at' => $n->created_at->toISOString(),
             'data' => $n->data,

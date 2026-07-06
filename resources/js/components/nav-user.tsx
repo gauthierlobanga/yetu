@@ -33,20 +33,27 @@ export function NavUser() {
                         <SidebarMenuButton
                             size="lg"
                             className={cn(
-                                'h-11 rounded px-3 transition-all duration-200',
+                                'h-12 rounded-xl px-3 transition-all duration-300 ease-out',
                                 'group text-sidebar-accent-foreground data-[state=open]:bg-sidebar-accent',
-                                'hover:bg-emerald-50 hover:text-emerald-700 dark:text-slate-400 dark:hover:bg-slate-800/60',
-                                // 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
+                                'hover:bg-slate-100/80 hover:text-slate-900',
+                                'dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100',
+                                'data-[state=open]:bg-slate-100/80 dark:data-[state=open]:bg-slate-800/60',
                             )}
                             data-test="sidebar-menu-button"
                         >
                             <UserInfo user={auth.user} />
-                            <ChevronsUpDown className="ml-auto size-4" />
+                            <ChevronsUpDown className="ml-auto size-4 shrink-0 text-slate-400 transition-transform duration-200 group-data-[state=open]:rotate-180 dark:text-slate-500" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
-                        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                        className={cn(
+                            'w-(--radix-dropdown-menu-trigger-width) min-w-64 rounded-2xl',
+                            'border border-slate-200/70 bg-white/95 shadow-xl shadow-slate-900/5 backdrop-blur-xl',
+                            'dark:border-slate-800/70 dark:bg-slate-950/95 dark:shadow-slate-950/50',
+                            'animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2',
+                        )}
                         align="end"
+                        sideOffset={8}
                         side={
                             isMobile
                                 ? 'bottom'

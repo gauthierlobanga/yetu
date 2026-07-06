@@ -6,6 +6,7 @@ import AppLayoutTemplate from '@/layouts/app/app-header-layout';
 import type { AppLayoutProps } from '@/types';
 import FooterSection from './app/app-footer';
 import FooterSectionVendeur from './Vendor/app/app-footer';
+import { CookieConsentManager } from '@/components/ecommerce/cookies/CookieConsentManager';
 
 export default function MainLayout({
     children,
@@ -31,6 +32,7 @@ export default function MainLayout({
                 duration={5000}
             />
             {isTenant ? <FooterSectionVendeur /> : <FooterSection />}
+            <CookieConsentManager />
         </AppLayoutTemplate>
     );
 }

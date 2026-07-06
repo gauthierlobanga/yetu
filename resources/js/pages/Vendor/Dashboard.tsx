@@ -285,7 +285,7 @@ export default function VendorDashboard({
         >
             <VendorSidebar tenant={tenant} />
             <SidebarInset className="flex min-h-0 flex-col">
-                <SiteHeader />
+                <SiteHeader context="vendor" />
                 <ScrollArea className="min-h-0 flex-1">
                     <div
                         ref={containerRef}

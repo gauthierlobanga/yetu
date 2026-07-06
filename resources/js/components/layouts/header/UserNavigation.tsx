@@ -26,10 +26,17 @@ export function UserNavigation({ user }: UserNavigationProps) {
                 variant="ghost"
                 size="sm"
                 asChild
-                className="group h-10 rounded-full border border-slate-200 bg-white/80 px-4 text-sm font-medium text-slate-700 shadow-sm backdrop-blur transition-all hover:border-emerald-300 hover:bg-white hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:border-emerald-600 dark:hover:text-emerald-400"
+                className={cn(
+                    'group h-10 rounded-full border px-4 text-[13.5px] font-medium tracking-tight',
+                    'border-slate-200/80 bg-white/80 text-slate-700 shadow-xs backdrop-blur-sm',
+                    'transition-all duration-300',
+                    'hover:border-emerald-300 hover:bg-white hover:text-emerald-700 hover:shadow-sm',
+                    'dark:border-slate-700/80 dark:bg-slate-900/80 dark:text-slate-300',
+                    'dark:hover:border-emerald-600/50 dark:hover:text-emerald-400',
+                )}
             >
                 <Link href={login()}>
-                    <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                    <LogIn className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
                     Connexion
                 </Link>
             </Button>
@@ -49,33 +56,31 @@ export function UserNavigation({ user }: UserNavigationProps) {
                 <Button
                     variant="ghost"
                     className={cn(
-                        'group relative h-10 rounded-full px-1.5 pr-2',
-                        'bg-white/80',
+                        'group relative size-10 rounded-full p-1',
                         'transition-all duration-300',
-                        'hover:bg-white',
-                        'dark:bg-slate-900/80',
-                        'dark:hover:bg-slate-900',
+                        'hover:ring-2 hover:ring-slate-200',
+                        'dark:hover:ring-slate-700',
                     )}
                 >
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="size-8 border border-slate-200/50 shadow-xs transition-transform duration-300 group-hover:scale-105 dark:border-slate-800">
                         {avatarUrl ? (
-                            <AvatarImage src={avatarUrl} alt={userName} />
+                            <AvatarImage src={avatarUrl} alt={userName} className="object-cover" />
                         ) : (
-                            <AvatarFallback className="bg-linear-to-br from-emerald-500 to-emerald-600 text-xs font-semibold text-white">
+                            <AvatarFallback className="bg-linear-to-br from-emerald-50 to-teal-100 text-xs font-semibold text-emerald-800 dark:from-emerald-950 dark:to-teal-900 dark:text-emerald-300">
                                 {userInitials}
                             </AvatarFallback>
                         )}
                     </Avatar>
-                    {/* <ChevronDown className="ml-2 h-4 w-4 text-slate-400 transition-all duration-300 group-hover:rotate-180 group-hover:text-emerald-500" /> */}
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
                 align="end"
-                sideOffset={12}
+                sideOffset={8}
                 className={cn(
-                    'w-80 overflow-hidden rounded-3xl border border-slate-200/70 bg-white/95 shadow-2xl backdrop-blur-xl',
-                    'dark:border-slate-800/70 dark:bg-slate-950/95 dark:shadow-black/40',
-                    'animate-in duration-200 fade-in-0 zoom-in-95 slide-in-from-top-2',
+                    'w-80 overflow-hidden rounded-2xl',
+                    'border border-slate-200/70 bg-white/95 shadow-xl shadow-slate-900/5 backdrop-blur-xl',
+                    'dark:border-slate-800/70 dark:bg-slate-950/95 dark:shadow-slate-950/50',
+                    'animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-200',
                 )}
             >
                 <UserMenuContent user={user} />

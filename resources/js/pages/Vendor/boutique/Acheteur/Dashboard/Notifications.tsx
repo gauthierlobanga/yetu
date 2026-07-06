@@ -38,7 +38,7 @@ export default function Notifications({ notifications, activeTab }: Props) {
             <Head title="Mes notifications" />
             <AppSidebar />
             <SidebarInset className="flex min-h-0 flex-col">
-                <SiteHeader />
+                <SiteHeader context="buyer" />
                 <ScrollArea className="min-h-0 flex-1">
                     <div className="bg-slate-50/50 dark:bg-slate-950 min-h-full">
                         <div className="p-4 md:p-8">

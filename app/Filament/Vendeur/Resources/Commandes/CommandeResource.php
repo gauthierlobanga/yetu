@@ -7,6 +7,8 @@ use App\Filament\Vendeur\Resources\Commandes\Pages\CreateCommande;
 use App\Filament\Vendeur\Resources\Commandes\Pages\EditCommande;
 use App\Filament\Vendeur\Resources\Commandes\Pages\ListCommandes;
 use App\Filament\Vendeur\Resources\Commandes\Pages\ViewCommande;
+use App\Filament\Vendeur\Resources\Commandes\RelationManagers\LignesRelationManager;
+use App\Filament\Vendeur\Resources\Commandes\RelationManagers\PaiementsRelationManager;
 use App\Filament\Vendeur\Resources\Commandes\Schemas\CommandeForm;
 use App\Filament\Vendeur\Resources\Commandes\Tables\CommandesTable;
 use App\Models\Commande;
@@ -44,7 +46,8 @@ class CommandeResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            LignesRelationManager::class,
+            PaiementsRelationManager::class,
         ];
     }
 

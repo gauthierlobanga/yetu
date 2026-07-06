@@ -161,7 +161,7 @@ Route::middleware([
         Route::prefix('acheteur')->name('acheteur.')->group(function () {
             Route::get('/account', [AccountDashboardController::class, 'AccountDashboardIndex'])->name('dashboard');
             Route::get('/notifications', [TenantDashboardNotificationController::class, 'index'])->name('notifications.index');
-            Route::get('/notifications/{id}', [TenantDashboardNotificationController::class, 'show'])->name('acheteur.notifications.show');
+            Route::get('/notifications/{id}', [TenantDashboardNotificationController::class, 'show'])->name('notifications.show');
 
             Route::prefix('settings')->group(function () {
                 Route::redirect('/', '/acheteur/settings/profile');

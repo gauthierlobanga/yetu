@@ -71,6 +71,7 @@ class LoyaltyController extends Controller
 
         return Inertia::render('Vendor/boutique/Loyalty/Index', [
             'compte' => $compte->load('transactions'),
+            'programme' => $programmeDefaut,
         ]);
     }
 

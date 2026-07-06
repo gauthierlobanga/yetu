@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Link, usePage } from '@inertiajs/react';
 // import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, Menu, Settings, ShieldCheck, User } from 'lucide-react';
@@ -39,31 +40,27 @@ export function SiteHeader() {
         : '?';
 
     return (
-        <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b border-slate-200 bg-white/80 backdrop-blur-xl transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) dark:border-slate-700 dark:bg-slate-900">
+        <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) dark:border-slate-800/70 dark:bg-slate-950/80">
             <div className="flex w-full items-center gap-2 px-4 lg:gap-4 lg:px-6">
-                <SidebarTrigger className="-ml-1 h-10 w-10 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" />
+                <SidebarTrigger className="-ml-1 h-10 w-10 rounded-xl text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800" />
 
-                <Separator orientation="vertical" className="mx-2 h-4" />
+                <Separator orientation="vertical" className="mx-2 h-5 bg-slate-200 dark:bg-slate-700" />
 
-                {isTenant && tenant ? (
-                    <Link
-                        href={tenant.url ?? route('vendor.dashboard')}
-                        className="flex items-center gap-2 text-sm font-semibold text-slate-800 transition-colors hover:text-emerald-600 dark:text-slate-200 dark:hover:text-emerald-400"
-                    >
-                        {/* <Store className="h-5 w-5 text-emerald-500" /> */}
-                        <span className="hidden md:inline">
-                            {tenant.raison_sociale}
-                        </span>
+                <div className="flex items-center gap-3">
+                    <Link href={route('dashboard')} className="group flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100/80 text-indigo-700 shadow-xs ring-1 ring-indigo-200/50 transition-all duration-300 group-hover:scale-105 group-hover:bg-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-400 dark:ring-indigo-800/50 dark:group-hover:bg-indigo-900/60">
+                            <ShieldCheck className="h-4 w-4" />
+                        </div>
+                        <div className="hidden flex-col md:flex">
+                            <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-500">
+                                Super Admin
+                            </span>
+                            <span className="text-sm font-bold tracking-tight text-slate-800 transition-colors group-hover:text-indigo-600 dark:text-slate-100 dark:group-hover:text-indigo-400">
+                                Administration Yetu
+                            </span>
+                        </div>
                     </Link>
-                ) : (
-                    <Link
-                        href={route('vendor.dashboard')}
-                        className="flex items-center gap-2 text-base font-semibold text-slate-800 transition-colors hover:text-emerald-600 dark:text-slate-200 dark:hover:text-emerald-400"
-                    >
-                        <Menu className="h-5 w-5 text-emerald-500" />
-                        <span>Tableau de bord</span>
-                    </Link>
-                )}
+                </div>
 
                 <div className="hidden flex-1 justify-center lg:flex">
                     {/* <DropdownSearchExperience /> */}

@@ -6,6 +6,9 @@ use App\Filament\Vendeur\Clusters\Products\ProductsCluster;
 use App\Filament\Vendeur\Resources\Produits\Pages\CreateProduit;
 use App\Filament\Vendeur\Resources\Produits\Pages\EditProduit;
 use App\Filament\Vendeur\Resources\Produits\Pages\ListProduits;
+use App\Filament\Vendeur\Resources\Produits\Pages\ViewProduit;
+use App\Filament\Vendeur\Resources\Produits\RelationManagers\AvisRelationManager;
+use App\Filament\Vendeur\Resources\Produits\RelationManagers\VariantesRelationManager;
 use App\Filament\Vendeur\Resources\Produits\Schemas\ProduitForm;
 use App\Filament\Vendeur\Resources\Produits\Tables\ProduitsTable;
 use App\Models\Produit;
@@ -37,10 +40,16 @@ class ProduitResource extends Resource
         return ProduitsTable::configure($table);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return Schemas\ProduitInfolist::configure($schema);
+    }
+
     public static function getRelations(): array
     {
         return [
-            //
+            VariantesRelationManager::class,
+            AvisRelationManager::class,
         ];
     }
 
@@ -49,6 +58,7 @@ class ProduitResource extends Resource
         return [
             'index' => ListProduits::route('/'),
             'create' => CreateProduit::route('/create'),
+            'view' => ViewProduit::route('/{record}'),
             'edit' => EditProduit::route('/{record}/edit'),
         ];
     }

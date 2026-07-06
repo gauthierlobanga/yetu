@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Textarea } from '@/components/ui/textarea';
 import { VendorSidebar } from '@/components/VendorSidebar';
+import { cn } from '@/lib/utils';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 
 interface Campaign {
@@ -47,76 +48,93 @@ export default function CampaignEdit({ tenant, campaign }: CampaignEditProps) {
 
     return (
         <SidebarProvider
-            className="bg-slate-950/94 p-0"
-            style={{ '--sidebar-width': 'calc(var(--spacing) * 72)', '--header-height': 'calc(var(--spacing) * 12)' } as React.CSSProperties}
+            className={cn(
+                'h-screen overflow-hidden',
+                'border-r border-slate-200/70',
+                'bg-white/92 backdrop-blur-3xl supports-backdrop-filter:bg-white/88',
+                'dark:border-transparent',
+                'dark:bg-slate-950/94 dark:supports-backdrop-filter:bg-slate-950/88'
+            )}
+            style={
+                {
+                    '--sidebar-width': 'calc(var(--spacing) * 72)',
+                    '--header-height': 'calc(var(--spacing) * 12)',
+                } as React.CSSProperties
+            }
         >
             <VendorSidebar tenant={tenant} />
-            <SidebarInset>
+            <SidebarInset className="flex min-h-0 flex-col">
                 <SiteHeader />
-                <div className="bg-white dark:bg-slate-950">
+                <div className="bg-slate-50/50 dark:bg-slate-950 flex-1 overflow-y-auto">
                     <Head title="Modifier la campagne" />
-                    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-                        <div className="flex items-center gap-4 mb-8">
+                    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+                        <div className="flex items-center gap-4">
                             <Link href={route('vendor.newsletters.campaigns.index')}>
-                                <Button variant="outline" size="icon">
+                                <Button variant="outline" size="icon" className="rounded-xl border-slate-200/60 hover:bg-slate-100 dark:border-slate-800/60 dark:hover:bg-slate-800">
                                     <ArrowLeft className="h-4 w-4" />
                                 </Button>
                             </Link>
                             <div>
                                 <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">Modifier la Campagne</h1>
+                                <p className="mt-1 text-slate-500 dark:text-slate-400">Ajustez les détails ou la programmation de votre campagne.</p>
                             </div>
                         </div>
 
                         {campaign.status === 'envoye' && (
-                            <div className="mb-6 p-4 bg-amber-50 text-amber-800 border border-amber-200 rounded-md text-sm">
-                                Cette campagne a déjà été envoyée et ne peut plus être modifiée.
+                            <div className="p-4 bg-amber-50/80 backdrop-blur-sm text-amber-800 border border-amber-200/60 rounded-2xl shadow-sm dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/50 flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/50">
+                                    <Send className="h-5 w-5 text-amber-600 dark:text-amber-500" />
+                                </div>
+                                <p className="text-sm font-medium">Cette campagne a déjà été envoyée et ne peut plus être modifiée.</p>
                             </div>
                         )}
 
                         <form onSubmit={handleSubmit}>
                             <div className="grid gap-6 md:grid-cols-3">
                                 <div className="md:col-span-2 flex flex-col gap-6">
-                                    <Card className="border-slate-200 dark:border-slate-800">
+                                    <Card className="rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
                                         <CardHeader>
-                                            <CardTitle>Informations principales</CardTitle>
+                                            <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">Informations principales</CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             <div className="space-y-2">
-                                                <Label htmlFor="titre">Nom de la campagne (interne)</Label>
+                                                <Label htmlFor="titre" className="text-slate-700 dark:text-slate-300">Nom de la campagne (interne)</Label>
                                                 <Input
                                                     id="titre"
                                                     value={data.titre}
                                                     onChange={(e) => setData('titre', e.target.value)}
                                                     disabled={campaign.status === 'envoye'}
+                                                    className="bg-white/50 dark:bg-slate-950/50 disabled:opacity-60"
                                                 />
                                                 {errors.titre && <p className="text-sm text-red-500">{errors.titre}</p>}
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="sujet">Sujet de l'email</Label>
+                                                <Label htmlFor="sujet" className="text-slate-700 dark:text-slate-300">Sujet de l'email</Label>
                                                 <Input
                                                     id="sujet"
                                                     value={data.sujet}
                                                     onChange={(e) => setData('sujet', e.target.value)}
                                                     disabled={campaign.status === 'envoye'}
+                                                    className="bg-white/50 dark:bg-slate-950/50 disabled:opacity-60"
                                                 />
                                                 {errors.sujet && <p className="text-sm text-red-500">{errors.sujet}</p>}
                                             </div>
                                         </CardContent>
                                     </Card>
 
-                                    <Card className="border-slate-200 dark:border-slate-800">
+                                    <Card className="rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
                                         <CardHeader>
-                                            <CardTitle>Contenu de l'email</CardTitle>
+                                            <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">Contenu de l'email</CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             <div className="space-y-2">
-                                                <Label htmlFor="contenu_html">Contenu HTML</Label>
+                                                <Label htmlFor="contenu_html" className="text-slate-700 dark:text-slate-300">Contenu HTML</Label>
                                                 <Textarea
                                                     id="contenu_html"
                                                     rows={15}
                                                     value={data.contenu_html}
                                                     onChange={(e) => setData('contenu_html', e.target.value)}
-                                                    className="font-mono text-sm"
+                                                    className="font-mono text-sm bg-white/50 dark:bg-slate-950/50 disabled:opacity-60"
                                                     disabled={campaign.status === 'envoye'}
                                                 />
                                                 {errors.contenu_html && <p className="text-sm text-red-500">{errors.contenu_html}</p>}
@@ -126,19 +144,19 @@ export default function CampaignEdit({ tenant, campaign }: CampaignEditProps) {
                                 </div>
 
                                 <div className="space-y-6">
-                                    <Card className="border-slate-200 dark:border-slate-800">
+                                    <Card className="rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
                                         <CardHeader>
-                                            <CardTitle>Paramètres d'envoi</CardTitle>
+                                            <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">Paramètres d'envoi</CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-4">
                                             <div className="space-y-2">
-                                                <Label htmlFor="status">Statut de la campagne</Label>
+                                                <Label htmlFor="status" className="text-slate-700 dark:text-slate-300">Statut de la campagne</Label>
                                                 <Select
                                                     value={data.status}
-                                                    onValueChange={(val) => setData('status', val)}
+                                                    onValueChange={(val) => setData('status', val as any)}
                                                     disabled={campaign.status === 'envoye'}
                                                 >
-                                                    <SelectTrigger id="status">
+                                                    <SelectTrigger id="status" className="bg-white/50 dark:bg-slate-950/50 disabled:opacity-60">
                                                         <SelectValue placeholder="Sélectionnez un statut" />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -150,21 +168,22 @@ export default function CampaignEdit({ tenant, campaign }: CampaignEditProps) {
                                             </div>
 
                                             {data.status === 'programme' && (
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="scheduled_at">Date et heure d'envoi</Label>
+                                                <div className="space-y-2 pt-4 mt-2 border-t border-slate-200/60 dark:border-slate-800/60">
+                                                    <Label htmlFor="scheduled_at" className="text-slate-700 dark:text-slate-300">Date et heure d'envoi</Label>
                                                     <Input
                                                         id="scheduled_at"
                                                         type="datetime-local"
                                                         value={data.scheduled_at}
                                                         onChange={(e) => setData('scheduled_at', e.target.value)}
                                                         disabled={campaign.status === 'envoye'}
+                                                        className="bg-white/50 dark:bg-slate-950/50 disabled:opacity-60"
                                                     />
                                                     {errors.scheduled_at && <p className="text-sm text-red-500">{errors.scheduled_at}</p>}
                                                 </div>
                                             )}
                                         </CardContent>
-                                        <CardFooter className="bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-800 flex justify-end p-4">
-                                            <Button type="submit" disabled={processing || campaign.status === 'envoye'} className="w-full">
+                                        <CardFooter className="bg-slate-50/50 dark:bg-slate-900/50 flex gap-2 rounded-b-2xl border-t border-slate-200/60 dark:border-slate-800/60 p-5">
+                                            <Button type="submit" disabled={processing || campaign.status === 'envoye'} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 disabled:bg-emerald-600/50">
                                                 {data.status === 'envoye' ? (
                                                     <><Send className="mr-2 h-4 w-4" /> Enregistrer et envoyer</>
                                                 ) : (

@@ -6,6 +6,7 @@ use App\Filament\Vendeur\Clusters\Products\ProductsCluster;
 use App\Filament\Vendeur\Resources\ProductCategories\Pages\CreateProductCategory;
 use App\Filament\Vendeur\Resources\ProductCategories\Pages\EditProductCategory;
 use App\Filament\Vendeur\Resources\ProductCategories\Pages\ListProductCategories;
+use App\Filament\Vendeur\Resources\ProductCategories\Pages\ViewProductCategory;
 use App\Filament\Vendeur\Resources\ProductCategories\Schemas\ProductCategoryForm;
 use App\Filament\Vendeur\Resources\ProductCategories\Tables\ProductCategoriesTable;
 use App\Models\ProductCategory;
@@ -39,10 +40,15 @@ class ProductCategoryResource extends Resource
         return ProductCategoriesTable::configure($table);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return Schemas\ProductCategoryInfolist::configure($schema);
+    }
+
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ProduitsRelationManager::class,
         ];
     }
 
@@ -51,6 +57,7 @@ class ProductCategoryResource extends Resource
         return [
             'index' => ListProductCategories::route('/'),
             'create' => CreateProductCategory::route('/create'),
+            'view' => ViewProductCategory::route('/{record}'),
             'edit' => EditProductCategory::route('/{record}/edit'),
         ];
     }

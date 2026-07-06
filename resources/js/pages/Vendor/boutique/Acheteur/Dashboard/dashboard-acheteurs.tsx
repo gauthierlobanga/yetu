@@ -422,7 +422,7 @@ export default function DashboardCustomerBuyer() {
             <Head title="Dashboard client" />
             <AppSidebar />
             <SidebarInset className="flex min-h-0 flex-col">
-                <SiteHeader />
+                <SiteHeader context="buyer" />
                 <ScrollArea className="min-h-0 flex-1">
                     <div className="bg-slate-50/50 dark:bg-slate-950">
                         <div className="space-y-8 p-4 md:p-8">

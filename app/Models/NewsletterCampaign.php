@@ -85,7 +85,7 @@ class NewsletterCampaign extends Model
 
     public function envois(): HasMany
     {
-        return $this->hasMany(NewsletterSend::class);
+        return $this->hasMany(NewsletterSend::class, 'campaign_id');
     }
 
     // Accessors

@@ -10,6 +10,7 @@ import {
     MapPin,
     RotateCcw,
     Store,
+    Bell,
 } from 'lucide-react';
 import * as React from 'react';
 import { NavMain } from '@/components/nav-main';
@@ -32,6 +33,7 @@ import addresses from '@/routes/tenant/addresses';
 import loyalty from '@/routes/tenant/loyalty';
 import orders from '@/routes/tenant/orders';
 import wishlist from '@/routes/tenant/wishlist';
+import acheteurNotifications from '@/routes/acheteur/notifications';
 import vendor from '@/routes/vendor';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';
@@ -126,6 +128,11 @@ export function AppSidebar() {
         {
             title: 'Compte',
             items: enhanceItems([
+                {
+                    title: 'Notifications',
+                    href: acheteurNotifications.index().url,
+                    icon: Bell,
+                },
                 {
                     title: 'Paramètres',
                     href: edit(),

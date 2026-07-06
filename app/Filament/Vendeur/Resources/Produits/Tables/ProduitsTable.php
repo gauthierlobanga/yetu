@@ -289,7 +289,7 @@ class ProduitsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort('produits.created_at', 'desc')
             ->filters([
                 SelectFilter::make('statut')
                     ->label('Statut')
@@ -481,6 +481,6 @@ class ProduitsTable
             ->paginated([10, 25, 50, 100, 250])
             ->persistFiltersInSession()
             ->persistSearchInSession()
-            ->defaultSort('created_at', 'desc');
+            ->defaultSort('produits.created_at', 'desc');
     }
 }
