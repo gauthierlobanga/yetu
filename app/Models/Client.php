@@ -207,9 +207,9 @@ class Client extends Model
      *
      * @return HasMany<Commande, Client>
      */
-    public function commandes(): HasMany
+    public function commandes()
     {
-        return $this->hasMany(Commande::class);
+        return $this->hasMany(Commande::class, 'client_id');
     }
 
     public function commandesRecentes($limit = 5)

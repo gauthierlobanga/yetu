@@ -13,9 +13,11 @@ import {
     CheckCircle2,
     Ticket,
     ShoppingBag,
-    ArrowRight
+    ArrowRight,
+    Clock
 } from 'lucide-react';
 
+import { toast } from 'sonner';
 import { AppSidebar } from '@/components/app-sidebar';
 import { SiteHeader } from '@/components/site-header';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +27,6 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 
 // ---------- Types ----------
 interface Transaction {
@@ -107,7 +108,7 @@ export default function ShopLoyaltyPage() {
     const seuils = programme?.regles?.seuils ?? {};
     const nextLevelKey = level.next;
     const maxPointsForNextLevel = nextLevelKey ? (seuils[nextLevelKey] ?? 500) : compte.points_cumules;
-    const progress = nextLevelKey 
+    const progress = nextLevelKey
         ? Math.min((compte.points_cumules / maxPointsForNextLevel) * 100, 100)
         : 100;
 
@@ -118,9 +119,10 @@ export default function ShopLoyaltyPage() {
     const handleRedeem = (e: React.FormEvent) => {
         e.preventDefault();
         const pointsToRedeem = parseInt(form.data.points, 10);
-        
+
         if (isNaN(pointsToRedeem) || pointsToRedeem <= 0 || pointsToRedeem > compte.points) {
             toast.error("Veuillez entrer un nombre de points valide.");
+
             return;
         }
 
@@ -153,12 +155,12 @@ export default function ShopLoyaltyPage() {
                 <SiteHeader />
                 <div className="flex-1 min-h-0 overflow-y-auto bg-slate-50/50 dark:bg-slate-950/50">
                     <div className="mx-auto max-w-7xl flex flex-col gap-8 p-4 md:p-8">
-                        
+
                         {/* En-tête Premium */}
                         <div className="relative overflow-hidden rounded-3xl border border-slate-200/60 bg-white/80 shadow-xs backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/80 p-8 sm:p-10 transition-all duration-300 hover:shadow-md">
                             <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl dark:bg-amber-500/5"></div>
                             <div className="absolute bottom-0 left-0 -ml-20 -mb-20 h-64 w-64 rounded-full bg-orange-500/10 blur-3xl dark:bg-orange-500/5"></div>
-                            
+
                             <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <Badge variant="outline" className="mb-4 inline-flex items-center gap-1.5 rounded-full border-amber-200 bg-amber-50 px-3 py-1 text-sm font-medium text-amber-700 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-400">
@@ -183,7 +185,7 @@ export default function ShopLoyaltyPage() {
                                     <Card className="rounded-2xl border-slate-200/60 bg-white/60 backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/60 hover:bg-white/80 dark:hover:bg-slate-900/80 transition-colors">
                                         <CardContent className="p-6">
                                             <div className="flex items-center gap-4">
-                                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/40 dark:to-amber-900/10 border border-amber-200/50 dark:border-amber-800/50">
+                                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-amber-100 to-amber-50 dark:from-amber-900/40 dark:to-amber-900/10 border border-amber-200/50 dark:border-amber-800/50">
                                                     <Coins className="h-7 w-7 text-amber-600 dark:text-amber-400" />
                                                 </div>
                                                 <div>
@@ -200,7 +202,7 @@ export default function ShopLoyaltyPage() {
                                     <Card className="rounded-2xl border-slate-200/60 bg-white/60 backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/60 hover:bg-white/80 dark:hover:bg-slate-900/80 transition-colors">
                                         <CardContent className="p-6">
                                             <div className="flex items-center gap-4">
-                                                <div className={cn('flex h-14 w-14 items-center justify-center rounded-2xl border', level.color.replace('bg-', 'from-').replace('text-', 'text-').concat(' bg-gradient-to-br to-transparent border-current/20'))}>
+                                                <div className={cn('flex h-14 w-14 items-center justify-center rounded-2xl border', level.color.replace('bg-', 'from-').replace('text-', 'text-').concat(' bg-linear-to-br to-transparent border-current/20'))}>
                                                     <LevelIcon className="h-7 w-7" />
                                                 </div>
                                                 <div className="flex-1 w-full">
@@ -257,7 +259,7 @@ export default function ShopLoyaltyPage() {
 
                                 {/* Formulaire d'échange amélioré */}
                                 <Card className="rounded-2xl border-slate-200/60 bg-white/60 backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/60 relative overflow-hidden">
-                                    <div className="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-amber-500/5 to-transparent pointer-events-none"></div>
+                                    <div className="absolute right-0 top-0 w-64 h-full bg-linear-to-l from-amber-500/5 to-transparent pointer-events-none"></div>
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2 text-lg">
                                             <Gift className="h-5 w-5 text-amber-500" />
@@ -318,10 +320,11 @@ export default function ShopLoyaltyPage() {
                                             {compte.transactions.length}
                                         </Badge>
                                     </CardHeader>
-                                    <CardContent className="flex-1 overflow-y-auto pr-2 pb-6 space-y-4 max-h-[600px] custom-scrollbar">
+                                    <CardContent className="flex-1 overflow-y-auto pr-2 pb-6 space-y-4 max-h-150 custom-scrollbar">
                                         {compte.transactions.length > 0 ? (
                                             compte.transactions.map((transaction) => {
                                                 const isPositive = transaction.points >= 0;
+
                                                 return (
                                                     <div key={transaction.id} className="group relative flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-white dark:hover:bg-slate-900 border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
                                                         <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full border', isPositive ? 'bg-emerald-50 border-emerald-100 dark:bg-emerald-950/30 dark:border-emerald-900/50' : 'bg-amber-50 border-amber-100 dark:bg-amber-950/30 dark:border-amber-900/50')}>
@@ -356,7 +359,7 @@ export default function ShopLoyaltyPage() {
                                                     <History className="h-8 w-8 text-slate-400" />
                                                 </div>
                                                 <p className="text-sm font-medium text-slate-900 dark:text-white">Aucune transaction</p>
-                                                <p className="text-xs text-slate-500 mt-1 max-w-[200px]">Vos gains et dépenses de points apparaîtront ici.</p>
+                                                <p className="text-xs text-slate-500 mt-1 max-w-50">Vos gains et dépenses de points apparaîtront ici.</p>
                                             </div>
                                         )}
                                     </CardContent>

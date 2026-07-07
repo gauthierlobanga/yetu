@@ -59,6 +59,12 @@ class LigneCommandeResource extends Resource
             ]);
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['produit', 'variante']);
+    }
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();

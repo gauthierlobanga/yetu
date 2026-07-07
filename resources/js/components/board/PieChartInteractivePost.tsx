@@ -1,14 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
 import { usePage } from '@inertiajs/react';
 import * as React from 'react';
 import { Label, Pie, PieChart, Sector } from 'recharts';
-import type {
-    PieSectorDataItem,
-    PieSectorShapeProps,
-} from 'recharts/types/polar/Pie';
 
 import {
     Card,
@@ -19,7 +15,6 @@ import {
 } from '@/components/ui/card';
 import {
     ChartContainer,
-    ChartStyle,
     ChartTooltip,
     ChartTooltipContent,
 } from '@/components/ui/chart';
@@ -32,6 +27,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
+// ----------------------------------------------------------------------
+// Types et constantes
+// ----------------------------------------------------------------------
 interface PostStatsData {
     status: string;
     status_label: string;
@@ -44,11 +42,11 @@ interface ChartPieInteractiveProps {
 }
 
 const statusColors: Record<string, string> = {
-    published: 'var(--chart-1)',
-    draft: 'var(--chart-2)',
-    scheduled: 'var(--chart-3)',
-    archived: 'var(--chart-4)',
-    expired: 'var(--chart-5)',
+    published: '#10b981',
+    draft: '#3b82f6',
+    scheduled: '#8b5cf6',
+    archived: '#f59e0b',
+    expired: '#6b7280',
 };
 
 const statusLabels: Record<string, string> = {
@@ -59,36 +57,46 @@ const statusLabels: Record<string, string> = {
     expired: 'Expirés',
 };
 
+// ----------------------------------------------------------------------
+// Composant
+// ----------------------------------------------------------------------
 export function ChartPieInteractive({
     postsStats: propPostsStats,
 }: ChartPieInteractiveProps) {
     const id = 'pie-interactive';
     const { props } = usePage<{ postsStatusStats?: PostStatsData[] }>();
 
-    // Utiliser directement les données des props
     const rawData = propPostsStats || props.postsStatusStats || [];
 
+    // Mise en forme et couleurs
     const chartData = React.useMemo(() => {
         if (rawData.length === 0) {
-            return [];
-        }
+return [];
+}
 
         return rawData.map((item) => ({
             ...item,
-            fill: statusColors[item.status] || `var(--chart-1)`,
+            fill: statusColors[item.status] || '#10b981',
             status_label: statusLabels[item.status] || item.status,
         }));
     }, [rawData]);
 
-    const [activeStatus, setActiveStatus] = React.useState<string>(
-        chartData.length > 0 ? chartData[0].status : '',
-    );
+    const [activeIndex, setActiveIndex] = React.useState<number | null>(null);
 
-    const chartConfig = React.useMemo(() => {
-        const config: ChartConfig = {
-            posts: { label: 'Articles' },
-        };
+    // Statut sélectionné via le select (synchronisé avec activeIndex)
+    const activeStatus =
+        activeIndex !== null
+            ? chartData[activeIndex]?.status
+            : chartData[0]?.status || '';
 
+    const handleStatusChange = (status: string) => {
+        const idx = chartData.findIndex((item) => item.status === status);
+        setActiveIndex(idx >= 0 ? idx : null);
+    };
+
+    // Configuration des couleurs pour le chart (tooltip, etc.)
+    const chartConfig: ChartConfig = React.useMemo(() => {
+        const config: ChartConfig = { posts: { label: 'Articles' } };
         chartData.forEach((item) => {
             config[item.status] = {
                 label: item.status_label,
@@ -99,45 +107,27 @@ export function ChartPieInteractive({
         return config;
     }, [chartData]);
 
-    const activeIndex = React.useMemo(
-        () => chartData.findIndex((item) => item.status === activeStatus),
-        [activeStatus, chartData],
-    );
-
     const totalPosts = React.useMemo(
         () => chartData.reduce((sum, item) => sum + item.count, 0),
         [chartData],
     );
 
-    const renderPieShape = React.useCallback(
-        ({ index, outerRadius = 0, ...props }: PieSectorShapeProps) => {
-            if (index === activeIndex) {
-                return (
-                    <g>
-                        <Sector {...props} outerRadius={outerRadius + 10} />
-                        <Sector
-                            {...props}
-                            outerRadius={outerRadius + 25}
-                            innerRadius={outerRadius + 12}
-                        />
-                    </g>
-                );
-            }
+    const activeItem = activeIndex !== null ? chartData[activeIndex] : null;
 
-            return <Sector {...props} outerRadius={outerRadius} />;
-        },
-        [activeIndex],
-    );
-
+    // État vide
     if (chartData.length === 0) {
         return (
-            <Card className="flex flex-col">
-                <CardHeader>
-                    <CardTitle>Répartition des articles</CardTitle>
-                    <CardDescription>Aucune donnée disponible</CardDescription>
+            <Card className="border-0 bg-slate-50/60 dark:bg-slate-900/40">
+                <CardHeader className="px-4 pt-4 pb-2">
+                    <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">
+                        Répartition des articles
+                    </CardTitle>
+                    <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                        Aucune donnée disponible
+                    </CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-1 justify-center pb-0">
-                    <div className="flex h-64 items-center justify-center text-muted-foreground">
+                <CardContent>
+                    <div className="flex h-48 items-center justify-center text-sm text-slate-400">
                         Aucun article trouvé
                     </div>
                 </CardContent>
@@ -145,22 +135,24 @@ export function ChartPieInteractive({
         );
     }
 
-    const activeItem = chartData[activeIndex];
-
     return (
-        <Card data-chart={id} className="flex flex-col">
-            <ChartStyle id={id} config={chartConfig} />
-            <CardHeader className="flex-row items-start space-y-0 pb-0">
-                <div className="grid gap-1">
-                    <CardTitle>Répartition des articles</CardTitle>
-                    <CardDescription>
-                        Total: {totalPosts} articles • {chartData.length}{' '}
+        <Card className="border-0 bg-slate-50/60 dark:bg-slate-900/40">
+            <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-slate-200/60 px-4 pt-4 pb-2 dark:border-slate-800/60">
+                <div>
+                    <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">
+                        Répartition des articles
+                    </CardTitle>
+                    <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                        Total : {totalPosts} articles · {chartData.length}{' '}
                         statuts
                     </CardDescription>
                 </div>
-                <Select value={activeStatus} onValueChange={setActiveStatus}>
+                <Select
+                    value={activeStatus}
+                    onValueChange={handleStatusChange}
+                >
                     <SelectTrigger
-                        className="ml-auto h-7 w-32.5 rounded-lg pl-2.5"
+                        className="ml-auto h-7 w-32 rounded-lg border-slate-200 bg-white/90 pl-2.5 text-xs dark:border-slate-700 dark:bg-slate-900/90"
                         aria-label="Sélectionner un statut"
                     >
                         <SelectValue placeholder="Sélectionner" />
@@ -175,7 +167,9 @@ export function ChartPieInteractive({
                                 <div className="flex items-center gap-2 text-xs">
                                     <span
                                         className="flex h-3 w-3 shrink-0 rounded-xs"
-                                        style={{ backgroundColor: item.fill }}
+                                        style={{
+                                            backgroundColor: item.fill,
+                                        }}
                                     />
                                     {item.status_label}
                                 </div>
@@ -184,24 +178,88 @@ export function ChartPieInteractive({
                     </SelectContent>
                 </Select>
             </CardHeader>
-            <CardContent className="flex flex-1 justify-center pb-0">
+            <CardContent className="flex flex-1 justify-center pt-6 pb-4">
                 <ChartContainer
                     id={id}
                     config={chartConfig}
-                    className="mx-auto aspect-square w-full max-w-75"
+                    className="mx-auto aspect-square w-full max-w-50"
                 >
                     <PieChart>
                         <ChartTooltip
                             cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
+                            content={
+                                <ChartTooltipContent
+                                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs shadow-sm dark:border-slate-700 dark:bg-slate-900"
+                                    hideLabel
+                                />
+                            }
                         />
                         <Pie
                             data={chartData}
                             dataKey="count"
                             nameKey="status"
-                            innerRadius={60}
-                            strokeWidth={5}
-                            shape={renderPieShape}
+                            innerRadius={55}
+                            strokeWidth={2}
+                            stroke="transparent"
+                            onMouseEnter={(_, index) =>
+                                setActiveIndex(index)
+                            }
+                            onMouseLeave={() => setActiveIndex(null)}
+                            // Personnalisation de chaque secteur via shape
+                            shape={(shapeProps: any) => {
+                                const {
+                                    cx,
+                                    cy,
+                                    innerRadius,
+                                    outerRadius,
+                                    startAngle,
+                                    endAngle,
+                                    fill,
+                                    index,
+                                } = shapeProps;
+                                const isActive = index === activeIndex;
+
+                                if (isActive) {
+                                    return (
+                                        <g>
+                                            <Sector
+                                                cx={cx}
+                                                cy={cy}
+                                                innerRadius={innerRadius}
+                                                outerRadius={outerRadius + 6}
+                                                startAngle={startAngle}
+                                                endAngle={endAngle}
+                                                fill={fill}
+                                            />
+                                            <Sector
+                                                cx={cx}
+                                                cy={cy}
+                                                innerRadius={
+                                                    innerRadius + 8
+                                                }
+                                                outerRadius={
+                                                    outerRadius + 16
+                                                }
+                                                startAngle={startAngle}
+                                                endAngle={endAngle}
+                                                fill={fill}
+                                            />
+                                        </g>
+                                    );
+                                }
+
+                                return (
+                                    <Sector
+                                        cx={cx}
+                                        cy={cy}
+                                        innerRadius={innerRadius}
+                                        outerRadius={outerRadius}
+                                        startAngle={startAngle}
+                                        endAngle={endAngle}
+                                        fill={fill}
+                                    />
+                                );
+                            }}
                         >
                             <Label
                                 content={({ viewBox }) => {
@@ -220,18 +278,21 @@ export function ChartPieInteractive({
                                                 <tspan
                                                     x={viewBox.cx}
                                                     y={viewBox.cy}
-                                                    className="fill-foreground text-3xl font-bold"
+                                                    className="fill-slate-900 text-xl font-bold dark:fill-white"
                                                 >
-                                                    {activeItem?.count.toLocaleString() ||
+                                                    {activeItem?.count?.toLocaleString() ??
                                                         0}
                                                 </tspan>
                                                 <tspan
                                                     x={viewBox.cx}
-                                                    y={(viewBox.cy || 0) + 24}
-                                                    className="fill-muted-foreground text-sm"
+                                                    y={
+                                                        (viewBox.cy || 0) +
+                                                        20
+                                                    }
+                                                    className="fill-slate-500 text-[11px] dark:fill-slate-400"
                                                 >
-                                                    {activeItem?.status_label ||
-                                                        'Articles'}
+                                                    {activeItem?.status_label ??
+                                                        'Statut'}
                                                 </tspan>
                                             </text>
                                         );

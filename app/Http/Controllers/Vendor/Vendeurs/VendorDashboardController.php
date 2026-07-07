@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Commande;
 use App\Models\Panier;
 use App\Models\Plan;
+use App\Models\ProductCategory; // ou Categorie selon votre modèle
 use App\Models\Produit;
 use App\Models\User;
 use App\Services\TenantPropsService;
@@ -31,13 +32,47 @@ class VendorDashboardController extends Controller
 
         // Statistiques (exécutées dans le schéma du tenant)
         $stats = $tenant->run(function () {
+            // Produits
             $productsCount = Produit::count();
-            $ordersCount = Commande::count();
-            $revenue = Commande::where('statut', 'payee')->sum('total');
-            $customersCount = Client::count();
-            $abandonedCarts = Panier::where('statut', Panier::STATUT_ACTIF)->count();
+            $publishedCount = Produit::where('statut', Produit::STATUS_PUBLISHED)->count();
+            $outOfStockCount = Produit::where('quantite_stock', '<=', 0)->count();
             $inventoryCount = Produit::sum('quantite_stock');
-            $growthPercent = 12.5; // à calculer plus tard
+
+            // Catégories (ajustez le nom du modèle selon votre projet)
+            $categoriesCount = ProductCategory::count();
+
+            // Commandes
+            $ordersCount = Commande::count();
+            // Revenus basés sur les commandes valides (non annulées/rejetées)
+            $revenue = Commande::whereNotIn('statut', [Commande::STATUT_ANNULE, Commande::STATUT_REJETE])
+                ->sum('total');
+            $averageOrderValue = $ordersCount > 0 ? $revenue / $ordersCount : 0;
+
+            // Clients
+            $customersCount = Client::count();
+            $newCustomersThisMonth = Client::whereDate('created_at', '>=', now()->startOfMonth())->count();
+
+            // Paniers abandonnés (corrigé : on compte les paniers avec statut "abandonne")
+            $abandonedCarts = Panier::where('statut', Panier::STATUT_ABANDONNE)
+                ->whereNull('deleted_at') // sécurité si SoftDeletes n'est pas implémenté
+                ->count();
+
+            // Croissance mensuelle (calculée)
+            $previousMonthRevenue = Commande::whereNotIn('statut', [Commande::STATUT_ANNULE, Commande::STATUT_REJETE])
+                ->whereMonth('date_commande', now()->subMonth()->month)
+                ->whereYear('date_commande', now()->subMonth()->year)
+                ->sum('total');
+            $growthPercent = $previousMonthRevenue > 0
+                ? round((($revenue - $previousMonthRevenue) / $previousMonthRevenue) * 100, 1)
+                : 0;
+
+            // Métriques additionnelles
+            $additional = [
+                'published_products' => $publishedCount,
+                'out_of_stock_products' => $outOfStockCount,
+                'average_order_value' => round($averageOrderValue, 2),
+                'new_customers_this_month' => $newCustomersThisMonth,
+            ];
 
             return [
                 'products_count' => $productsCount,
@@ -46,7 +81,9 @@ class VendorDashboardController extends Controller
                 'customers_count' => $customersCount,
                 'abandoned_carts' => $abandonedCarts,
                 'inventory_count' => $inventoryCount,
+                'categories_count' => $categoriesCount,
                 'growth_percent' => $growthPercent,
+                'additional' => $additional,
             ];
         });
 
@@ -83,7 +120,6 @@ class VendorDashboardController extends Controller
         // Fonctionnalités des plans (centrales)
         $allPlans = Plan::where('is_active', true)
             ->get()
-            // ->keyBy('name')
             ->map(function ($plan) {
                 $features = is_array($plan->features) ? $plan->features : json_decode($plan->features, true) ?? [];
 

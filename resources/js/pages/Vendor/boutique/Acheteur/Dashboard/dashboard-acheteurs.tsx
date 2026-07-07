@@ -756,16 +756,24 @@ export default function DashboardCustomerBuyer() {
                                 </h2>
                                 <div className="grid gap-6 lg:grid-cols-2">
                                     {/* Dépenses mensuelles (Area Gradient) */}
-                                    <ChartAreaGradient monthlyOrders={monthlyOrders} />
-                                    
+                                    <ChartAreaGradient
+                                        monthlyOrders={monthlyOrders}
+                                    />
+
                                     {/* Historique interactif (Area Interactive) */}
-                                    <ChartAreaInteractive dailySpending={dailySpending} />
-                                    
+                                    <ChartAreaInteractive
+                                        dailySpending={dailySpending}
+                                    />
+
                                     {/* Commandes passées (Line Label) */}
-                                    <ChartLineLabel monthlyOrders={monthlyOrders} />
-                                    
+                                    <ChartLineLabel
+                                        monthlyOrders={monthlyOrders}
+                                    />
+
                                     {/* Bilan fidélité (Bar Negative) */}
-                                    <ChartBarNegative loyaltyHistory={loyaltyHistory} />
+                                    <ChartBarNegative
+                                        loyaltyHistory={loyaltyHistory}
+                                    />
                                 </div>
                             </div>
 
@@ -850,7 +858,8 @@ export default function DashboardCustomerBuyer() {
                             {/* Dernières commandes */}
                             <Card className="rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
                                 <CardHeader className="flex flex-row items-center justify-between">
-                                    <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">
+                                    <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+                                        <Package className="h-5 w-5 text-emerald-500" />
                                         Dernières commandes
                                     </CardTitle>
                                     <Button
@@ -860,48 +869,82 @@ export default function DashboardCustomerBuyer() {
                                         asChild
                                     >
                                         <Link href={tenant.orders.index().url}>
-                                            Tout voir{' '}
+                                            Tout voir
                                             <ArrowRight className="ml-2 h-4 w-4" />
                                         </Link>
                                     </Button>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
-                                    {recentOrders.map((order) => (
-                                        <Link
-                                            key={order.id}
-                                            href={
-                                                tenant.orders.show(order.id).url
-                                            }
-                                            className="flex items-center justify-between rounded-xl border border-slate-200/60 bg-white p-4 transition-all hover:border-emerald-200 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900/60"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
-                                                    <Package className="h-5 w-5 text-slate-500" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-semibold text-slate-900 dark:text-white">
-                                                        {order.numero_commande}
-                                                    </p>
-                                                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                        {order.lignes_count}{' '}
-                                                        article(s) ·{' '}
-                                                        {new Date(
-                                                            order.created_at,
-                                                        ).toLocaleDateString(
-                                                            'fr-FR',
+                                    {recentOrders.length > 0 ? (
+                                        recentOrders.map((order, index) => (
+                                            <motion.div
+                                                key={order.id}
+                                                initial={{ opacity: 0, y: 8 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{
+                                                    delay: index * 0.05,
+                                                }}
+                                            >
+                                                <Link
+                                                    href={
+                                                        tenant.orders.show(
+                                                            order.id,
+                                                        ).url
+                                                    }
+                                                    className="flex items-center justify-between rounded-xl border border-slate-200/60 bg-white p-4 transition-all hover:border-emerald-200 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900/60"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+                                                            <Package className="h-5 w-5 text-slate-500" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-semibold text-slate-900 dark:text-white">
+                                                                {
+                                                                    order.numero_commande
+                                                                }
+                                                            </p>
+                                                            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                                                <span>
+                                                                    {
+                                                                        order.lignes_count
+                                                                    }{' '}
+                                                                    article(s)
+                                                                </span>
+                                                                <span className="h-1 w-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+                                                                <span>
+                                                                    {new Date(
+                                                                        order.created_at,
+                                                                    ).toLocaleDateString(
+                                                                        'fr-FR',
+                                                                        {
+                                                                            day: 'numeric',
+                                                                            month: 'short',
+                                                                            year: 'numeric',
+                                                                        },
+                                                                    )}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        {getStatusBadge(
+                                                            order.statut,
                                                         )}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                {getStatusBadge(order.statut)}
-                                                <span className="font-bold text-slate-900 dark:text-white">
-                                                    {formatPrice(order.total)}
-                                                </span>
-                                                <ChevronRight className="h-5 w-5 text-slate-300 transition-colors group-hover:text-emerald-500" />
-                                            </div>
-                                        </Link>
-                                    ))}
+                                                        <span className="font-bold text-slate-900 dark:text-white">
+                                                            {formatPrice(
+                                                                order.total,
+                                                            )}
+                                                        </span>
+                                                        <ChevronRight className="h-5 w-5 text-slate-300 transition-colors group-hover:text-emerald-500" />
+                                                    </div>
+                                                </Link>
+                                            </motion.div>
+                                        ))
+                                    ) : (
+                                        <div className="py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                                            Aucune commande récente.
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>

@@ -19,7 +19,6 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface CategoryStats {
     id: number;
@@ -31,27 +30,39 @@ interface CategoryStats {
 
 interface ChartBarMixedProps {
     categoriesData?: CategoryStats[];
+    totalCategoriesCount?: number; // ajouté
 }
+
+const COLORS = [
+    '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#06b6d4',
+    '#ef4444', '#ec4899', '#6366f1', '#14b8a6', '#84cc16',
+];
 
 export function ChartBarMixed({
     categoriesData: propCategoriesData,
+    totalCategoriesCount,
 }: ChartBarMixedProps) {
-    // Récupérer les données depuis les props Inertia
-    const { props } = usePage<{ categoriesStats?: CategoryStats[] }>();
+    const { props } = usePage<{
+        categoriesStats?: CategoryStats[];
+        totalCategoriesCount?: number;
+    }>();
     const categoriesStats = props.categoriesStats;
-
-    // Utiliser directement les données des props
+    const totalCount = totalCategoriesCount ?? props.totalCategoriesCount ?? 0;
     const chartData = propCategoriesData || categoriesStats || [];
 
     if (!chartData || chartData.length === 0) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Articles par catégorie</CardTitle>
-                    <CardDescription>Aucune catégorie trouvée</CardDescription>
+            <Card className="border-0 bg-slate-50/60 dark:bg-slate-900/40">
+                <CardHeader className="px-4 pt-4 pb-2">
+                    <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">
+                        Articles par catégorie
+                    </CardTitle>
+                    <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                        Aucune catégorie trouvée
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex h-64 items-center justify-center text-muted-foreground">
+                    <div className="flex h-48 items-center justify-center text-sm text-slate-400">
                         Aucune catégorie avec des articles
                     </div>
                 </CardContent>
@@ -59,112 +70,88 @@ export function ChartBarMixed({
         );
     }
 
-    // Générer la configuration du graphique dynamiquement
-    const chartConfig = chartData.reduce(
-        (config, category, index) => {
-            const colors = [
-                'var(--chart-1)',
-                'var(--chart-2)',
-                'var(--chart-3)',
-                'var(--chart-4)',
-                'var(--chart-5)',
-                'hsl(var(--primary))',
-                'hsl(var(--secondary))',
-                'hsl(var(--accent))',
-            ];
-
-            config[category.nom] = {
-                label: category.nom,
-                color: category.color || colors[index % colors.length],
-            };
-
-            return config;
-        },
-        {
-            posts: {
-                label: "Nombre d'articles",
-            },
-        } as ChartConfig,
-    );
-
-    // Préparer les données pour le graphique
-    const barData = chartData.map((category) => ({
+    const barData = chartData.map((category, idx) => ({
         category: category.nom,
         posts: category.posts_count,
-        fill: category.color || undefined,
+        fill: category.color || COLORS[idx % COLORS.length],
     }));
 
     const totalPosts = chartData.reduce((sum, cat) => sum + cat.posts_count, 0);
-    const categoriesWithPosts = chartData.filter(
-        (cat) => cat.posts_count > 0,
-    ).length;
+    const shownCategories = chartData.length; // <=10
+    const otherCategories = totalCount - shownCategories;
+
+    const chartConfig = {
+        posts: { label: 'Articles' },
+        ...Object.fromEntries(
+            barData.map((item) => [
+                item.category,
+                { label: item.category, color: item.fill },
+            ])
+        ),
+    } satisfies ChartConfig;
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Articles par catégorie</CardTitle>
-                <CardDescription>
-                    {totalPosts} articles répartis dans {categoriesWithPosts}{' '}
-                    catégories
-                </CardDescription>
+        <Card className="border-0 bg-slate-50/60 dark:bg-slate-900/40">
+            <CardHeader className="border-b border-slate-200/60 px-4 pt-4 pb-2 dark:border-slate-800/60">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">
+                            Articles par catégorie
+                        </CardTitle>
+                        <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                            {totalPosts} articles dans {totalCount} catégorie{totalCount > 1 ? 's' : ''}
+                        </CardDescription>
+                    </div>
+                </div>
             </CardHeader>
-            <CardContent>
-                <ChartContainer config={chartConfig}>
+            <CardContent className="px-4 py-3">
+                {/* Hauteur augmentée pour plus de lisibilité */}
+                <ChartContainer config={chartConfig} className="h-80 w-full">
                     <BarChart
-                        accessibilityLayer
                         data={barData}
                         layout="vertical"
-                        margin={{
-                            left: 0,
-                        }}
+                        margin={{ left: 0 }}
                     >
                         <YAxis
                             dataKey="category"
                             type="category"
                             tickLine={false}
-                            tickMargin={10}
+                            tickMargin={8}
                             axisLine={false}
-                            tickFormatter={(value) => {
-                                const config =
-                                    chartConfig[
-                                        value as keyof typeof chartConfig
-                                    ];
-
-                                return config?.label || value;
-                            }}
+                            width={140}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                         />
                         <XAxis dataKey="posts" type="number" hide />
                         <ChartTooltip
                             cursor={false}
                             content={
                                 <ChartTooltipContent
-                                    hideLabel
-                                    formatter={(value, name) => {
-                                        return [
-                                            `${value} article${value !== 1 ? 's' : ''}`,
-                                            name,
-                                        ];
-                                    }}
+                                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs shadow-sm dark:border-slate-700 dark:bg-slate-900"
+                                    formatter={(value, name) => [
+                                        `${value} article${value !== 1 ? 's' : ''}`,
+                                        name,
+                                    ]}
                                 />
                             }
                         />
-                        <Bar
-                            dataKey="posts"
-                            radius={5}
-                            className="fill-primary"
-                        />
+                        <Bar dataKey="posts" radius={[0, 4, 4, 0]} barSize={16}>
+                            {barData.map((entry, idx) => (
+                                <rect key={idx} fill={entry.fill} />
+                            ))}
+                        </Bar>
                     </BarChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 leading-none font-medium">
-                    {categoriesWithPosts} catégories actives{' '}
-                    <TrendingUp className="h-4 w-4" />
+            <CardFooter className="flex-col items-start gap-1 border-t border-slate-200/60 px-4 py-2 text-xs text-slate-500 dark:border-slate-800/60">
+                <div className="flex gap-2 font-medium">
+                    {shownCategories} catégories affichées
+                    {otherCategories > 0 && (
+                        <span className="text-slate-400">
+                            · {otherCategories} autre{otherCategories > 1 ? 's' : ''} catégorie{otherCategories > 1 ? 's' : ''}
+                        </span>
+                    )}
                 </div>
-                <div className="leading-none text-muted-foreground">
-                    Nombre d'articles par catégorie (total: {totalPosts}{' '}
-                    articles)
-                </div>
+                <div>Nombre d'articles par catégorie</div>
             </CardFooter>
         </Card>
     );

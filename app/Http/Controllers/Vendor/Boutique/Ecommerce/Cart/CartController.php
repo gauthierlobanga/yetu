@@ -203,6 +203,9 @@ class CartController extends Controller
         // Optimisation : eager loading pour éviter un LazyLoadingViolation sur l'accès aux relations de l'item du panier
         $cart->load(['items.produit.media', 'items.variante', 'promotions']);
 
+        // 🔥 Trier les items par ID pour un ordre stable
+        $items = $cart->items->sortBy('id')->values();
+
         return [
             'id' => $cart->id,
             'nb_articles' => $cart->nb_articles,
@@ -211,7 +214,7 @@ class CartController extends Controller
             'total_livraison' => $cart->total_livraison,
             'total_remises' => $cart->total_remises,
             'total_general' => $cart->total_general,
-            'items' => $cart->items->map(fn ($item) => [
+            'items' => $items->map(fn ($item) => [
                 'id' => $item->id,
                 'produit' => [
                     'id' => $item->produit->id,

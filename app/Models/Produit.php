@@ -286,9 +286,9 @@ class Produit extends Model implements HasMedia, Sitemapable
         return $this->hasMany(ItemPanier::class);
     }
 
-    public function ligneCommandes(): HasMany
+    public function ligneCommandes()
     {
-        return $this->hasMany(LigneCommande::class);
+        return $this->hasMany(LigneCommande::class, 'produit_id');
     }
 
     public function wishlistItems(): HasMany

@@ -4,6 +4,7 @@ namespace App\Services\Analytics;
 
 use App\Models\Commande;
 use App\Models\ProductView;
+use App\Models\Produit;
 use App\Models\Visit;
 use App\Models\VisitorEvent;
 use Illuminate\Support\Facades\DB;
@@ -77,21 +78,42 @@ class AnalyticsService
 
     public function getTopProducts($limit = 10)
     {
-        $topViewed = ProductView::select('product_id', DB::raw('count(*) as views'))
-            ->groupBy('product_id')
-            ->orderBy('views', 'desc')
+        // Top produits les plus vus (basé sur views_count)
+        $topViewed = Produit::select(
+            'id as product_id',
+            'nom as product_name',
+            'views_count as views'
+        )
+            ->where('views_count', '>', 0)
+            ->orderBy('views_count', 'desc')
             ->limit($limit)
-            ->get();
+            ->get()
+            ->map(fn ($item) => (array) $item)
+            ->toArray();
 
-        $topSold = Commande::where('statut', 'termine')
+        // Top produits les plus vendus
+        $topSold = Commande::where('commandes.statut', 'termine')
             ->join('ligne_commandes', 'commandes.id', '=', 'ligne_commandes.commande_id')
-            ->select('ligne_commandes.produit_id', DB::raw('sum(ligne_commandes.quantite) as sold'))
-            ->groupBy('ligne_commandes.produit_id')
-            ->orderBy('sold', 'desc')
+            ->join('produits', 'ligne_commandes.produit_id', '=', 'produits.id')
+            ->whereNull('produits.deleted_at')
+            ->whereNull('commandes.deleted_at')
+            ->select(
+                'produits.id as product_id',
+                'produits.nom as product_name',
+                DB::raw('SUM(ligne_commandes.quantite) as sold')
+            )
+            ->groupBy('produits.id', 'produits.nom')
+            ->havingRaw('SUM(ligne_commandes.quantite) > 0')
+            ->orderByRaw('SUM(ligne_commandes.quantite) DESC')
             ->limit($limit)
-            ->get();
+            ->get()
+            ->map(fn ($item) => (array) $item)
+            ->toArray();
 
-        return ['top_viewed' => $topViewed, 'top_sold' => $topSold];
+        return [
+            'top_viewed' => $topViewed,
+            'top_sold' => $topSold,
+        ];
     }
 
     public function getTrafficSources($period = 'month')

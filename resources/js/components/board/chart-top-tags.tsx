@@ -1,8 +1,9 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { usePage } from '@inertiajs/react';
 import { TrendingUp, Hash } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useState, useMemo, useEffect } from 'react';
 import {
     Bar,
@@ -27,7 +28,6 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface TopTag {
@@ -44,96 +44,54 @@ interface ChartTopTagsProps {
 export function ChartTopTags({ topTags: propTopTags }: ChartTopTagsProps) {
     const { props } = usePage<{ topTags?: TopTag[] }>();
     const topTags = propTopTags || props.topTags;
-    const [loading, setLoading] = useState(true);
     const [sortBy, setSortBy] = useState<'count' | 'name'>('count');
+    const { resolvedTheme } = useTheme();
+    const isDark = resolvedTheme === 'dark';
+    const gridColor = isDark ? 'rgba(148,163,184,0.2)' : '#e2e8f0';
 
-    useEffect(() => {
-        if (topTags && topTags.length > 0) {
-            setLoading(false);
-        } else {
-            const timer = setTimeout(() => setLoading(false), 1000);
-
-            return () => clearTimeout(timer);
-        }
-    }, [topTags]);
-
-    // Préparer les données pour le graphique
+    // Préparer les données
     const chartData = useMemo(() => {
         if (!topTags || topTags.length === 0) {
-            return [];
-        }
+return [];
+}
 
-        const sortedTags = [...topTags].sort((a, b) => {
+        const sorted = [...topTags].sort((a, b) => {
             if (sortBy === 'count') {
-                return b.posts_count - a.posts_count;
-            } else {
-                return a.name.localeCompare(b.name);
-            }
+return b.posts_count - a.posts_count;
+}
+
+            return a.name.localeCompare(b.name);
         });
 
-        return sortedTags.slice(0, 15).map((tag) => ({
-            name:
-                tag.name.length > 15
-                    ? tag.name.substring(0, 15) + '...'
-                    : tag.name,
+        return sorted.slice(0, 15).map((tag) => ({
+            name: tag.name.length > 15 ? tag.name.substring(0, 15) + '...' : tag.name,
             fullName: tag.name,
             count: tag.posts_count,
             id: tag.id,
         }));
     }, [topTags, sortBy]);
 
+    const totalTags = topTags ? topTags.reduce((sum, tag) => sum + tag.posts_count, 0) : 0;
+    const averageTags = topTags && topTags.length > 0 ? Math.round(totalTags / topTags.length) : 0;
+
     const chartConfig = {
-        count: {
-            label: "Nombre d'articles",
-            color: 'var(--chart-1)',
-        },
+        count: { label: "Nombre d'articles", color: '#10b981' },
     } satisfies ChartConfig;
-
-    const totalTags = useMemo(() => {
-        if (!topTags) {
-            return 0;
-        }
-
-        return topTags.reduce((sum, tag) => sum + tag.posts_count, 0);
-    }, [topTags]);
-
-    const averageTags = useMemo(() => {
-        if (!topTags || topTags.length === 0) {
-            return 0;
-        }
-
-        return Math.round(totalTags / topTags.length);
-    }, [totalTags, topTags]);
-
-    if (loading) {
-        return (
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-4 w-64" />
-                </CardHeader>
-                <CardContent>
-                    <div className="flex h-100 items-center justify-center">
-                        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
 
     if (!topTags || topTags.length === 0) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Tags populaires</CardTitle>
-                    <CardDescription>Aucun tag trouvé</CardDescription>
+            <Card className="border-0 bg-slate-50/60 dark:bg-slate-900/40">
+                <CardHeader className="px-4 pt-4 pb-2">
+                    <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">
+                        Tags populaires
+                    </CardTitle>
+                    <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                        Aucun tag trouvé
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex h-100 items-center justify-center text-muted-foreground">
-                        <div className="text-center">
-                            <Hash className="mx-auto mb-4 h-12 w-12 opacity-50" />
-                            <p>Aucun tag n'a été utilisé</p>
-                        </div>
+                    <div className="flex h-48 items-center justify-center text-sm text-slate-400">
+                        <Hash className="mx-auto h-10 w-10 opacity-40" />
                     </div>
                 </CardContent>
             </Card>
@@ -141,142 +99,96 @@ export function ChartTopTags({ topTags: propTopTags }: ChartTopTagsProps) {
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle>Tags populaires</CardTitle>
-                        <CardDescription>
-                            Top {Math.min(15, topTags.length)} tags les plus
-                            utilisés
-                        </CardDescription>
-                    </div>
-                    <ToggleGroup
-                        type="single"
-                        value={sortBy}
-                        onValueChange={(value) =>
-                            value && setSortBy(value as 'count' | 'name')
-                        }
-                        variant="outline"
-                        className="hidden sm:flex"
-                    >
-                        <ToggleGroupItem value="count" className="px-3 text-xs">
-                            Par popularité
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="name" className="px-3 text-xs">
-                            Par ordre alphabétique
-                        </ToggleGroupItem>
-                    </ToggleGroup>
+        <Card className="border-0 bg-slate-50/60 dark:bg-slate-900/40">
+            <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-slate-200/60 px-4 pt-4 pb-2 dark:border-slate-800/60">
+                <div>
+                    <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">
+                        Tags populaires
+                    </CardTitle>
+                    <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                        Top {Math.min(15, topTags.length)} tags les plus utilisés
+                    </CardDescription>
                 </div>
+                <ToggleGroup
+                    type="single"
+                    value={sortBy}
+                    onValueChange={(value) => value && setSortBy(value as 'count' | 'name')}
+                    variant="outline"
+                    className="hidden gap-0 rounded-xl bg-slate-100 p-0.5 sm:flex dark:bg-slate-800"
+                >
+                    <ToggleGroupItem value="count" className="rounded-lg px-3 py-1 text-xs">
+                        Popularité
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="name" className="rounded-lg px-3 py-1 text-xs">
+                        A-Z
+                    </ToggleGroupItem>
+                </ToggleGroup>
             </CardHeader>
-            <CardContent>
-                <ChartContainer config={chartConfig} className="h-125 w-full">
+            <CardContent className="px-4 py-3">
+                <ChartContainer config={chartConfig} className="h-80 w-full">
                     <BarChart
-                        accessibilityLayer
                         data={chartData}
                         layout="vertical"
-                        margin={{
-                            left: 100,
-                            right: 40,
-                            top: 20,
-                            bottom: 20,
-                        }}
+                        margin={{ left: 90, right: 30, top: 5, bottom: 5 }}
                     >
-                        <CartesianGrid horizontal={false} />
+                        <CartesianGrid horizontal={false} stroke={gridColor} strokeDasharray="2 2" strokeWidth={0.5} />
                         <YAxis
                             dataKey="name"
                             type="category"
                             tickLine={false}
-                            tickMargin={10}
+                            tickMargin={8}
                             axisLine={false}
-                            width={120}
-                            tickFormatter={(value) => value}
+                            width={90}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                         />
                         <XAxis
                             dataKey="count"
                             type="number"
                             tickLine={false}
                             axisLine={false}
-                            tickFormatter={(value) =>
-                                value?.toLocaleString() || '0'
-                            }
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
+                            tickFormatter={(value) => value?.toLocaleString() || '0'}
                         />
                         <ChartTooltip
                             cursor={false}
                             content={
                                 <ChartTooltipContent
+                                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs shadow-sm dark:border-slate-700 dark:bg-slate-900"
                                     labelFormatter={(label, payload) => {
                                         const data = payload[0]?.payload;
 
                                         return (
-                                            <div className="space-y-1">
-                                                <p className="font-medium">
-                                                    {data?.fullName || label}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    ID: #{data?.id}
-                                                </p>
+                                            <div className="space-y-0.5">
+                                                <p className="font-medium">{data?.fullName || label}</p>
+                                                <p className="text-slate-500">ID: #{data?.id}</p>
                                             </div>
                                         );
                                     }}
-                                    formatter={(value) => {
-                                        const numericValue =
-                                            typeof value === 'number'
-                                                ? value
-                                                : 0;
-
-                                        return [
-                                            `${numericValue.toLocaleString()} article${numericValue > 1 ? 's' : ''}`,
-                                            '',
-                                        ];
-                                    }}
+                                    formatter={(value) => [
+                                        `${value} article${value !== 1 ? 's' : ''}`,
+                                        '',
+                                    ]}
                                 />
                             }
                         />
-                        <Bar
-                            dataKey="count"
-                            fill="var(--color-count)"
-                            radius={[0, 4, 4, 0]}
-                            barSize={24}
-                        >
+                        <Bar dataKey="count" fill={chartConfig.count.color} radius={[0, 4, 4, 0]} barSize={18}>
                             <LabelList
                                 dataKey="count"
                                 position="right"
-                                offset={8}
-                                className="fill-foreground"
-                                fontSize={11}
-                                // CORRECTION: Utiliser content au lieu de formatter
-                                content={(props) => {
-                                    const { x, y, width, value } = props;
-                                    const numericValue =
-                                        typeof value === 'number' ? value : 0;
-
-                                    return (
-                                        <text
-                                            x={Number(x) + Number(width) + 8}
-                                            y={Number(y) + 12}
-                                            fill="currentColor"
-                                            fontSize={11}
-                                            className="fill-foreground"
-                                        >
-                                            {numericValue.toLocaleString()}
-                                        </text>
-                                    );
-                                }}
+                                offset={6}
+                                className="fill-slate-500 text-[11px]"
+                                formatter={(value: any) => Number(value).toLocaleString()}
                             />
                         </Bar>
                     </BarChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 leading-none font-medium">
-                    Moyenne: {averageTags.toLocaleString()} articles par tag
-                    <TrendingUp className="h-4 w-4" />
+            <CardFooter className="flex-col items-start gap-1 border-t border-slate-200/60 px-4 py-2 text-xs text-slate-500 dark:border-slate-800/60">
+                <div className="flex gap-2 font-medium">
+                    Moyenne : {averageTags.toLocaleString()} articles par tag
+                    <TrendingUp className="h-3.5 w-3.5" />
                 </div>
-                <div className="leading-none text-muted-foreground">
-                    Total de {totalTags} articles tagués avec {topTags.length}{' '}
-                    tags différents
-                </div>
+                <div>Total de {totalTags} articles tagués dans {topTags.length} tags</div>
             </CardFooter>
         </Card>
     );

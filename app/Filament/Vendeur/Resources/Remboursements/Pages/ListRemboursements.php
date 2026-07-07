@@ -27,10 +27,10 @@ class ListRemboursements extends ListRecords
         return [
             'all' => Tab::make('Tous'),
             'today' => Tab::make('Aujourd\'hui')
-                ->modifyQueryUsing(fn (Builder $query) => $query->whereDate('visited_at', Carbon::today()))
-                ->badge(static::getResource()::getEloquentQuery()->whereDate('visited_at', Carbon::today())->count()),
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereDate('created_at', Carbon::today()))
+                ->badge(static::getResource()::getEloquentQuery()->whereDate('created_at', Carbon::today())->count()),
             'last_7_days' => Tab::make('7 derniers jours')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('visited_at', '>=', Carbon::now()->subDays(7))),
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('created_at', '>=', Carbon::now()->subDays(7))),
             'this_week' => Tab::make('Cette semaine')
                 ->badge(Remboursement::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count())
                 ->badgeColor('info')

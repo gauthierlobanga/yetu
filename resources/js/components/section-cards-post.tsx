@@ -1,252 +1,202 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/components/section-cards-post.tsx
-
 import { usePage } from '@inertiajs/react';
 import {
-    IconTrendingDown,
-    IconTrendingUp,
-    IconFileText,
-    IconCalendar,
-    IconUser,
-    IconRocket,
-    IconClock,
-    IconChartBar,
-    IconShoppingCart,
-} from '@tabler/icons-react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useEffect, useState } from 'react';
+    TrendingUp,
+    TrendingDown,
+    FileText,
+    Calendar,
+    Users,
+    Eye,
+    ThumbsUp,
+    MessageCircle,
+    Clock,
+    BarChart3,
+    Zap,
+    AlertCircle,
+    PencilLine,
+    UserPlus,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import {
-    Card,
-    CardAction,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
-interface EcommerceStats {
-    total_products: number;
-    published_products: number;
-    draft_products: number;
-    total_orders: number;
-    completed_orders: number;
-    pending_orders: number;
-    cancelled_orders: number;
-    total_revenue: number;
-    revenue_change: number;
-    orders_change: number;
-    total_customers: number;
-    customers_change: number;
-    active_carts: number;
-    abandoned_carts: number;
-    avg_order_value: number;
+interface BlogStats {
+    total_posts: number;
+    published_posts: number;
+    draft_posts: number;
+    scheduled_posts: number;
+    archived_posts: number;
+    total_views: number;
+    total_likes: number;
+    total_comments: number;
+    views_change: number;
+    likes_change: number;
+    posts_change: number;
+    old_drafts_count: number;
+    avg_engagement: number;
+    max_engagement: number;
+    posts_this_month: number;
+    posts_this_month_change: number;
+    active_authors: number;
+    active_authors_change: number;
     conversion_rate: number;
-    return_rate: number;
-    inventory_count: number;
-    low_stock_count: number;
-    out_of_stock_count: number;
-    revenue_this_month: number;
-    revenue_this_month_change: number;
-    orders_this_month: number;
-    orders_this_month_change: number;
+    days_since_last_post: number | null;
+    views_trend: number;
+    pending_drafts: number;
+    pending_drafts_change: number;
 }
 
 interface PageProps {
-    stats: Partial<EcommerceStats>;
+    stats: Partial<BlogStats>;
     [key: string]: unknown;
 }
 
-export function SectionCards() {
+export function SectionCardsBlog() {
     const { props } = usePage<PageProps>();
     const stats = props.stats;
 
     if (!stats) {
         return (
-            <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @3xl/main:grid-cols-4">
-                {[...Array(12)].map((_, i) => (
-                    <Card key={i} className="@container/card animate-pulse">
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div className="h-4 w-24 rounded bg-muted" />
-                                <div className="h-6 w-12 rounded bg-muted" />
-                            </div>
-                            <div className="mt-2 h-8 w-32 rounded bg-muted" />
-                        </CardHeader>
-                        <CardFooter>
-                            <div className="h-4 w-40 rounded bg-muted" />
-                        </CardFooter>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {[...Array(8)].map((_, i) => (
+                    <Card key={i} className="animate-pulse border-0 bg-slate-50/50 dark:bg-slate-900/50">
+                        <CardContent className="p-4">
+                            <div className="h-4 w-24 rounded bg-slate-200 dark:bg-slate-800" />
+                            <div className="mt-2 h-8 w-32 rounded bg-slate-200 dark:bg-slate-800" />
+                        </CardContent>
                     </Card>
                 ))}
             </div>
         );
     }
 
+    const formatNumber = (value: number) => value.toLocaleString('fr-FR');
+
     const cards = [
         {
-            title: 'Total des produits',
-            value: stats.total_products ?? 0,
-            description: 'Tous statuts confondus',
-            trend: stats.orders_change ?? 0,
-            icon: <IconFileText className="size-6" />,
-            subText: `${stats.published_products ?? 0} publiés, ${stats.draft_products ?? 0} brouillons`,
-            trendUp: (stats.orders_change ?? 0) >= 0,
+            title: 'Articles publiés',
+            value: formatNumber(stats.published_posts ?? 0),
+            sub: `${stats.draft_posts ?? 0} brouillons, ${stats.scheduled_posts ?? 0} programmés`,
+            trend: stats.posts_change ?? 0,
+            icon: <FileText className="h-5 w-5 text-blue-500" />,
         },
         {
-            title: 'Produits publiés',
-            value: stats.published_products ?? 0,
-            description: 'Accessibles au public',
-            trend:
-                (stats.published_products ?? 0) > 0 && (stats.total_products ?? 0) > 0
-                    ? Math.round(
-                          ((stats.published_products ?? 0) / (stats.total_products ?? 1)) *
-                              100,
-                      )
-                    : 0,
-            icon: <IconFileText className="size-6 text-primary" />,
-            subText: `${stats.low_stock_count ?? 0} en stock faible`,
-            trendUp: true,
+            title: 'Vues totales',
+            value: formatNumber(stats.total_views ?? 0),
+            sub: 'Depuis le début',
+            trend: stats.views_change ?? 0,
+            icon: <Eye className="h-5 w-5 text-emerald-500" />,
         },
         {
-            title: "Chiffre d'affaires",
-            value: new Intl.NumberFormat('fr-CD', {
-                style: 'currency',
-                currency: 'CDF',
-            }).format(stats.total_revenue ?? 0),
-            description: 'Revenu total',
-            trend: stats.revenue_change ?? 0,
-            icon: <IconChartBar className="size-6" />,
-            subText: 'Performance des ventes',
-            trendUp: (stats.revenue_change ?? 0) >= 0,
+            title: 'Likes',
+            value: formatNumber(stats.total_likes ?? 0),
+            sub: 'Engagement global',
+            trend: stats.likes_change ?? 0,
+            icon: <ThumbsUp className="h-5 w-5 text-purple-500" />,
         },
         {
-            title: 'Commandes totales',
-            value: stats.total_orders ?? 0,
-            description: 'Commandes reçues',
-            trend: stats.orders_change ?? 0,
-            icon: <IconRocket className="size-6 text-primary" />,
-            subText: `${stats.completed_orders ?? 0} complétées, ${stats.pending_orders ?? 0} en attente`,
-            trendUp: (stats.orders_change ?? 0) >= 0,
+            title: 'Commentaires',
+            value: formatNumber(stats.total_comments ?? 0),
+            sub: 'Interactions',
+            trend: stats.likes_change ?? 0, // ou un changement dédié, à ajuster si besoin
+            icon: <MessageCircle className="h-5 w-5 text-orange-500" />,
         },
         {
-            title: 'Clients',
-            value: (stats.total_customers ?? 0).toLocaleString(),
-            description: 'Clients enregistrés',
-            trend: stats.customers_change ?? 0,
-            icon: <IconUser className="size-6 text-primary" />,
-            subText: 'Base de clients',
-            trendUp: (stats.customers_change ?? 0) >= 0,
+            title: 'Auteurs actifs',
+            value: formatNumber(stats.active_authors ?? 0),
+            sub: 'Contributeurs',
+            trend: stats.active_authors_change ?? 0,
+            icon: <Users className="h-5 w-5 text-cyan-500" />,
         },
         {
-            title: 'Paniers actifs',
-            value: stats.active_carts ?? 0,
-            description: 'Paniers en cours',
-            trend: stats.abandoned_carts ?? 0,
-            icon: <IconShoppingCart className="size-6 text-primary" />,
-            subText: `${stats.abandoned_carts ?? 0} abandonnés`,
-            trendUp: false,
+            title: 'Taux d\'engagement',
+            value: `${(stats.avg_engagement ?? 0).toFixed(1)}%`,
+            sub: `Max: ${(stats.max_engagement ?? 0).toFixed(1)}%`,
+            trend: stats.avg_engagement ?? 0,
+            icon: <BarChart3 className="h-5 w-5 text-yellow-500" />,
         },
         {
-            title: 'Paniers abandonnés',
-            value: (stats.abandoned_carts ?? 0).toLocaleString(),
-            description: 'Paniers non finalisés',
-            trend: stats.return_rate ?? 0,
-            icon: <IconClock className="size-6 text-destructive" />,
-            subText: "Taux d'abandon",
-            trendUp: false,
+            title: 'Articles ce mois',
+            value: formatNumber(stats.posts_this_month ?? 0),
+            sub: 'vs mois précédent',
+            trend: stats.posts_this_month_change ?? 0,
+            icon: <Calendar className="h-5 w-5 text-indigo-500" />,
         },
         {
-            title: 'Panier moyen',
-            value: new Intl.NumberFormat('fr-CD', {
-                style: 'currency',
-                currency: 'CDF',
-            }).format(stats.avg_order_value ?? 0),
-            description: 'Valeur moyenne par commande',
-            trend: stats.revenue_change ?? 0,
-            icon: <IconChartBar className="size-6 text-primary" />,
-            subText: 'vs période précédente',
-            trendUp: (stats.revenue_change ?? 0) >= 0,
+            title: 'Brouillons en attente',
+            value: formatNumber(stats.pending_drafts ?? 0),
+            sub: 'Mis à jour récemment',
+            trend: stats.pending_drafts_change ?? 0,
+            icon: <PencilLine className="h-5 w-5 text-rose-500" />,
         },
         {
-            title: 'Taux de conversion',
+            title: 'Dernier article',
+            value: stats.days_since_last_post !== null ? `${stats.days_since_last_post}j` : 'N/A',
+            sub: 'Jours depuis la dernière publication',
+            trend: 0,
+            icon: <Clock className="h-5 w-5 text-slate-500" />,
+        },
+        {
+            title: 'Tendance vues 7j',
+            value: `${stats.views_trend ?? 0}%`,
+            sub: 'Par rapport à la semaine précédente',
+            trend: stats.views_trend ?? 0,
+            icon: <TrendingUp className="h-5 w-5 text-teal-500" />,
+        },
+        {
+            title: 'Taux de conversion*',
             value: `${stats.conversion_rate ?? 0}%`,
-            description: 'Visiteurs → Clients',
+            sub: 'Ratio posts actuels / précédents',
             trend: stats.conversion_rate ?? 0,
-            icon: <IconRocket className="size-6 text-primary" />,
-            subText: 'Performance de conversion',
-            trendUp: (stats.conversion_rate ?? 0) >= 0,
+            icon: <Zap className="h-5 w-5 text-amber-500" />,
         },
         {
-            title: 'Taux de retour',
-            value: `${stats.return_rate ?? 0}%`,
-            description: 'Produits retournés',
-            trend: stats.return_rate ?? 0,
-            icon: <IconClock className="size-6 text-destructive" />,
-            subText: 'vs période précédente',
-            trendUp: (stats.return_rate ?? 0) <= 0,
-        },
-        {
-            title: 'Stock total',
-            value: (stats.inventory_count ?? 0).toLocaleString(),
-            description: 'Unités en stock',
-            trend: stats.out_of_stock_count ?? 0,
-            icon: <IconFileText className="size-6 text-primary" />,
-            subText: `${stats.out_of_stock_count ?? 0} rupture de stock`,
-            trendUp: (stats.out_of_stock_count ?? 0) === 0,
-        },
-        {
-            title: 'Revenu ce mois',
-            value: new Intl.NumberFormat('fr-CD', {
-                style: 'currency',
-                currency: 'CDF',
-            }).format(stats.revenue_this_month ?? 0),
-            description: 'Revenu mensuel',
-            trend: stats.revenue_this_month_change ?? 0,
-            icon: <IconCalendar className="size-6 text-primary" />,
-            subText: 'vs mois précédent',
-            trendUp: (stats.revenue_this_month_change ?? 0) >= 0,
+            title: 'Brouillons anciens',
+            value: formatNumber(stats.old_drafts_count ?? 0),
+            sub: 'Non modifiés depuis 30 jours',
+            trend: 0,
+            icon: <AlertCircle className="h-5 w-5 text-red-400" />,
         },
     ];
 
     return (
-        <div className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @3xl/main:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {cards.map((card, index) => (
-                <Card key={index} className="@container/card">
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardDescription className="flex items-center gap-2">
-                                {card.icon}
-                                {card.title}
-                            </CardDescription>
-                            <CardAction>
-                                <Badge
-                                    variant="outline"
-                                    className={
-                                        card.trendUp
-                                            ? 'text-green-500'
-                                            : 'text-red-500'
-                                    }
-                                >
-                                    {card.trendUp ? (
-                                        <IconTrendingUp className="size-5" />
-                                    ) : (
-                                        <IconTrendingDown className="size-5" />
-                                    )}
-                                    {Math.abs(card.trend)}%
-                                </Badge>
-                            </CardAction>
+                <Card
+                    key={index}
+                    className="group border-0 bg-slate-50/60 transition-colors duration-200 hover:bg-white dark:bg-slate-900/40 dark:hover:bg-slate-900/80"
+                >
+                    <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                                    {card.icon}
+                                    {card.title}
+                                </div>
+                                <div className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                    {card.value}
+                                </div>
+                            </div>
+                            <Badge
+                                variant="outline"
+                                className={`flex items-center gap-0.5 px-1.5 py-0 text-[10px] leading-none ${
+                                    card.trend >= 0
+                                        ? 'border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400'
+                                        : 'border-red-200 text-red-700 dark:border-red-800 dark:text-red-400'
+                                }`}
+                            >
+                                {card.trend >= 0 ? (
+                                    <TrendingUp className="h-3 w-3" />
+                                ) : (
+                                    <TrendingDown className="h-3 w-3" />
+                                )}
+                                {Math.abs(card.trend)}%
+                            </Badge>
                         </div>
-                    </CardHeader>
-                    <CardFooter className="flex-col items-start gap-1.5 text-sm">
-                        <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                            {card.value}
-                        </CardTitle>
-                        <div className="line-clamp-1 flex gap-2 font-medium">
-                            {card.subText}
+                        <div className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+                            {card.sub}
                         </div>
-                        <div className="text-muted-foreground">
-                            {card.description}
-                        </div>
-                    </CardFooter>
+                    </CardContent>
                 </Card>
             ))}
         </div>

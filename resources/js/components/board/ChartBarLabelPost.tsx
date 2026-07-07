@@ -1,4 +1,5 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 'use client';
 
 import { usePage } from '@inertiajs/react';
@@ -28,7 +29,6 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
-import { Skeleton } from '@/components/ui/skeleton';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface TopPost {
@@ -60,34 +60,16 @@ const metricLabels: Record<MetricType, string> = {
 };
 
 const metricColors: Record<MetricType, string> = {
-    views_count: 'var(--chart-1)',
-    likes_count: 'var(--chart-2)',
-    comments_count: 'var(--chart-3)',
-};
-
-const metricKeys: Record<MetricType, keyof TopPost> = {
-    views_count: 'views_count',
-    likes_count: 'likes_count',
-    comments_count: 'comments_count',
+    views_count: '#10b981',
+    likes_count: '#3b82f6',
+    comments_count: '#f59e0b',
 };
 
 export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
     const { props } = usePage<{ topPosts?: TopPost[] }>();
     const topPosts = propTopPosts || props.topPosts;
     const [activeMetric, setActiveMetric] = useState<MetricType>('views_count');
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (topPosts && topPosts.length > 0) {
-            setLoading(false);
-        } else {
-            const timer = setTimeout(() => setLoading(false), 1000);
-
-            return () => clearTimeout(timer);
-        }
-    }, [topPosts]);
-
-    // Préparer les données pour le graphique
     const chartData = useMemo(() => {
         if (!topPosts || topPosts.length === 0) {
             return [];
@@ -99,7 +81,7 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                     ? post.title.substring(0, 20) + '...'
                     : post.title,
             fullTitle: post.title,
-            value: post[metricKeys[activeMetric]] as number,
+            value: (post as any)[activeMetric] || 0,
             author: post.user?.name || 'Anonyme',
             authorAvatar: post.user?.avatar_url || null,
             id: post.id,
@@ -107,26 +89,15 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
         }));
     }, [topPosts, activeMetric]);
 
-    const chartConfig = {
-        value: {
-            label: metricLabels[activeMetric],
-            color: metricColors[activeMetric],
-        },
-    } satisfies ChartConfig;
-
-    // CORRECTION: Type assertion pour garantir que c'est un nombre
     const totalMetric = useMemo(() => {
         if (!topPosts) {
             return 0;
         }
 
-        return topPosts.reduce((sum, post) => {
-            const value = post[metricKeys[activeMetric]];
-            // S'assurer que value est un nombre
-            const numericValue = typeof value === 'number' ? value : 0;
-
-            return sum + numericValue;
-        }, 0);
+        return topPosts.reduce(
+            (sum, post) => sum + ((post as any)[activeMetric] || 0),
+            0,
+        );
     }, [topPosts, activeMetric]);
 
     const averageMetric = useMemo(() => {
@@ -137,115 +108,96 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
         return Math.round(totalMetric / topPosts.length);
     }, [totalMetric, topPosts]);
 
-    if (loading) {
-        return (
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-6 w-48" />
-                    <Skeleton className="h-4 w-64" />
-                </CardHeader>
-                <CardContent>
-                    <div className="flex h-100 items-center justify-center">
-                        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary" />
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
-
     if (!topPosts || topPosts.length === 0) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Top des articles</CardTitle>
-                    <CardDescription>Aucun article trouvé</CardDescription>
+            <Card className="border-0 bg-slate-50/60 dark:bg-slate-900/40">
+                <CardHeader className="px-4 pt-4 pb-2">
+                    <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">
+                        Top des articles
+                    </CardTitle>
+                    <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                        Aucun article trouvé
+                    </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <div className="flex h-100 items-center justify-center text-muted-foreground">
-                        Aucune donnée disponible
-                    </div>
-                </CardContent>
             </Card>
         );
     }
 
+    const chartConfig = {
+        value: {
+            label: metricLabels[activeMetric],
+            color: metricColors[activeMetric],
+        },
+    } satisfies ChartConfig;
+
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle>
-                            Top {Math.min(10, topPosts.length)} des meilleurs
-                            articles
-                        </CardTitle>
-                        <CardDescription>
-                            Classement par{' '}
-                            {metricLabels[activeMetric].toLowerCase()} - Total:{' '}
-                            {totalMetric.toLocaleString()}{' '}
-                            {metricLabels[activeMetric].toLowerCase()}
-                        </CardDescription>
-                    </div>
-                    <ToggleGroup
-                        type="single"
-                        value={activeMetric}
-                        onValueChange={(value) =>
-                            value && setActiveMetric(value as MetricType)
-                        }
-                        variant="outline"
-                        className="hidden sm:flex"
-                    >
-                        <ToggleGroupItem
-                            value="views_count"
-                            className="px-3 text-xs"
-                        >
-                            <Eye className="mr-1 h-3 w-3" />
-                            Vues
-                        </ToggleGroupItem>
-                        <ToggleGroupItem
-                            value="likes_count"
-                            className="px-3 text-xs"
-                        >
-                            <Heart className="mr-1 h-3 w-3" />
-                            Likes
-                        </ToggleGroupItem>
-                        <ToggleGroupItem
-                            value="comments_count"
-                            className="px-3 text-xs"
-                        >
-                            <MessageCircle className="mr-1 h-3 w-3" />
-                            Commentaires
-                        </ToggleGroupItem>
-                    </ToggleGroup>
+        <Card className="border-0 bg-slate-50/60 dark:bg-slate-900/40">
+            <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-slate-200/60 px-4 pt-4 pb-2 dark:border-slate-800/60">
+                <div>
+                    <CardTitle className="text-base font-semibold text-slate-900 dark:text-white">
+                        Top {Math.min(10, topPosts.length)} articles
+                    </CardTitle>
+                    <CardDescription className="text-xs text-slate-500 dark:text-slate-400">
+                        Total : {totalMetric.toLocaleString()}{' '}
+                        {metricLabels[activeMetric].toLowerCase()}
+                    </CardDescription>
                 </div>
+                <ToggleGroup
+                    type="single"
+                    value={activeMetric}
+                    onValueChange={(value) =>
+                        value && setActiveMetric(value as MetricType)
+                    }
+                    variant="outline"
+                    className="hidden gap-0 rounded-xl bg-slate-100 p-0.5 sm:flex dark:bg-slate-800"
+                >
+                    <ToggleGroupItem
+                        value="views_count"
+                        className="rounded-lg px-3 py-1 text-xs"
+                    >
+                        <Eye className="mr-1 h-3 w-3" /> Vues
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                        value="likes_count"
+                        className="rounded-lg px-3 py-1 text-xs"
+                    >
+                        <Heart className="mr-1 h-3 w-3" /> Likes
+                    </ToggleGroupItem>
+                    <ToggleGroupItem
+                        value="comments_count"
+                        className="rounded-lg px-3 py-1 text-xs"
+                    >
+                        <MessageCircle className="mr-1 h-3 w-3" /> Comm.
+                    </ToggleGroupItem>
+                </ToggleGroup>
             </CardHeader>
-            <CardContent>
-                <ChartContainer config={chartConfig} className="h-125 w-full">
+            <CardContent className="px-4 py-3">
+                <ChartContainer config={chartConfig} className="h-80 w-full">
                     <BarChart
-                        accessibilityLayer
                         data={chartData}
                         layout="vertical"
-                        margin={{
-                            left: 100,
-                            right: 40,
-                            top: 20,
-                            bottom: 20,
-                        }}
+                        margin={{ left: 90, right: 30, top: 5, bottom: 5 }}
                     >
-                        <CartesianGrid horizontal={false} />
+                        <CartesianGrid
+                            horizontal={false}
+                            stroke="#e2e8f0"
+                            strokeDasharray="2 2"
+                        />
                         <YAxis
                             dataKey="title"
                             type="category"
                             tickLine={false}
-                            tickMargin={10}
+                            tickMargin={8}
                             axisLine={false}
-                            width={120}
-                            tickFormatter={(value) => value}
+                            width={90}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                         />
                         <XAxis
                             dataKey="value"
                             type="number"
                             tickLine={false}
                             axisLine={false}
+                            tick={{ fontSize: 11, fill: '#94a3b8' }}
                             tickFormatter={(value) =>
                                 value?.toLocaleString() || '0'
                             }
@@ -254,15 +206,16 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                             cursor={false}
                             content={
                                 <ChartTooltipContent
+                                    className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs shadow-sm dark:border-slate-700 dark:bg-slate-900"
                                     labelFormatter={(label, payload) => {
                                         const data = payload[0]?.payload;
 
                                         return (
-                                            <div className="space-y-1">
+                                            <div className="space-y-0.5">
                                                 <p className="font-medium">
                                                     {data?.fullTitle || label}
                                                 </p>
-                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-1 text-slate-500">
                                                     {data?.authorAvatar && (
                                                         <Avatar className="h-4 w-4">
                                                             <AvatarImage
@@ -270,7 +223,7 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                                                                     data.authorAvatar
                                                                 }
                                                             />
-                                                            <AvatarFallback>
+                                                            <AvatarFallback className="text-[10px]">
                                                                 {data?.author?.charAt(
                                                                     0,
                                                                 ) || '?'}
@@ -286,17 +239,10 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                                             </div>
                                         );
                                     }}
-                                    formatter={(value) => {
-                                        const numericValue =
-                                            typeof value === 'number'
-                                                ? value
-                                                : 0;
-
-                                        return [
-                                            `${numericValue.toLocaleString()} ${metricLabels[activeMetric].toLowerCase()}`,
-                                            '',
-                                        ];
-                                    }}
+                                    formatter={(value) => [
+                                        `${(value as number).toLocaleString()} ${metricLabels[activeMetric].toLowerCase()}`,
+                                        '',
+                                    ]}
                                 />
                             }
                         />
@@ -304,32 +250,28 @@ export function ChartBarLabel({ topPosts: propTopPosts }: ChartBarLabelProps) {
                             dataKey="value"
                             fill={metricColors[activeMetric]}
                             radius={[0, 4, 4, 0]}
-                            barSize={24}
+                            barSize={18}
                         >
                             <LabelList
                                 dataKey="value"
                                 position="right"
-                                offset={8}
-                                className="fill-foreground"
-                                fontSize={11}
-                                formatter={(value) => {
-                                    const numValue =
-                                        typeof value === 'number' ? value : 0;
-
-                                    return numValue.toLocaleString();
-                                }}
+                                offset={6}
+                                className="fill-slate-500 text-[11px]"
+                                formatter={(value: any) =>
+                                    Number(value).toLocaleString()
+                                }
                             />
                         </Bar>
                     </BarChart>
                 </ChartContainer>
             </CardContent>
-            <CardFooter className="flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 leading-none font-medium">
-                    Moyenne: {averageMetric.toLocaleString()}{' '}
+            <CardFooter className="flex-col items-start gap-1 border-t border-slate-200/60 px-4 py-2 text-xs text-slate-500 dark:border-slate-800/60">
+                <div className="flex gap-2 font-medium">
+                    Moyenne : {averageMetric.toLocaleString()}{' '}
                     {metricLabels[activeMetric].toLowerCase()} par article
-                    <TrendingUp className="h-4 w-4" />
+                    <TrendingUp className="h-3.5 w-3.5" />
                 </div>
-                <div className="leading-none text-muted-foreground">
+                <div>
                     Top {Math.min(10, topPosts.length)} articles les plus{' '}
                     {metricLabels[activeMetric].toLowerCase()}s
                 </div>

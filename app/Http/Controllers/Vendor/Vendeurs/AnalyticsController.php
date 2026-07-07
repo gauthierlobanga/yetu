@@ -99,4 +99,5 @@ class AnalyticsController extends Controller
                 return ['start' => now()->subDays(30), 'end' => now()];
         }
     }
+
 }

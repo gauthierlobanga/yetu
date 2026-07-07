@@ -217,6 +217,8 @@ Route::middleware([
                 ->name('mark-all-as-read');
             Route::delete('/{id}', [TenantDashboardNotificationController::class, 'destroy'])
                 ->name('destroy');
+            Route::get('/{id}', [TenantDashboardNotificationController::class, 'show'])
+                ->name('show');
             Route::delete('/', [TenantDashboardNotificationController::class, 'destroyAll'])
                 ->name('destroy-all');
         });
@@ -270,7 +272,18 @@ Route::middleware([
         Route::get('/products', [TenantProductController::class, 'index'])->name('dashboard.products.index');
 
         Route::get('/vendor/stats/visitors', [VisitorStatsController::class, 'index'])->name('vendor.stats.visitors');
-        Route::get('/blog/stats', [StatsBlogController::class, 'stats'])->name('blog.stats');
+    });
+
+    Route::middleware(['auth', 'verified'])->prefix('blog')->name('blog.')->group(function () {
+        // dashboard des stats (existante) : blog.stats
+        Route::get('/stats', [StatsBlogController::class, 'stats'])->name('stats');
+
+        // CRUD basique (à adapter selon vos contrôleurs réels)
+        Route::get('/posts/create', [StatsBlogController::class, 'create'])->name('posts.create');
+        Route::get('/posts/{post}/edit', [StatsBlogController::class, 'edit'])->name('posts.edit');
+        Route::delete('/posts/{post}', [StatsBlogController::class, 'destroy'])->name('posts.destroy');
+        Route::post('/posts/{post}/duplicate', [StatsBlogController::class, 'duplicate'])->name('posts.duplicate');
+        Route::post('/posts/reorder', [StatsBlogController::class, 'postsReorder'])->name('posts.reorder');
     });
 
     Route::middleware(['auth', 'verified'])->prefix('analytics')->name('tenant.analytics.')->group(function () {

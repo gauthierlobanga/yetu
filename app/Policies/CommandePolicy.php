@@ -35,6 +35,11 @@ class CommandePolicy
 
     public function view(AuthUser $authUser, Commande $commande): bool
     {
+        // Le client propriétaire de la commande peut la voir
+        if ($authUser->client && $authUser->client->id === $commande->client_id) {
+            return true;
+        }
+
         return $authUser->can('View Commande');
     }
 
@@ -86,5 +91,18 @@ class CommandePolicy
     public function reorder(AuthUser $authUser): bool
     {
         return $authUser->can('Reorder Commande');
+    }
+
+    /**
+     * Autoriser l'annulation d'une commande.
+     */
+    public function cancel(AuthUser $authUser, Commande $commande): bool
+    {
+        // Seul le client propriétaire peut annuler, et seulement si la commande est en attente ou en cours
+        if ($authUser->client && $authUser->client->id === $commande->client_id) {
+            return in_array($commande->statut, ['en_attente', 'en_cours']);
+        }
+
+        return $authUser->can('Cancel Commande');
     }
 }

@@ -319,9 +319,49 @@ class Panier extends Model
         return $abandon;
     }
 
-    public function convertirEnCommande(): Commande
+    // public function convertirEnCommande(): Commande
+    // {
+    //     $commande = $this->commande()->create([
+    //         'tenant_id' => $this->tenant_id,
+    //         'client_id' => $this->client_id,
+    //         'numero_commande' => $this->genererNumeroCommande(),
+    //         'statut' => Commande::STATUT_EN_ATTENTE,
+    //         'sous_total' => $this->sous_total,
+    //         'taxe' => $this->total_taxes,
+    //         'frais_livraison' => $this->total_livraison,
+    //         'total' => $this->total_general,
+    //         'adresse_facturation_id' => $this->client?->adresse_facturation?->id,
+    //         'adresse_livraison_id' => $this->livraison?->adresse_id,
+    //         'date_commande' => now(),
+    //     ]);
+
+    //     // Copier les items
+    //     foreach ($this->items as $item) {
+    //         $commande->lignes()->create([
+    //             'produit_id' => $item->produit_id,
+    //             'variante_produit_id' => $item->variante_produit_id,
+    //             'quantite' => $item->quantite,
+    //             'prix_unitaire' => $item->prix_unitaire,
+    //             'prix_total' => $item->prix_total,
+    //             'taxe' => $item->taxe_unitaire * $item->quantite,
+    //             'options' => $item->options_selectionnees,
+    //         ]);
+    //     }
+
+    //     $this->statut = self::STATUT_CONVERTI;
+    //     $this->date_conversion = now();
+    //     $this->save();
+
+    //     return $commande;
+    // }
+
+    // Dans app/Models/Panier.php
+
+    // Dans app/Models/Panier.php
+
+    public function convertirEnCommande(array $extraData = []): Commande
     {
-        $commande = $this->commande()->create([
+        $defaultData = [
             'tenant_id' => $this->tenant_id,
             'client_id' => $this->client_id,
             'numero_commande' => $this->genererNumeroCommande(),
@@ -333,13 +373,16 @@ class Panier extends Model
             'adresse_facturation_id' => $this->client?->adresse_facturation?->id,
             'adresse_livraison_id' => $this->livraison?->adresse_id,
             'date_commande' => now(),
-        ]);
+        ];
 
-        // Copier les items
+        $data = array_merge($defaultData, $extraData);
+
+        $commande = $this->commande()->create($data);
+
         foreach ($this->items as $item) {
             $commande->lignes()->create([
                 'produit_id' => $item->produit_id,
-                'variante_produit_id' => $item->variante_produit_id,
+                'variante_produit_id' => $item->variante_produit_id, // peut être null
                 'quantite' => $item->quantite,
                 'prix_unitaire' => $item->prix_unitaire,
                 'prix_total' => $item->prix_total,

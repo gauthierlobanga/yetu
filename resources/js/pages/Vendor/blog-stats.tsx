@@ -14,11 +14,11 @@ import { ChartBarLabel } from '@/components/board/ChartBarLabelPost';
 import { DashboardFilters } from '@/components/board/dashboard-filters';
 import { ChartPieInteractive } from '@/components/board/PieChartInteractivePost';
 import { DataTable } from '@/components/data-table-post';
-import { SectionCards } from '@/components/section-cards-post';
 import { SiteHeader } from '@/components/site-header';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { VendorSidebar } from '@/components/VendorSidebar';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
+import { SectionCards } from './stats/section-cards-post';
 
 interface DashboardProps {
     tenant: Tenant;
@@ -31,6 +31,7 @@ interface DashboardProps {
         total: number;
         per_page: number;
     };
+    totalCategoriesCount?: number; // ← nouvelle prop
     stats: {
         total_posts: number;
         published_posts: number;
@@ -154,6 +155,7 @@ export default function StatsBlog({
     topPosts,
     topAuthors,
     engagementStats,
+    totalCategoriesCount, // ← déstructuré
     scheduledPosts,
     weeklyActivity,
     monthlyPostsStats,
@@ -191,7 +193,7 @@ export default function StatsBlog({
             <SidebarInset>
                 <SiteHeader />
                 {/* Hero Section moderne */}
-                <div className="relative flex min-h-screen flex-1 flex-col overflow-hidden bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.08),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(20,184,166,0.08),transparent_25%)] dark:bg-slate-950">
+                <div className="relative flex min-h-screen flex-1 flex-col overflow-hidden dark:bg-slate-950">
                     <div className="@container/main flex flex-1 flex-col gap-4">
                         {/* Filtres globaux */}
                         <div className="py-4 lg:py-6">
@@ -207,7 +209,10 @@ export default function StatsBlog({
 
                         {/* Ligne 1: Graphiques principaux */}
                         <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-2 lg:px-6">
-                            <ChartBarMixed categoriesData={categoriesStats} />
+                            <ChartBarMixed
+                                categoriesData={categoriesStats}
+                                totalCategoriesCount={totalCategoriesCount}
+                            />
                             <ChartCategoryPerformance
                                 data={categoryPerformance}
                             />
@@ -250,11 +255,4 @@ export default function StatsBlog({
     );
 }
 
-StatsBlog.layout = {
-    breadcrumbs: [
-        {
-            title: 'Dashboard',
-            href: route('dashboard'),
-        },
-    ],
-};
+// StatsBlog.layout = (page: React.ReactNode) => <>{page}</>;

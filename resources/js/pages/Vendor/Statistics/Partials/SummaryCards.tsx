@@ -11,16 +11,9 @@ import {
 import { Area, AreaChart, ResponsiveContainer } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 
-interface SummaryCardProps {
-    title: string;
-    value: string;
-    change: number;
-    sub: string;
-    icon: React.ReactNode;
-    sparklineData: { value: number }[];
-    color: string;
-}
-
+// ----------------------------------------------------------------------
+// Carte individuelle (design épuré)
+// ----------------------------------------------------------------------
 function SummaryCard({
     title,
     value,
@@ -29,29 +22,30 @@ function SummaryCard({
     icon,
     sparklineData,
     color,
-}: SummaryCardProps) {
+}: {
+    title: string;
+    value: string;
+    change: number;
+    sub: string;
+    icon: React.ReactNode;
+    sparklineData: { value: number }[];
+    color: string;
+}) {
     return (
         <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
         >
-            <Card className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:border-emerald-200 hover:shadow-lg hover:shadow-emerald-100 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-700 dark:hover:shadow-emerald-900/20">
-                {/* Ligne colorée */}
-                <div
-                    className="absolute inset-x-0 top-0 h-1 transition-all duration-200 group-hover:h-1.5"
-                    style={{ backgroundColor: color }}
-                />
-                <CardContent className="p-5">
+            <Card className="group relative overflow-hidden border-0 bg-slate-50/60 transition-colors duration-200 hover:bg-white dark:bg-slate-900/40 dark:hover:bg-slate-900/80">
+                <CardContent className="p-4">
                     <div className="flex items-start justify-between">
                         <div className="space-y-1.5">
-                            <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                                <span className="rounded-lg bg-slate-50 p-1 dark:bg-slate-800">
-                                    {icon}
-                                </span>
+                            <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                                {icon}
                                 {title}
                             </div>
-                            <div className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                            <div className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
                                 {value}
                             </div>
                             <div className="flex items-center gap-1 text-xs">
@@ -74,7 +68,8 @@ function SummaryCard({
                                 </span>
                             </div>
                         </div>
-                        <div className="h-14 w-24">
+                        {/* Sparkline */}
+                        <div className="h-12 w-20">
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart
                                     data={sparklineData}
@@ -87,7 +82,7 @@ function SummaryCard({
                                 >
                                     <defs>
                                         <linearGradient
-                                            id={`gradient-${title.replace(/\s/g, '')}`}
+                                            id={`grad-${title.replace(/\s/g, '')}`}
                                             x1="0"
                                             y1="0"
                                             x2="0"
@@ -109,8 +104,8 @@ function SummaryCard({
                                         dataKey="value"
                                         type="monotone"
                                         stroke={color}
-                                        fill={`url(#gradient-${title.replace(/\s/g, '')})`}
-                                        strokeWidth={2}
+                                        fill={`url(#grad-${title.replace(/\s/g, '')})`}
+                                        strokeWidth={1.5}
                                         dot={false}
                                     />
                                 </AreaChart>
@@ -123,6 +118,9 @@ function SummaryCard({
     );
 }
 
+// ----------------------------------------------------------------------
+// Composant principal
+// ----------------------------------------------------------------------
 interface Props {
     summary: {
         total_visitors: number;

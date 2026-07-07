@@ -26,7 +26,6 @@ class CommandeForm
                     ->schema([
                         Grid::make(2)
                             ->schema([
-
                                 Select::make('client_id')
                                     ->label('Client')
                                     ->relationship('client', 'nom', function ($query) {
@@ -85,9 +84,11 @@ class CommandeForm
                                     ->default('en_attente')
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(function ($state, callable $set) {
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                         if ($state === 'termine') {
                                             $set('date_livraison', now());
+                                        } elseif ($state === 'en_cours' && ! $get('date_paiement')) {
+                                            $set('date_paiement', now());
                                         } elseif ($state === 'annule') {
                                             $set('date_annulation', now());
                                         }
@@ -101,6 +102,7 @@ class CommandeForm
                                         'virement' => 'Virement bancaire',
                                         'cheque' => 'Chèque',
                                         'especes' => 'Espèces',
+                                        'cash' => 'Paiement à la livraison',
                                     ])
                                     ->searchable(),
                             ]),
@@ -112,6 +114,74 @@ class CommandeForm
                             ->helperText('Notes internes ou instructions spéciales'),
                     ]),
 
+                Section::make('Montants')
+                    ->icon('heroicon-o-currency-euro')
+                    ->columnSpan(1)
+                    ->schema([
+                        Grid::make(1)
+                            ->schema([
+                                TextInput::make('sous_total')
+                                    ->label('Sous-total HT')
+                                    ->numeric()
+                                    ->required()
+                                    ->default(0)
+                                    ->step(0.01)
+                                    ->prefix('€')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                        $taxe = floatval($get('taxe') ?? 0);
+                                        $frais = floatval($get('frais_livraison') ?? 0);
+                                        $set('total', $state + $taxe + $frais);
+                                    }),
+
+                                TextInput::make('taxe')
+                                    ->label('Taxe (TVA)')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->step(0.01)
+                                    ->prefix('€')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                        $subtotal = floatval($get('sous_total') ?? 0);
+                                        $frais = floatval($get('frais_livraison') ?? 0);
+                                        $set('total', $subtotal + $state + $frais);
+                                    }),
+
+                                TextInput::make('frais_livraison')
+                                    ->label('Frais de livraison')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->step(0.01)
+                                    ->prefix('€')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                                        $subtotal = floatval($get('sous_total') ?? 0);
+                                        $taxe = floatval($get('taxe') ?? 0);
+                                        $set('total', $subtotal + $taxe + $state);
+                                    }),
+
+                                TextInput::make('total')
+                                    ->label('Total TTC')
+                                    ->numeric()
+                                    ->required()
+                                    ->default(0)
+                                    ->step(0.01)
+                                    ->prefix('€')
+                                    ->disabled()
+                                    ->dehydrated(),
+
+                                TextInput::make('total_lettres')
+                                    ->label('Montant en lettres')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->formatStateUsing(function ($get) {
+                                        $total = floatval($get('total') ?? 0);
+
+                                        return Number::spell($total, 'fr');
+                                    })
+                                    ->visible(fn ($get) => $get('total') > 0),
+                            ]),
+                    ]),
                 Section::make('Montants')
                     ->icon('heroicon-o-currency-euro')
                     ->columnSpan(1)

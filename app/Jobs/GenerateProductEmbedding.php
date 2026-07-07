@@ -42,15 +42,19 @@ class GenerateProductEmbedding implements ShouldBeUnique, ShouldQueue
     /** @var int Durée d'unicité du job en secondes (10 minutes) */
     public int $uniqueFor = 600;
 
-    /** @var bool Dispatcher le job uniquement après le commit de la transaction */
-    public bool $afterCommit = true;
+    // /** @var bool Dispatcher le job uniquement après le commit de la transaction */
+    // public bool $afterCommit = true;
 
     /**
      * Crée une nouvelle instance du job.
      *
      * @param  Produit  $produit  Le produit dont les embeddings doivent être générés
      */
-    public function __construct(public Produit $produit) {}
+    public function __construct(public Produit $produit)
+    {
+        // Définir afterCommit après l'instanciation (via le trait)
+        $this->afterCommit = true;
+    }
 
     /**
      * Exécute la génération des embeddings image et texte.

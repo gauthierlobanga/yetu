@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/components/section-cards-post.tsx
 
 import { usePage } from '@inertiajs/react';
@@ -13,9 +15,20 @@ import {
     IconRocket,
     IconClock,
     IconChartBar,
+    IconPencil,
+    IconAlertTriangle,
 } from '@tabler/icons-react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import CountUp from 'react-countup';
+import {
+    AreaChart,
+    Area,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+} from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import {
     Card,
@@ -57,6 +70,31 @@ interface PageProps {
     [key: string]: unknown;
 }
 
+/**
+ * Génère des données synthétiques pour le mini graphique en aires.
+ * @param trend - pourcentage de changement (ex: +12.5 ou -5.2)
+ * @param points - nombre de points (par défaut 6)
+ * @returns tableau d'objets { name: string, value: number }
+ */
+function generateTrendData(trend: number, points: number = 6) {
+    const baseValue = 50; // valeur de base arbitraire
+    const direction = trend >= 0 ? 1 : -1;
+    const amplitude = Math.min(Math.abs(trend), 30); // limiter l'amplitude
+
+    return Array.from({ length: points }, (_, i) => {
+        // progression linéaire avec un peu d'aléatoire
+        const progress = (i + 1) / points;
+        const randomFactor = 0.7 + Math.random() * 0.6; // entre 0.7 et 1.3
+        const value =
+            baseValue + direction * amplitude * progress * randomFactor;
+
+        return {
+            name: `J${i + 1}`,
+            value: Math.max(0, Math.round(value * 10) / 10),
+        };
+    });
+}
+
 export function SectionCards() {
     const { props } = usePage<PageProps>();
     const stats = props.stats;
@@ -82,200 +120,277 @@ export function SectionCards() {
         );
     }
 
-    const getDaysSinceLastPost = () => {
-        const days = stats.days_since_last_post;
+    const safeDays = () => {
+        const d = stats.days_since_last_post;
 
-        if (
-            days === null ||
-            days === undefined ||
-            days < 0 ||
-            days > 10000 ||
-            isNaN(days)
-        ) {
-            return null;
-        }
-
-        return days;
+        return d !== null && d !== undefined && !isNaN(d) && d >= 0 && d < 10000
+            ? d
+            : null;
     };
-
-    const daysValue = getDaysSinceLastPost();
+    const daysValue = safeDays();
 
     const cards = [
         {
-            title: 'Total des articles',
-            value: stats.total_posts.toLocaleString(),
-            description: 'Tous statuts confondus',
-            trend: stats.posts_change,
-            icon: <IconFileText className="size-6" />,
-            subText: `${stats.published_posts} publiés, ${stats.draft_posts} brouillons`,
-            trendUp: stats.posts_change >= 0,
-        },
-        {
             title: 'Articles publiés',
-            value: stats.published_posts.toLocaleString(),
-            description: 'Accessibles au public',
-            trend:
-                stats.published_posts > 0
-                    ? Math.round(
-                          (stats.published_posts / stats.total_posts) * 100,
-                      )
-                    : 0,
-            icon: <IconFileText className="size-6 text-green-500" />,
-            subText: `${stats.scheduled_posts} programmés`,
-            trendUp: true,
+            value: stats.published_posts,
+            trend: stats.posts_change,
+            trendUp: stats.posts_change >= 0,
+            icon: <IconFileText className="size-5 text-emerald-500" />,
+            sub: `${stats.draft_posts} brouillons · ${stats.scheduled_posts} programmés`,
+            strokeColor: '#10b981',
+            gradientId: 'publishedGradient',
         },
         {
             title: 'Vues totales',
-            value: stats.total_views.toLocaleString(),
-            description: 'Nombre total de vues',
+            value: stats.total_views,
             trend: stats.views_change,
-            icon: <IconEye className="size-6" />,
-            subText: 'Performance des articles',
             trendUp: stats.views_change >= 0,
+            icon: <IconEye className="size-5 text-blue-500" />,
+            sub: 'Audience cumulée',
+            strokeColor: '#3b82f6',
+            gradientId: 'viewsGradient',
         },
         {
-            title: "J'aime",
-            value: stats.total_likes.toLocaleString(),
-            description: 'Likes cumulés',
+            title: 'Likes',
+            value: stats.total_likes,
             trend: stats.likes_change,
-            icon: <IconHeart className="size-6 text-red-500" />,
-            subText: 'Engagement des lecteurs',
             trendUp: stats.likes_change >= 0,
+            icon: <IconHeart className="size-5 text-red-500" />,
+            sub: `Ratio : ${stats.total_views > 0 ? ((stats.total_likes / stats.total_views) * 100).toFixed(1) : 0}%`,
+            strokeColor: '#ef4444',
+            gradientId: 'likesGradient',
         },
         {
             title: 'Commentaires',
-            value: stats.total_comments.toLocaleString(),
-            description: 'Commentaires reçus',
+            value: stats.total_comments,
             trend:
-                stats.total_comments > 0
-                    ? Math.round(
-                          (stats.total_comments / stats.total_views) * 100,
-                      )
+                stats.total_views > 0
+                    ? (stats.total_comments / stats.total_views) * 100
                     : 0,
-            icon: <IconMessage className="size-6 text-blue-500" />,
-            subText: `${stats.avg_engagement}% d'engagement moyen`,
             trendUp: true,
+            icon: <IconMessage className="size-5 text-violet-500" />,
+            sub: `${stats.avg_engagement.toFixed(1)}% d'engagement`,
+            strokeColor: '#8b5cf6',
+            gradientId: 'commentsGradient',
         },
         {
             title: 'Taux de conversion',
-            value: `${stats.conversion_rate}%`,
-            description: 'Publications vs période précédente',
+            value: stats.conversion_rate,
             trend: stats.conversion_rate,
-            icon: <IconRocket className="size-6 text-purple-500" />,
-            subText: 'Rythme de publication',
             trendUp: stats.conversion_rate >= 0,
-        },
-        {
-            title: 'Dernière publication',
-            value:
-                daysValue === 0
-                    ? "Aujourd'hui"
-                    : daysValue !== null
-                      ? `J-${daysValue}`
-                      : 'Jamais',
-            description: 'Dernier article publié',
-            trend: daysValue !== null ? -daysValue : 0,
-            icon: <IconClock className="size-6 text-orange-500" />,
-            subText:
-                daysValue === 0
-                    ? "Publié aujourd'hui"
-                    : daysValue !== null
-                      ? `Il y a ${daysValue} jour${daysValue > 1 ? 's' : ''}`
-                      : 'Aucun article publié',
-            trendUp: false,
-        },
-        {
-            title: 'Tendance des vues',
-            value: `${stats.views_trend}%`,
-            description: 'Évolution sur 7 jours',
-            trend: stats.views_trend,
-            icon: <IconChartBar className="size-6 text-indigo-500" />,
-            subText: 'vs période précédente',
-            trendUp: stats.views_trend >= 0,
-        },
-        {
-            title: 'Articles ce mois',
-            value: stats.posts_this_month.toLocaleString(),
-            description: 'Créés ce mois-ci',
-            trend: stats.posts_this_month_change,
-            icon: <IconCalendar className="size-6" />,
-            subText: 'Rythme de publication',
-            trendUp: stats.posts_this_month_change >= 0,
+            icon: <IconRocket className="size-5 text-amber-500" />,
+            sub: 'Ratio vs période précédente',
+            strokeColor: '#f59e0b',
+            gradientId: 'conversionGradient',
         },
         {
             title: 'Auteurs actifs',
-            value: stats.active_authors.toLocaleString(),
-            description: 'Contributeurs',
+            value: stats.active_authors,
             trend: stats.active_authors_change,
-            icon: <IconUser className="size-6" />,
-            subText: 'Équipe éditoriale',
             trendUp: stats.active_authors_change >= 0,
+            icon: <IconUser className="size-5 text-cyan-500" />,
+            sub: `${stats.active_authors_change >= 0 ? '+' : ''}${stats.active_authors_change}%`,
+            strokeColor: '#06b6d4',
+            gradientId: 'authorsGradient',
         },
         {
-            title: 'Brouillons',
-            value: stats.draft_posts.toLocaleString(),
-            description: 'À terminer',
-            trend:
-                stats.draft_posts > 0
-                    ? Math.round((stats.draft_posts / stats.total_posts) * 100)
-                    : 0,
-            icon: <IconFileText className="size-6 text-yellow-500" />,
-            subText: `${stats.old_drafts_count} brouillons anciens (30j+)`,
-            trendUp: false,
+            title: 'Articles ce mois',
+            value: stats.posts_this_month,
+            trend: stats.posts_this_month_change,
+            trendUp: stats.posts_this_month_change >= 0,
+            icon: <IconCalendar className="size-5 text-indigo-500" />,
+            sub: `${stats.posts_this_month_change >= 0 ? '+' : ''}${stats.posts_this_month_change}%`,
+            strokeColor: '#6366f1',
+            gradientId: 'monthlyGradient',
         },
         {
             title: 'Brouillons en attente',
-            value: stats.pending_drafts?.toLocaleString() ?? '0',
-            description: 'Modifiés cette semaine',
+            value: stats.pending_drafts,
             trend: stats.pending_drafts_change ?? 0,
-            icon: <IconFileText className="size-6 text-orange-500" />,
-            subText: 'À publier prochainement',
             trendUp: (stats.pending_drafts_change ?? 0) >= 0,
+            icon: <IconPencil className="size-5 text-orange-500" />,
+            sub: `${stats.old_drafts_count} anciens (30j+)`,
+            strokeColor: '#f97316',
+            gradientId: 'draftsGradient',
+        },
+        {
+            title: 'Dernière publication',
+            value: daysValue ?? 999,
+            trend: daysValue !== null ? -daysValue : 0,
+            trendUp: false,
+            icon: <IconClock className="size-5 text-slate-500" />,
+            sub:
+                daysValue === 0
+                    ? "Aujourd'hui"
+                    : daysValue !== null
+                      ? `Il y a ${daysValue} jour(s)`
+                      : 'Aucune',
+            strokeColor: '#64748b',
+            gradientId: 'lastPostGradient',
+        },
+        {
+            title: 'Tendance vues 7j',
+            value: stats.views_trend,
+            trend: stats.views_trend,
+            trendUp: stats.views_trend >= 0,
+            icon: <IconChartBar className="size-5 text-purple-500" />,
+            sub: 'vs semaine précédente',
+            strokeColor: '#a855f7',
+            gradientId: 'trendGradient',
+        },
+        {
+            title: 'Anciens brouillons',
+            value: stats.old_drafts_count,
+            trend: 0,
+            trendUp: false,
+            icon: <IconAlertTriangle className="size-5 text-rose-500" />,
+            sub: 'Non modifiés depuis 30 jours',
+            strokeColor: '#f43f5e',
+            gradientId: 'oldDraftsGradient',
+        },
+        {
+            title: 'Taux d’engagement',
+            value: stats.avg_engagement,
+            trend: stats.avg_engagement,
+            trendUp: stats.avg_engagement >= 0,
+            icon: <IconChartBar className="size-5 text-teal-500" />,
+            sub: `Max ${stats.max_engagement.toFixed(1)}%`,
+            strokeColor: '#14b8a6',
+            gradientId: 'engagementGradient',
         },
     ];
 
     return (
-        <div className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @3xl/main:grid-cols-4">
-            {cards.map((card, index) => (
-                <Card key={index} className="@container/card">
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardDescription className="flex items-center gap-2">
-                                {card.icon}
-                                {card.title}
-                            </CardDescription>
-                            <CardAction>
-                                <Badge
-                                    variant="outline"
-                                    className={
-                                        card.trendUp
-                                            ? 'text-green-500'
-                                            : 'text-red-500'
-                                    }
-                                >
-                                    {card.trendUp ? (
-                                        <IconTrendingUp className="size-5" />
-                                    ) : (
-                                        <IconTrendingDown className="size-5" />
-                                    )}
-                                    {Math.abs(card.trend)}%
-                                </Badge>
-                            </CardAction>
-                        </div>
-                    </CardHeader>
-                    <CardFooter className="flex-col items-start gap-1.5 text-sm">
-                        <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-                            {card.value}
-                        </CardTitle>
-                        <div className="line-clamp-1 flex gap-2 font-medium">
-                            {card.subText}
-                        </div>
-                        <div className="text-muted-foreground">
-                            {card.description}
-                        </div>
-                    </CardFooter>
-                </Card>
-            ))}
+        <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @3xl/main:grid-cols-4">
+            {cards.map((card, index) => {
+                const data = useMemo(
+                    () => generateTrendData(card.trend, 6),
+                    [card.trend],
+                );
+
+                return (
+                    <Card
+                        key={index}
+                        className="group @container/card relative overflow-hidden border-0 bg-linear-to-br from-white to-slate-50 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:from-slate-900 dark:to-slate-950"
+                    >
+                        <CardHeader className="pb-2">
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="flex size-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+                                        {card.icon}
+                                    </span>
+                                    <div>
+                                        <CardDescription className="text-xs font-medium text-slate-500">
+                                            {card.title}
+                                        </CardDescription>
+                                        <CardTitle className="text-2xl font-bold tracking-tight tabular-nums">
+                                            <CountUp
+                                                start={0}
+                                                end={card.value}
+                                                duration={1.5}
+                                                separator=" "
+                                                decimals={
+                                                    typeof card.value ===
+                                                        'number' &&
+                                                    card.value % 1 !== 0
+                                                        ? 1
+                                                        : 0
+                                                }
+                                            />
+                                        </CardTitle>
+                                    </div>
+                                </div>
+                                <CardAction>
+                                    <Badge
+                                        variant="outline"
+                                        className={`flex items-center gap-1 px-2 py-0.5 text-xs ${
+                                            card.trendUp
+                                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400'
+                                                : 'border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/50 dark:text-red-400'
+                                        }`}
+                                    >
+                                        {card.trendUp ? (
+                                            <IconTrendingUp className="size-3.5" />
+                                        ) : (
+                                            <IconTrendingDown className="size-3.5" />
+                                        )}
+                                        {Math.abs(card.trend).toFixed(1)}%
+                                    </Badge>
+                                </CardAction>
+                            </div>
+                        </CardHeader>
+                        <CardFooter className="flex-col items-start gap-1.5 pt-0">
+                            <p className="text-xs text-slate-500">{card.sub}</p>
+                            {/* Mini graphique en aires */}
+                            <div className="h-16 w-full">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <AreaChart
+                                        data={data}
+                                        margin={{
+                                            top: 0,
+                                            right: 0,
+                                            left: 0,
+                                            bottom: 0,
+                                        }}
+                                    >
+                                        <defs>
+                                            <linearGradient
+                                                id={`${card.gradientId}`}
+                                                x1="0"
+                                                y1="0"
+                                                x2="0"
+                                                y2="1"
+                                            >
+                                                <stop
+                                                    offset="5%"
+                                                    stopColor={card.strokeColor}
+                                                    stopOpacity={0.3}
+                                                />
+                                                <stop
+                                                    offset="95%"
+                                                    stopColor={card.strokeColor}
+                                                    stopOpacity={0}
+                                                />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid
+                                            strokeDasharray="3 3"
+                                            stroke="#e2e8f0"
+                                            strokeOpacity={0.3}
+                                        />
+                                        <XAxis dataKey="name" hide />
+                                        <YAxis
+                                            hide
+                                            domain={[
+                                                'dataMin - 5',
+                                                'dataMax + 5',
+                                            ]}
+                                        />
+                                        <Tooltip
+                                            contentStyle={{
+                                                background:
+                                                    'rgba(255,255,255,0.9)',
+                                                border: 'none',
+                                                borderRadius: '12px',
+                                                boxShadow:
+                                                    '0 4px 12px rgba(0,0,0,0.1)',
+                                                fontSize: '12px',
+                                            }}
+                                        />
+                                        <Area
+                                            type="monotone"
+                                            dataKey="value"
+                                            stroke={card.strokeColor}
+                                            strokeWidth={2}
+                                            fill={`url(#${card.gradientId})`}
+                                        />
+                                    </AreaChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </CardFooter>
+                    </Card>
+                );
+            })}
         </div>
     );
 }

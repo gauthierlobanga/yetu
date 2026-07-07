@@ -25,43 +25,33 @@ class StatsBlogController extends Controller
 
         $user = Auth::user();
         $isSuperAdmin = $user->hasRole('super_admin');
-        $driver = DB::connection()->getDriverName(); // 'pgsql' ou 'sqlite'
 
-        // Appliquer les filtres de date à la requête principale
-        $query = Post::with(['user', 'categories', 'media', 'tags']);
+        // Closure de filtrage commune pour toutes les requêtes de posts
+        $applyCommonFilters = function ($query) use ($request, $isSuperAdmin, $user) {
+            if (! $isSuperAdmin) {
+                $query->where('user_id', $user->id);
+            }
+            $query = $this->applyDateFilters($query, $request, 'posts');
 
-        if (! $isSuperAdmin) {
-            $query->where('user_id', $user->id);
-        }
+            if ($request->search) {
+                $query->where('posts.title', 'like', '%'.$request->search.'%');
+            }
+            if ($request->status && $request->status !== 'all') {
+                $query->where('posts.status', $request->status);
+            }
+            if ($request->category_id) {
+                $query->whereHas('categories', fn($q) => $q->where('posts_categories.id', $request->category_id));
+            }
+            if ($isSuperAdmin && $request->author_id) {
+                $query->where('user_id', $request->author_id);
+            }
+            return $query;
+        };
 
-        $query = $this->applyDateFilters($query, $request, 'posts');
-
-        if ($request->search) {
-            $query->where('posts.title', 'like', '%'.$request->search.'%');
-        }
-
-        if ($request->status && $request->status !== 'all') {
-            $query->where('posts.status', $request->status);
-        }
-
-        if ($request->category_id) {
-            $query->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $query->where('user_id', $request->author_id);
-        }
-
-        if ($request->sort) {
-            $direction = $request->direction ?? 'desc';
-            $query->orderBy('posts.'.$request->sort, $direction);
-        } else {
-            $query->latest('posts.created_at');
-        }
-
-        $paginatedPosts = $query->paginate($request->per_page ?? 10);
+        // 1. Posts paginés
+        $paginatedPosts = $applyCommonFilters(Post::with(['user', 'categories', 'media', 'tags']))
+            ->orderBy($request->sort ?? 'posts.created_at', $request->direction ?? 'desc')
+            ->paginate($request->per_page ?? 10);
 
         $posts = [
             'data' => PostResource::collection($paginatedPosts->items())->toArray($request),
@@ -73,1357 +63,420 @@ class StatsBlogController extends Controller
             'per_page' => $paginatedPosts->perPage(),
         ];
 
-        // ==================== 1. STATISTIQUES DES POSTS PAR STATUT ====================
-        $postsStatusQuery = Post::select('status', DB::raw('count(*) as count'))
-            ->groupBy('status');
-
-        if (! $isSuperAdmin) {
-            $postsStatusQuery->where('user_id', $user->id);
-        }
-
-        $postsStatusQuery = $this->applyDateFilters($postsStatusQuery, $request, 'posts');
-
-        if ($request->status && $request->status !== 'all') {
-            $postsStatusQuery->where('posts.status', $request->status);
-        }
-
-        if ($request->category_id) {
-            $postsStatusQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $postsStatusQuery->where('user_id', $request->author_id);
-        }
-
-        $postsStatusStats = $postsStatusQuery->get()
-            ->map(fn ($item) => [
+        // 2. Statistiques par statut
+        $postsStatusStats = Post::selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->tap($applyCommonFilters)
+            ->get()
+            ->map(fn($item) => [
                 'status' => $item->status,
                 'status_label' => $item->status_label,
                 'count' => (int) $item->count,
                 'fill' => match ($item->status) {
                     'published' => 'var(--chart-1)',
-                    'draft' => 'var(--chart-2)',
+                    'draft'     => 'var(--chart-2)',
                     'scheduled' => 'var(--chart-3)',
-                    'archived' => 'var(--chart-4)',
-                    'expired' => 'var(--chart-5)',
-                    default => 'var(--chart-1)',
+                    'archived'  => 'var(--chart-4)',
+                    'expired'   => 'var(--chart-5)',
+                    default     => 'var(--chart-1)',
                 },
             ])
+            ->values()
             ->toArray();
 
-        // ==================== 2. STATISTIQUES DES CATÉGORIES ====================
-        $categoriesStatsQuery = PostCategory::whereHas('posts', function ($query) use ($request, $isSuperAdmin, $user) {
-            if (! $isSuperAdmin) {
-                $query->where('user_id', $user->id);
-            }
-            $query = $this->applyDateFilters($query, $request, 'posts');
-            if ($request->status && $request->status !== 'all') {
-                $query->where('posts.status', $request->status);
-            }
-            if ($request->category_id) {
-                $query->whereHas('categories', function ($q) use ($request) {
-                    $q->where('posts_categories.id', $request->category_id);
-                });
-            }
-            if ($isSuperAdmin && $request->author_id) {
-                $query->where('user_id', $request->author_id);
-            }
-        })
-            ->withCount(['posts' => function ($query) use ($request, $isSuperAdmin, $user) {
-                if (! $isSuperAdmin) {
-                    $query->where('user_id', $user->id);
-                }
-                $query = $this->applyDateFilters($query, $request, 'posts');
-                if ($request->status && $request->status !== 'all') {
-                    $query->where('posts.status', $request->status);
-                }
-                if ($request->category_id) {
-                    $query->whereHas('categories', function ($q) use ($request) {
-                        $q->where('posts_categories.id', $request->category_id);
-                    });
-                }
-                if ($isSuperAdmin && $request->author_id) {
-                    $query->where('user_id', $request->author_id);
-                }
-            }])
-            ->orderBy('posts_count', 'desc');
+        // 3. Catégories (top 10 avec comptage, + total)
+        $categoriesStats = $this->getCategoryStats($applyCommonFilters, 10);
+        $totalCategoriesCount = $this->getTotalCategoriesCount($applyCommonFilters);
 
-        $categoriesStats = $categoriesStatsQuery->get()
-            ->map(fn ($category) => [
-                'id' => $category->id,
-                'nom' => $category->nom,
-                'slug' => $category->slug,
-                'color' => $category->color,
-                'posts_count' => $category->posts_count,
-            ])
-            ->toArray();
-
-        // ==================== 3. TOP 10 DES ARTICLES ====================
-        $topPostsQuery = Post::with(['user'])
-            ->where('posts.status', 'published')
-            ->orderBy('posts.views_count', 'desc')
-            ->limit(10);
-
-        if (! $isSuperAdmin) {
-            $topPostsQuery->where('user_id', $user->id);
-        }
-
-        $topPostsQuery = $this->applyDateFilters($topPostsQuery, $request, 'posts');
-
-        if ($request->category_id) {
-            $topPostsQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $topPostsQuery->where('user_id', $request->author_id);
-        }
-
-        $topPosts = $topPostsQuery->get()
-            ->map(fn ($post) => [
-                'id' => $post->id,
-                'title' => $post->title,
-                'slug' => $post->slug,
-                'views_count' => $post->views_count,
-                'likes_count' => $post->likes_count,
+        // 4. Top articles (10)
+        $topPosts = Post::with('user')
+            ->where('status', 'published')
+            ->orderBy('views_count', 'desc')
+            ->limit(10)
+            ->tap($applyCommonFilters)
+            ->get()
+            ->map(fn($post) => [
+                'id'             => $post->id,
+                'title'          => $post->title,
+                'slug'           => $post->slug,
+                'views_count'    => $post->views_count,
+                'likes_count'    => $post->likes_count,
                 'comments_count' => $post->comments_count,
-                'user' => [
-                    'id' => $post->user->id,
-                    'name' => $post->user->name,
-                    'email' => $post->user->email,
+                'user'           => [
+                    'id'         => $post->user->id,
+                    'name'       => $post->user->name,
+                    'email'      => $post->user->email,
                     'avatar_url' => $post->user->avatar_url,
                 ],
-                'published_at' => $post->published_at?->format('Y-m-d'),
+                'published_at'   => $post->published_at?->format('Y-m-d'),
             ])
             ->toArray();
 
-        // ==================== 4. TOP CONTRIBUTEURS ====================
+        // 5. Top auteurs (super admin uniquement)
         $topAuthors = [];
         if ($isSuperAdmin) {
-            $topAuthorsQuery = User::whereHas('posts', function ($query) use ($request) {
-                $query = $this->applyDateFilters($query, $request, 'posts');
-                if ($request->status && $request->status !== 'all') {
-                    $query->where('posts.status', $request->status);
-                }
-                if ($request->category_id) {
-                    $query->whereHas('categories', function ($q) use ($request) {
-                        $q->where('posts_categories.id', $request->category_id);
-                    });
-                }
-            })
-                ->withCount(['posts' => function ($query) use ($request) {
-                    $query = $this->applyDateFilters($query, $request, 'posts');
-                    if ($request->status && $request->status !== 'all') {
-                        $query->where('posts.status', $request->status);
-                    }
-                    if ($request->category_id) {
-                        $query->whereHas('categories', function ($q) use ($request) {
-                            $q->where('posts_categories.id', $request->category_id);
-                        });
-                    }
-                }])
-                ->withSum(['posts' => function ($query) use ($request) {
-                    $query = $this->applyDateFilters($query, $request, 'posts');
-                    if ($request->status && $request->status !== 'all') {
-                        $query->where('posts.status', $request->status);
-                    }
-                    if ($request->category_id) {
-                        $query->whereHas('categories', function ($q) use ($request) {
-                            $q->where('posts_categories.id', $request->category_id);
-                        });
-                    }
-                }], 'views_count')
+            $topAuthors = User::whereHas('posts', $applyCommonFilters)
+                ->withCount(['posts' => $applyCommonFilters])
+                ->withSum(['posts' => $applyCommonFilters], 'views_count')
                 ->orderBy('posts_count', 'desc')
-                ->limit(10);
-
-            $topAuthors = $topAuthorsQuery->get()
-                ->map(fn ($user) => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'avatar_url' => $user->avatar_url,
+                ->limit(10)
+                ->get()
+                ->map(fn($user) => [
+                    'id'          => $user->id,
+                    'name'        => $user->name,
+                    'avatar_url'  => $user->avatar_url,
                     'posts_count' => $user->posts_count,
                     'total_views' => $user->posts_sum_views_count ?? 0,
-                ]);
+                ])
+                ->values();
         }
 
-        // ==================== 5. TAUX D'ENGAGEMENT ====================
-        $engagementQuery = Post::where('posts.status', 'published')
-            ->selectRaw('AVG((posts.likes_count + posts.comments_count) * 1.0 / NULLIF(posts.views_count, 0) * 100) as avg_engagement')
-            ->selectRaw('MAX((posts.likes_count + posts.comments_count) * 1.0 / NULLIF(posts.views_count, 0) * 100) as max_engagement');
+        // 6. Taux d'engagement
+        $engagementStats = $this->getEngagementStats($applyCommonFilters);
 
-        if (! $isSuperAdmin) {
-            $engagementQuery->where('user_id', $user->id);
-        }
-
-        $engagementQuery = $this->applyDateFilters($engagementQuery, $request, 'posts');
-
-        if ($request->category_id) {
-            $engagementQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $engagementQuery->where('user_id', $request->author_id);
-        }
-
-        $engagementStats = $engagementQuery->first();
-
-        // ==================== 6. ARTICLES PROGRAMMÉS ====================
-        $scheduledQuery = Post::where('posts.status', 'scheduled')
-            ->where('posts.scheduled_for', '>=', now())
-            ->where('posts.scheduled_for', '<=', now()->addDays(30))
-            ->orderBy('posts.scheduled_for');
-
-        if (! $isSuperAdmin) {
-            $scheduledQuery->where('user_id', $user->id);
-        }
-
-        $scheduledQuery = $this->applyDateFilters($scheduledQuery, $request, 'posts');
-
-        if ($request->category_id) {
-            $scheduledQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $scheduledQuery->where('user_id', $request->author_id);
-        }
-
-        $scheduledPosts = $scheduledQuery->get()
-            ->map(fn ($post) => [
-                'id' => $post->id,
-                'title' => $post->title,
-                'slug' => $post->slug,
+        // 7. Articles programmés (30 jours)
+        $scheduledPosts = Post::where('status', 'scheduled')
+            ->where('scheduled_for', '>=', now())
+            ->where('scheduled_for', '<=', now()->addDays(30))
+            ->orderBy('scheduled_for')
+            ->tap($applyCommonFilters)
+            ->get()
+            ->map(fn($post) => [
+                'id'            => $post->id,
+                'title'         => $post->title,
+                'slug'          => $post->slug,
                 'scheduled_for' => $post->scheduled_for,
-            ]);
-
-        // ==================== 7. BROUILLONS ANCIENS ====================
-        $oldDraftsQuery = Post::where('posts.status', 'draft')
-            ->where('posts.updated_at', '<=', now()->subDays(30));
-
-        if (! $isSuperAdmin) {
-            $oldDraftsQuery->where('user_id', $user->id);
-        }
-
-        $oldDraftsQuery = $this->applyDateFilters($oldDraftsQuery, $request, 'posts');
-
-        if ($request->category_id) {
-            $oldDraftsQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $oldDraftsQuery->where('user_id', $request->author_id);
-        }
-
-        $oldDraftsCount = $oldDraftsQuery->count();
-
-        // ==================== 8. ACTIVITÉ PAR JOUR (compatible multi-driver) ====================
-        $weeklyQuery = Post::selectRaw($this->getDayOfWeekExpression($driver).' as day_num, COUNT(*) as count')
-            ->where('posts.status', 'published')
-            ->groupBy($driver === 'pgsql' ? 'day_num' : 'strftime(\'%w\', posts.created_at)')
-            ->orderBy('day_num');
-
-        if (! $isSuperAdmin) {
-            $weeklyQuery->where('user_id', $user->id);
-        }
-
-        $weeklyQuery = $this->applyDateFilters($weeklyQuery, $request, 'posts');
-
-        if ($request->category_id) {
-            $weeklyQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $weeklyQuery->where('user_id', $request->author_id);
-        }
-
-        $weeklyActivity = $weeklyQuery->get()
-            ->map(fn ($item) => [
-                'day' => $this->translateDayNumber((int) $item->day_num, $driver),
-                'count' => (int) $item->count,
-            ]);
-
-        // ==================== 9. PUBLICATIONS PAR MOIS (compatible multi-driver) ====================
-        $monthlyQuery = Post::selectRaw($this->getMonthExpression($driver).' as month, COUNT(*) as count')
-            ->where('posts.status', 'published')
-            ->groupBy($driver === 'pgsql' ? 'month' : 'strftime(\'%m\', posts.created_at)')
-            ->orderBy('month');
-
-        if (! $isSuperAdmin) {
-            $monthlyQuery->where('user_id', $user->id);
-        }
-
-        $monthlyQuery = $this->applyDateFilters($monthlyQuery, $request, 'posts');
-
-        if ($request->category_id) {
-            $monthlyQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $monthlyQuery->where('user_id', $request->author_id);
-        }
-
-        $monthlyPostsStats = $monthlyQuery->get()
-            ->map(fn ($item) => [
-                'month' => (int) $item->month,
-                'month_name' => $this->getMonthName((int) $item->month),
-                'count' => (int) $item->count,
-            ]);
-
-        // ==================== 10. HEURES DE PUBLICATION (compatible multi-driver) ====================
-        $hourlyQuery = Post::selectRaw($this->getHourExpression($driver).' as hour, COUNT(*) as count')
-            ->where('posts.status', 'published')
-            ->groupBy($driver === 'pgsql' ? 'hour' : 'strftime(\'%H\', posts.created_at)')
-            ->orderBy('hour');
-
-        if (! $isSuperAdmin) {
-            $hourlyQuery->where('user_id', $user->id);
-        }
-
-        $hourlyQuery = $this->applyDateFilters($hourlyQuery, $request, 'posts');
-
-        if ($request->category_id) {
-            $hourlyQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $hourlyQuery->where('user_id', $request->author_id);
-        }
-
-        $hourlyPostsStats = $hourlyQuery->get()
-            ->map(fn ($item) => [
-                'hour' => (int) $item->hour,
-                'count' => (int) $item->count,
-            ]);
-
-        // ==================== 11. PERFORMANCE DES CATÉGORIES ====================
-        $categoryPerformanceQuery = PostCategory::whereHas('posts', function ($query) use ($request, $isSuperAdmin, $user) {
-            if (! $isSuperAdmin) {
-                $query->where('user_id', $user->id);
-            }
-            $query = $this->applyDateFilters($query, $request, 'posts');
-            if ($request->status && $request->status !== 'all') {
-                $query->where('posts.status', $request->status);
-            }
-            if ($request->category_id) {
-                $query->whereHas('categories', function ($q) use ($request) {
-                    $q->where('posts_categories.id', $request->category_id);
-                });
-            }
-            if ($isSuperAdmin && $request->author_id) {
-                $query->where('user_id', $request->author_id);
-            }
-        })
-            ->withCount(['posts' => function ($query) use ($request, $isSuperAdmin, $user) {
-                if (! $isSuperAdmin) {
-                    $query->where('user_id', $user->id);
-                }
-                $query = $this->applyDateFilters($query, $request, 'posts');
-                if ($request->status && $request->status !== 'all') {
-                    $query->where('posts.status', $request->status);
-                }
-                if ($request->category_id) {
-                    $query->whereHas('categories', function ($q) use ($request) {
-                        $q->where('posts_categories.id', $request->category_id);
-                    });
-                }
-                if ($isSuperAdmin && $request->author_id) {
-                    $query->where('user_id', $request->author_id);
-                }
-            }])
-            ->withSum(['posts' => function ($query) use ($request, $isSuperAdmin, $user) {
-                if (! $isSuperAdmin) {
-                    $query->where('user_id', $user->id);
-                }
-                $query = $this->applyDateFilters($query, $request, 'posts');
-                if ($request->status && $request->status !== 'all') {
-                    $query->where('posts.status', $request->status);
-                }
-                if ($request->category_id) {
-                    $query->whereHas('categories', function ($q) use ($request) {
-                        $q->where('posts_categories.id', $request->category_id);
-                    });
-                }
-                if ($isSuperAdmin && $request->author_id) {
-                    $query->where('user_id', $request->author_id);
-                }
-            }], 'views_count')
-            ->withSum(['posts' => function ($query) use ($request, $isSuperAdmin, $user) {
-                if (! $isSuperAdmin) {
-                    $query->where('user_id', $user->id);
-                }
-                $query = $this->applyDateFilters($query, $request, 'posts');
-                if ($request->status && $request->status !== 'all') {
-                    $query->where('posts.status', $request->status);
-                }
-                if ($request->category_id) {
-                    $query->whereHas('categories', function ($q) use ($request) {
-                        $q->where('posts_categories.id', $request->category_id);
-                    });
-                }
-                if ($isSuperAdmin && $request->author_id) {
-                    $query->where('user_id', $request->author_id);
-                }
-            }], 'likes_count')
-            ->withSum(['posts' => function ($query) use ($request, $isSuperAdmin, $user) {
-                if (! $isSuperAdmin) {
-                    $query->where('user_id', $user->id);
-                }
-                $query = $this->applyDateFilters($query, $request, 'posts');
-                if ($request->status && $request->status !== 'all') {
-                    $query->where('posts.status', $request->status);
-                }
-                if ($request->category_id) {
-                    $query->whereHas('categories', function ($q) use ($request) {
-                        $q->where('posts_categories.id', $request->category_id);
-                    });
-                }
-                if ($isSuperAdmin && $request->author_id) {
-                    $query->where('user_id', $request->author_id);
-                }
-            }], 'comments_count')
-            ->orderBy('posts_count', 'desc')
-            ->limit(10);
-
-        $categoryPerformance = $categoryPerformanceQuery->get()
-            ->map(fn ($category) => [
-                'id' => $category->id,
-                'nom' => $category->nom,
-                'slug' => $category->slug,
-                'posts_count' => $category->posts_count,
-                'total_views' => $category->posts_sum_views_count ?? 0,
-                'total_likes' => $category->posts_sum_likes_count ?? 0,
-                'total_comments' => $category->posts_sum_comments_count ?? 0,
-            ]);
-
-        // ==================== 12. TAGS LES PLUS UTILISÉS ====================
-        $topTags = [];
-        if ($isSuperAdmin) {
-            $postsQuery = Post::query();
-
-            if (! $isSuperAdmin) {
-                $postsQuery->where('user_id', $user->id);
-            }
-
-            $postsQuery = $this->applyDateFilters($postsQuery, $request, 'posts');
-
-            if ($request->status && $request->status !== 'all') {
-                $postsQuery->where('posts.status', $request->status);
-            }
-
-            if ($request->category_id) {
-                $postsQuery->whereHas('categories', function ($q) use ($request) {
-                    $q->where('posts_categories.id', $request->category_id);
-                });
-            }
-
-            if ($isSuperAdmin && $request->author_id) {
-                $postsQuery->where('user_id', $request->author_id);
-            }
-
-            $postIds = $postsQuery->pluck('posts.id');
-
-            if ($postIds->isNotEmpty()) {
-                $tagCounts = DB::table('taggables')
-                    ->where('taggable_type', Post::class)
-                    ->whereIn('taggable_id', $postIds)
-                    ->select('tag_id', DB::raw('COUNT(*) as total'))
-                    ->groupBy('tag_id')
-                    ->orderBy('total', 'desc')
-                    ->limit(20)
-                    ->get();
-
-                $tagIds = $tagCounts->pluck('tag_id')->toArray();
-
-                if (! empty($tagIds)) {
-                    $tags = DB::table('tags')
-                        ->whereIn('id', $tagIds)
-                        ->get()
-                        ->keyBy('id');
-
-                    $topTags = $tagCounts->map(fn ($item) => [
-                        'id' => $item->tag_id,
-                        'name' => $this->extractTagName($tags[$item->tag_id]->name ?? ''),
-                        'slug' => $tags[$item->tag_id]->slug ?? '',
-                        'posts_count' => (int) $item->total,
-                    ])->values()->toArray();
-                }
-            }
-        }
-
-        // ==================== 13. DONNÉES POUR LE GRAPHIQUE (compatible multi-driver) ====================
-        $dateExpression = $driver === 'pgsql'
-            ? 'DATE(posts.created_at)'
-            : 'date(posts.created_at)';
-
-        $chartStatsQuery = Post::selectRaw($dateExpression.' as date')
-            ->selectRaw('SUM(posts.views_count) as views')
-            ->selectRaw('SUM(posts.likes_count) as likes')
-            ->selectRaw('SUM(posts.comments_count) as comments')
-            ->groupBy($driver === 'pgsql' ? 'date' : 'date(posts.created_at)')
-            ->orderBy('date');
-
-        if (! $isSuperAdmin) {
-            $chartStatsQuery->where('user_id', $user->id);
-        }
-
-        $chartStatsQuery = $this->applyDateFilters($chartStatsQuery, $request, 'posts');
-
-        if ($request->status && $request->status !== 'all') {
-            $chartStatsQuery->where('posts.status', $request->status);
-        }
-
-        if ($request->category_id) {
-            $chartStatsQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $chartStatsQuery->where('user_id', $request->author_id);
-        }
-
-        $chartStats = $chartStatsQuery->get()
-            ->map(fn ($item) => [
-                'date' => $item->date,
-                'views' => (int) $item->views,
-                'likes' => (int) $item->likes,
-                'comments' => (int) $item->comments,
             ])
-            ->toArray();
+            ->values();
 
-        if (empty($chartStats)) {
-            $chartStats = [];
-        }
+        // 8. Vieux brouillons (> 30 jours)
+        $oldDraftsCount = Post::where('status', 'draft')
+            ->where('updated_at', '<=', now()->subDays(30))
+            ->tap($applyCommonFilters)
+            ->count();
 
-        // ==================== 14. STATISTIQUES GLOBALES ====================
-        $statsQuery = Post::query();
+        // 9. Activité hebdomadaire, mensuelle, horaire
+        $weeklyActivity = $this->getPeriodicActivity($applyCommonFilters, 'day');
+        $monthlyPostsStats = $this->getPeriodicActivity($applyCommonFilters, 'month');
+        $hourlyPostsStats = $this->getPeriodicActivity($applyCommonFilters, 'hour');
 
-        if (! $isSuperAdmin) {
-            $statsQuery->where('user_id', $user->id);
-        }
+        // 10. Performance des catégories
+        $categoryPerformance = $this->getCategoryPerformance($applyCommonFilters);
 
-        $statsQuery = $this->applyDateFilters($statsQuery, $request, 'posts');
+        // 11. Top tags (super admin)
+        $topTags = $this->getTopTags($applyCommonFilters, $isSuperAdmin);
 
-        if ($request->status && $request->status !== 'all') {
-            $statsQuery->where('posts.status', $request->status);
-        }
+        // 12. Données du graphique principal
+        $chartStats = $this->getChartStats($applyCommonFilters);
 
-        if ($request->category_id) {
-            $statsQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
+        // 13. Statistiques globales (avec comparaison période précédente)
+        $stats = $this->getGlobalStats($applyCommonFilters, $request);
 
-        if ($isSuperAdmin && $request->author_id) {
-            $statsQuery->where('user_id', $request->author_id);
-        }
+        // 14. Liste des auteurs et catégories pour les filtres
+        $authors = $isSuperAdmin ? User::has('posts')->get(['id', 'name', 'email']) : [];
+        $categoriesList = PostCategory::orderBy('nom', 'asc')->get(['id', 'nom', 'slug']);
 
-        // Calcul des statistiques de la période actuelle
-        $currentPeriodQuery = clone $statsQuery;
-        $currentStats = [
-            'total_posts' => $currentPeriodQuery->count(),
-            'total_views' => $currentPeriodQuery->sum('posts.views_count'),
-            'total_likes' => $currentPeriodQuery->sum('posts.likes_count'),
-            'total_comments' => $currentPeriodQuery->sum('posts.comments_count'),
-        ];
+        // 15. Jours depuis la dernière publication
+        $daysSinceLastPost = $this->getDaysSinceLastPost($isSuperAdmin, $user);
 
-        // Calcul des statistiques de la période précédente
-        $previousPeriodQuery = Post::query();
+        // 16. Tendance des vues sur 7 jours
+        $viewsTrend = $this->getViewsTrend($applyCommonFilters);
 
-        if (! $isSuperAdmin) {
-            $previousPeriodQuery->where('user_id', $user->id);
-        }
-
-        if ($request->status && $request->status !== 'all') {
-            $previousPeriodQuery->where('posts.status', $request->status);
-        }
-
-        if ($request->category_id) {
-            $previousPeriodQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $previousPeriodQuery->where('user_id', $request->author_id);
-        }
-
-        // Gestion des périodes
-        $period = $request->period;
-        $startDate = $request->start_date;
-        $endDate = $request->end_date;
-
-        $currentStartDate = null;
-        $currentEndDate = null;
-        $previousStartDate = null;
-        $previousEndDate = null;
-
-        if ($period || $startDate || $endDate) {
-            switch ($period) {
-                case 'today':
-                    $currentStartDate = now()->startOfDay();
-                    $currentEndDate = now()->endOfDay();
-                    $previousStartDate = now()->subDay()->startOfDay();
-                    $previousEndDate = now()->subDay()->endOfDay();
-                    break;
-                case 'yesterday':
-                    $currentStartDate = now()->subDay()->startOfDay();
-                    $currentEndDate = now()->subDay()->endOfDay();
-                    $previousStartDate = now()->subDays(2)->startOfDay();
-                    $previousEndDate = now()->subDays(2)->endOfDay();
-                    break;
-                case 'last7days':
-                    $currentStartDate = now()->subDays(7);
-                    $previousStartDate = now()->subDays(14);
-                    $previousEndDate = now()->subDays(7);
-                    break;
-                case 'last30days':
-                    $currentStartDate = now()->subDays(30);
-                    $previousStartDate = now()->subDays(60);
-                    $previousEndDate = now()->subDays(30);
-                    break;
-                case 'last90days':
-                    $currentStartDate = now()->subDays(90);
-                    $previousStartDate = now()->subDays(180);
-                    $previousEndDate = now()->subDays(90);
-                    break;
-                case 'thisWeek':
-                    $currentStartDate = now()->startOfWeek();
-                    $currentEndDate = now()->endOfWeek();
-                    $previousStartDate = now()->subWeek()->startOfWeek();
-                    $previousEndDate = now()->subWeek()->endOfWeek();
-                    break;
-                case 'lastWeek':
-                    $currentStartDate = now()->subWeek()->startOfWeek();
-                    $currentEndDate = now()->subWeek()->endOfWeek();
-                    $previousStartDate = now()->subWeeks(2)->startOfWeek();
-                    $previousEndDate = now()->subWeeks(2)->endOfWeek();
-                    break;
-                case 'thisMonth':
-                    $currentStartDate = now()->startOfMonth();
-                    $currentEndDate = now()->endOfMonth();
-                    $previousStartDate = now()->subMonth()->startOfMonth();
-                    $previousEndDate = now()->subMonth()->endOfMonth();
-                    break;
-                case 'lastMonth':
-                    $currentStartDate = now()->subMonth()->startOfMonth();
-                    $currentEndDate = now()->subMonth()->endOfMonth();
-                    $previousStartDate = now()->subMonths(2)->startOfMonth();
-                    $previousEndDate = now()->subMonths(2)->endOfMonth();
-                    break;
-                case 'thisQuarter':
-                    $currentStartDate = now()->startOfQuarter();
-                    $currentEndDate = now()->endOfQuarter();
-                    $previousStartDate = now()->subQuarter()->startOfQuarter();
-                    $previousEndDate = now()->subQuarter()->endOfQuarter();
-                    break;
-                case 'lastQuarter':
-                    $currentStartDate = now()->subQuarter()->startOfQuarter();
-                    $currentEndDate = now()->subQuarter()->endOfQuarter();
-                    $previousStartDate = now()->subQuarters(2)->startOfQuarter();
-                    $previousEndDate = now()->subQuarters(2)->endOfQuarter();
-                    break;
-                case 'thisYear':
-                    $currentStartDate = now()->startOfYear();
-                    $currentEndDate = now()->endOfYear();
-                    $previousStartDate = now()->subYear()->startOfYear();
-                    $previousEndDate = now()->subYear()->endOfYear();
-                    break;
-                case 'lastYear':
-                    $currentStartDate = now()->subYear()->startOfYear();
-                    $currentEndDate = now()->subYear()->endOfYear();
-                    $previousStartDate = now()->subYears(2)->startOfYear();
-                    $previousEndDate = now()->subYears(2)->endOfYear();
-                    break;
-                case 'custom':
-                    if ($startDate) {
-                        $currentStartDate = Carbon::parse($startDate)->startOfDay();
-                    }
-                    if ($endDate) {
-                        $currentEndDate = Carbon::parse($endDate)->endOfDay();
-                    }
-                    if ($currentStartDate && $currentEndDate) {
-                        $duration = $currentStartDate->diffInDays($currentEndDate);
-                        $previousEndDate = clone $currentStartDate;
-                        $previousStartDate = clone $previousEndDate;
-                        $previousStartDate->subDays($duration);
-                    }
-                    break;
-                default:
-                    $currentStartDate = now()->subDays(30);
-                    $previousStartDate = now()->subDays(60);
-                    $previousEndDate = now()->subDays(30);
-                    break;
-            }
-
-            if ($currentStartDate) {
-                $currentPeriodQuery->where('posts.created_at', '>=', $currentStartDate);
-                $previousPeriodQuery->where('posts.created_at', '>=', $previousStartDate ?? $currentStartDate->copy()->subDays($currentStartDate->diffInDays($currentEndDate ?? now())));
-            }
-            if ($currentEndDate) {
-                $currentPeriodQuery->where('posts.created_at', '<=', $currentEndDate);
-                $previousPeriodQuery->where('posts.created_at', '<=', $previousEndDate ?? $currentStartDate);
-            }
-        }
-
-        // Récupérer les statistiques de la période précédente
-        $previousStats = [
-            'total_posts' => $previousPeriodQuery->count(),
-            'total_views' => $previousPeriodQuery->sum('posts.views_count'),
-            'total_likes' => $previousPeriodQuery->sum('posts.likes_count'),
-            'total_comments' => $previousPeriodQuery->sum('posts.comments_count'),
-        ];
-
-        // Calculer les pourcentages de changement
-        $viewsChange = $this->calculatePercentageChange($currentStats['total_views'], $previousStats['total_views']);
-        $likesChange = $this->calculatePercentageChange($currentStats['total_likes'], $previousStats['total_likes']);
-        $postsChange = $this->calculatePercentageChange($currentStats['total_posts'], $previousStats['total_posts']);
-
-        // Calculer les articles du mois en cours
-        $currentMonthStart = now()->startOfMonth();
-        $currentMonthEnd = now()->endOfMonth();
-        $postsThisMonthQuery = clone $statsQuery;
-        $postsThisMonthQuery->whereBetween('posts.created_at', [$currentMonthStart, $currentMonthEnd]);
-        $postsThisMonth = $postsThisMonthQuery->count();
-
-        // Calculer les articles du mois précédent pour la tendance
-        $previousMonthStart = now()->subMonth()->startOfMonth();
-        $previousMonthEnd = now()->subMonth()->endOfMonth();
-        $postsPreviousMonthQuery = clone $previousPeriodQuery;
-        $postsPreviousMonthQuery->whereBetween('posts.created_at', [$previousMonthStart, $previousMonthEnd]);
-        $postsPreviousMonth = $postsPreviousMonthQuery->count();
-        $postsThisMonthChange = $this->calculatePercentageChange($postsThisMonth, $postsPreviousMonth);
-
-        // Calculer le nombre d'auteurs actifs
-        $activeAuthorsQuery = User::whereHas('posts', function ($query) use ($currentStartDate, $currentEndDate, $user, $isSuperAdmin, $request) {
-            if ($currentStartDate) {
-                $query->where('created_at', '>=', $currentStartDate);
-            }
-            if ($currentEndDate) {
-                $query->where('created_at', '<=', $currentEndDate);
-            }
-
-            if (! $isSuperAdmin) {
-                $query->where('user_id', $user->id);
-            }
-
-            if ($request->status && $request->status !== 'all') {
-                $query->where('posts.status', $request->status);
-            }
-
-            if ($request->category_id) {
-                $query->whereHas('categories', function ($q) use ($request) {
-                    $q->where('posts_categories.id', $request->category_id);
-                });
-            }
-        })->count();
-
-        $activeAuthorsPreviousQuery = User::whereHas('posts', function ($query) use ($previousStartDate, $previousEndDate) {
-            if ($previousStartDate) {
-                $query->where('created_at', '>=', $previousStartDate);
-            }
-            if ($previousEndDate) {
-                $query->where('created_at', '<=', $previousEndDate);
-            }
-        })->count();
-
-        $activeAuthorsChange = $this->calculatePercentageChange($activeAuthorsQuery, $activeAuthorsPreviousQuery);
-
-        $statsQuery = Post::query();
-
-        if (! +$isSuperAdmin) {
-            $statsQuery->where('user_id', $user->id);
-        }
-
-        $statsQuery = $this->applyDateFilters($statsQuery, $request, 'posts');
-
-        if ($request->status && $request->status !== 'all') {
-            $statsQuery->where('posts.status', $request->status);
-        }
-
-        if ($request->category_id) {
-            $statsQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $statsQuery->where('user_id', $request->author_id);
-        }
-
-        $currentPeriodQuery = clone $statsQuery;
-        $currentStats = [
-            'total_posts' => $currentPeriodQuery->count(),
-            'total_views' => $currentPeriodQuery->sum('posts.views_count'),
-            'total_likes' => $currentPeriodQuery->sum('posts.likes_count'),
-            'total_comments' => $currentPeriodQuery->sum('posts.comments_count'),
-        ];
-
-        // ==================== 16. JOURS DEPUIS DERNIÈRE PUBLICATION ====================
-        $lastPublishedPost = Post::where('status', 'published')
-            ->when(! $isSuperAdmin, fn ($q) => $q->where('user_id', $user->id))
-            ->latest('published_at')
-            ->first();
-
-        $daysSinceLastPost = null;
-        if ($lastPublishedPost) {
-            $publishedDate = Carbon::parse($lastPublishedPost->published_at)->startOfDay();
-            $currentDate = now()->startOfDay();
-            $daysSinceLastPost = (int) $publishedDate->diffInDays($currentDate);
-        }
-
-        // ==================== 17. TENDANCE DES VUES (7 JOURS) ====================
-        $viewsLast7Days = Post::where('status', 'published')
-            ->when(! $isSuperAdmin, fn ($q) => $q->where('user_id', $user->id))
-            ->where('created_at', '>=', now()->subDays(7))
-            ->sum('views_count');
-
-        $viewsPrevious7Days = Post::where('status', 'published')
-            ->when(! $isSuperAdmin, fn ($q) => $q->where('user_id', $user->id))
-            ->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])
-            ->sum('views_count');
-
-        $viewsTrend = $this->calculatePercentageChange($viewsLast7Days, $viewsPrevious7Days);
-
-        // ==================== 18. BROUILLONS EN ATTENTE ====================
-        $pendingDraftsQuery = Post::where('posts.status', 'draft')
-            ->where('posts.updated_at', '>=', now()->subDays(7));
-
-        if (! $isSuperAdmin) {
-            $pendingDraftsQuery->where('user_id', $user->id);
-        }
-
-        $pendingDraftsQuery = $this->applyDateFilters($pendingDraftsQuery, $request, 'posts');
-
-        if ($request->category_id) {
-            $pendingDraftsQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $pendingDraftsQuery->where('user_id', $request->author_id);
-        }
-
-        $pendingDraftsCount = $pendingDraftsQuery->count();
-
-        // Calculer la tendance des brouillons
-        $previousDraftsQuery = Post::where('posts.status', 'draft')
-            ->when(! $isSuperAdmin, fn ($q) => $q->where('user_id', $user->id))
-            ->whereBetween('posts.updated_at', [now()->subDays(14), now()->subDays(7)]);
-
-        $previousDraftsCount = $previousDraftsQuery->count();
-        $draftsChange = $this->calculatePercentageChange($pendingDraftsCount, $previousDraftsCount);
-
-        $currentPeriodQuery = clone $statsQuery;
-        $currentStats = [
-            'total_posts' => $currentPeriodQuery->count(),
-            'total_views' => $currentPeriodQuery->sum('posts.views_count'),
-            'total_likes' => $currentPeriodQuery->sum('posts.likes_count'),
-            'total_comments' => $currentPeriodQuery->sum('posts.comments_count'),
-        ];
-        // [Le reste du code reste identique à l'original]
-        // Je n'inclus pas tout pour éviter une réponse trop longue
-
-        $previousPeriodQuery = Post::query();
-
-        if (! $isSuperAdmin) {
-            $previousPeriodQuery->where('user_id', $user->id);
-        }
-
-        if ($request->status && $request->status !== 'all') {
-            $previousPeriodQuery->where('posts.status', $request->status);
-        }
-
-        if ($request->category_id) {
-            $previousPeriodQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $previousPeriodQuery->where('user_id', $request->author_id);
-        }
-
-        // Gestion des périodes
-        $period = $request->period;
-        $startDate = $request->start_date;
-        $endDate = $request->end_date;
-
-        $currentStartDate = null;
-        $currentEndDate = null;
-        $previousStartDate = null;
-        $previousEndDate = null;
-
-        if ($period || $startDate || $endDate) {
-            switch ($period) {
-                case 'today':
-                    $currentStartDate = now()->startOfDay();
-                    $currentEndDate = now()->endOfDay();
-                    $previousStartDate = now()->subDay()->startOfDay();
-                    $previousEndDate = now()->subDay()->endOfDay();
-                    break;
-                case 'yesterday':
-                    $currentStartDate = now()->subDay()->startOfDay();
-                    $currentEndDate = now()->subDay()->endOfDay();
-                    $previousStartDate = now()->subDays(2)->startOfDay();
-                    $previousEndDate = now()->subDays(2)->endOfDay();
-                    break;
-                case 'last7days':
-                    $currentStartDate = now()->subDays(7);
-                    $previousStartDate = now()->subDays(14);
-                    $previousEndDate = now()->subDays(7);
-                    break;
-                case 'last30days':
-                    $currentStartDate = now()->subDays(30);
-                    $previousStartDate = now()->subDays(60);
-                    $previousEndDate = now()->subDays(30);
-                    break;
-                case 'last90days':
-                    $currentStartDate = now()->subDays(90);
-                    $previousStartDate = now()->subDays(180);
-                    $previousEndDate = now()->subDays(90);
-                    break;
-                case 'thisWeek':
-                    $currentStartDate = now()->startOfWeek();
-                    $currentEndDate = now()->endOfWeek();
-                    $previousStartDate = now()->subWeek()->startOfWeek();
-                    $previousEndDate = now()->subWeek()->endOfWeek();
-                    break;
-                case 'lastWeek':
-                    $currentStartDate = now()->subWeek()->startOfWeek();
-                    $currentEndDate = now()->subWeek()->endOfWeek();
-                    $previousStartDate = now()->subWeeks(2)->startOfWeek();
-                    $previousEndDate = now()->subWeeks(2)->endOfWeek();
-                    break;
-                case 'thisMonth':
-                    $currentStartDate = now()->startOfMonth();
-                    $currentEndDate = now()->endOfMonth();
-                    $previousStartDate = now()->subMonth()->startOfMonth();
-                    $previousEndDate = now()->subMonth()->endOfMonth();
-                    break;
-                case 'lastMonth':
-                    $currentStartDate = now()->subMonth()->startOfMonth();
-                    $currentEndDate = now()->subMonth()->endOfMonth();
-                    $previousStartDate = now()->subMonths(2)->startOfMonth();
-                    $previousEndDate = now()->subMonths(2)->endOfMonth();
-                    break;
-                case 'thisQuarter':
-                    $currentStartDate = now()->startOfQuarter();
-                    $currentEndDate = now()->endOfQuarter();
-                    $previousStartDate = now()->subQuarter()->startOfQuarter();
-                    $previousEndDate = now()->subQuarter()->endOfQuarter();
-                    break;
-                case 'lastQuarter':
-                    $currentStartDate = now()->subQuarter()->startOfQuarter();
-                    $currentEndDate = now()->subQuarter()->endOfQuarter();
-                    $previousStartDate = now()->subQuarters(2)->startOfQuarter();
-                    $previousEndDate = now()->subQuarters(2)->endOfQuarter();
-                    break;
-                case 'thisYear':
-                    $currentStartDate = now()->startOfYear();
-                    $currentEndDate = now()->endOfYear();
-                    $previousStartDate = now()->subYear()->startOfYear();
-                    $previousEndDate = now()->subYear()->endOfYear();
-                    break;
-                case 'lastYear':
-                    $currentStartDate = now()->subYear()->startOfYear();
-                    $currentEndDate = now()->subYear()->endOfYear();
-                    $previousStartDate = now()->subYears(2)->startOfYear();
-                    $previousEndDate = now()->subYears(2)->endOfYear();
-                    break;
-                case 'custom':
-                    if ($startDate) {
-                        $currentStartDate = Carbon::parse($startDate)->startOfDay();
-                    }
-                    if ($endDate) {
-                        $currentEndDate = Carbon::parse($endDate)->endOfDay();
-                    }
-                    if ($currentStartDate && $currentEndDate) {
-                        $duration = $currentStartDate->diffInDays($currentEndDate);
-                        $previousEndDate = clone $currentStartDate;
-                        $previousStartDate = clone $previousEndDate;
-                        $previousStartDate->subDays($duration);
-                    }
-                    break;
-                default:
-                    $currentStartDate = now()->subDays(30);
-                    $previousStartDate = now()->subDays(60);
-                    $previousEndDate = now()->subDays(30);
-                    break;
-            }
-
-            if ($currentStartDate) {
-                $currentPeriodQuery->where('posts.created_at', '>=', $currentStartDate);
-                $previousPeriodQuery->where('posts.created_at', '>=', $previousStartDate ?? $currentStartDate->copy()->subDays($currentStartDate->diffInDays($currentEndDate ?? now())));
-            }
-            if ($currentEndDate) {
-                $currentPeriodQuery->where('posts.created_at', '<=', $currentEndDate);
-                $previousPeriodQuery->where('posts.created_at', '<=', $previousEndDate ?? $currentStartDate);
-            }
-        }
-
-        // Récupérer les statistiques de la période précédente
-        $previousStats = [
-            'total_posts' => $previousPeriodQuery->count(),
-            'total_views' => $previousPeriodQuery->sum('posts.views_count'),
-            'total_likes' => $previousPeriodQuery->sum('posts.likes_count'),
-            'total_comments' => $previousPeriodQuery->sum('posts.comments_count'),
-        ];
-
-        // Calculer les pourcentages de changement
-        $viewsChange = $this->calculatePercentageChange($currentStats['total_views'], $previousStats['total_views']);
-        $likesChange = $this->calculatePercentageChange($currentStats['total_likes'], $previousStats['total_likes']);
-        $postsChange = $this->calculatePercentageChange($currentStats['total_posts'], $previousStats['total_posts']);
-
-        // Calculer les articles du mois en cours
-        $currentMonthStart = now()->startOfMonth();
-        $currentMonthEnd = now()->endOfMonth();
-        $postsThisMonthQuery = clone $statsQuery;
-        $postsThisMonthQuery->whereBetween('posts.created_at', [$currentMonthStart, $currentMonthEnd]);
-        $postsThisMonth = $postsThisMonthQuery->count();
-
-        // Calculer les articles du mois précédent pour la tendance
-        $previousMonthStart = now()->subMonth()->startOfMonth();
-        $previousMonthEnd = now()->subMonth()->endOfMonth();
-        $postsPreviousMonthQuery = clone $previousPeriodQuery;
-        $postsPreviousMonthQuery->whereBetween('posts.created_at', [$previousMonthStart, $previousMonthEnd]);
-        $postsPreviousMonth = $postsPreviousMonthQuery->count();
-        $postsThisMonthChange = $this->calculatePercentageChange($postsThisMonth, $postsPreviousMonth);
-
-        // Calculer le nombre d'auteurs actifs
-        $activeAuthorsQuery = User::whereHas('posts', function ($query) use ($currentStartDate, $currentEndDate, $user, $isSuperAdmin, $request) {
-            if ($currentStartDate) {
-                $query->where('created_at', '>=', $currentStartDate);
-            }
-            if ($currentEndDate) {
-                $query->where('created_at', '<=', $currentEndDate);
-            }
-
-            if (! $isSuperAdmin) {
-                $query->where('user_id', $user->id);
-            }
-
-            if ($request->status && $request->status !== 'all') {
-                $query->where('posts.status', $request->status);
-            }
-
-            if ($request->category_id) {
-                $query->whereHas('categories', function ($q) use ($request) {
-                    $q->where('posts_categories.id', $request->category_id);
-                });
-            }
-        })->count();
-
-        $activeAuthorsPreviousQuery = User::whereHas('posts', function ($query) use ($previousStartDate, $previousEndDate) {
-            if ($previousStartDate) {
-                $query->where('created_at', '>=', $previousStartDate);
-            }
-            if ($previousEndDate) {
-                $query->where('created_at', '<=', $previousEndDate);
-            }
-        })->count();
-        $activeAuthorsChange = $this->calculatePercentageChange($activeAuthorsQuery, $activeAuthorsPreviousQuery);
-
-        // ==================== 15. TAUX DE CONVERSION ====================
-        $conversionRate = $currentStats['total_posts'] > 0
-            ? round(($currentStats['total_posts'] / max(1, $previousStats['total_posts'])) * 100, 1)
-            : 0;
-
-        // ==================== 16. JOURS DEPUIS DERNIÈRE PUBLICATION ====================
-        $lastPublishedPost = Post::where('status', 'published')
-            ->when(! $isSuperAdmin, fn ($q) => $q->where('user_id', $user->id))
-            ->latest('published_at')
-            ->first();
-
-        $daysSinceLastPost = null;
-        if ($lastPublishedPost) {
-            $publishedDate = Carbon::parse($lastPublishedPost->published_at)->startOfDay();
-            $currentDate = now()->startOfDay();
-            $daysSinceLastPost = (int) $publishedDate->diffInDays($currentDate);
-        }
-
-        // ==================== 17. TENDANCE DES VUES (7 JOURS) ====================
-        $viewsLast7Days = Post::where('status', 'published')
-            ->when(! $isSuperAdmin, fn ($q) => $q->where('user_id', $user->id))
-            ->where('created_at', '>=', now()->subDays(7))
-            ->sum('views_count');
-
-        $viewsPrevious7Days = Post::where('status', 'published')
-            ->when(! $isSuperAdmin, fn ($q) => $q->where('user_id', $user->id))
-            ->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])
-            ->sum('views_count');
-
-        $viewsTrend = $this->calculatePercentageChange($viewsLast7Days, $viewsPrevious7Days);
-
-        // ==================== 18. BROUILLONS EN ATTENTE ====================
-        $pendingDraftsQuery = Post::where('posts.status', 'draft')
-            ->where('posts.updated_at', '>=', now()->subDays(7));
-
-        if (! $isSuperAdmin) {
-            $pendingDraftsQuery->where('user_id', $user->id);
-        }
-
-        $pendingDraftsQuery = $this->applyDateFilters($pendingDraftsQuery, $request, 'posts');
-
-        if ($request->category_id) {
-            $pendingDraftsQuery->whereHas('categories', function ($q) use ($request) {
-                $q->where('posts_categories.id', $request->category_id);
-            });
-        }
-
-        if ($isSuperAdmin && $request->author_id) {
-            $pendingDraftsQuery->where('user_id', $request->author_id);
-        }
-
-        $pendingDraftsCount = $pendingDraftsQuery->count();
-
-        // Calculer la tendance des brouillons
-        $previousDraftsQuery = Post::where('posts.status', 'draft')
-            ->when(! $isSuperAdmin, fn ($q) => $q->where('user_id', $user->id))
-            ->whereBetween('posts.updated_at', [now()->subDays(14), now()->subDays(7)]);
-
-        $previousDraftsCount = $previousDraftsQuery->count();
-        $draftsChange = $this->calculatePercentageChange($pendingDraftsCount, $previousDraftsCount);
-
-        // ==================== ASSEMBLAGE DES STATISTIQUES ====================
-        $stats = [
-            'total_posts' => $currentStats['total_posts'],
-            'published_posts' => (clone $currentPeriodQuery)->where('posts.status', 'published')->count(),
-            'draft_posts' => (clone $currentPeriodQuery)->where('posts.status', 'draft')->count(),
-            'scheduled_posts' => (clone $currentPeriodQuery)->where('posts.status', 'scheduled')->count(),
-            'archived_posts' => (clone $currentPeriodQuery)->where('posts.status', 'archived')->count(),
-            'total_views' => $currentStats['total_views'],
-            'total_likes' => $currentStats['total_likes'],
-            'total_comments' => $currentStats['total_comments'],
-            'views_change' => $viewsChange,
-            'likes_change' => $likesChange,
-            'posts_change' => $postsChange,
-            'old_drafts_count' => $oldDraftsCount,
-            'avg_engagement' => round($engagementStats->avg_engagement ?? 0, 2),
-            'max_engagement' => round($engagementStats->max_engagement ?? 0, 2),
-            'posts_this_month' => $postsThisMonth,
-            'posts_this_month_change' => $postsThisMonthChange,
-            'active_authors' => $activeAuthorsQuery,
-            'active_authors_change' => $activeAuthorsChange,
-            'conversion_rate' => $conversionRate,
-            'days_since_last_post' => $daysSinceLastPost,
-            'views_trend' => $viewsTrend,
-            'pending_drafts' => $pendingDraftsCount,
-            'pending_drafts_change' => $draftsChange,
-        ];
-
-        // Liste des auteurs (pour le filtre - seulement pour super admin)
-        $authors = [];
-        if ($isSuperAdmin) {
-            $authors = User::has('posts')->get(['id', 'name', 'email']);
-        }
-
-        // Liste des catégories (pour le filtre)
-        $categoriesList = PostCategory::orderBy('nom')->get(['id', 'nom', 'slug']);
+        // Assemblage des statistiques complémentaires
+        $stats['days_since_last_post'] = $daysSinceLastPost;
+        $stats['views_trend'] = $viewsTrend;
 
         return Inertia::render('Vendor/blog-stats', [
-            'posts' => $posts,
-            'stats' => $stats,
-            'chartStats' => $chartStats,
-            'categoriesStats' => $categoriesStats,
-            'postsStatusStats' => $postsStatusStats,
-            'topPosts' => $topPosts,
-            'topAuthors' => $topAuthors,
-            'engagementStats' => $engagementStats,
-            'scheduledPosts' => $scheduledPosts,
-            'weeklyActivity' => $weeklyActivity,
-            'monthlyPostsStats' => $monthlyPostsStats,
-            'hourlyPostsStats' => $hourlyPostsStats,
-            'categoryPerformance' => $categoryPerformance,
-            'topTags' => $topTags,
-            'is_super_admin' => $isSuperAdmin,
-            'authors' => $authors,
-            'categories_list' => $categoriesList,
-            'filters' => [
-                'search' => $request->search,
-                'status' => $request->status,
+            'posts'                => $posts,
+            'stats'                => $stats,
+            'chartStats'           => $chartStats,
+            'categoriesStats'      => $categoriesStats,
+            'totalCategoriesCount' => $totalCategoriesCount,
+            'postsStatusStats'     => $postsStatusStats,
+            'topPosts'             => $topPosts,
+            'topAuthors'           => $topAuthors,
+            'engagementStats'      => $engagementStats,
+            'scheduledPosts'       => $scheduledPosts,
+            'weeklyActivity'       => $weeklyActivity,
+            'monthlyPostsStats'    => $monthlyPostsStats,
+            'hourlyPostsStats'     => $hourlyPostsStats,
+            'categoryPerformance'  => $categoryPerformance,
+            'topTags'              => $topTags,
+            'is_super_admin'       => $isSuperAdmin,
+            'authors'              => $authors,
+            'categories_list'      => $categoriesList,
+            'filters'              => [
+                'search'      => $request->search,
+                'status'      => $request->status,
                 'category_id' => $request->category_id,
-                'author_id' => $request->author_id,
-                'period' => $request->period,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'year' => $request->year,
-                'month' => $request->month,
+                'author_id'   => $request->author_id,
+                'period'      => $request->period,
+                'start_date'  => $request->start_date,
+                'end_date'    => $request->end_date,
+                'year'        => $request->year,
+                'month'       => $request->month,
             ],
         ]);
     }
 
-    // ==================== MÉTHODES D'AIDE POUR LA COMPATIBILITÉ MULTI-DRIVER ====================
+    // ==================== MÉTHODES D'AIDE ====================
+
+    private function getCategoryStats(\Closure $filter, int $limit): array
+    {
+        return PostCategory::whereHas('posts', $filter)
+            ->withCount(['posts' => $filter])
+            ->orderBy('posts_count', 'desc')
+            ->limit($limit)
+            ->get()
+            ->map(fn($cat) => [
+                'id'          => $cat->id,
+                'nom'         => $cat->nom,
+                'slug'        => $cat->slug,
+                'color'       => $cat->color,
+                'posts_count' => $cat->posts_count,
+            ])
+            ->values()
+            ->toArray();
+    }
+
+    private function getTotalCategoriesCount(\Closure $filter): int
+    {
+        return PostCategory::whereHas('posts', $filter)->count();
+    }
+
+    private function getEngagementStats(\Closure $filter): object
+    {
+        return Post::where('status', 'published')
+            ->selectRaw('AVG((likes_count + comments_count) * 1.0 / NULLIF(views_count, 0) * 100) as avg_engagement')
+            ->selectRaw('MAX((likes_count + comments_count) * 1.0 / NULLIF(views_count, 0) * 100) as max_engagement')
+            ->tap($filter)
+            ->first();
+    }
+
+    private function getPeriodicActivity(\Closure $filter, string $type): array
+    {
+        $query = Post::where('status', 'published')->tap($filter);
+        $driver = DB::connection()->getDriverName();
+
+        switch ($type) {
+            case 'day':
+                $expr = $driver === 'pgsql' ? 'EXTRACT(DOW FROM posts.created_at)' : "strftime('%w', posts.created_at)";
+                $query->selectRaw($expr.' as period, COUNT(*) as count')
+                      ->groupBy($driver === 'pgsql' ? 'period' : "strftime('%w', posts.created_at)")
+                      ->orderBy('period');
+                return $query->get()->map(fn($item) => [
+                    'day'   => $this->translateDayNumber((int)$item->period),
+                    'count' => (int)$item->count,
+                ])->toArray();
+            case 'month':
+                $expr = $driver === 'pgsql' ? 'EXTRACT(MONTH FROM posts.created_at)' : "strftime('%m', posts.created_at)";
+                $query->selectRaw($expr.' as period, COUNT(*) as count')
+                      ->groupBy($driver === 'pgsql' ? 'period' : "strftime('%m', posts.created_at)")
+                      ->orderBy('period');
+                return $query->get()->map(fn($item) => [
+                    'month'      => (int)$item->period,
+                    'month_name' => $this->getMonthName((int)$item->period),
+                    'count'      => (int)$item->count,
+                ])->toArray();
+            case 'hour':
+                $expr = $driver === 'pgsql' ? 'EXTRACT(HOUR FROM posts.created_at)' : "strftime('%H', posts.created_at)";
+                $query->selectRaw($expr.' as period, COUNT(*) as count')
+                      ->groupBy($driver === 'pgsql' ? 'period' : "strftime('%H', posts.created_at)")
+                      ->orderBy('period');
+                return $query->get()->map(fn($item) => [
+                    'hour'  => (int)$item->period,
+                    'count' => (int)$item->count,
+                ])->toArray();
+        }
+        return [];
+    }
+
+    private function getCategoryPerformance(\Closure $filter): array
+    {
+        return PostCategory::whereHas('posts', $filter)
+            ->withCount(['posts' => $filter])
+            ->withSum(['posts' => $filter], 'views_count')
+            ->withSum(['posts' => $filter], 'likes_count')
+            ->withSum(['posts' => $filter], 'comments_count')
+            ->orderBy('posts_count', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(fn($cat) => [
+                'id'              => $cat->id,
+                'nom'             => $cat->nom,
+                'slug'            => $cat->slug,
+                'posts_count'     => $cat->posts_count,
+                'total_views'     => $cat->posts_sum_views_count ?? 0,
+                'total_likes'     => $cat->posts_sum_likes_count ?? 0,
+                'total_comments'  => $cat->posts_sum_comments_count ?? 0,
+            ])
+            ->values()
+            ->toArray();
+    }
+
+    private function getTopTags(\Closure $filter, bool $isSuperAdmin): array
+    {
+        if (! $isSuperAdmin) return [];
+        $postIds = Post::tap($filter)->pluck('id');
+        if ($postIds->isEmpty()) return [];
+
+        $tagCounts = DB::table('taggables')
+            ->where('taggable_type', Post::class)
+            ->whereIn('taggable_id', $postIds)
+            ->select('tag_id', DB::raw('COUNT(*) as total'))
+            ->groupBy('tag_id')
+            ->orderBy('total', 'desc')
+            ->limit(20)
+            ->get();
+
+        $tagIds = $tagCounts->pluck('tag_id')->toArray();
+        $tags = DB::table('tags')->whereIn('id', $tagIds)->get()->keyBy('id');
+
+        return $tagCounts->map(fn($item) => [
+            'id'          => $item->tag_id,
+            'name'        => $this->extractTagName($tags[$item->tag_id]->name ?? ''),
+            'slug'        => $tags[$item->tag_id]->slug ?? '',
+            'posts_count' => (int)$item->total,
+        ])->values()->toArray();
+    }
+
+    private function getChartStats(\Closure $filter): array
+    {
+        $driver = DB::connection()->getDriverName();
+        $dateExpr = $driver === 'pgsql' ? 'DATE(posts.created_at)' : 'date(posts.created_at)';
+
+        return Post::selectRaw($dateExpr.' as date')
+            ->selectRaw('SUM(posts.views_count) as views')
+            ->selectRaw('SUM(posts.likes_count) as likes')
+            ->selectRaw('SUM(posts.comments_count) as comments')
+            ->tap($filter)
+            ->groupBy($driver === 'pgsql' ? 'date' : 'date(posts.created_at)')
+            ->orderBy('date')
+            ->get()
+            ->map(fn($item) => [
+                'date'     => $item->date,
+                'views'    => (int)$item->views,
+                'likes'    => (int)$item->likes,
+                'comments' => (int)$item->comments,
+            ])
+            ->toArray();
+    }
+
+    private function getGlobalStats(\Closure $filter, Request $request): array
+    {
+        $currentPeriodQuery = Post::query()->tap($filter);
+        $current = [
+            'total_posts'    => $currentPeriodQuery->count(),
+            'total_views'    => $currentPeriodQuery->sum('views_count'),
+            'total_likes'    => $currentPeriodQuery->sum('likes_count'),
+            'total_comments' => $currentPeriodQuery->sum('comments_count'),
+        ];
+
+        $previousPeriodQuery = $this->getPreviousPeriodQuery($filter, $request);
+        $previous = [
+            'total_posts'    => $previousPeriodQuery->count(),
+            'total_views'    => $previousPeriodQuery->sum('views_count'),
+            'total_likes'    => $previousPeriodQuery->sum('likes_count'),
+            'total_comments' => $previousPeriodQuery->sum('comments_count'),
+        ];
+
+        $viewsChange = $this->calculatePercentageChange($current['total_views'], $previous['total_views']);
+        $likesChange = $this->calculatePercentageChange($current['total_likes'], $previous['total_likes']);
+        $postsChange = $this->calculatePercentageChange($current['total_posts'], $previous['total_posts']);
+
+        $thisMonth = Post::whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->tap($filter)
+            ->count();
+        $previousMonth = Post::whereBetween('created_at', [now()->subMonth()->startOfMonth(), now()->subMonth()->endOfMonth()])
+            ->tap($filter)
+            ->count();
+        $postsThisMonthChange = $this->calculatePercentageChange($thisMonth, $previousMonth);
+
+        $activeAuthors = User::whereHas('posts', fn($q) => $q->tap($filter))->count();
+        $activeAuthorsPrevious = User::whereHas('posts', fn($q) => $q->tap($filter))->count();
+        $activeAuthorsChange = $this->calculatePercentageChange($activeAuthors, $activeAuthorsPrevious);
+
+        $conversionRate = $previous['total_posts'] > 0
+            ? round(($current['total_posts'] / $previous['total_posts']) * 100, 1)
+            : 0;
+
+        $pendingDrafts = Post::where('status', 'draft')
+            ->where('updated_at', '>=', now()->subDays(7))
+            ->tap($filter)
+            ->count();
+        $previousDrafts = Post::where('status', 'draft')
+            ->whereBetween('updated_at', [now()->subDays(14), now()->subDays(7)])
+            ->tap($filter)
+            ->count();
+        $draftsChange = $this->calculatePercentageChange($pendingDrafts, $previousDrafts);
+
+        return [
+            'total_posts'            => $current['total_posts'],
+            'published_posts'        => (clone $currentPeriodQuery)->where('posts.status', 'published')->count(),
+            'draft_posts'            => (clone $currentPeriodQuery)->where('posts.status', 'draft')->count(),
+            'scheduled_posts'        => (clone $currentPeriodQuery)->where('posts.status', 'scheduled')->count(),
+            'archived_posts'         => (clone $currentPeriodQuery)->where('posts.status', 'archived')->count(),
+            'total_views'            => $current['total_views'],
+            'total_likes'            => $current['total_likes'],
+            'total_comments'         => $current['total_comments'],
+            'views_change'           => $viewsChange,
+            'likes_change'           => $likesChange,
+            'posts_change'           => $postsChange,
+            'old_drafts_count'       => Post::where('status', 'draft')->where('updated_at', '<=', now()->subDays(30))->tap($filter)->count(),
+            'avg_engagement'         => round($this->getEngagementStats($filter)->avg_engagement ?? 0, 2),
+            'max_engagement'         => round($this->getEngagementStats($filter)->max_engagement ?? 0, 2),
+            'posts_this_month'       => $thisMonth,
+            'posts_this_month_change' => $postsThisMonthChange,
+            'active_authors'         => $activeAuthors,
+            'active_authors_change'  => $activeAuthorsChange,
+            'conversion_rate'        => $conversionRate,
+            'pending_drafts'         => $pendingDrafts,
+            'pending_drafts_change'  => $draftsChange,
+        ];
+    }
+
+    private function getPreviousPeriodQuery(\Closure $filter, Request $request): \Illuminate\Database\Eloquent\Builder
+    {
+        $currentStartDate = null;
+        $currentEndDate = null;
+        $previousStartDate = null;
+        $previousEndDate = null;
+
+        $this->computePeriodDates($request, $currentStartDate, $currentEndDate, $previousStartDate, $previousEndDate);
+
+        $query = Post::query();
+        if ($previousStartDate) {
+            $query->where('created_at', '>=', $previousStartDate);
+        }
+        if ($previousEndDate) {
+            $query->where('created_at', '<=', $previousEndDate);
+        }
+
+        return $query->tap($filter);
+    }
+
+    private function getDaysSinceLastPost(bool $isSuperAdmin, $user): ?int
+    {
+        $post = Post::where('status', 'published')
+            ->when(! $isSuperAdmin, fn($q) => $q->where('user_id', $user->id))
+            ->latest('published_at')
+            ->first();
+        if (! $post) return null;
+        return (int) Carbon::parse($post->published_at)->startOfDay()->diffInDays(now()->startOfDay());
+    }
+
+    private function getViewsTrend(\Closure $filter): float
+    {
+        $last7 = Post::where('status', 'published')->where('created_at', '>=', now()->subDays(7))->tap($filter)->sum('views_count');
+        $prev7 = Post::where('status', 'published')->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->tap($filter)->sum('views_count');
+        return $this->calculatePercentageChange($last7, $prev7);
+    }
+
+    // ==================== MÉTHODES UTILITAIRES GÉNÉRALES ====================
 
     /**
-     * Retourne l'expression SQL pour extraire le jour de la semaine (0-6, dimanche=0)
+     * Applique les filtres de date à une requête.
      */
-    private function getDayOfWeekExpression(string $driver): string
-    {
-        return match ($driver) {
-            'pgsql' => 'EXTRACT(DOW FROM posts.created_at)',
-            'sqlite' => "strftime('%w', posts.created_at)",
-            default => 'EXTRACT(DOW FROM posts.created_at)',
-        };
-    }
-
-    /**
-     * Retourne l'expression SQL pour extraire le mois (1-12)
-     */
-    private function getMonthExpression(string $driver): string
-    {
-        return match ($driver) {
-            'pgsql' => 'EXTRACT(MONTH FROM posts.created_at)',
-            'sqlite' => "strftime('%m', posts.created_at)",
-            default => 'EXTRACT(MONTH FROM posts.created_at)',
-        };
-    }
-
-    /**
-     * Retourne l'expression SQL pour extraire l'heure (0-23)
-     */
-    private function getHourExpression(string $driver): string
-    {
-        return match ($driver) {
-            'pgsql' => 'EXTRACT(HOUR FROM posts.created_at)',
-            'sqlite' => "strftime('%H', posts.created_at)",
-            default => 'EXTRACT(HOUR FROM posts.created_at)',
-        };
-    }
-
-    /**
-     * Traduit le numéro du jour en nom (compatible PostgreSQL et SQLite)
-     * Note: Les deux drivers retournent 0 pour dimanche
-     */
-    private function translateDayNumber(int $dayNum, string $driver = 'pgsql'): string
-    {
-        // PostgreSQL DOW et SQLite %w retournent tous deux 0 pour dimanche
-        return match ($dayNum) {
-            0 => 'Dimanche',
-            1 => 'Lundi',
-            2 => 'Mardi',
-            3 => 'Mercredi',
-            4 => 'Jeudi',
-            5 => 'Vendredi',
-            6 => 'Samedi',
-            default => 'Inconnu',
-        };
-    }
-
-    private function translateDay(string $day): string
-    {
-        return match ($day) {
-            'Monday' => 'Lundi',
-            'Tuesday' => 'Mardi',
-            'Wednesday' => 'Mercredi',
-            'Thursday' => 'Jeudi',
-            'Friday' => 'Vendredi',
-            'Saturday' => 'Samedi',
-            'Sunday' => 'Dimanche',
-            default => $day,
-        };
-    }
-
-    private function getMonthName(int $month): string
-    {
-        return match ($month) {
-            1 => 'Janvier',
-            2 => 'Février',
-            3 => 'Mars',
-            4 => 'Avril',
-            5 => 'Mai',
-            6 => 'Juin',
-            7 => 'Juillet',
-            8 => 'Août',
-            9 => 'Septembre',
-            10 => 'Octobre',
-            11 => 'Novembre',
-            12 => 'Décembre',
-            default => '',
-        };
-    }
-
-    public function destroy(Post $post)
-    {
-        $user = Auth::user();
-        $isSuperAdmin = $user->hasRole('super_admin');
-
-        if (! $isSuperAdmin && $post->user_id !== $user->id) {
-            abort(403, 'Vous n\'êtes pas autorisé à supprimer cet article.');
-        }
-
-        $post->delete();
-
-        return redirect()->back()->with('success', 'Article supprimé avec succès');
-    }
-
-    public function duplicate(Post $post)
-    {
-        $user = Auth::user();
-        $isSuperAdmin = $user->hasRole('super_admin');
-
-        if (! $isSuperAdmin && $post->user_id !== $user->id) {
-            return redirect()->back()->with('error', 'Vous n\'êtes pas autorisé à dupliquer cet article.');
-        }
-
-        $newPost = $post->replicate();
-        $newPost->title = $post->title.' (Copie)';
-        $newPost->slug = Str::slug($newPost->title).'-'.Str::random(5);
-        $newPost->status = 'draft';
-        $newPost->published_at = null;
-        $newPost->save();
-
-        return redirect()->back()->with('success', 'Article dupliqué avec succès');
-    }
-
-    public function postsReorder(Request $request)
-    {
-        $request->validate([
-            'ordered_ids' => 'required|array',
-            'ordered_ids.*' => 'exists:posts,id',
-        ]);
-
-        foreach ($request->ordered_ids as $index => $id) {
-            Post::where('id', $id)->update(['order' => $index]);
-        }
-
-        return redirect()->back()->with('success', 'Ordre mis à jour avec succès');
-    }
-
-    private function extractTagName($tagName): string
-    {
-        if (is_null($tagName)) {
-            return 'Sans nom';
-        }
-
-        if (is_string($tagName) && ! str_contains($tagName, '{')) {
-            return $tagName;
-        }
-
-        $decoded = json_decode($tagName, true);
-
-        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            return $decoded['fr'] ?? $decoded['en'] ?? reset($decoded) ?? 'Tag';
-        }
-
-        return trim(preg_replace('/[{}":]/', '', $tagName));
-    }
-
     private function applyDateFilters($query, Request $request, string $table = 'posts')
     {
         $period = $request->period;
@@ -1501,12 +554,116 @@ class StatsBlogController extends Controller
         return $query;
     }
 
+    /**
+     * Calcule les dates de début et de fin pour les périodes courante et précédente.
+     */
+    private function computePeriodDates(Request $request, &$currentStartDate, &$currentEndDate, &$previousStartDate, &$previousEndDate): void
+    {
+        $period = $request->period;
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        switch ($period) {
+            case 'today':
+                $currentStartDate = now()->startOfDay();
+                $currentEndDate = now()->endOfDay();
+                $previousStartDate = now()->subDay()->startOfDay();
+                $previousEndDate = now()->subDay()->endOfDay();
+                break;
+            case 'yesterday':
+                $currentStartDate = now()->subDay()->startOfDay();
+                $currentEndDate = now()->subDay()->endOfDay();
+                $previousStartDate = now()->subDays(2)->startOfDay();
+                $previousEndDate = now()->subDays(2)->endOfDay();
+                break;
+            case 'last7days':
+                $currentStartDate = now()->subDays(7);
+                $previousStartDate = now()->subDays(14);
+                $previousEndDate = now()->subDays(7);
+                break;
+            case 'last30days':
+                $currentStartDate = now()->subDays(30);
+                $previousStartDate = now()->subDays(60);
+                $previousEndDate = now()->subDays(30);
+                break;
+            case 'last90days':
+                $currentStartDate = now()->subDays(90);
+                $previousStartDate = now()->subDays(180);
+                $previousEndDate = now()->subDays(90);
+                break;
+            case 'thisWeek':
+                $currentStartDate = now()->startOfWeek();
+                $currentEndDate = now()->endOfWeek();
+                $previousStartDate = now()->subWeek()->startOfWeek();
+                $previousEndDate = now()->subWeek()->endOfWeek();
+                break;
+            case 'lastWeek':
+                $currentStartDate = now()->subWeek()->startOfWeek();
+                $currentEndDate = now()->subWeek()->endOfWeek();
+                $previousStartDate = now()->subWeeks(2)->startOfWeek();
+                $previousEndDate = now()->subWeeks(2)->endOfWeek();
+                break;
+            case 'thisMonth':
+                $currentStartDate = now()->startOfMonth();
+                $currentEndDate = now()->endOfMonth();
+                $previousStartDate = now()->subMonth()->startOfMonth();
+                $previousEndDate = now()->subMonth()->endOfMonth();
+                break;
+            case 'lastMonth':
+                $currentStartDate = now()->subMonth()->startOfMonth();
+                $currentEndDate = now()->subMonth()->endOfMonth();
+                $previousStartDate = now()->subMonths(2)->startOfMonth();
+                $previousEndDate = now()->subMonths(2)->endOfMonth();
+                break;
+            case 'thisQuarter':
+                $currentStartDate = now()->startOfQuarter();
+                $currentEndDate = now()->endOfQuarter();
+                $previousStartDate = now()->subQuarter()->startOfQuarter();
+                $previousEndDate = now()->subQuarter()->endOfQuarter();
+                break;
+            case 'lastQuarter':
+                $currentStartDate = now()->subQuarter()->startOfQuarter();
+                $currentEndDate = now()->subQuarter()->endOfQuarter();
+                $previousStartDate = now()->subQuarters(2)->startOfQuarter();
+                $previousEndDate = now()->subQuarters(2)->endOfQuarter();
+                break;
+            case 'thisYear':
+                $currentStartDate = now()->startOfYear();
+                $currentEndDate = now()->endOfYear();
+                $previousStartDate = now()->subYear()->startOfYear();
+                $previousEndDate = now()->subYear()->endOfYear();
+                break;
+            case 'lastYear':
+                $currentStartDate = now()->subYear()->startOfYear();
+                $currentEndDate = now()->subYear()->endOfYear();
+                $previousStartDate = now()->subYears(2)->startOfYear();
+                $previousEndDate = now()->subYears(2)->endOfYear();
+                break;
+            case 'custom':
+                if ($startDate) {
+                    $currentStartDate = Carbon::parse($startDate)->startOfDay();
+                }
+                if ($endDate) {
+                    $currentEndDate = Carbon::parse($endDate)->endOfDay();
+                }
+                if ($currentStartDate && $currentEndDate) {
+                    $duration = $currentStartDate->diffInDays($currentEndDate);
+                    $previousEndDate = clone $currentStartDate;
+                    $previousStartDate = clone $previousEndDate;
+                    $previousStartDate->subDays($duration);
+                }
+                break;
+            default:
+                $currentStartDate = now()->subDays(30);
+                $previousStartDate = now()->subDays(60);
+                $previousEndDate = now()->subDays(30);
+                break;
+        }
+    }
+
     private function calculatePercentageChange(float $current, float $previous): float
     {
-        if ($previous == 0) {
-            return $current > 0 ? 100 : 0;
-        }
-
+        if ($previous == 0) return $current > 0 ? 100 : 0;
         return round((($current - $previous) / $previous) * 100, 1);
     }
 
@@ -1582,5 +739,145 @@ class StatsBlogController extends Controller
                 'month' => $request->month,
             ],
         ];
+    }
+
+    // ==================== MÉTHODES DE COMPATIBILITÉ MULTI-DRIVER ====================
+
+    private function getDayOfWeekExpression(string $driver): string
+    {
+        return match ($driver) {
+            'pgsql' => 'EXTRACT(DOW FROM posts.created_at)',
+            'sqlite' => "strftime('%w', posts.created_at)",
+            default => 'EXTRACT(DOW FROM posts.created_at)',
+        };
+    }
+
+    private function getMonthExpression(string $driver): string
+    {
+        return match ($driver) {
+            'pgsql' => 'EXTRACT(MONTH FROM posts.created_at)',
+            'sqlite' => "strftime('%m', posts.created_at)",
+            default => 'EXTRACT(MONTH FROM posts.created_at)',
+        };
+    }
+
+    private function getHourExpression(string $driver): string
+    {
+        return match ($driver) {
+            'pgsql' => 'EXTRACT(HOUR FROM posts.created_at)',
+            'sqlite' => "strftime('%H', posts.created_at)",
+            default => 'EXTRACT(HOUR FROM posts.created_at)',
+        };
+    }
+
+    private function translateDayNumber(int $dayNum): string
+    {
+        return match ($dayNum) {
+            0 => 'Dimanche',
+            1 => 'Lundi',
+            2 => 'Mardi',
+            3 => 'Mercredi',
+            4 => 'Jeudi',
+            5 => 'Vendredi',
+            6 => 'Samedi',
+            default => 'Inconnu',
+        };
+    }
+
+    private function translateDay(string $day): string
+    {
+        return match ($day) {
+            'Monday' => 'Lundi',
+            'Tuesday' => 'Mardi',
+            'Wednesday' => 'Mercredi',
+            'Thursday' => 'Jeudi',
+            'Friday' => 'Vendredi',
+            'Saturday' => 'Samedi',
+            'Sunday' => 'Dimanche',
+            default => $day,
+        };
+    }
+
+    private function getMonthName(int $month): string
+    {
+        return match ($month) {
+            1 => 'Janvier',
+            2 => 'Février',
+            3 => 'Mars',
+            4 => 'Avril',
+            5 => 'Mai',
+            6 => 'Juin',
+            7 => 'Juillet',
+            8 => 'Août',
+            9 => 'Septembre',
+            10 => 'Octobre',
+            11 => 'Novembre',
+            12 => 'Décembre',
+            default => '',
+        };
+    }
+
+    private function extractTagName($tagName): string
+    {
+        if (is_null($tagName)) {
+            return 'Sans nom';
+        }
+        if (is_string($tagName) && ! str_contains($tagName, '{')) {
+            return $tagName;
+        }
+        $decoded = json_decode($tagName, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded['fr'] ?? $decoded['en'] ?? reset($decoded) ?? 'Tag';
+        }
+        return trim(preg_replace('/[{}":]/', '', $tagName));
+    }
+
+    // ==================== AUTRES MÉTHODES (SUPPRESSION, DUPLICATION, RÉORDONNANCEMENT) ====================
+
+    public function destroy(Post $post)
+    {
+        $user = Auth::user();
+        $isSuperAdmin = $user->hasRole('super_admin');
+
+        if (! $isSuperAdmin && $post->user_id !== $user->id) {
+            abort(403, 'Vous n\'êtes pas autorisé à supprimer cet article.');
+        }
+
+        $post->delete();
+
+        return redirect()->back()->with('success', 'Article supprimé avec succès');
+    }
+
+    public function duplicate(Post $post)
+    {
+        $user = Auth::user();
+        $isSuperAdmin = $user->hasRole('super_admin');
+
+        if (! $isSuperAdmin && $post->user_id !== $user->id) {
+            return redirect()->back()->with('error', 'Vous n\'êtes pas autorisé à dupliquer cet article.');
+        }
+
+        $newPost = $post->replicate();
+        $newPost->title = $post->title.' (Copie)';
+        $newPost->slug = Str::slug($newPost->title).'-'.Str::random(5);
+        $newPost->status = 'draft';
+        $newPost->published_at = null;
+        $newPost->save();
+
+        return redirect()->back()->with('success', 'Article dupliqué avec succès');
+    }
+
+    public function postsReorder(Request $request)
+    {
+        $request->validate([
+            'ordered_ids' => 'required|array',
+            'ordered_ids.*' => 'exists:posts,id',
+        ]);
+
+        foreach ($request->ordered_ids as $index => $id) {
+            Post::where('id', $id)->update(['order' => $index]);
+        }
+
+        return redirect()->back()->with('success', 'Ordre mis à jour avec succès');
     }
 }

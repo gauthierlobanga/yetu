@@ -3,8 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/Vendor/Dashboard.tsx
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import type { Variants } from 'framer-motion';
 import { motion } from 'framer-motion';
-import { gsap } from 'gsap';
 import type { LucideIcon } from 'lucide-react';
 import {
     BarChart3,
@@ -19,22 +19,20 @@ import {
     ShoppingBag,
     ShoppingCart,
     Sparkles,
-    Trash2,
     Users,
     ArrowRight,
     ArrowUpRight,
     PlusCircle,
+    TrendingUp,
+    DollarSign,
+    AlertCircle,
+    Eye,
+    Ban,
+    UserPlus,
 } from 'lucide-react';
-import { createElement, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import AIChat from '@/components/AI/AIChat';
-import { ChatIA } from '@/components/AI/ChatIA';
-import ProductGenerator from '@/components/AI/ProductGenerator';
-import Recommendations from '@/components/AI/Recommendations';
-import { AIUnlockAnimation } from '@/components/ecommerce/others/AIUnlockAnimation';
-import { FloatingChatWidget } from '@/components/ecommerce/others/FloatingChatWidget';
-import { TenantControlPanel } from '@/components/ecommerce/others/TenantControlPanel';
-import { TrialCountdown } from '@/components/ecommerce/others/TrialCountdown';
+import CountUp from 'react-countup';
 import { SiteHeader } from '@/components/site-header';
 import {
     AlertDialog,
@@ -63,15 +61,11 @@ import getToastStyle from '@/lib/toast-style';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 import { SubscriptionReminderBanner } from '@/components/ecommerce/others/SubscriptionReminderBanner';
 import { cn } from '@/lib/utils';
-import Stats07 from '@/components/stat-cards-06';
-import Stats06 from '@/components/stat-cards-05';
-import Stats05 from '@/components/stat-cards-05';
-import Stats04 from '@/components/stat-cards-04';
-import Stats03 from '@/components/stat-cards-03';
-import Stats02 from '@/components/stat-cards-02';
-import Stats08 from '@/components/stat-cards-08';
-import Table02 from '@/components/tables-01';
+import { FloatingChatWidget } from '@/components/ecommerce/others/FloatingChatWidget';
+import { TenantControlPanel } from '@/components/ecommerce/others/TenantControlPanel';
+import { TrialCountdown } from '@/components/ecommerce/others/TrialCountdown';
 
+// Types existants réutilisés
 type QuickActionColor =
     | 'emerald'
     | 'slate'
@@ -160,6 +154,13 @@ const colorVariants: Record<
     },
 };
 
+interface AdditionalStats {
+    published_products: number;
+    out_of_stock_products: number;
+    average_order_value: number;
+    new_customers_this_month: number;
+}
+
 interface Stats {
     categories_count: number;
     products_count: number;
@@ -169,6 +170,7 @@ interface Stats {
     abandoned_carts: number;
     inventory_count: number;
     growth_percent: number;
+    additional?: AdditionalStats;
 }
 
 interface Trial {
@@ -184,26 +186,74 @@ interface Subscription {
     trial_ends_at: string | null;
 }
 
-interface RecentProduct {
-    id: string;
-    nom: string;
-    slug: string;
-    prix: number;
-    stock: number;
-    statut: string;
-    image: string;
-    edit_url: string;
-    delete_url?: string;
-}
-
 interface Props {
     tenant: Tenant;
     stats: Stats;
     trial?: Trial;
     subscription?: Subscription | null;
-    recentProducts: RecentProduct[];
+    recentProducts: any[];
     currentPlanFeatures: string[];
     allPlansFeatures: Record<string, string[]>;
+}
+
+// Petit composant KPI réutilisable
+function KpiCard({
+    title,
+    value,
+    icon: Icon,
+    trend,
+    positive,
+    format,
+}: {
+    title: string;
+    value: number;
+    icon: LucideIcon;
+    trend?: string;
+    positive?: boolean;
+    format?: (v: number) => string;
+}) {
+    return (
+        <Card className="group relative overflow-hidden rounded-2xl border border-white/40 bg-white/60 shadow-lg backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-slate-700/30 dark:bg-slate-900/60">
+            <CardContent className="p-4">
+                <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                            {title}
+                        </p>
+                        <p className="text-2xl font-bold text-slate-900 tabular-nums dark:text-white">
+                            {format ? (
+                                format(value)
+                            ) : (
+                                <CountUp
+                                    start={0}
+                                    end={value}
+                                    duration={2}
+                                    separator=" "
+                                />
+                            )}
+                        </p>
+                        {trend && (
+                            <Badge
+                                variant="outline"
+                                className={cn(
+                                    'rounded-full px-2 py-0 text-xs',
+                                    positive
+                                        ? 'border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400'
+                                        : 'border-red-200 text-red-700 dark:border-red-800 dark:text-red-400',
+                                )}
+                            >
+                                {trend}
+                            </Badge>
+                        )}
+                    </div>
+                    <div className="rounded-xl bg-slate-100/70 p-2 shadow-inner dark:bg-slate-800/70">
+                        <Icon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                    </div>
+                </div>
+            </CardContent>
+            <div className="absolute bottom-0 left-0 h-1 w-full bg-linear-to-r from-emerald-400/50 via-teal-400/50 to-emerald-400/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+        </Card>
+    );
 }
 
 export default function VendorDashboard({
@@ -216,12 +266,11 @@ export default function VendorDashboard({
     const containerRef = useRef<HTMLDivElement>(null);
     const [aiEnabled, setAiEnabled] = useState(tenant.ai_enabled ?? false);
 
-    // Synchroniser l'état local avec la prop (après reload)
     useEffect(() => {
         setAiEnabled(tenant.ai_enabled ?? false);
     }, [tenant.ai_enabled]);
 
-    // Appliquer les variables CSS du thème personnalisé
+    // Application des variables CSS du thème
     useEffect(() => {
         const root = document.documentElement;
         const theme = (tenant as any).theme;
@@ -235,37 +284,32 @@ export default function VendorDashboard({
         }
     }, [tenant]);
 
-    useEffect(() => {
-        const ctx = gsap.context(() => {
-            // gsap.fromTo(
-            //     '.dashboard-card',
-            //     { opacity: 0, y: 30 },
-            //     {
-            //         opacity: 1,
-            //         y: 0,
-            //         duration: 0.4,
-            //         stagger: 0.1,
-            //         ease: 'power2.out',
-            //     },
-            // );
-            gsap.fromTo(
-                '.dashboard-section',
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.4,
-                    delay: 0.3,
-                    stagger: 0.1,
-                    ease: 'power2.out',
-                },
-            );
-        }, containerRef);
+    const formatCurrency = (amount: number) =>
+        new Intl.NumberFormat('fr-CD', {
+            style: 'currency',
+            currency: 'CDF',
+            minimumFractionDigits: 0,
+        }).format(amount);
 
-        return () => ctx.revert();
-    }, []);
+    // Variants d'animation Framer Motion (remplace GSAP)
+    const sectionVariants: Variants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5, ease: 'easeOut' },
+        },
+    };
 
     const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
+
+    // Extraire les statistiques additionnelles
+    const additional = stats.additional ?? {
+        published_products: 0,
+        out_of_stock_products: 0,
+        average_order_value: 0,
+        new_customers_this_month: 0,
+    };
 
     return (
         <SidebarProvider
@@ -289,12 +333,23 @@ export default function VendorDashboard({
                 <ScrollArea className="min-h-0 flex-1">
                     <div
                         ref={containerRef}
-                        className="bg-white dark:bg-slate-950"
+                        className="relative min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"
                     >
+                        {/* Cercles décoratifs */}
+                        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                            <div className="absolute -top-24 right-1/4 h-96 w-96 rounded-full bg-emerald-200/20 blur-3xl dark:bg-emerald-900/20" />
+                            <div className="absolute bottom-12 left-1/3 h-64 w-64 rounded-full bg-teal-100/30 blur-2xl dark:bg-teal-900/20" />
+                        </div>
+
                         <Head title={`Gérer ${tenant.raison_sociale}`} />
-                        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+                        <div className="relative z-10 mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
                             {/* En-tête */}
-                            <div className="dashboard-section mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                            <motion.div
+                                initial={{ opacity: 0, y: -15 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5 }}
+                                className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                            >
                                 <div>
                                     <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
                                         {tenant.raison_sociale}
@@ -323,14 +378,112 @@ export default function VendorDashboard({
                                         </span>
                                     )}
                                 </div>
-                            </div>
+                            </motion.div>
 
                             <TrialCountdown trial={trial ?? null} />
 
-                            {/* {aiEnabled && <ChatIA />} */}
+                            {/* ===== KPIs modernes ===== */}
+                            <motion.section
+                                variants={sectionVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="my-10"
+                            >
+                                <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                            Résumé de votre activité
+                                        </h2>
+                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                            Principaux indicateurs clés.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                    <KpiCard
+                                        title="Revenus"
+                                        value={stats.revenue ?? 0}
+                                        icon={DollarSign}
+                                        trend={`+${stats.growth_percent ?? 0}%`}
+                                        positive
+                                        format={formatCurrency}
+                                    />
+                                    <KpiCard
+                                        title="Commandes"
+                                        value={stats.orders_count ?? 0}
+                                        icon={ShoppingCart}
+                                    />
+                                    <KpiCard
+                                        title="Clients"
+                                        value={stats.customers_count ?? 0}
+                                        icon={Users}
+                                    />
+                                    <KpiCard
+                                        title="Produits"
+                                        value={stats.products_count ?? 0}
+                                        icon={Package}
+                                    />
+                                    <KpiCard
+                                        title="Catégories"
+                                        value={stats.categories_count ?? 0}
+                                        icon={BarChart3}
+                                    />
+                                    {/* Nouvelles métriques */}
+                                    <KpiCard
+                                        title="Produits publiés"
+                                        value={additional.published_products}
+                                        icon={Eye}
+                                    />
+                                    <KpiCard
+                                        title="En rupture"
+                                        value={additional.out_of_stock_products}
+                                        icon={Ban}
+                                        positive={false}
+                                    />
+                                    <KpiCard
+                                        title="Panier moyen"
+                                        value={additional.average_order_value}
+                                        icon={ShoppingBag}
+                                        format={formatCurrency}
+                                    />
+                                    <KpiCard
+                                        title="Nouveaux clients (mois)"
+                                        value={
+                                            additional.new_customers_this_month
+                                        }
+                                        icon={UserPlus}
+                                    />
+                                    <KpiCard
+                                        title="Paniers abandonnés"
+                                        value={stats.abandoned_carts ?? 0}
+                                        icon={AlertCircle}
+                                        positive={false}
+                                    />
+                                    <KpiCard
+                                        title="Stock total"
+                                        value={stats.inventory_count ?? 0}
+                                        icon={Package}
+                                    />
+                                    <KpiCard
+                                        title="Croissance"
+                                        value={stats.growth_percent ?? 0}
+                                        icon={TrendingUp}
+                                        trend={`${stats.growth_percent ?? 0}%`}
+                                        positive={
+                                            (stats.growth_percent ?? 0) >= 0
+                                        }
+                                        format={(v) => `${v}%`}
+                                    />
+                                </div>
+                            </motion.section>
 
-                            {/* ======<<<< Actions rapides premium >>>>==========*/}
-                            <section className="dashboard-section my-10">
+                            {/* ======<<<< Actions rapides >>>>==========*/}
+                            <motion.section
+                                variants={sectionVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="my-10"
+                            >
                                 <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
                                         <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -338,11 +491,9 @@ export default function VendorDashboard({
                                         </h2>
                                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                             Accédez instantanément aux
-                                            fonctionnalités essentielles de
-                                            votre boutique.
+                                            fonctionnalités essentielles.
                                         </p>
                                     </div>
-
                                     <Badge className="border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
                                         <Rocket className="mr-1.5 h-3.5 w-3.5" />
                                         Accès rapide
@@ -358,7 +509,6 @@ export default function VendorDashboard({
                                         external
                                         color="emerald"
                                     />
-
                                     <QuickActionCard
                                         href={route('vendor.configure')}
                                         icon={Settings}
@@ -366,7 +516,6 @@ export default function VendorDashboard({
                                         description="Configuration"
                                         color="slate"
                                     />
-
                                     <QuickActionCard
                                         href={tenant.url}
                                         icon={Globe}
@@ -375,7 +524,6 @@ export default function VendorDashboard({
                                         external
                                         color="blue"
                                     />
-
                                     <QuickActionCard
                                         href={route('subscription.show')}
                                         icon={CreditCard}
@@ -383,7 +531,6 @@ export default function VendorDashboard({
                                         description="Plan & facturation"
                                         color="violet"
                                     />
-
                                     <QuickActionCard
                                         href={`${tenant.admin_url}/produits/create`}
                                         icon={PenLine}
@@ -392,7 +539,6 @@ export default function VendorDashboard({
                                         external
                                         color="amber"
                                     />
-
                                     <QuickActionCard
                                         href={`${tenant.admin_url}/commandes`}
                                         icon={ClipboardList}
@@ -401,7 +547,6 @@ export default function VendorDashboard({
                                         external
                                         color="rose"
                                     />
-
                                     <QuickActionCard
                                         href={`${tenant.admin_url}/clients`}
                                         icon={Users}
@@ -410,7 +555,6 @@ export default function VendorDashboard({
                                         external
                                         color="cyan"
                                     />
-
                                     <QuickActionCard
                                         href={`${tenant.admin_url}/statistiques`}
                                         icon={BarChart3}
@@ -420,15 +564,19 @@ export default function VendorDashboard({
                                         color="indigo"
                                     />
                                 </div>
-                            </section>
+                            </motion.section>
 
                             {/* ======<<<<     Centre de contrôle   >>>>======== */}
-                            <section className="dashboard-section mb-12">
+                            <motion.section
+                                variants={sectionVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="my-10"
+                            >
                                 <div className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/80">
                                     <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-400/70 to-transparent" />
                                     <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-emerald-500/10 blur-3xl" />
                                     <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-slate-500/10 blur-3xl" />
-
                                     <div className="relative border-b border-slate-100 px-6 py-5 dark:border-slate-800">
                                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                             <div>
@@ -441,14 +589,12 @@ export default function VendorDashboard({
                                                     votre boutique.
                                                 </p>
                                             </div>
-
                                             <Badge className="w-fit border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
                                                 <Settings className="mr-1.5 h-3.5 w-3.5" />
                                                 Configuration avancée
                                             </Badge>
                                         </div>
                                     </div>
-
                                     <div className="relative p-6">
                                         <TenantControlPanel
                                             tenant={{
@@ -497,10 +643,15 @@ export default function VendorDashboard({
                                         />
                                     </div>
                                 </div>
-                            </section>
+                            </motion.section>
 
                             {/* Plans disponibles */}
-                            <div className="dashboard-section mt-10 mb-12">
+                            <motion.section
+                                variants={sectionVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="my-10"
+                            >
                                 <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                                     <div>
                                         <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
@@ -508,11 +659,9 @@ export default function VendorDashboard({
                                         </h2>
                                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                             Comparez les fonctionnalités et
-                                            choisissez l’offre la plus adaptée à
-                                            votre activité.
+                                            choisissez l'offre la plus adaptée.
                                         </p>
                                     </div>
-
                                     <Badge className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
                                         <Sparkles className="mr-1.5 h-3.5 w-3.5" />
                                         Offres évolutives
@@ -528,7 +677,6 @@ export default function VendorDashboard({
                                                     'gratuit'
                                                 ).toLowerCase() ===
                                                 planName.toLowerCase();
-
                                             const isPopular =
                                                 planName
                                                     .toLowerCase()
@@ -562,7 +710,6 @@ export default function VendorDashboard({
                                                         }`}
                                                     >
                                                         <div className="absolute -top-10 -right-10 h-28 w-28 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/5" />
-
                                                         {isCurrentPlan && (
                                                             <div className="absolute top-4 right-4 z-10">
                                                                 <Badge className="rounded-full border border-emerald-200 bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow-lg shadow-emerald-500/25 dark:border-emerald-500/30">
@@ -570,7 +717,6 @@ export default function VendorDashboard({
                                                                 </Badge>
                                                             </div>
                                                         )}
-
                                                         {!isCurrentPlan &&
                                                             isPopular && (
                                                                 <div className="absolute top-4 right-4 z-10">
@@ -580,16 +726,13 @@ export default function VendorDashboard({
                                                                     </Badge>
                                                                 </div>
                                                             )}
-
                                                         <CardHeader className="pb-4">
                                                             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400">
                                                                 <Sparkles className="h-6 w-6" />
                                                             </div>
-
                                                             <CardTitle className="text-xl font-bold tracking-tight text-slate-900 capitalize dark:text-white">
                                                                 {planName}
                                                             </CardTitle>
-
                                                             <CardDescription className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
                                                                 {features
                                                                     .slice(0, 3)
@@ -598,7 +741,6 @@ export default function VendorDashboard({
                                                                     )}
                                                             </CardDescription>
                                                         </CardHeader>
-
                                                         <CardContent className="flex-1 pt-0">
                                                             <ul className="space-y-3">
                                                                 {features
@@ -617,7 +759,6 @@ export default function VendorDashboard({
                                                                                 <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
                                                                                     <CheckCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                                                                                 </div>
-
                                                                                 <span className="text-sm leading-6 text-slate-600 dark:text-slate-300">
                                                                                     {
                                                                                         feature
@@ -626,11 +767,10 @@ export default function VendorDashboard({
                                                                             </li>
                                                                         ),
                                                                     )}
-
                                                                 {features.length >
                                                                     5 && (
                                                                     <li className="pt-1 text-xs font-medium text-slate-400 dark:text-slate-500">
-                                                                        +
+                                                                        +{' '}
                                                                         {features.length -
                                                                             5}{' '}
                                                                         autres
@@ -639,7 +779,6 @@ export default function VendorDashboard({
                                                                 )}
                                                             </ul>
                                                         </CardContent>
-
                                                         <CardFooter className="pt-2">
                                                             {isCurrentPlan ? (
                                                                 <div className="w-full rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
@@ -670,9 +809,38 @@ export default function VendorDashboard({
                                         },
                                     )}
                                 </div>
-                            </div>
+                            </motion.section>
 
-                            <Table02 />
+                            {/* Commandes récentes (placeholder) */}
+                            <motion.section
+                                variants={sectionVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="my-10"
+                            >
+                                <div className="mb-4 flex items-center justify-between">
+                                    <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                                        Commandes récentes
+                                    </h2>
+                                    <Link
+                                        href={`${tenant.admin_url}/commandes`}
+                                        className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+                                    >
+                                        Voir tout
+                                        <ArrowRight className="h-4 w-4" />
+                                    </Link>
+                                </div>
+                                <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 text-center text-slate-500 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-400">
+                                    <ShoppingBag className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" />
+                                    <p className="mt-2">
+                                        Les dernières commandes apparaîtront
+                                        ici.
+                                    </p>
+                                    <p className="text-sm">
+                                        Vous pouvez afficher un composant dédié.
+                                    </p>
+                                </div>
+                            </motion.section>
 
                             {aiEnabled && <FloatingChatWidget />}
                         </div>
@@ -758,13 +926,11 @@ export function QuickActionCard({
     const content = (
         <>
             <div className="absolute -top-10 -right-10 h-24 w-24 rounded-full bg-current opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-10" />
-
             {badge && (
                 <span className="absolute top-3 right-3 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold tracking-wide text-slate-500 uppercase shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
                     {badge}
                 </span>
             )}
-
             <div
                 className={[
                     'relative flex h-14 w-14 items-center justify-center rounded-2xl shadow-sm ring-1 ring-white/50 transition-all duration-300 ring-inset',
@@ -779,19 +945,16 @@ export function QuickActionCard({
                     ].join(' ')}
                 />
             </div>
-
             <div className="space-y-1 text-center">
                 <h3 className="text-sm font-semibold text-slate-800 transition-colors dark:text-slate-100">
                     {label}
                 </h3>
-
                 {description && (
                     <p className="line-clamp-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                         {description}
                     </p>
                 )}
             </div>
-
             {external && (
                 <div className="absolute top-4 left-4 opacity-0 transition-all duration-300 group-hover:opacity-100">
                     <ArrowUpRight className="h-4 w-4 text-slate-400 dark:text-slate-500" />

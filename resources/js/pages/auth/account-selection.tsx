@@ -1,14 +1,16 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/consistent-type-imports */
 import { Head, Link } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
     ArrowRight,
     ExternalLink,
-    LayoutDashboard,
     Mail,
     PanelTopOpen,
     Plus,
     ShieldCheck,
     Store,
+    LayoutDashboard
 } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -105,7 +107,11 @@ export default function AccountSelection({
     const hasTenants = tenants.length > 0;
     const primaryTenant = tenants[0];
 
-    const dashboardUrl = primaryTenant?.sso_login_url ?? 'admin/dashboard';
+    const vendorDashboard = 'vendor/dashboard';
+    const adminDashboard = 'admin/dashboard';
+
+    const dashboardUrl = primaryTenant?.sso_login_url ? vendorDashboard : adminDashboard;
+
     const panelUrl = is_super_admin
         ? admin_panel_url
         : primaryTenant?.admin_url;
@@ -158,7 +164,7 @@ export default function AccountSelection({
                 </motion.section>
 
                 {/* Accès rapides */}
-                <motion.section
+                {/* <motion.section
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.45, delay: 0.1, ease: 'easeOut' }}
@@ -175,6 +181,7 @@ export default function AccountSelection({
                                 : 'Creer une boutique'
                         }
                     />
+
                     <QuickAccess
                         href={panelUrl}
                         icon={PanelTopOpen}
@@ -186,7 +193,7 @@ export default function AccountSelection({
                         }
                         disabled={!panelUrl}
                     />
-                </motion.section>
+                </motion.section> */}
 
                 {/* Boutiques ou état vide */}
                 <AnimatePresence mode="wait">

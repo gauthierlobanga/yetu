@@ -217,12 +217,7 @@ export function VendorSidebar({ tenant }: { tenant: Tenant }) {
                 'dark:bg-slate-950/94 dark:supports-backdrop-filter:bg-slate-950/88',
             )}
         >
-            {/* Halo décoratif */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                <div className="absolute top-0 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-emerald-500/8 blur-3xl dark:bg-emerald-400/6" />
-                <div className="absolute top-1/3 -left-24 h-64 w-64 rounded-full bg-slate-400/8 blur-3xl dark:bg-slate-500/6" />
-                <div className="absolute bottom-0 left-0 h-40 w-full bg-linear-to-t from-emerald-500/3 to-transparent dark:from-emerald-400/2" />
-            </div>
+
 
             {/* HEADER */}
             <SidebarHeader className="relative border-b border-slate-200/60 px-3 py-4 dark:border-slate-800/70 dark:bg-slate-900">

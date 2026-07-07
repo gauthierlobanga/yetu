@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { usePage } from '@inertiajs/react';
 import { useEffect, useMemo } from 'react';
+import { CookieConsentManager } from '@/components/ecommerce/cookies/CookieConsentManager';
 import { Toaster } from '@/components/ui/sonner';
 import AppLayoutTemplate from '@/layouts/app/app-header-layout';
 import type { AppLayoutProps } from '@/types';
 import FooterSection from './app/app-footer';
 import FooterSectionVendeur from './Vendor/app/app-footer';
-import { CookieConsentManager } from '@/components/ecommerce/cookies/CookieConsentManager';
 
 export default function MainLayout({
     children,

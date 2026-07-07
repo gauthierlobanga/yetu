@@ -89,12 +89,14 @@ class CommandesTable
                         'virement' => 'Virement',
                         'cheque' => 'Chèque',
                         'especes' => 'Espèces',
+                        'cash' => 'Paiement à la livraison',
                         default => $state,
                     })
                     ->color(fn ($state) => match ($state) {
                         'carte' => 'primary',
                         'paypal' => 'info',
                         'virement' => 'warning',
+                        'cash' => 'success',
                         default => 'gray',
                     })
                     ->toggleable(),
@@ -130,7 +132,7 @@ class CommandesTable
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
                     ->falseColor('danger')
-                    ->getStateUsing(fn ($record) => $record->statut !== 'en_attente')
+                    ->getStateUsing(fn ($record) => in_array($record->statut, ['en_cours', 'termine']))
                     ->toggleable(),
 
                 // Statistiques
@@ -215,6 +217,7 @@ class CommandesTable
                         'virement' => 'Virement',
                         'cheque' => 'Chèque',
                         'especes' => 'Espèces',
+                        'cash' => 'Paiement à la livraison',
                     ])
                     ->multiple(),
 

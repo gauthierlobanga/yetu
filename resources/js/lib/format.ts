@@ -1,3 +1,4 @@
+//src/lib/format.ts
 /**
  * Formate un prix selon la devise et la locale
  */

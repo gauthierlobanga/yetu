@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/set-state-in-effect */
 import axios from 'axios';
+import { useState, useEffect } from 'react';
 
 export interface CookiePreferences {
     necessary: boolean;
@@ -22,6 +24,7 @@ export function useCookieConsent() {
 
     useEffect(() => {
         const stored = localStorage.getItem(STORAGE_KEY);
+
         if (stored) {
             try {
                 const parsed = JSON.parse(stored);
@@ -33,6 +36,7 @@ export function useCookieConsent() {
         } else {
             setShowBanner(true);
         }
+
         setIsLoaded(true);
     }, []);
 

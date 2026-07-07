@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Vendor\Boutique\Ecommerce\Commande;
 use App\Http\Controllers\Controller;
 use App\Models\Commande;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -13,6 +14,8 @@ use Inertia\Inertia;
  */
 class OrderController extends Controller
 {
+    use AuthorizesRequests; // 👈 Ajout indispensable
+
     public function ordersIndex()
     {
         $user = Auth::user();

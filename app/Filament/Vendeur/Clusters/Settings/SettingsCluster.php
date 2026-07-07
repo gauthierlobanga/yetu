@@ -8,5 +8,5 @@ use Filament\Support\Icons\Heroicon;
 
 class SettingsCluster extends Cluster
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::Server;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedServer;
 }

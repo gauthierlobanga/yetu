@@ -9,7 +9,6 @@ use App\Filament\Vendeur\Resources\Announcements\Schemas\AnnouncementForm;
 use App\Filament\Vendeur\Resources\Announcements\Tables\AnnouncementsTable;
 use App\Models\Announcement;
 use BackedEnum;
-use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -20,9 +19,9 @@ class AnnouncementResource extends Resource
 {
     protected static ?string $model = Announcement::class;
 
-    protected static ?string $modelLabel = 'Annonce boutique';
+    protected static ?string $modelLabel = 'Annonce';
 
-    protected static ?string $pluralModelLabel = 'Annonces boutique';
+    protected static ?string $pluralModelLabel = 'Annonces';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMegaphone;
 
@@ -54,6 +53,18 @@ class AnnouncementResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->where('tenant_id', \Filament\Facades\Filament::getTenant()?->id);
+        return parent::getEloquentQuery()->where('tenant_id', tenant('id'));
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        // Utilise la requête avec le filtre tenant
+        return static::getEloquentQuery()->count();
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        // Utilise la requête avec le filtre tenant
+        return static::getEloquentQuery()->count() > 10 ? 'success' : 'warning';
     }
 }

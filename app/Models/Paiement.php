@@ -62,6 +62,8 @@ class Paiement extends Model
 
     const MODE_ESPECES = 'especes';
 
+    const MODE_CASH = 'cash';
+
     const MODE_CRYPTO = 'crypto';
 
     const STATUT_EN_ATTENTE = 'en_attente';

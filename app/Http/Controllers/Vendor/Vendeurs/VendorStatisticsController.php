@@ -21,17 +21,11 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
-/**
- * Contrôleur de statistiques avancées pour le tableau de bord du vendeur.
- *
- * Fournit l'ensemble des indicateurs e‑commerce (ventes, produits, clients,
- * paniers, catégories, etc.) dans le contexte du tenant actif.
- */
 class VendorStatisticsController extends Controller
 {
-    /**
-     * Page principale des statistiques du vendeur.
-     */
+    // Statuts considérés comme terminés (ventes validées)
+    private const COMPLETED_STATUSES = ['payee', 'termine', 'livree'];
+
     public function index(TenantPropsService $tenantProps): Response
     {
         $user = Auth::user();
@@ -43,40 +37,27 @@ class VendorStatisticsController extends Controller
 
         $planAllowsAdvanced = $tenant->plan && $tenant->plan->price > 0;
 
-        $stats = Cache::remember('vendor_stats_'.$tenant->id, now()->addMinutes(15), function () use ($tenant, $planAllowsAdvanced) {
+        $stats = Cache::remember('vendor_stats_v2_'.$tenant->id, now()->addMinutes(15), function () use ($tenant, $planAllowsAdvanced) {
             return $tenant->run(function () use ($planAllowsAdvanced) {
                 return [
-                    // -- Évolution du chiffre d’affaires et des commandes --
                     'salesOverTime' => $this->getSalesOverTime(),
-                    // -- Meilleurs produits --
                     'topProducts' => $this->getTopProducts(),
-                    // -- Meilleurs clients --
                     'topClients' => $this->getTopClients(),
-                    // -- Répartition des statuts de commandes --
                     'orderStatuses' => $this->getOrderStatuses(),
-                    // -- Activité sur 7 jours glissants --
                     'weeklyActivity' => $this->getWeeklyActivity(),
-                    // -- Commandes par mois (12 derniers) --
                     'monthlyOrders' => $this->getMonthlyOrders(),
-                    // -- Commandes par heure --
                     'hourlyOrders' => $this->getHourlyOrders(),
-                    // -- Performance par catégorie --
                     'categoryPerformance' => $this->getCategoryPerformance(),
-                    // -- Top catégories (CA) --
                     'topCategories' => $this->getTopCategories(),
-                    // -- Paniers actifs / abandonnés --
                     'cartStats' => $this->getCartStats(),
-                    // -- Métriques clients --
                     'customerMetrics' => $this->getCustomerMetrics(),
-                    // -- Derniers mouvements de stock --
                     'recentMovements' => $this->getRecentMovements(),
-                    // -- Statistiques avancées supplémentaires --
                     'advancedStats' => $this->getAdvancedStats($planAllowsAdvanced),
                 ];
             });
         });
 
-        // Récupérer les 10 dernières commandes
+        // Dernières commandes
         $commandes = Commande::with('client')
             ->latest('date_commande')
             ->take(10)
@@ -91,7 +72,7 @@ class VendorStatisticsController extends Controller
                 'url' => route('tenant.vendor.orders.show', $cmd),
             ]);
 
-        // Récupérer les 10 derniers paiements
+        // Derniers paiements
         $paiements = Paiement::latest('date_paiement')
             ->take(10)
             ->get()
@@ -102,7 +83,7 @@ class VendorStatisticsController extends Controller
                 'montant' => (float) $p->montant,
                 'mode' => $p->mode,
                 'statut' => $p->statut,
-                'date_paiement' => $p->date_paiement->toDateTimeString(),
+                'date_paiement' => $p->date_paiement,
             ]);
 
         return Inertia::render('Vendor/Statistics', [
@@ -124,14 +105,13 @@ class VendorStatisticsController extends Controller
             'planAllowsAdvancedStats' => $planAllowsAdvanced,
             'advancedStats' => $stats['advancedStats'],
             'summary' => [
-                // --- Totaux généraux ---
                 'total_products' => Produit::withTrashed()->count(),
                 'published_products' => Produit::where('statut', 'publie')->count(),
                 'draft_products' => Produit::where('statut', 'brouillon')->count(),
                 'total_orders' => Commande::count(),
-                'completed_orders' => Commande::where('statut', 'payee')->count(),
+                'completed_orders' => Commande::whereIn('statut', self::COMPLETED_STATUSES)->count(),
                 'cancelled_orders' => Commande::where('statut', 'annulee')->count(),
-                'total_revenue' => Commande::where('statut', 'payee')->sum('total'),
+                'total_revenue' => Commande::whereIn('statut', self::COMPLETED_STATUSES)->sum('total'),
                 'total_customers' => Client::count(),
                 'active_carts' => Panier::where('statut', Panier::STATUT_ACTIF)->count(),
                 'abandoned_carts' => Panier::where('statut', Panier::STATUT_ABANDONNE)->count(),
@@ -141,12 +121,8 @@ class VendorStatisticsController extends Controller
                 'avg_order_value' => $this->getAverageOrderValue(),
                 'return_rate' => $this->getReturnRate(),
                 'conversion_rate' => $this->getConversionRate(),
-
-                // --- Métriques du mois en cours ---
-                'revenue_this_month' => Commande::whereMonth('created_at', now()->month)->sum('total'),
-                'orders_this_month' => Commande::whereMonth('created_at', now()->month)->count(),
-
-                // --- Tendances (ce mois vs mois précédent) ---
+                'revenue_this_month' => Commande::whereIn('statut', self::COMPLETED_STATUSES)->whereMonth('created_at', now()->month)->sum('total'),
+                'orders_this_month' => Commande::whereIn('statut', self::COMPLETED_STATUSES)->whereMonth('created_at', now()->month)->count(),
                 'products_change' => $this->getChange(Produit::class, 'created_at'),
                 'orders_change' => $this->getChange(Commande::class, 'date_commande'),
                 'revenue_change' => $this->getRevenueChange(),
@@ -156,18 +132,26 @@ class VendorStatisticsController extends Controller
                 'aov_change' => $this->getAovChange(),
                 'conversion_change' => $this->getConversionChange(),
                 'out_of_stock_change' => $this->getOutOfStockChange(),
-                'sales_today_change' => 0, // pas de comparaison simple
+                'sales_today' => $this->getSalesToday(),
+                'sales_today_change' => $this->getSalesTodayChange(),
                 'promo_change' => $this->getPromoChange(),
                 'returning_change' => 0,
-
                 'revenue_per_customer' => $this->getRevenuePerCustomer(),
                 'products_without_image' => Produit::whereDoesntHave('media')->count(),
-                'active_promotions' => Promotion::currentlyActive()->count(),   // ← nouvelle clé
-
+                'active_promotions' => Promotion::currentlyActive()->count(),
+                // ---- Sparklines pour les cartes (SectionCards) ----
+                'sparkline_customers' => $this->getCustomersSparkline(),
+                'sparkline_carts' => $this->getCartsSparkline(),        // à créer
+                'sparkline_pending' => $this->getPendingSparkline(),      // à créer
+                'sparkline_sales_today' => $this->getSalesTodaySparkline(),   // à créer
+                'sparkline_promotions' => $this->getPromotionsSparkline(),   // à créer
+                'sparkline_returning' => $this->getReturningSparkline(),    // à créer
+                'sparkline_revenue_per_customer' => $this->getRevenuePerCustomerSparkline(), // à créer
+                'sparkline_no_image' => $this->getNoImageSparkline(),      // à créer (optionnel)
             ],
             'summaryCards' => [
-                'total_visitors' => Produit::sum('views_count'),      // total des vues de produits
-                'total_sales' => Commande::where('statut', 'payee')->sum('total'),
+                'total_visitors' => Produit::sum('views_count'),
+                'total_sales' => Commande::whereIn('statut', self::COMPLETED_STATUSES)->sum('total'),
                 'total_customers' => Client::count(),
                 'total_products' => Produit::count(),
                 'visitors_change' => 0,
@@ -192,7 +176,7 @@ class VendorStatisticsController extends Controller
     }
 
     // -----------------------------------------------------------------
-    //  Méthodes privées de collecte des statistiques
+    //  Méthodes de collecte des statistiques (corrigées)
     // -----------------------------------------------------------------
 
     /**
@@ -206,7 +190,7 @@ class VendorStatisticsController extends Controller
             DB::raw('SUM(total) as revenue'),
             DB::raw('COUNT(*) as orders')
         )
-            ->where('statut', 'payee')
+            ->whereIn('statut', self::COMPLETED_STATUSES)
             ->where('date_commande', '>=', Carbon::now()->subMonths(6)->startOfMonth())
             ->groupBy('month')
             ->orderBy('month')
@@ -219,12 +203,24 @@ class VendorStatisticsController extends Controller
             ->toArray();
     }
 
+    private function getSalesTodayChange(): float
+    {
+        $today = $this->getSalesToday();
+        $yesterday = $this->getSalesYesterday();
+
+        if ($yesterday > 0) {
+            return round((($today - $yesterday) / $yesterday) * 100, 2);
+        }
+
+        return $today > 0 ? 100.0 : 0.0;
+    }
+
     private function getFreightData(): array
     {
         return [
             [
                 'name' => 'Livré',
-                'count' => Commande::whereIn('statut', ['payee', 'expediee'])->count(),
+                'count' => Commande::whereIn('statut', self::COMPLETED_STATUSES)->count(),
                 'fill' => '#10b981',
             ],
             [
@@ -233,7 +229,7 @@ class VendorStatisticsController extends Controller
                 'fill' => '#3b82f6',
             ],
             [
-                'name' => 'Retard',   // commandes créées il y a plus de X jours sans être payées/expédiées
+                'name' => 'Retard',
                 'count' => Commande::where('statut', 'en_attente')
                     ->where('created_at', '<', now()->subDays(7))
                     ->count(),
@@ -246,6 +242,164 @@ class VendorStatisticsController extends Controller
             ],
         ];
     }
+
+    /**
+     * Top 10 des produits par chiffre d’affaires généré.
+     */
+    private function getTopProducts(): array
+    {
+        $products = Produit::select('produits.id', 'produits.nom', 'produits.slug')
+            ->selectRaw('COALESCE(SUM(ligne_commandes.quantite), 0) as total_quantity')
+            ->join('ligne_commandes', 'produits.id', '=', 'ligne_commandes.produit_id')
+            ->groupBy('produits.id', 'produits.nom', 'produits.slug')
+            ->orderByDesc('total_quantity')
+            ->take(10)
+            ->get();
+
+        return $products->map(fn ($p) => [
+            'id' => $p->id,
+            'title' => $p->nom,
+            'slug' => $p->slug,
+            'views_count' => (int) $p->total_quantity,
+        ])->toArray();
+    }
+
+    /**
+     * Top 8 des clients par chiffre d’affaires cumulé.
+     */
+    private function getTopClients(): array
+    {
+        return Client::withCount('commandes')
+            ->withSum('commandes', 'total')
+            ->orderByDesc('commandes_sum_total')
+            ->take(10)
+            ->get()
+            ->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->nom ?? $c->email,
+                'avatar_url' => null,
+                'total_spent' => (float) $c->commandes_sum_total, // correspond à l'interface TopClient
+                'orders_count' => $c->commandes_count,
+            ])
+            ->toArray();
+    }
+
+    private function getSalesToday(): float
+    {
+        return (float) Commande::whereIn('statut', self::COMPLETED_STATUSES)
+            ->whereDate('date_commande', Carbon::today())
+            ->sum('total');
+    }
+
+    private function getSalesYesterday(): float
+    {
+        return (float) Commande::whereIn('statut', self::COMPLETED_STATUSES)
+            ->whereDate('date_commande', Carbon::yesterday())
+            ->sum('total');
+    }
+
+    /**
+     * Répartition des commandes par statut.
+     */
+    private function getOrderStatuses(): array
+    {
+        return Commande::select('statut', DB::raw('count(*) as count'))
+            ->groupBy('statut')
+            ->get()
+            ->map(fn ($s) => [
+                'name' => ucfirst($s->statut),         // correspond au composant ChartOrderStatuses
+                'value' => $s->count,
+                'color' => $this->statusColor($s->statut),
+            ])
+            ->toArray();
+    }
+
+    private function statusColor(string $status): string
+    {
+        return match ($status) {
+            'payee', 'termine', 'livree' => '#10b981',
+            'en_attente' => '#f59e0b',
+            'annulee' => '#ef4444',
+            'expediee' => '#3b82f6',
+            default => '#6b7280',
+        };
+    }
+
+    /**
+     * Panier moyen (chiffre d'affaires total / nombre de commandes payées).
+     */
+    private function getAverageOrderValue(): float
+    {
+        $total = Commande::whereIn('statut', self::COMPLETED_STATUSES)->sum('total');
+        $count = Commande::whereIn('statut', self::COMPLETED_STATUSES)->count();
+
+        return $count > 0 ? round($total / $count, 2) : 0.0;
+    }
+
+    private function getConversionRate(): float
+    {
+        $carts = Panier::count();
+        $orders = Commande::whereIn('statut', self::COMPLETED_STATUSES)->count();
+
+        return $carts > 0 ? round(($orders / $carts) * 100, 2) : 0.0;
+    }
+
+    private function getRevenueChange(): float
+    {
+        $current = Commande::whereIn('statut', self::COMPLETED_STATUSES)->whereMonth('date_commande', now()->month)->sum('total');
+        $previous = Commande::whereIn('statut', self::COMPLETED_STATUSES)->whereMonth('date_commande', now()->subMonth()->month)->sum('total');
+
+        return $previous > 0 ? round((($current - $previous) / $previous) * 100, 2) : 0.0;
+    }
+
+    private function getAovChange(): float
+    {
+        $current = $this->getAverageOrderValue();
+        $prevRevenue = Commande::whereIn('statut', self::COMPLETED_STATUSES)->whereMonth('date_commande', now()->subMonth()->month)->sum('total');
+        $prevOrders = Commande::whereIn('statut', self::COMPLETED_STATUSES)->whereMonth('date_commande', now()->subMonth()->month)->count();
+        $previous = $prevOrders > 0 ? round($prevRevenue / $prevOrders, 2) : 0.0;
+
+        return $previous > 0 ? round((($current - $previous) / $previous) * 100, 2) : 0.0;
+    }
+
+    /**
+     * Sparkline des ventes : revenus mensuels des 6 derniers mois.
+     */
+    private function getSalesSparkline(): array
+    {
+        return Commande::select(
+            DB::raw("to_char(date_commande, 'YYYY-MM') as month"),
+            DB::raw('SUM(total) as revenue')
+        )
+            ->whereIn('statut', self::COMPLETED_STATUSES)
+            ->where('date_commande', '>=', Carbon::now()->subMonths(6)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(fn ($row) => ['value' => (float) $row->revenue])
+            ->toArray();
+    }
+
+    // Méthodes de résolution du tenant (inchangée)
+    private function resolveOwnedTenant(?User $user)
+    {
+        $tenant = function_exists('tenant') ? tenant() : null;
+        if (! $tenant || ! $user) {
+            return null;
+        }
+        $ownsTenant = DB::connection(config('tenancy.database.central_connection', config('database.default')))
+            ->table('user_tenant')
+            ->where('tenant_id', $tenant->id)
+            ->where('user_id', $user->id)
+            ->where('is_owner', true)
+            ->exists();
+
+        return $ownsTenant ? $tenant : null;
+    }
+
+    // -----------------------------------------------------------------
+    //  Méthodes privées de collecte des statistiques
+    // -----------------------------------------------------------------
 
     private function getPromoChange(): float
     {
@@ -273,70 +427,10 @@ class VendorStatisticsController extends Controller
 
     private function getRevenuePerCustomer(): float
     {
-        $total = Commande::where('statut', 'payee')->sum('total');
-        $customers = Client::has('commandes')->count();
+        $total = Commande::whereIn('statut', self::COMPLETED_STATUSES)->sum('total');
+        $customers = Client::has('commandes')->count(); // on peut aussi filtrer, mais cela reste acceptable
 
         return $customers > 0 ? round($total / $customers, 2) : 0.0;
-    }
-
-    /**
-     * Top 8 des produits par chiffre d’affaires généré.
-     */
-    private function getTopProducts(): array
-    {
-        return Produit::withSum('ligneCommandes', 'prix_total')
-            ->withCount('ligneCommandes as quantity')
-            ->orderByDesc('ligne_commandes_sum_prix_total')
-            ->take(10)
-            ->get()
-            ->map(fn ($p) => [
-                'id' => $p->id,
-                'title' => $p->nom,
-                'slug' => $p->slug,
-                'views_count' => $p->quantity ?? 0,
-                'likes_count' => 0,
-                'comments_count' => 0,
-                'user' => null,
-                'published_at' => null,
-            ])
-            ->toArray();
-    }
-
-    /**
-     * Top 8 des clients par chiffre d’affaires cumulé.
-     */
-    private function getTopClients(): array
-    {
-        return Client::withCount('commandes')
-            ->withSum('commandes', 'total')
-            ->orderByDesc('commandes_sum_total')
-            ->take(8)
-            ->get()
-            ->map(fn ($c) => [
-                'id' => $c->id,
-                'name' => $c->nom ?? $c->email,
-                'avatar_url' => null,
-                'posts_count' => $c->commandes_count,
-                'total_views' => (float) $c->commandes_sum_total,
-            ])
-            ->toArray();
-    }
-
-    /**
-     * Répartition des commandes par statut.
-     */
-    private function getOrderStatuses(): array
-    {
-        return Commande::select('statut', DB::raw('count(*) as count'))
-            ->groupBy('statut')
-            ->get()
-            ->map(fn ($s) => [
-                'status' => $s->statut,
-                'status_label' => ucfirst($s->statut),
-                'count' => $s->count,
-                'fill' => $this->statusColor($s->statut),
-            ])
-            ->toArray();
     }
 
     /**
@@ -552,8 +646,8 @@ class VendorStatisticsController extends Controller
         }
 
         // Répartition des produits par catégorie
-        $stats['products_per_category'] = ProductCategory::withCount('produits')
-            ->orderByDesc('produits_count')
+        $stats['products_per_category'] = ProductCategory::withCount('products')
+            ->orderBy('order')
             ->take(5)
             ->get()
             ->map(fn ($cat) => [
@@ -578,55 +672,11 @@ class VendorStatisticsController extends Controller
         return $stats;
     }
 
-    /**
-     * Panier moyen (chiffre d'affaires total / nombre de commandes payées).
-     */
-    private function getAverageOrderValue(): float
-    {
-        $total = Commande::where('statut', 'payee')->sum('total');
-        $count = Commande::where('statut', 'payee')->count();
-
-        return $count > 0 ? round($total / $count, 2) : 0.0;
-    }
-
-    /**
-     * Taux de conversion (commandes / paniers créés) en pourcentage.
-     */
-    private function getConversionRate(): float
-    {
-        $carts = Panier::count();
-        $orders = Commande::count();
-
-        return $carts > 0 ? round(($orders / $carts) * 100, 2) : 0.0;
-    }
-
-    /**
-     * Retourne une couleur associée à un statut de commande.
-     */
-    private function statusColor(string $status): string
-    {
-        return match ($status) {
-            'payee' => '#10b981',
-            'en_attente' => '#f59e0b',
-            'annulee' => '#ef4444',
-            'expediee' => '#3b82f6',
-            default => '#6b7280',
-        };
-    }
-
     /** Retourne le pourcentage de variation entre ce mois et le mois précédent pour un modèle donné. */
     private function getChange(string $model, string $dateColumn): float
     {
         $current = $model::whereMonth($dateColumn, now()->month)->count();
         $previous = $model::whereMonth($dateColumn, now()->subMonth()->month)->count();
-
-        return $previous > 0 ? round((($current - $previous) / $previous) * 100, 2) : 0.0;
-    }
-
-    private function getRevenueChange(): float
-    {
-        $current = Commande::whereMonth('date_commande', now()->month)->sum('total');
-        $previous = Commande::whereMonth('date_commande', now()->subMonth()->month)->sum('total');
 
         return $previous > 0 ? round((($current - $previous) / $previous) * 100, 2) : 0.0;
     }
@@ -643,17 +693,6 @@ class VendorStatisticsController extends Controller
     {
         $current = Commande::where('statut', 'en_attente')->whereMonth('date_commande', now()->month)->count();
         $previous = Commande::where('statut', 'en_attente')->whereMonth('date_commande', now()->subMonth()->month)->count();
-
-        return $previous > 0 ? round((($current - $previous) / $previous) * 100, 2) : 0.0;
-    }
-
-    private function getAovChange(): float
-    {
-        $current = $this->getAverageOrderValue();
-        // recalcul pour le mois précédent
-        $prevRevenue = Commande::where('statut', 'payee')->whereMonth('date_commande', now()->subMonth()->month)->sum('total');
-        $prevOrders = Commande::where('statut', 'payee')->whereMonth('date_commande', now()->subMonth()->month)->count();
-        $previous = $prevOrders > 0 ? round($prevRevenue / $prevOrders, 2) : 0.0;
 
         return $previous > 0 ? round((($current - $previous) / $previous) * 100, 2) : 0.0;
     }
@@ -690,24 +729,6 @@ class VendorStatisticsController extends Controller
         $cancelled = Commande::where('statut', 'annulee')->count();
 
         return $total > 0 ? round(($cancelled / $total) * 100, 2) : 0.0;
-    }
-
-    /**
-     * Sparkline des ventes : revenus mensuels des 6 derniers mois.
-     */
-    private function getSalesSparkline(): array
-    {
-        return Commande::select(
-            DB::raw("to_char(date_commande, 'YYYY-MM') as month"),
-            DB::raw('SUM(total) as revenue')
-        )
-            ->where('statut', 'payee')
-            ->where('date_commande', '>=', Carbon::now()->subMonths(6)->startOfMonth())
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->map(fn ($row) => ['value' => (float) $row->revenue])
-            ->toArray();
     }
 
     /**
@@ -796,21 +817,106 @@ class VendorStatisticsController extends Controller
         return round(AvisClient::where('approuve', true)->avg('note') ?? 0, 1);
     }
 
-    private function resolveOwnedTenant(?User $user)
+    // Sparkline pour les paniers abandonnés (exemple basé sur les paniers créés par mois)
+    private function getCartsSparkline(): array
     {
-        $tenant = function_exists('tenant') ? tenant() : null;
+        return Panier::select(
+            DB::raw("to_char(created_at, 'YYYY-MM') as month"),
+            DB::raw('COUNT(*) as count')
+        )
+            ->where('created_at', '>=', Carbon::now()->subMonths(6)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(fn ($row) => ['value' => (int) $row->count])
+            ->toArray();
+    }
 
-        if (! $tenant || ! $user) {
-            return null;
+    // Sparkline pour les commandes en attente
+    private function getPendingSparkline(): array
+    {
+        return Commande::where('statut', 'en_attente')
+            ->select(
+                DB::raw("to_char(date_commande, 'YYYY-MM') as month"),
+                DB::raw('COUNT(*) as count')
+            )
+            ->where('date_commande', '>=', Carbon::now()->subMonths(6)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(fn ($row) => ['value' => (int) $row->count])
+            ->toArray();
+    }
+
+    // Sparkline pour les ventes du jour (sur les 6 derniers jours ouvrés)
+    private function getSalesTodaySparkline(): array
+    {
+        // Pour un graphique sur les 6 derniers jours
+        $days = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            $days[] = [
+                'value' => (float) Commande::whereIn('statut', self::COMPLETED_STATUSES)
+                    ->whereDate('date_commande', $date)
+                    ->sum('total'),
+            ];
         }
 
-        $ownsTenant = DB::connection(config('tenancy.database.central_connection', config('database.default')))
-            ->table('user_tenant')
-            ->where('tenant_id', $tenant->id)
-            ->where('user_id', $user->id)
-            ->where('is_owner', true)
-            ->exists();
+        return $days;
+    }
 
-        return $ownsTenant ? $tenant : null;
+    // Sparkline pour les promotions actives (simulé car les promotions n'ont pas d'historique par mois)
+    private function getPromotionsSparkline(): array
+    {
+        // Retourne le nombre actuel répété sur 6 mois (ou générez des données historiques si dispo)
+        $current = Promotion::currentlyActive()->count();
+
+        return array_fill(0, 6, ['value' => $current]);
+    }
+
+    // Sparkline pour les clients récurrents (simulé)
+    private function getReturningSparkline(): array
+    {
+        // On peut se baser sur les clients ayant passé plus d'une commande dans le mois
+        $data = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $count = Client::whereHas('commandes', function ($q) use ($date) {
+                $q->whereMonth('date_commande', $date->month)
+                    ->whereYear('date_commande', $date->year);
+            }, '>=', 2)->count();
+            $data[] = ['value' => $count];
+        }
+
+        return $data;
+    }
+
+    // Sparkline pour le revenu par client (évolution mensuelle)
+    private function getRevenuePerCustomerSparkline(): array
+    {
+        $data = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $total = Commande::whereIn('statut', self::COMPLETED_STATUSES)
+                ->whereMonth('date_commande', $date->month)
+                ->whereYear('date_commande', $date->year)
+                ->sum('total');
+            $customers = Client::whereHas('commandes', function ($q) use ($date) {
+                $q->whereMonth('date_commande', $date->month)
+                    ->whereYear('date_commande', $date->year);
+            })->count();
+            $value = $customers > 0 ? round($total / $customers, 2) : 0;
+            $data[] = ['value' => $value];
+        }
+
+        return $data;
+    }
+
+    // Sparkline pour les produits sans image (généralement constant, on peut le dériver du nombre actuel)
+    private function getNoImageSparkline(): array
+    {
+        $current = Produit::whereDoesntHave('media')->count();
+
+        return array_fill(0, 6, ['value' => $current]);
     }
 }
