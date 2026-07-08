@@ -1,7 +1,7 @@
 // resources/js/components/ecommerce/products/TrendingProducts.tsx
 import { Link } from '@inertiajs/react';
 import type { Variants } from 'framer-motion';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ChevronRight, TrendingUp, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

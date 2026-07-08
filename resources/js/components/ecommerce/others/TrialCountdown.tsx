@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Clock3, Hourglass, Sparkles, CalendarRange } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';

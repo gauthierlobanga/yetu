@@ -4,7 +4,7 @@
 // resources/js/Pages/Vendor/Dashboard.tsx
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { Variants } from 'framer-motion';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import type { LucideIcon } from 'lucide-react';
 import {
     BarChart3,
@@ -224,12 +224,7 @@ function KpiCard({
                             {format ? (
                                 format(value)
                             ) : (
-                                <CountUp
-                                    start={0}
-                                    end={value}
-                                    duration={2}
-                                    separator=" "
-                                />
+                                <CountUp start={0} end={value} duration={2} separator=" " />
                             )}
                         </p>
                         {trend && (
@@ -292,13 +287,9 @@ export default function VendorDashboard({
         }).format(amount);
 
     // Variants d'animation Framer Motion (remplace GSAP)
-    const sectionVariants: Variants = {
+    const sectionVariants : Variants = {
         hidden: { opacity: 0, y: 20 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5, ease: 'easeOut' },
-        },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
     };
 
     const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
@@ -331,10 +322,7 @@ export default function VendorDashboard({
             <SidebarInset className="flex min-h-0 flex-col">
                 <SiteHeader context="vendor" />
                 <ScrollArea className="min-h-0 flex-1">
-                    <div
-                        ref={containerRef}
-                        className="relative min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"
-                    >
+                    <div ref={containerRef} className="relative min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
                         {/* Cercles décoratifs */}
                         <div className="pointer-events-none absolute inset-0 overflow-hidden">
                             <div className="absolute -top-24 right-1/4 h-96 w-96 rounded-full bg-emerald-200/20 blur-3xl dark:bg-emerald-900/20" />
@@ -448,9 +436,7 @@ export default function VendorDashboard({
                                     />
                                     <KpiCard
                                         title="Nouveaux clients (mois)"
-                                        value={
-                                            additional.new_customers_this_month
-                                        }
+                                        value={additional.new_customers_this_month}
                                         icon={UserPlus}
                                     />
                                     <KpiCard
@@ -469,9 +455,7 @@ export default function VendorDashboard({
                                         value={stats.growth_percent ?? 0}
                                         icon={TrendingUp}
                                         trend={`${stats.growth_percent ?? 0}%`}
-                                        positive={
-                                            (stats.growth_percent ?? 0) >= 0
-                                        }
+                                        positive={(stats.growth_percent ?? 0) >= 0}
                                         format={(v) => `${v}%`}
                                     />
                                 </div>
@@ -584,9 +568,7 @@ export default function VendorDashboard({
                                                     Centre de contrôle
                                                 </h3>
                                                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                                    Gérez rapidement les
-                                                    paramètres stratégiques de
-                                                    votre boutique.
+                                                    Gérez rapidement les paramètres stratégiques de votre boutique.
                                                 </p>
                                             </div>
                                             <Badge className="w-fit border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
@@ -599,13 +581,10 @@ export default function VendorDashboard({
                                         <TenantControlPanel
                                             tenant={{
                                                 id: tenant.id,
-                                                raison_sociale:
-                                                    tenant.raison_sociale,
+                                                raison_sociale: tenant.raison_sociale,
                                                 slug: tenant.slug,
-                                                produits_count:
-                                                    stats.products_count ?? 0,
-                                                categories_count:
-                                                    stats.categories_count ?? 0,
+                                                produits_count: stats.products_count ?? 0,
+                                                categories_count: stats.categories_count ?? 0,
                                                 ai_enabled: aiEnabled,
                                                 plan: tenant.plan ?? null,
                                             }}
@@ -619,23 +598,15 @@ export default function VendorDashboard({
                                                         showProgress: false,
                                                         onSuccess: () => {
                                                             router.reload({
-                                                                only: [
-                                                                    'tenant',
-                                                                ],
+                                                                only: ['tenant'],
                                                             });
-                                                            toast.success(
-                                                                'Paramètre IA mis à jour',
-                                                                {
-                                                                    description:
-                                                                        enabled
-                                                                            ? 'IA activée'
-                                                                            : 'IA désactivée',
-                                                                    duration: 2500,
-                                                                    style: getToastStyle(
-                                                                        'success',
-                                                                    ),
-                                                                },
-                                                            );
+                                                            toast.success('Paramètre IA mis à jour', {
+                                                                description: enabled
+                                                                    ? 'IA activée'
+                                                                    : 'IA désactivée',
+                                                                duration: 2500,
+                                                                style: getToastStyle('success'),
+                                                            });
                                                         },
                                                     },
                                                 );
@@ -658,8 +629,7 @@ export default function VendorDashboard({
                                             Plans disponibles
                                         </h2>
                                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                            Comparez les fonctionnalités et
-                                            choisissez l'offre la plus adaptée.
+                                            Comparez les fonctionnalités et choisissez l'offre la plus adaptée.
                                         </p>
                                     </div>
                                     <Badge className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
@@ -672,34 +642,18 @@ export default function VendorDashboard({
                                     {Object.entries(allPlansFeatures).map(
                                         ([planName, features], index) => {
                                             const isCurrentPlan =
-                                                (
-                                                    tenant.plan?.name ??
-                                                    'gratuit'
-                                                ).toLowerCase() ===
+                                                (tenant.plan?.name ?? 'gratuit').toLowerCase() ===
                                                 planName.toLowerCase();
                                             const isPopular =
-                                                planName
-                                                    .toLowerCase()
-                                                    .includes('pro') ||
-                                                planName
-                                                    .toLowerCase()
-                                                    .includes('business');
+                                                planName.toLowerCase().includes('pro') ||
+                                                planName.toLowerCase().includes('business');
 
                                             return (
                                                 <motion.div
                                                     key={planName}
-                                                    initial={{
-                                                        opacity: 0,
-                                                        y: 24,
-                                                    }}
-                                                    animate={{
-                                                        opacity: 1,
-                                                        y: 0,
-                                                    }}
-                                                    transition={{
-                                                        duration: 0.4,
-                                                        delay: index * 0.06,
-                                                    }}
+                                                    initial={{ opacity: 0, y: 24 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ duration: 0.4, delay: index * 0.06 }}
                                                     className="h-full"
                                                 >
                                                     <Card
@@ -717,15 +671,13 @@ export default function VendorDashboard({
                                                                 </Badge>
                                                             </div>
                                                         )}
-                                                        {!isCurrentPlan &&
-                                                            isPopular && (
-                                                                <div className="absolute top-4 right-4 z-10">
-                                                                    <Badge className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
-                                                                        ⭐
-                                                                        Populaire
-                                                                    </Badge>
-                                                                </div>
-                                                            )}
+                                                        {!isCurrentPlan && isPopular && (
+                                                            <div className="absolute top-4 right-4 z-10">
+                                                                <Badge className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
+                                                                    ⭐ Populaire
+                                                                </Badge>
+                                                            </div>
+                                                        )}
                                                         <CardHeader className="pb-4">
                                                             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-400">
                                                                 <Sparkles className="h-6 w-6" />
@@ -734,47 +686,24 @@ export default function VendorDashboard({
                                                                 {planName}
                                                             </CardTitle>
                                                             <CardDescription className="mt-2 line-clamp-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                                                {features
-                                                                    .slice(0, 3)
-                                                                    .join(
-                                                                        ' • ',
-                                                                    )}
+                                                                {features.slice(0, 3).join(' • ')}
                                                             </CardDescription>
                                                         </CardHeader>
                                                         <CardContent className="flex-1 pt-0">
                                                             <ul className="space-y-3">
-                                                                {features
-                                                                    .slice(0, 5)
-                                                                    .map(
-                                                                        (
-                                                                            feature,
-                                                                            i,
-                                                                        ) => (
-                                                                            <li
-                                                                                key={
-                                                                                    i
-                                                                                }
-                                                                                className="flex items-start gap-3"
-                                                                            >
-                                                                                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                                                                                    <CheckCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                                                                                </div>
-                                                                                <span className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                                                                    {
-                                                                                        feature
-                                                                                    }
-                                                                                </span>
-                                                                            </li>
-                                                                        ),
-                                                                    )}
-                                                                {features.length >
-                                                                    5 && (
+                                                                {features.slice(0, 5).map((feature, i) => (
+                                                                    <li key={i} className="flex items-start gap-3">
+                                                                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                                                                            <CheckCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                                                                        </div>
+                                                                        <span className="text-sm leading-6 text-slate-600 dark:text-slate-300">
+                                                                            {feature}
+                                                                        </span>
+                                                                    </li>
+                                                                ))}
+                                                                {features.length > 5 && (
                                                                     <li className="pt-1 text-xs font-medium text-slate-400 dark:text-slate-500">
-                                                                        +{' '}
-                                                                        {features.length -
-                                                                            5}{' '}
-                                                                        autres
-                                                                        fonctionnalités
+                                                                        + {features.length - 5} autres fonctionnalités
                                                                     </li>
                                                                 )}
                                                             </ul>
@@ -782,23 +711,16 @@ export default function VendorDashboard({
                                                         <CardFooter className="pt-2">
                                                             {isCurrentPlan ? (
                                                                 <div className="w-full rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-semibold text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/30 dark:text-emerald-300">
-                                                                    Plan
-                                                                    actuellement
-                                                                    actif
+                                                                    Plan actuellement actif
                                                                 </div>
                                                             ) : (
                                                                 <Button
                                                                     asChild
                                                                     className="w-full rounded-2xl bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all duration-300 hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-500/25"
                                                                 >
-                                                                    <Link
-                                                                        href={route(
-                                                                            'subscription.show',
-                                                                        )}
-                                                                    >
+                                                                    <Link href={route('subscription.show')}>
                                                                         <Sparkles className="mr-2 h-4 w-4" />
-                                                                        Choisir
-                                                                        ce plan
+                                                                        Choisir ce plan
                                                                     </Link>
                                                                 </Button>
                                                             )}
@@ -832,13 +754,8 @@ export default function VendorDashboard({
                                 </div>
                                 <div className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 text-center text-slate-500 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-400">
                                     <ShoppingBag className="mx-auto h-12 w-12 text-slate-300 dark:text-slate-600" />
-                                    <p className="mt-2">
-                                        Les dernières commandes apparaîtront
-                                        ici.
-                                    </p>
-                                    <p className="text-sm">
-                                        Vous pouvez afficher un composant dédié.
-                                    </p>
+                                    <p className="mt-2">Les dernières commandes apparaîtront ici.</p>
+                                    <p className="text-sm">Vous pouvez afficher un composant dédié.</p>
                                 </div>
                             </motion.section>
 
@@ -856,46 +773,27 @@ export default function VendorDashboard({
                         >
                             <AlertDialogContent className="sm:max-w-md">
                                 <AlertDialogHeader>
-                                    <AlertDialogTitle>
-                                        Supprimer le produit ?
-                                    </AlertDialogTitle>
+                                    <AlertDialogTitle>Supprimer le produit ?</AlertDialogTitle>
                                     <AlertDialogDescription>
-                                        Cette action est irréversible. Le
-                                        produit sera définitivement supprimé.
+                                        Cette action est irréversible. Le produit sera définitivement supprimé.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                    <AlertDialogCancel>
-                                        Annuler
-                                    </AlertDialogCancel>
+                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
                                     <AlertDialogAction
                                         className="bg-red-600 hover:bg-red-700"
                                         onClick={() => {
                                             if (deleteProductId) {
-                                                router.delete(
-                                                    route(
-                                                        'tenant.product.delete',
-                                                        deleteProductId,
-                                                    ),
-                                                    {
-                                                        onSuccess: () => {
-                                                            toast.success(
-                                                                'Produit supprimé',
-                                                            );
-                                                            setDeleteProductId(
-                                                                null,
-                                                            );
-                                                        },
-                                                        onError: () => {
-                                                            toast.error(
-                                                                'Erreur lors de la suppression',
-                                                            );
-                                                            setDeleteProductId(
-                                                                null,
-                                                            );
-                                                        },
+                                                router.delete(route('tenant.product.delete', deleteProductId), {
+                                                    onSuccess: () => {
+                                                        toast.success('Produit supprimé',{style: getToastStyle()});
+                                                        setDeleteProductId(null);
                                                     },
-                                                );
+                                                    onError: () => {
+                                                        toast.error('Erreur lors de la suppression',{style: getToastStyle('error')});
+                                                        setDeleteProductId(null);
+                                                    },
+                                                });
                                             }
                                         }}
                                     >

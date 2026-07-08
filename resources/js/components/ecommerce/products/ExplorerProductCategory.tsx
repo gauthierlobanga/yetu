@@ -187,7 +187,7 @@ function CategoryVisual({
 // ----------------------------------------------------------------------
 function EmptyCategories() {
     return (
-        <Empty className="min-h-80 rounded-2xl border-2 border-dashed border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-slate-50 to-emerald-50/30 dark:from-slate-900 dark:to-emerald-950/30">
+        <Empty className="min-h-80 rounded-2xl border-2 border-dashed border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-slate-50 to-emerald-50/30 dark:from-slate-900 dark:to-emerald-950/30">
             <EmptyHeader>
                 <EmptyMedia variant="icon"><Store className="text-emerald-500" /></EmptyMedia>
                 <EmptyTitle>Aucune catégorie disponible</EmptyTitle>
@@ -232,7 +232,7 @@ function ProductPreviewCard({ product, index }: { product: CategoryProduct; inde
                 prefetch
                 className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-xl hover:shadow-emerald-500/10 dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-600 dark:hover:shadow-emerald-500/20"
             >
-                <div className="relative aspect-[3/4] overflow-hidden bg-slate-100 dark:bg-slate-700/50">
+                <div className="relative aspect-3/4 overflow-hidden bg-slate-100 dark:bg-slate-700/50">
                     <img
                         src={resolveImageUrl(product.image_principale)}
                         alt={product.nom}
@@ -240,7 +240,7 @@ function ProductPreviewCard({ product, index }: { product: CategoryProduct; inde
                         onError={handleImageFallback()}
                         className="size-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-emerald-800/30" />
+                    <div className="absolute inset-0 bg-linear-to-t from-emerald-900/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:from-emerald-800/30" />
                     {product.badge && (
                         <span className="absolute left-3 top-3 rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white shadow-lg backdrop-blur-md dark:bg-emerald-600">
                             {product.badge}
@@ -309,9 +309,9 @@ return null;
             whileInView="show"
             viewport={{ once: true, margin: '-60px' }}
             variants={panelVariants}
-            className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-emerald-50/30 shadow-2xl shadow-emerald-500/5 backdrop-blur-sm dark:border-slate-700 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950/20 dark:shadow-emerald-500/10"
+            className="overflow-hidden rounded-3xl border border-slate-200 bg-linear-to-br from-white via-slate-50 to-emerald-50/30 shadow-2xl shadow-emerald-500/5 backdrop-blur-sm dark:border-slate-700 dark:from-slate-900 dark:via-slate-800 dark:to-emerald-950/20 dark:shadow-emerald-500/10"
         >
-            <div className="grid min-h-[38rem] grid-cols-1 lg:grid-cols-[22rem_minmax(0,1fr)]">
+            <div className="grid min-h-152 grid-cols-1 lg:grid-cols-[22rem_minmax(0,1fr)]">
                 {/* Colonne latérale */}
                 <aside className="relative border-b border-slate-200 bg-white/60 p-6 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-800/50 lg:border-r lg:border-b-0">
                     <div className="mb-6 flex items-center justify-between">
@@ -341,7 +341,7 @@ return null;
                     </div>
 
                     {/* Liste des catégories */}
-                    <div className="flex gap-2 overflow-x-auto pb-2 lg:max-h-[24rem] lg:flex-col lg:overflow-x-visible lg:overflow-y-auto lg:pr-2">
+                    <div className="flex gap-2 overflow-x-auto pb-2 lg:max-h-96 lg:flex-col lg:overflow-x-visible lg:overflow-y-auto lg:pr-2">
                         {filteredCategories.map((category) => {
                             const isSelected = selectedCat.id === category.id;
                             const productCount = category.produits?.length ?? 0;
@@ -389,7 +389,7 @@ return null;
                             );
                         })}
                     </div>
-                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/40 to-transparent dark:from-slate-800/40" />
+                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-white/40 to-transparent dark:from-slate-800/40" />
                 </aside>
 
                 {/* Contenu principal */}
@@ -464,7 +464,7 @@ return null;
 
                             {/* Footer d'exploration modernisé */}
                             <motion.div
-                                className="mt-10 flex flex-col gap-6 rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-emerald-50/50 p-6 backdrop-blur-md dark:border-slate-700 dark:from-slate-800/50 dark:to-emerald-950/20 md:flex-row md:items-center md:justify-between"
+                                className="mt-10 flex flex-col gap-6 rounded-2xl border border-slate-200 bg-linear-to-r from-slate-50 to-emerald-50/50 p-6 backdrop-blur-md dark:border-slate-700 dark:from-slate-800/50 dark:to-emerald-950/20 md:flex-row md:items-center md:justify-between"
                                 whileHover={{ scale: 1.01 }}
                             >
                                 <div className="flex items-start gap-4">
@@ -553,7 +553,7 @@ export default function ProductCategoriesPage() {
                         </Link>
                     </Button>
                 </motion.header>
-                <ProductCategoriesMega />
+                <ProductCategoriesMega categories={[]} />
             </div>
         </section>
     );

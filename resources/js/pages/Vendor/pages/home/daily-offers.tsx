@@ -1,8 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 // resources/js/components/home/daily-offers.tsx
 import { Link } from '@inertiajs/react';
-import type { Variants } from 'framer-motion';
-import { motion } from 'framer-motion';
 import {
     ArrowRight,
     ChevronLeft,
@@ -12,6 +10,7 @@ import {
     TrendingUp,
     Zap,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Autoplay, Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -38,7 +37,7 @@ interface DailyOffersProps {
 /*                              Animation Variants                            */
 /* -------------------------------------------------------------------------- */
 
-const fadeUp: Variants = {
+const fadeUp = {
     hidden: { opacity: 0, y: 24 },
     visible: {
         opacity: 1,

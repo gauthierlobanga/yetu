@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Package, PenLine, Trash2, PlusCircle, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';

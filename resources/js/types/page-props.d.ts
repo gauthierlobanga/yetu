@@ -9,6 +9,8 @@ export interface UserProfile extends NonNullable<Auth['user']> {
         phone?: string;
         city?: string;
         country?: string;
+        notifications_email?: boolean;   // ← ajouté
+        notifications_offers?: boolean;  // ← ajouté
     };
     adresses?: Array<{
         type: string;

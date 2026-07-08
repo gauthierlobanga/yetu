@@ -1,6 +1,6 @@
 // resources/js/Pages/Shop/Promotions/Index.tsx
 import { Head, Link, usePage } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     CalendarRange,
     TicketPercent,

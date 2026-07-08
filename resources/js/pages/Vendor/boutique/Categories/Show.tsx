@@ -236,7 +236,7 @@ export default function CategoryShow({
                     </nav>
 
                     {/* En-tête de catégorie premium – light & dark */}
-                    <div className="relative mb-12 overflow-hidden rounded-[3rem] bg-white/80 p-8 shadow-2xl shadow-slate-200/40 backdrop-blur-xl md:p-12 dark:bg-slate-900/80 dark:shadow-black/20">
+                    <div className="relative mb-12 overflow-hidden rounded bg-white/80 p-8 md:p-12 dark:bg-slate-900/80">
                         {/* Overlay de fond */}
                         <div className="absolute inset-0">
                             {category.banner ? (
@@ -348,9 +348,9 @@ export default function CategoryShow({
                                     >
                                         <Link
                                             href={sub.url}
-                                            className="group flex items-center gap-3 rounded-full border border-slate-200/60 bg-white py-2 pr-5 pl-2 shadow-sm transition-all hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-700 dark:hover:bg-emerald-900/30"
+                                            className="group flex items-center gap-3 rounded border border-slate-200/60 bg-white py-2 pr-5 pl-2 shadow-sm transition-all hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/80 dark:hover:border-emerald-700 dark:hover:bg-emerald-900/30"
                                         >
-                                            <div className="h-9 w-9 overflow-hidden rounded-full border border-slate-100 bg-slate-100 transition-transform duration-300 group-hover:scale-110 dark:border-slate-700 dark:bg-slate-700">
+                                            <div className="h-9 w-9 overflow-hidden rounded border border-slate-100 bg-slate-100 transition-transform duration-300 group-hover:scale-110 dark:border-slate-700 dark:bg-slate-700">
                                                 {sub.image ? (
                                                     <img
                                                         src={resolveImageUrl(
@@ -375,7 +375,7 @@ export default function CategoryShow({
                     )}
 
                     {/* Barre d'outils flottante */}
-                    <div className="sticky top-16 z-20 mb-8 rounded-2xl border border-white/40 bg-white/70 p-4 shadow-lg backdrop-blur-xl transition-all dark:border-slate-700/30 dark:bg-slate-900/70">
+                    <div className="sticky top-16 z-20 mb-8 rounded-xl border border-white/40 bg-white/70 p-4 transition-all dark:border-slate-700/30 dark:bg-slate-900/70">
                         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                             <div className="relative flex-1 sm:max-w-md">
                                 <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />

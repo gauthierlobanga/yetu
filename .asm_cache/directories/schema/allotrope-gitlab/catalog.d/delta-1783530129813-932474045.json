@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-26T19:40:02.691Z",
+  "timestamp": "2026-07-08T17:02:09.743Z",
   "kind": "schema",
   "entries": [
     {
@@ -73,6 +73,21 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/absorbance/REC/2026/03/absorbance-spectrum-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/absorbance/REC/2026/06/absorbance-area-scan-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/absorbance/REC/2026/06/absorbance-cube-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/absorbance/REC/2026/06/absorbance-point-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/absorbance/REC/2026/06/absorbance-spectrum-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/absorbance/REC/2026/06/absorbance-variable-pathlength-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2022/03/automated-reactors.embed.schema"
@@ -315,6 +330,45 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/03/volume-profile-detector.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/angular-velocity-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/automated-reactors.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/automated-reactors.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/chord-length-distribution-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/concentration-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/flow-rate-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/heat-flow-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/heating-or-cooling-rate-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/jacket-temperature-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/near-infrared-spectrum-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/purge-gas-flow-rate-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/reaction-temperature-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/automated-reactors/REC/2026/06/volume-profile-detector.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/balance/REC/2021/09/balance.embed.schema"
     },
     {
@@ -411,6 +465,18 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/balance/REC/2026/03/balance.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/balance/REC/2026/06/balance-point-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/balance/REC/2026/06/balance-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/balance/REC/2026/06/balance.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/balance/REC/2026/06/balance.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/bga/REC/2021/12/bga.embed.schema"
     },
     {
@@ -445,6 +511,9 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/bga/REC/2026/03/blood-gas-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/bga/REC/2026/06/blood-gas-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/binding-affinity/REC/2025/03/binding-affinity-analyzer.schema"
@@ -490,6 +559,15 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/binding-affinity/REC/2026/05/surface-plasmon-resonance-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/binding-affinity/REC/2026/06/binding-affinity-analyzer.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/binding-affinity/REC/2026/06/binding-affinity-analyzer.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/binding-affinity/REC/2026/06/surface-plasmon-resonance-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/bulk-density/REC/2021/12/bulk-density.embed.schema"
@@ -627,6 +705,18 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/cell-counting/REC/2026/03/fluorescence-cell-counting.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/cell-counting/REC/2026/06/cell-counting-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/cell-counting/REC/2026/06/cell-counting.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/cell-counting/REC/2026/06/cell-counting.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/cell-counting/REC/2026/06/fluorescence-cell-counting.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/cell-culture-analyzer/REC/2021/12/cell-culture-analyzer.embed.schema"
     },
     {
@@ -705,6 +795,15 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/chromatography/REC/2026/03/chromatography-detectors.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/chromatography/REC/2026/06/chromatography-column.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/chromatography/REC/2026/06/chromatography-column.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/chromatography/REC/2026/06/chromatography-detectors.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/code-reader/REC/2022/06/code-reader.embed.schema"
     },
     {
@@ -721,6 +820,9 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/conductance/REC/2026/03/conductance-cube-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/conductance/REC/2026/06/conductance-cube-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/conductivity/CR/2023/06/conductivity-cube-detection.schema"
@@ -769,6 +871,9 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/conductivity/REC/2026/03/conductivity-cube-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/conductivity/REC/2026/06/conductivity-cube-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/core/CR/2021/12/core.schema"
@@ -924,6 +1029,18 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/core/REC/2026/03/manifest.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/core/REC/2026/06/core.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/core/REC/2026/06/cube.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/core/REC/2026/06/hierarchy.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/core/REC/2026/06/manifest.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/disintegration/REC/2021/12/disintegration.embed.schema"
     },
     {
@@ -987,6 +1104,15 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/electronic-lab-notebook/REC/2026/03/section.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/electronic-lab-notebook/REC/2026/06/electronic-lab-notebook.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/electronic-lab-notebook/REC/2026/06/electronic-lab-notebook.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/electronic-lab-notebook/REC/2026/06/section.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/electronic-spectrometry/REC/2024/09/electronic-spectrometry.embed.schema"
     },
     {
@@ -1021,6 +1147,12 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/electronic-spectrometry/REC/2026/03/electronic-spectrometry.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/electronic-spectrometry/REC/2026/06/electronic-spectrometry.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/electronic-spectrometry/REC/2026/06/electronic-spectrometry.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/electrophoresis/REC/2024/06/electrophoresis.embed.schema"
@@ -1065,6 +1197,12 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/electrophoresis/REC/2026/03/electrophoresis.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/electrophoresis/REC/2026/06/electrophoresis.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/electrophoresis/REC/2026/06/electrophoresis.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/flow-cytometry/REC/2025/06/flow-cytometry.embed.schema"
     },
     {
@@ -1081,6 +1219,12 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/flow-cytometry/REC/2026/03/flow-cytometry.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/flow-cytometry/REC/2026/06/flow-cytometry.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/flow-cytometry/REC/2026/06/flow-cytometry.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/fluorescence/CR/2023/06/fluorescence-point-detection.schema"
@@ -1182,6 +1326,21 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/fluorescence/REC/2026/03/fluorescence-point-detector.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/fluorescence/REC/2026/06/fluorescence-area-scan-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/fluorescence/REC/2026/06/fluorescence-cube-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/fluorescence/REC/2026/06/fluorescence-electropherogram-cube-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/fluorescence/REC/2026/06/fluorescence-imaging-point-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/fluorescence/REC/2026/06/fluorescence-point-detector.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/foam-height/CR/2023/06/foam-height.embed.schema"
     },
     {
@@ -1260,6 +1419,12 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/foam-height/REC/2026/03/foam-height.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/foam-height/REC/2026/06/foam-height.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/foam-height/REC/2026/06/foam-height.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/foam-qualification/CR/2022/06/foam-qualification.embed.schema"
     },
     {
@@ -1336,6 +1501,12 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/foam-qualification/REC/2026/03/foam-qualification.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/foam-qualification/REC/2026/06/foam-qualification.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/foam-qualification/REC/2026/06/foam-qualification.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/fplc/CR/2022/12/fplc.tabular.embed.schema"
@@ -1422,6 +1593,15 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/fplc/REC/2026/03/fplc.tabular.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/fplc/REC/2026/06/fplc.tabular.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/fplc/REC/2026/06/fplc.tabular.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/fraction-collection/REC/2026/06/fraction-collection.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/ftir/REC/2021/12/ftir.embed.schema"
     },
     {
@@ -1447,6 +1627,9 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/ftir/REC/2026/03/ftir-absorption-spectrum-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/ftir/REC/2026/06/ftir-absorption-spectrum-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/gas-chromatography/CR/2022/12/gas-chromatography.tabular.embed.schema"
@@ -1539,6 +1722,12 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/gas-chromatography/REC/2026/03/gas-chromatography.tabular.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/gas-chromatography/REC/2026/06/gas-chromatography.tabular.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/gas-chromatography/REC/2026/06/gas-chromatography.tabular.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/gc-ms/REC/2024/09/gc-ms.tabular.embed.schema"
     },
     {
@@ -1573,6 +1762,12 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/gc-ms/REC/2026/03/gc-ms.tabular.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/gc-ms/REC/2026/06/gc-ms.tabular.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/gc-ms/REC/2026/06/gc-ms.tabular.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/gloss/CR/2022/09/gloss.embed.schema"
@@ -1659,6 +1854,12 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/gloss/REC/2026/03/gloss.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/gloss/REC/2026/06/gloss.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/gloss/REC/2026/06/gloss.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/hot-tack/CR/2022/09/hot-tack.embed.schema"
     },
     {
@@ -1743,6 +1944,12 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/hot-tack/REC/2026/03/hot-tack.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/hot-tack/REC/2026/06/hot-tack.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/hot-tack/REC/2026/06/hot-tack.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/impedance/REC/2024/06/impedance-scan-profile-detector.schema"
     },
     {
@@ -1783,6 +1990,12 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/impedance/REC/2026/03/impedance-spectrum-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/impedance/REC/2026/06/impedance-scan-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/impedance/REC/2026/06/impedance-spectrum-profile-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/lc-ms/CR/2023/06/lc-ms.tabular.embed.schema"
@@ -1851,6 +2064,12 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/lc-ms/REC/2026/03/lc-ms.tabular.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/lc-ms/REC/2026/06/lc-ms.tabular.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/lc-ms/REC/2026/06/lc-ms.tabular.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/light-obscuration/REC/2021/12/light-obscuration.embed.schema"
     },
     {
@@ -1876,6 +2095,9 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/light-obscuration/REC/2026/03/light-obscuration-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/light-obscuration/REC/2026/06/light-obscuration-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/liquid-chromatography/CR/2022/12/liquid-chromatography.tabular.embed.schema"
@@ -1962,6 +2184,12 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/liquid-chromatography/REC/2026/03/liquid-chromatography.tabular.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/liquid-chromatography/REC/2026/06/liquid-chromatography.tabular.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/liquid-chromatography/REC/2026/06/liquid-chromatography.tabular.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/loss-on-drying/REC/2021/12/loss-on-drying.embed.schema"
     },
     {
@@ -2044,6 +2272,15 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/luminescence/REC/2026/03/luminescence-point-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/luminescence/REC/2026/06/luminescence-area-scan-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/luminescence/REC/2026/06/luminescence-cube-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/luminescence/REC/2026/06/luminescence-point-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/mass-spectrometry/CR/2023/06/mass-spectrometry-cube-detection.schema"
@@ -2142,6 +2379,27 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/mass-spectrometry/REC/2026/03/mass-spectrometry.tabular.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/mass-spectrometry/REC/2026/06/mass-chromatogram-cube-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/mass-spectrometry/REC/2026/06/mass-chromatogram-tandem-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/mass-spectrometry/REC/2026/06/mass-spectrometry-cube-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/mass-spectrometry/REC/2026/06/mass-spectrometry.tabular.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/mass-spectrometry/REC/2026/06/mass-spectrometry.tabular.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/mercury-porosimetry/REC/2026/06/mercury-porosimetry.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/mercury-porosimetry/REC/2026/06/mercury-porosimetry.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/metabolite-analyzer/REC/2023/12/metabolite-detector.schema"
     },
     {
@@ -2167,6 +2425,9 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/metabolite-analyzer/REC/2026/03/metabolite-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/metabolite-analyzer/REC/2026/06/metabolite-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/multi-analyte-profiling/REC/2024/03/multi-analyte-profiling.embed.schema"
@@ -2215,6 +2476,12 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/multi-analyte-profiling/REC/2026/03/multi-analyte-profiling.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/multi-analyte-profiling/REC/2026/06/multi-analyte-profiling.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/multi-analyte-profiling/REC/2026/06/multi-analyte-profiling.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/nephelometry/REC/2021/12/nephelometry.embed.schema"
@@ -2277,6 +2544,12 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/nmr/REC/2026/03/solution-nmr.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/nmr/REC/2026/06/solution-nmr.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/nmr/REC/2026/06/solution-nmr.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/optical-imaging/REC/2024/12/imaging-point-detector.schema"
     },
     {
@@ -2290,6 +2563,9 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/optical-imaging/REC/2026/03/imaging-point-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/optical-imaging/REC/2026/06/imaging-point-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/optical-microscopy/CR/2021/12/optical-microscopy.embed.schema"
@@ -2386,6 +2662,15 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/osmolality/REC/2026/03/osmolality.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/osmolality/REC/2026/06/osmolality-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/osmolality/REC/2026/06/osmolality.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/osmolality/REC/2026/06/osmolality.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/oven-kf/REC/2021/12/coulometric-oven-kf.embed.schema"
@@ -2517,6 +2802,18 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/pcr/REC/2026/03/qpcr.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/pcr/REC/2026/06/dpcr.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/pcr/REC/2026/06/dpcr.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/pcr/REC/2026/06/qpcr.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/pcr/REC/2026/06/qpcr.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/ph/REC/2021/12/ph.embed.schema"
     },
     {
@@ -2631,6 +2928,18 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/ph/REC/2026/03/ph-sensor.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/ph/REC/2026/06/ph-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/ph/REC/2026/06/ph-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/ph/REC/2026/06/ph-sensor.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/ph/REC/2026/06/ph-sensor.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/plate-reader/CR/2023/06/plate-reader.embed.schema"
     },
     {
@@ -2695,6 +3004,12 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/plate-reader/REC/2026/03/plate-reader.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/plate-reader/REC/2026/06/plate-reader.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/plate-reader/REC/2026/06/plate-reader.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/pressure-monitoring/REC/2023/03/pressure-sensor.embed.schema"
@@ -2799,6 +3114,18 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/pressure-monitoring/REC/2026/03/pressure-sensor.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/pressure-monitoring/REC/2026/06/pressure-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/pressure-monitoring/REC/2026/06/pressure-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/pressure-monitoring/REC/2026/06/pressure-sensor.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/pressure-monitoring/REC/2026/06/pressure-sensor.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/psd/REC/2021/12/psd.embed.schema"
     },
     {
@@ -2839,6 +3166,9 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/raman/REC/2026/03/raman-spectrum-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/raman/REC/2026/06/raman-spectrum-detector.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/rheometry/REC/2024/09/measurement-cell.schema"
@@ -2913,6 +3243,18 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/rheometry/REC/2026/03/rotational-rheometry-cube-detector.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/rheometry/REC/2026/06/measurement-cell.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/rheometry/REC/2026/06/rheometry.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/rheometry/REC/2026/06/rheometry.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/rheometry/REC/2026/06/rotational-rheometry-cube-detector.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/sem/CR/2021/12/sem.embed.schema"
     },
     {
@@ -2980,6 +3322,12 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/solution-analyzer/REC/2026/03/solution-analyzer.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/solution-analyzer/REC/2026/06/solution-analyzer.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/solution-analyzer/REC/2026/06/solution-analyzer.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/specific-rotation/REC/2021/09/specific-rotation.embed.schema"
@@ -3082,6 +3430,15 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/stirring/REC/2026/03/stirring.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/stirring/REC/2026/06/stirring-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/stirring/REC/2026/06/stirring.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/stirring/REC/2026/06/stirring.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/surface-area-analysis/REC/2021/12/surface-area-analysis.embed.schema"
@@ -3204,6 +3561,18 @@
       "uri": "http://purl.allotrope.org/json-schemas/adm/temperature-monitoring/REC/2026/03/temperature-sensor.schema"
     },
     {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/temperature-monitoring/REC/2026/06/temperature-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/temperature-monitoring/REC/2026/06/temperature-profile-detector.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/temperature-monitoring/REC/2026/06/temperature-sensor.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/temperature-monitoring/REC/2026/06/temperature-sensor.schema"
+    },
+    {
       "uri": "http://purl.allotrope.org/json-schemas/adm/tensile-test/CR/2023/06/tensile-test.embed.schema"
     },
     {
@@ -3280,6 +3649,12 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/tensile-test/REC/2026/03/tensile-test.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/tensile-test/REC/2026/06/tensile-test.embed.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/adm/tensile-test/REC/2026/06/tensile-test.schema"
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/adm/thermogravimetric-analysis/REC/2021/12/thermogravimetric-analysis.embed.schema"
@@ -3406,6 +3781,9 @@
     },
     {
       "uri": "http://purl.allotrope.org/json-schemas/qudt/REC/2026/03/units.schema"
+    },
+    {
+      "uri": "http://purl.allotrope.org/json-schemas/qudt/REC/2026/06/units.schema"
     }
   ]
 }

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 // resources/js/components/chart-area-interactive.tsx
 

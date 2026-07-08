@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ArrowRight, Eye, Globe, Layers, PlusCircle } from 'lucide-react';
 import CategoriesList from '@/components/ecommerce/products/CategoriesList';
 import RecentProducts from '@/components/ecommerce/products/RecentProducts';

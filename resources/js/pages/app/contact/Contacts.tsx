@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/Contact.tsx
 import { Head, useForm } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     ArrowRightIcon,
     CheckCircle2Icon,

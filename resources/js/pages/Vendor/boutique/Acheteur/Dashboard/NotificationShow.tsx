@@ -1,9 +1,9 @@
 import { Head } from '@inertiajs/react';
 import { AppSidebar } from '@/components/app-sidebar';
+import { NotificationDetail } from '@/components/ecommerce/notifications/NotificationDetail';
 import { SiteHeader } from '@/components/site-header';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { NotificationDetail } from '@/components/ecommerce/notifications/NotificationDetail';
 import { cn } from '@/lib/utils';
 import type { DashboardNotification } from '@/types/ecommerce/notifications/notification';
 

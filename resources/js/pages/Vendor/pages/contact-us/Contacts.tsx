@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/immo/pages/contact/Contact.tsx
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { motion } from 'framer-motion';
 import {
     CheckCircle2Icon,
     Clock3Icon,
@@ -19,6 +18,7 @@ import {
     UserIcon,
     LoaderIcon,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';

@@ -2,7 +2,7 @@
 // resources/js/pages/customs/dashboard-acheteurs.tsx
 import type { PageProps } from '@inertiajs/core';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import type { LucideIcon } from 'lucide-react';
 import {
     ArrowRight,
@@ -605,7 +605,7 @@ export default function DashboardCustomerBuyer() {
                                                         payload[0]?.value;
 
                                                     return (
-                                                        <div className="min-w-47.5 rounded-2xl border border-emerald-200/50 bg-white/95 p-4 shadow-2xl backdrop-blur-xl dark:border-emerald-800/40 dark:bg-slate-900/95">
+                                                        <div className="min-w-47.5 rounded-xl border border-emerald-200/50 bg-white/95 p-4 shadow-2xl backdrop-blur-xl dark:border-emerald-800/40 dark:bg-slate-900/95">
                                                             <div className="mb-3 flex items-center justify-between">
                                                                 <span className="text-xs font-medium tracking-wide text-slate-400 uppercase">
                                                                     Jour

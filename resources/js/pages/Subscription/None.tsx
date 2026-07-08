@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/purity */
 import { Head, Link } from '@inertiajs/react';
 import type { Variants } from 'framer-motion';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Package, ArrowRight, Zap, ShieldCheck, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 

@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/Contact.tsx
 import { Head, useForm } from '@inertiajs/react';
-import { motion } from 'framer-motion';
 import {
     ArrowRightIcon,
     CheckCircle2Icon,
@@ -21,6 +20,7 @@ import {
     UserIcon,
     LoaderIcon,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { toast } from 'sonner';

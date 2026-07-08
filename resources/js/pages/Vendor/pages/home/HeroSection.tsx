@@ -2,7 +2,6 @@
 // resources/js/components/home/HeroSection.tsx
 import { useGSAP } from '@gsap/react';
 import { Link, usePage } from '@inertiajs/react';
-import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import {
     ArrowRight,
@@ -17,6 +16,7 @@ import {
     Users,
     ChevronRight,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useRef, useState } from 'react';
 import CountUp from 'react-countup';
 import { Badge } from '@/components/ui/badge';

@@ -1,7 +1,7 @@
 // resources/js/pages/Shop/Orders/Show.tsx
 import type { PageProps } from '@inertiajs/core';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     ArrowLeft,
     Package,

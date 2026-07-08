@@ -25,6 +25,9 @@ export interface Tenant {
     } | null;
     logo_url?: string | null;
     sso_login_url: string;
+    type_entite?: string | null;      // type d'entité
+  siret?: string | null;            // RCCM / SIRET
+  email_verified_at?: string | null;// date de vérification email
 }
 
 export interface Summary {

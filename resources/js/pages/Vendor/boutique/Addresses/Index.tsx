@@ -23,8 +23,23 @@ import {
     Pencil,
     ChevronDown,
     Search,
+    PieChart,
+    BarChart3,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import {
+    ResponsiveContainer,
+    PieChart as RPieChart,
+    Pie,
+    Cell,
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    Legend,
+} from 'recharts';
 import { toast } from 'sonner';
 
 import { AppSidebar } from '@/components/app-sidebar';
@@ -99,29 +114,188 @@ interface City {
 
 interface Props extends PageProps {
     addresses: Address[];
-    defaultCountry?: string; // ex: "République Démocratique du Congo"
-    defaultPhoneCode?: string; // ex: "+243"
+    defaultCountry?: string;
+    defaultPhoneCode?: string;
 }
 
-// ---------- Constantes (pays par défaut si non fourni) ----------
 const FALLBACK_COUNTRY = 'République Démocratique du Congo';
 const FALLBACK_PHONE_CODE = '+243';
 
-// ---------- Page ----------
+// Graphique : Répartition par type (livraison vs facturation)
+const COLORS = ['#10b981', '#3b82f6'];
+
+function AddressCharts({ addresses }: { addresses: Address[] }) {
+    const typeData = useMemo(() => {
+        const livraison = addresses.filter(
+            (a) => a.type === 'livraison',
+        ).length;
+        const facturation = addresses.filter(
+            (a) => a.type === 'facturation',
+        ).length;
+
+        return [
+            { name: 'Livraison', value: livraison, fill: COLORS[0] },
+            { name: 'Facturation', value: facturation, fill: COLORS[1] },
+        ];
+    }, [addresses]);
+
+    const countryData = useMemo(() => {
+        const countMap: Record<string, number> = {};
+        addresses.forEach((a) => {
+            countMap[a.pays] = (countMap[a.pays] || 0) + 1;
+        });
+
+        return Object.entries(countMap).map(([country, count]) => ({
+            country,
+            count,
+        }));
+    }, [addresses]);
+
+    if (addresses.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {/* Graphique circulaire */}
+            <Card className="rounded-2xl border-0 bg-white/60 shadow-lg shadow-slate-200/20 backdrop-blur-md dark:bg-slate-900/60 dark:shadow-black/20">
+                <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                        <PieChart className="h-5 w-5 text-emerald-500" />
+                        Type d'adresses
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center">
+                    {typeData.some((d) => d.value > 0) ? (
+                        <>
+                            <ResponsiveContainer width="100%" height={250}>
+                                <RPieChart>
+                                    <Pie
+                                        key={typeData
+                                            .map((d) => d.name)
+                                            .join('-')} // force re-mount when data changes
+                                        data={typeData}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        cx="50%"
+                                        cy="50%"
+                                        outerRadius={90}
+                                        innerRadius={50}
+                                        paddingAngle={5}
+                                        stroke="none"
+                                        isAnimationActive={false} // évite les conflits de retrait de nœuds SVG
+                                        label={({ name, percent }) =>
+                                            `${name} ${percent ? `(${(percent * 100).toFixed(0)}%)` : ''}`
+                                        }
+                                    />
+                                    <Tooltip
+                                        contentStyle={{
+                                            background: 'rgba(255,255,255,0.9)',
+                                            borderRadius: '12px',
+                                            border: 'none',
+                                            boxShadow:
+                                                '0 4px 12px rgba(0,0,0,0.1)',
+                                        }}
+                                    />
+                                </RPieChart>
+                            </ResponsiveContainer>
+                            <div className="mt-4 flex justify-center gap-6">
+                                {typeData.map((d) => (
+                                    <div
+                                        key={d.name}
+                                        className="flex items-center gap-2 text-sm"
+                                    >
+                                        <span
+                                            className="h-3 w-3 rounded-full"
+                                            style={{ backgroundColor: d.fill }}
+                                        />
+                                        <span className="text-slate-600 dark:text-slate-300">
+                                            {d.name}
+                                        </span>
+                                        <span className="font-medium text-slate-900 dark:text-white">
+                                            {d.value}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    ) : (
+                        <p className="py-8 text-sm text-slate-500">
+                            Aucune adresse
+                        </p>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Graphique en barres (inchangé) */}
+            <Card className="rounded-2xl border-0 bg-white/60 shadow-lg shadow-slate-200/20 backdrop-blur-md dark:bg-slate-900/60 dark:shadow-black/20">
+                <CardHeader className="pb-2">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                        <BarChart3 className="h-5 w-5 text-emerald-500" />
+                        Adresses par pays
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {countryData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={250}>
+                            <BarChart
+                                data={countryData}
+                                margin={{
+                                    top: 5,
+                                    right: 20,
+                                    left: 0,
+                                    bottom: 5,
+                                }}
+                            >
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    stroke="#e2e8f0"
+                                    strokeOpacity={0.5}
+                                />
+                                <XAxis
+                                    dataKey="country"
+                                    tick={{ fontSize: 11, fill: '#94a3b8' }}
+                                />
+                                <YAxis
+                                    tick={{ fontSize: 11, fill: '#94a3b8' }}
+                                    allowDecimals={false}
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        background: 'rgba(255,255,255,0.9)',
+                                        borderRadius: '12px',
+                                        border: 'none',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                    }}
+                                />
+                                <Bar
+                                    dataKey="count"
+                                    fill="#10b981"
+                                    radius={[8, 8, 0, 0]}
+                                />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <p className="py-8 text-center text-sm text-slate-500">
+                            Aucune donnée
+                        </p>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+    );
+}
+
 export default function ShopAddressesPage() {
     const { addresses, defaultCountry, defaultPhoneCode } =
         usePage<Props>().props;
 
-    // États pour les listes de pays / villes
     const [countries, setCountries] = useState<Country[]>([]);
     const [cities, setCities] = useState<City[]>([]);
     const [loadingCountries, setLoadingCountries] = useState(true);
     const [loadingCities, setLoadingCities] = useState(false);
-
-    // ID de l'adresse en cours d'édition (null = création)
     const [editingId, setEditingId] = useState<string | null>(null);
 
-    // Charger les pays au montage
     useEffect(() => {
         fetch(route('tenant.addresses.countries'))
             .then((res) => res.json())
@@ -132,38 +306,30 @@ export default function ShopAddressesPage() {
             .catch(() => setLoadingCountries(false));
     }, []);
 
-    // Déterminer le pays initial (par défaut fourni par le backend ou fallback)
     const initialCountry = defaultCountry || FALLBACK_COUNTRY;
 
-    const {
-        data,
-        setData,
-        post,
-        put,
-        processing,
-        errors,
-        reset,
-        recentlySuccessful,
-    } = useForm<AddressFormData>({
-        rue: '',
-        complement: '',
-        code_postal: '',
-        ville: '',
-        pays: initialCountry,
-        telephone: defaultPhoneCode || FALLBACK_PHONE_CODE,
-        type: 'livraison',
-        est_defaut: false,
-    });
+    const { data, setData, post, put, processing, errors, reset } =
+        useForm<AddressFormData>({
+            rue: '',
+            complement: '',
+            code_postal: '',
+            ville: '',
+            pays: initialCountry,
+            telephone: defaultPhoneCode || FALLBACK_PHONE_CODE,
+            type: 'livraison',
+            est_defaut: false,
+        });
 
-    // Charger les villes quand le pays change
     useEffect(() => {
         if (!data.pays || countries.length === 0) {
             return;
         }
 
         const country = countries.find((c) => c.name === data.pays);
+
         if (!country) {
             setCities([]);
+
             return;
         }
 
@@ -180,14 +346,12 @@ export default function ShopAddressesPage() {
             });
     }, [data.pays, countries]);
 
-    // Lorsque l'utilisateur change de pays, on réinitialise ville et code postal
     const handleCountryChange = (countryName: string) => {
         setData({
             ...data,
             pays: countryName,
             ville: '',
             code_postal: '',
-            // Mettre à jour l'indicatif téléphonique si dispo
             telephone:
                 countries.find((c) => c.name === countryName)?.phone_code ||
                 defaultPhoneCode ||
@@ -195,7 +359,6 @@ export default function ShopAddressesPage() {
         });
     };
 
-    // Quand une ville est sélectionnée, on peut pré-remplir le code postal
     const handleCityChange = (cityName: string) => {
         const city = cities.find((c) => c.name === cityName);
         setData({
@@ -205,7 +368,6 @@ export default function ShopAddressesPage() {
         });
     };
 
-    // Supprimer une adresse
     const handleDelete = (id: string, e: React.MouseEvent) => {
         e.preventDefault();
 
@@ -225,7 +387,6 @@ export default function ShopAddressesPage() {
         }
     };
 
-    // Définir comme adresse par défaut
     const handleSetDefault = (id: string) => {
         router.post(
             route('tenant.addresses.default', id),
@@ -241,7 +402,6 @@ export default function ShopAddressesPage() {
         );
     };
 
-    // Passer en mode édition pour une adresse
     const startEdit = (address: Address) => {
         setEditingId(address.id);
         setData({
@@ -256,7 +416,6 @@ export default function ShopAddressesPage() {
         });
     };
 
-    // Annuler l'édition et repasser en mode création
     const cancelEdit = () => {
         setEditingId(null);
         reset();
@@ -272,10 +431,8 @@ export default function ShopAddressesPage() {
         });
     };
 
-    // Soumission (création ou mise à jour)
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         const onSuccess = () => {
             reset();
 
@@ -343,8 +500,7 @@ export default function ShopAddressesPage() {
                 <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-emerald-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
                     <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:p-6 md:pt-6">
                         {/* En-tête */}
-                        <div className="relative overflow-hidden rounded-lg border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/70">
-                            <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-transparent dark:from-emerald-500/10" />
+                        <div className="relative overflow-hidden rounded-xl border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/70">
                             <div className="relative z-10 flex flex-col gap-6 p-8 lg:flex-row lg:items-center lg:justify-between">
                                 <div className="max-w-2xl">
                                     <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
@@ -392,11 +548,13 @@ export default function ShopAddressesPage() {
                             </div>
                         </div>
 
-                        {/* Grille principale */}
+                        {/* Graphiques statistiques */}
+                        <AddressCharts addresses={addresses} />
+
+                        {/* Contenu principal */}
                         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
                             {/* Liste des adresses */}
                             <div className="space-y-6">
-                                {/* Livraison */}
                                 <Card className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
                                     <CardHeader className="pb-3">
                                         <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
@@ -406,7 +564,7 @@ export default function ShopAddressesPage() {
                                     </CardHeader>
                                     <CardContent>
                                         {livraisonAddresses.length > 0 ? (
-                                            <div className="grid gap-4 sm:grid-cols-2">
+                                            <div className="flex flex-col gap-4">
                                                 {livraisonAddresses.map(
                                                     (address) => (
                                                         <AdresseCard
@@ -438,7 +596,6 @@ export default function ShopAddressesPage() {
                                     </CardContent>
                                 </Card>
 
-                                {/* Facturation */}
                                 <Card className="overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
                                     <CardHeader className="pb-3">
                                         <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
@@ -448,7 +605,7 @@ export default function ShopAddressesPage() {
                                     </CardHeader>
                                     <CardContent>
                                         {facturationAddresses.length > 0 ? (
-                                            <div className="grid gap-4 sm:grid-cols-2">
+                                            <div className="flex flex-col gap-4">
                                                 {facturationAddresses.map(
                                                     (address) => (
                                                         <AdresseCard
@@ -482,18 +639,18 @@ export default function ShopAddressesPage() {
                                 </Card>
                             </div>
 
-                            {/* Formulaire (création / modification) */}
+                            {/* Formulaire */}
                             <Card className="h-fit rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
                                         {editingId ? (
                                             <>
-                                                <Pencil className="h-5 w-5 text-amber-500" />
+                                                <Pencil className="h-5 w-5 text-amber-500" />{' '}
                                                 Modifier l’adresse
                                             </>
                                         ) : (
                                             <>
-                                                <Plus className="h-5 w-5 text-emerald-500" />
+                                                <Plus className="h-5 w-5 text-emerald-500" />{' '}
                                                 Nouvelle adresse
                                             </>
                                         )}
@@ -535,7 +692,6 @@ export default function ShopAddressesPage() {
                                             </div>
                                             <InputError message={errors.rue} />
                                         </div>
-
                                         {/* Complément */}
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -561,10 +717,8 @@ export default function ShopAddressesPage() {
                                                 message={errors.complement}
                                             />
                                         </div>
-
-                                        {/* Ligne : Pays et Ville */}
+                                        {/* Pays & Ville */}
                                         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                            {/* Pays (combobox recherchable) */}
                                             <div className="space-y-2">
                                                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                                     Pays
@@ -575,11 +729,9 @@ export default function ShopAddressesPage() {
                                                             variant="outline"
                                                             role="combobox"
                                                             className={cn(
-                                                                'h-12 w-full justify-start rounded-2xl border-slate-200/60 bg-slate-50/50 pl-4 text-left font-normal shadow-xs transition-all duration-300',
-                                                                'hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10',
-                                                                'dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950',
+                                                                'h-12 w-full justify-start rounded-2xl border-slate-200/60 bg-slate-50/50 pl-4 text-left font-normal shadow-xs transition-all duration-300 hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950',
                                                                 !data.pays &&
-                                                                    'text-slate-400 dark:text-slate-500',
+                                                                    'text-slate-400',
                                                             )}
                                                             disabled={
                                                                 loadingCountries
@@ -587,17 +739,29 @@ export default function ShopAddressesPage() {
                                                         >
                                                             {data.pays ? (
                                                                 <span className="truncate">
-                                                                    {countries.find((c) => c.name === data.pays)?.name}
+                                                                    {
+                                                                        countries.find(
+                                                                            (
+                                                                                c,
+                                                                            ) =>
+                                                                                c.name ===
+                                                                                data.pays,
+                                                                        )?.name
+                                                                    }
                                                                 </span>
                                                             ) : (
                                                                 'Sélectionnez un pays'
                                                             )}
+                                                            <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
                                                         </Button>
                                                     </PopoverTrigger>
-                                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-2xl border-slate-200/60 bg-white/90 backdrop-blur-xl shadow-xl dark:border-slate-800 dark:bg-slate-950/90">
+                                                    <PopoverContent className="w-[--radix-popover-trigger-width] rounded-2xl border-slate-200/60 bg-white/90 p-0 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/90">
                                                         <Command className="bg-transparent">
-                                                            <CommandInput placeholder="Rechercher un pays..." className="border-none focus:ring-0" />
-                                                            <CommandList className="p-1 max-h-60">
+                                                            <CommandInput
+                                                                placeholder="Rechercher un pays..."
+                                                                className="border-none focus:ring-0"
+                                                            />
+                                                            <CommandList className="max-h-60">
                                                                 <CommandEmpty className="py-6 text-center text-sm text-slate-500">
                                                                     Aucun pays
                                                                     trouvé.
@@ -612,21 +776,21 @@ export default function ShopAddressesPage() {
                                                                                 value={
                                                                                     c.name
                                                                                 }
-                                                                                className="mb-1 cursor-pointer rounded-xl px-3 py-2 transition-colors aria-selected:bg-emerald-50 aria-selected:text-emerald-900 last:mb-0 dark:aria-selected:bg-emerald-500/10 dark:aria-selected:text-emerald-100"
+                                                                                className="mb-1 cursor-pointer rounded-xl px-3 py-2 transition-colors aria-selected:bg-emerald-50 aria-selected:text-emerald-900 dark:aria-selected:bg-emerald-500/10 dark:aria-selected:text-emerald-100"
                                                                                 onSelect={(
                                                                                     currentValue,
-                                                                                ) => {
+                                                                                ) =>
                                                                                     handleCountryChange(
                                                                                         currentValue,
-                                                                                    );
-                                                                                }}
+                                                                                    )
+                                                                                }
                                                                             >
                                                                                 <Check
                                                                                     className={cn(
                                                                                         'mr-2 h-4 w-4',
                                                                                         data.pays ===
                                                                                             c.name
-                                                                                            ? 'opacity-100 text-emerald-500'
+                                                                                            ? 'text-emerald-500 opacity-100'
                                                                                             : 'opacity-0',
                                                                                     )}
                                                                                 />
@@ -641,10 +805,10 @@ export default function ShopAddressesPage() {
                                                         </Command>
                                                     </PopoverContent>
                                                 </Popover>
-                                                <InputError message={errors.pays} />
+                                                <InputError
+                                                    message={errors.pays}
+                                                />
                                             </div>
-
-                                            {/* Ville (combobox recherchable) */}
                                             <div className="space-y-2">
                                                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                                     Ville
@@ -655,11 +819,9 @@ export default function ShopAddressesPage() {
                                                             variant="outline"
                                                             role="combobox"
                                                             className={cn(
-                                                                'h-12 w-full justify-start rounded-2xl border-slate-200/60 bg-slate-50/50 pl-4 text-left font-normal shadow-xs transition-all duration-300',
-                                                                'hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10',
-                                                                'dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950',
+                                                                'h-12 w-full justify-start rounded-2xl border-slate-200/60 bg-slate-50/50 pl-4 text-left font-normal shadow-xs transition-all duration-300 hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950',
                                                                 !data.ville &&
-                                                                    'text-slate-400 dark:text-slate-500',
+                                                                    'text-slate-400',
                                                             )}
                                                             disabled={
                                                                 loadingCities ||
@@ -668,85 +830,98 @@ export default function ShopAddressesPage() {
                                                         >
                                                             {data.ville ? (
                                                                 <span className="truncate">
-                                                                    {cities.find((c) => c.name === data.ville)?.name}
+                                                                    {
+                                                                        cities.find(
+                                                                            (
+                                                                                c,
+                                                                            ) =>
+                                                                                c.name ===
+                                                                                data.ville,
+                                                                        )?.name
+                                                                    }
                                                                 </span>
                                                             ) : loadingCities ? (
                                                                 <div className="flex items-center gap-2 text-slate-500">
-                                                                    <LoaderIcon className="h-4 w-4 animate-spin" />
+                                                                    <LoaderIcon className="h-4 w-4 animate-spin" />{' '}
                                                                     Chargement...
                                                                 </div>
                                                             ) : (
                                                                 'Sélectionnez une ville'
                                                             )}
+                                                            <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
                                                         </Button>
                                                     </PopoverTrigger>
-                                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0 rounded-2xl border-slate-200/60 bg-white/90 backdrop-blur-xl shadow-xl dark:border-slate-800 dark:bg-slate-950/90">
-                                                    <Command className="bg-transparent">
-                                                        <CommandInput placeholder="Rechercher une ville..." className="border-none focus:ring-0" />
-                                                        <CommandList className="p-1 max-h-60">
-                                                            <CommandEmpty className="py-6 text-center text-sm text-slate-500">
-                                                                Aucune ville
-                                                                trouvée.
-                                                            </CommandEmpty>
-                                                            <CommandGroup>
-                                                                {cities.map(
-                                                                    (city) => (
-                                                                        <CommandItem
-                                                                            key={
-                                                                                city.id
-                                                                            }
-                                                                            value={
-                                                                                city.name
-                                                                            }
-                                                                            className="mb-1 cursor-pointer rounded-xl px-3 py-2 transition-colors aria-selected:bg-emerald-50 aria-selected:text-emerald-900 last:mb-0 dark:aria-selected:bg-emerald-500/10 dark:aria-selected:text-emerald-100"
-                                                                            onSelect={(
-                                                                                currentValue,
-                                                                            ) => {
-                                                                                handleCityChange(
+                                                    <PopoverContent className="w-[--radix-popover-trigger-width] rounded-2xl border-slate-200/60 bg-white/90 p-0 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/90">
+                                                        <Command className="bg-transparent">
+                                                            <CommandInput
+                                                                placeholder="Rechercher une ville..."
+                                                                className="border-none focus:ring-0"
+                                                            />
+                                                            <CommandList className="max-h-60">
+                                                                <CommandEmpty className="py-6 text-center text-sm text-slate-500">
+                                                                    Aucune ville
+                                                                    trouvée.
+                                                                </CommandEmpty>
+                                                                <CommandGroup>
+                                                                    {cities.map(
+                                                                        (
+                                                                            city,
+                                                                        ) => (
+                                                                            <CommandItem
+                                                                                key={
+                                                                                    city.id
+                                                                                }
+                                                                                value={
+                                                                                    city.name
+                                                                                }
+                                                                                className="mb-1 cursor-pointer rounded-xl px-3 py-2 transition-colors aria-selected:bg-emerald-50 aria-selected:text-emerald-900 dark:aria-selected:bg-emerald-500/10 dark:aria-selected:text-emerald-100"
+                                                                                onSelect={(
                                                                                     currentValue,
-                                                                                );
-                                                                            }}
-                                                                        >
-                                                                            <Check
-                                                                                className={cn(
-                                                                                    'mr-2 h-4 w-4',
-                                                                                    data.ville ===
-                                                                                        city.name
-                                                                                        ? 'opacity-100 text-emerald-500'
-                                                                                        : 'opacity-0',
+                                                                                ) =>
+                                                                                    handleCityChange(
+                                                                                        currentValue,
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                <Check
+                                                                                    className={cn(
+                                                                                        'mr-2 h-4 w-4',
+                                                                                        data.ville ===
+                                                                                            city.name
+                                                                                            ? 'text-emerald-500 opacity-100'
+                                                                                            : 'opacity-0',
+                                                                                    )}
+                                                                                />
+                                                                                {
+                                                                                    city.name
+                                                                                }
+                                                                                {city.postal_code && (
+                                                                                    <span className="ml-auto text-xs text-slate-400">
+                                                                                        {
+                                                                                            city.postal_code
+                                                                                        }
+                                                                                    </span>
                                                                                 )}
-                                                                            />
-                                                                            {
-                                                                                city.name
-                                                                            }
-                                                                            {city.postal_code && (
-                                                                                <span className="ml-auto text-xs text-slate-400">
-                                                                                    {
-                                                                                        city.postal_code
-                                                                                    }
-                                                                                </span>
-                                                                            )}
-                                                                        </CommandItem>
-                                                                    ),
-                                                                )}
-                                                            </CommandGroup>
-                                                        </CommandList>
-                                                    </Command>
-                                                </PopoverContent>
-                                            </Popover>
-                                            <InputError
-                                                message={errors.ville}
-                                            />
+                                                                            </CommandItem>
+                                                                        ),
+                                                                    )}
+                                                                </CommandGroup>
+                                                            </CommandList>
+                                                        </Command>
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <InputError
+                                                    message={errors.ville}
+                                                />
+                                            </div>
                                         </div>
-                                        </div>
-
                                         {/* Code postal */}
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                                 Code postal
                                             </label>
                                             <div className="relative">
-                                                <Landmark className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-emerald-500 dark:text-emerald-400" />
+                                                <Landmark className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-emerald-500" />
                                                 <Input
                                                     value={data.code_postal}
                                                     onChange={(e) =>
@@ -763,18 +938,28 @@ export default function ShopAddressesPage() {
                                                 message={errors.code_postal}
                                             />
                                         </div>
-
                                         {/* Téléphone */}
                                         <div className="space-y-2">
                                             <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                                 Téléphone
                                             </label>
                                             <div className="relative">
-                                                <div className="absolute top-1/2 left-4 -translate-y-1/2 flex items-center gap-2">
-                                                    <Phone className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
-                                                    {countries.find((c) => c.name === data.pays)?.phone_code && (
-                                                        <span className="text-sm font-medium text-slate-500 border-r border-slate-200 dark:border-slate-700 pr-2 select-none">
-                                                            +{countries.find((c) => c.name === data.pays)?.phone_code}
+                                                <div className="absolute top-1/2 left-4 flex -translate-y-1/2 items-center gap-2">
+                                                    <Phone className="h-4 w-4 text-emerald-500" />
+                                                    {countries.find(
+                                                        (c) =>
+                                                            c.name ===
+                                                            data.pays,
+                                                    )?.phone_code && (
+                                                        <span className="border-r border-slate-200 pr-2 text-sm font-medium text-slate-500 select-none dark:border-slate-700">
+                                                            +
+                                                            {
+                                                                countries.find(
+                                                                    (c) =>
+                                                                        c.name ===
+                                                                        data.pays,
+                                                                )?.phone_code
+                                                            }
                                                         </span>
                                                     )}
                                                 </div>
@@ -788,10 +973,14 @@ export default function ShopAddressesPage() {
                                                     }
                                                     placeholder="Numéro de téléphone"
                                                     className={cn(
-                                                        "h-12 rounded-2xl border-slate-200/60 bg-slate-50/50 shadow-xs transition-all duration-300",
-                                                        "hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10",
-                                                        "dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950",
-                                                        countries.find((c) => c.name === data.pays)?.phone_code ? "pl-28" : "pl-11"
+                                                        'h-12 rounded-2xl border-slate-200/60 bg-slate-50/50 shadow-xs transition-all duration-300 hover:border-emerald-200 hover:bg-slate-100 focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-emerald-800 dark:hover:bg-slate-800 dark:focus:bg-slate-950',
+                                                        countries.find(
+                                                            (c) =>
+                                                                c.name ===
+                                                                data.pays,
+                                                        )?.phone_code
+                                                            ? 'pl-28'
+                                                            : 'pl-11',
                                                     )}
                                                 />
                                             </div>
@@ -799,8 +988,7 @@ export default function ShopAddressesPage() {
                                                 message={errors.telephone}
                                             />
                                         </div>
-
-                                        {/* Type (sélecteur moderne) */}
+                                        {/* Type */}
                                         <div className="grid grid-cols-2 gap-3">
                                             <button
                                                 type="button"
@@ -846,7 +1034,6 @@ export default function ShopAddressesPage() {
                                                 </p>
                                             </button>
                                         </div>
-
                                         <Button
                                             type="submit"
                                             disabled={processing}
@@ -859,7 +1046,7 @@ export default function ShopAddressesPage() {
                                         >
                                             {processing ? (
                                                 <>
-                                                    <LoaderIcon className="h-6 w-6 animate-spin" />
+                                                    <LoaderIcon className="h-6 w-6 animate-spin" />{' '}
                                                     {editingId
                                                         ? 'Mise à jour...'
                                                         : 'Enregistrement...'}
@@ -869,13 +1056,13 @@ export default function ShopAddressesPage() {
                                                     {editingId ? (
                                                         <>
                                                             Mettre à jour
-                                                            l’adresse
+                                                            l’adresse{' '}
                                                             <CheckCircle2 className="ml-2 h-5 w-5" />
                                                         </>
                                                     ) : (
                                                         <>
                                                             Enregistrer
-                                                            l’adresse
+                                                            l’adresse{' '}
                                                             <PackageCheck className="ml-2 h-5 w-5" />
                                                         </>
                                                     )}
@@ -893,7 +1080,7 @@ export default function ShopAddressesPage() {
     );
 }
 
-// ---------- Composant Carte Adresse (extrait pour plus de clarté) ----------
+// Composant carte adresse modernisé
 function AdresseCard({
     address,
     onSetDefault,
@@ -910,15 +1097,11 @@ function AdresseCard({
     return (
         <div
             className={cn(
-                'group relative overflow-hidden rounded-3xl border border-slate-200/60 bg-white/90 p-6 shadow-sm transition-all duration-300',
-                'hover:-translate-y-1 hover:border-emerald-200 hover:shadow-2xl dark:border-slate-800/60 dark:bg-slate-900/80',
+                'group relative overflow-hidden rounded-3xl border border-slate-200/60 bg-white/90 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-2xl dark:border-slate-800/60 dark:bg-slate-900/80',
                 isEditing && 'ring-2 ring-amber-400 dark:ring-amber-500',
             )}
         >
-            {/* Glow */}
             <div className="absolute inset-0 bg-linear-to-br from-emerald-500/0 via-emerald-500/0 to-cyan-500/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-            {/* Badge principal + boutons d'action */}
             <div className="absolute top-4 right-4 flex items-center gap-2">
                 {address.est_defaut && (
                     <div className="flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-xs font-bold text-white shadow-lg">
@@ -926,13 +1109,10 @@ function AdresseCard({
                         Principale
                     </div>
                 )}
-                {/* Bouton Modifier (toujours visible) */}
                 <button
                     onClick={() => onEdit(address)}
                     className={cn(
-                        'rounded-full p-2 transition-colors',
-                        'text-slate-400 hover:bg-amber-50 hover:text-amber-500',
-                        'dark:hover:bg-slate-800 dark:hover:text-amber-400',
+                        'rounded-full p-2 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-500 dark:hover:bg-slate-800 dark:hover:text-amber-400',
                         isEditing &&
                             'bg-amber-50 text-amber-500 dark:bg-slate-800',
                     )}
@@ -941,9 +1121,7 @@ function AdresseCard({
                     <Pencil className="h-4 w-4" />
                 </button>
             </div>
-
             <div className="relative z-10">
-                {/* Icône type */}
                 <div className="mb-5 flex items-start justify-between">
                     <div className="flex items-center gap-3">
                         <div
@@ -972,7 +1150,6 @@ function AdresseCard({
                         </div>
                     </div>
                 </div>
-
                 <div className="space-y-3">
                     <div className="flex items-start gap-3">
                         <MapPinned className="mt-0.5 h-4 w-4 text-slate-400" />
@@ -990,7 +1167,6 @@ function AdresseCard({
                         </div>
                     )}
                 </div>
-
                 <div className="mt-6 flex flex-wrap gap-3">
                     {!address.est_defaut && (
                         <Button

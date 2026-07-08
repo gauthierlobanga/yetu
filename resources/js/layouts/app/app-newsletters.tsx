@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Loader2, Mail, Send } from 'lucide-react';
 import type { SubmitEventHandler } from 'react';
 import { toast } from 'sonner';
@@ -85,8 +85,8 @@ export default function NewsletterSectionCentral() {
                             transition={{ duration: 0.5, delay: 0.4 }}
                             className="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
                         >
-                            Abonnez-vous à notre newsletter pour recevoir les dernières 
-                            mises à jour, du contenu exclusif et des offres spéciales 
+                            Abonnez-vous à notre newsletter pour recevoir les dernières
+                            mises à jour, du contenu exclusif et des offres spéciales
                             directement dans votre boîte de réception.
                         </motion.p>
 

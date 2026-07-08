@@ -17,6 +17,7 @@ import {
     Clock,
     X,
     Pencil,
+    Sparkles,
 } from 'lucide-react';
 import { useState, useRef, useMemo } from 'react';
 import { toast } from 'sonner';
@@ -50,10 +51,7 @@ import type { BreadcrumbItem } from '@/types';
 import type { ProfilePageProps } from '@/types/page-props';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Mon profil',
-        href: ProfileController.edit.url(),
-    },
+    { title: 'Mon profil', href: ProfileController.edit.url() },
 ];
 
 const AVAILABLE_LOCALES = [
@@ -68,6 +66,19 @@ const AVAILABLE_CURRENCIES = [
     { value: 'USD', label: 'US Dollar (USD)' },
 ];
 
+interface ProfileFormData {
+    name: string;
+    email: string;
+    phone: string;
+    city: string;
+    country: string;
+    locale: string;
+    currency: string;
+    notifications_email: boolean;
+    notifications_offers: boolean;
+    avatar: File | null;
+}
+
 export default function ClientProfile() {
     const { auth, mustVerifyEmail, status } = usePage<ProfilePageProps>().props;
     const user = auth.user;
@@ -76,8 +87,8 @@ export default function ClientProfile() {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Initialisation du formulaire avec useForm pour une réactivité totale
-    const form = useForm({
+    // Typage explicite du formulaire
+    const form = useForm<ProfileFormData>({
         name: user.name || '',
         email: user.email || '',
         phone: client?.phone || user.preferences?.phone || '',
@@ -87,7 +98,7 @@ export default function ClientProfile() {
         currency: user.preferences?.currency || 'XOF',
         notifications_email: user.preferences?.notifications_email ?? true,
         notifications_offers: user.preferences?.notifications_offers ?? false,
-        avatar: null as File | null,
+        avatar: null,
     });
 
     const initials = useMemo(() => {
@@ -111,7 +122,6 @@ export default function ClientProfile() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Utilisation de post avec _method PATCH pour supporter l'upload de fichiers
         form.post(
             ProfileController.update.url({ query: { _method: 'PATCH' } }),
             {
@@ -158,59 +168,87 @@ export default function ClientProfile() {
             <Head title="Mon profil" />
             <SettingsLayout>
                 <div className="mx-auto max-w-6xl space-y-8">
-                    {/* Carte d'identité */}
-                    <Card className="relative overflow-hidden border-0 shadow-xl shadow-emerald-100/20 dark:shadow-none">
-                        <div className="relative h-32 bg-linear-to-br from-emerald-400 via-emerald-500 to-emerald-700 dark:from-emerald-800 dark:via-emerald-900 dark:to-slate-900">
+                    {/* Carte d'identité premium */}
+                    <Card className="relative overflow-hidden border-0 bg-white/70 dark:bg-slate-900/70">
+                        {/* <div className="h-28 bg-linear-to-br from-emerald-400 via-emerald-500 to-emerald-700 dark:from-emerald-800 dark:via-emerald-900 dark:to-slate-900">
                             <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-10 mix-blend-overlay" />
-                            <div className="absolute -bottom-6 left-1/2 h-32 w-32 -translate-x-1/2 rounded-full bg-white p-1 shadow-2xl dark:bg-slate-900">
-                                <Avatar className="h-full w-full ring-4 ring-white dark:ring-slate-900">
-                                    <AvatarImage
-                                        src={
-                                            previewUrl ||
-                                            user.avatar_url ||
-                                            `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`
-                                        }
-                                    />
-                                    <AvatarFallback className="bg-emerald-500 text-2xl font-bold text-white">
-                                        {initials}
-                                    </AvatarFallback>
-                                </Avatar>
-                            </div>
-                        </div>
-
-                        <CardContent className="space-y-3 px-6 pt-16 pb-6 text-center">
-                            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-                                {form.data.name || user.name}
-                            </h1>
-                            <p className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                <Mail className="h-4 w-4" />
-                                {user.email}
-                            </p>
-
-                            <div className="mt-4 flex justify-center">
-                                {user.email_verified_at ? (
-                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/50 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
-                                        <CheckCircle className="h-3.5 w-3.5" />
-                                        Email vérifié
-                                    </span>
-                                ) : (
-                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/50 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
-                                        <AlertCircle className="h-3.5 w-3.5" />
-                                        Email non vérifié
-                                    </span>
-                                )}
+                        </div> */}
+                        <CardContent className="relative px-6 pt-0 pb-6">
+                            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-end">
+                                <div className="relative -mt-16">
+                                    <div className="relative">
+                                        <Avatar className="h-28 w-28 border-2 border-white dark:border-slate-900">
+                                            <AvatarImage
+                                                src={
+                                                    previewUrl ||
+                                                    user.avatar_url ||
+                                                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`
+                                                }
+                                            />
+                                            <AvatarFallback className="bg-emerald-500 text-2xl font-bold text-white">
+                                                {initials}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <label
+                                            htmlFor="avatar-upload"
+                                            className="absolute right-1 bottom-1 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-slate-800 text-white shadow-lg transition hover:bg-emerald-600 dark:border-slate-900"
+                                        >
+                                            <input
+                                                id="avatar-upload"
+                                                ref={fileInputRef}
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleAvatarChange}
+                                            />
+                                            <Camera className="h-3.5 w-3.5" />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div className="min-w-0 flex-1 text-center sm:text-left">
+                                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+                                        {form.data.name || user.name}
+                                    </h1>
+                                    <p className="mt-1 flex items-center justify-center gap-2 text-sm text-slate-500 sm:justify-start dark:text-slate-400">
+                                        <Mail className="h-4 w-4" />
+                                        {user.email}
+                                    </p>
+                                    <div className="mt-3 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+                                        {user.email_verified_at ? (
+                                            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
+                                                <CheckCircle className="h-3.5 w-3.5" />
+                                                Email vérifié
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400">
+                                                <AlertCircle className="h-3.5 w-3.5" />
+                                                Email non vérifié
+                                            </span>
+                                        )}
+                                        {(previewUrl || user.avatar_url) && (
+                                            <button
+                                                type="button"
+                                                onClick={removeAvatar}
+                                                className="inline-flex items-center gap-1 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-900/40"
+                                            >
+                                                <X className="h-3 w-3" />
+                                                Supprimer
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
 
                     <form onSubmit={handleSubmit} className="space-y-8">
                         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                            {/* Colonne principale : formulaire */}
-                            <div className="space-y-8 lg:col-span-2">
-                                <Card className="border-slate-200/60 shadow-md dark:border-slate-800">
+                            {/* Colonne principale */}
+                            <div className="space-y-8 lg:col-span-3">
+                                <Card className="border-0 bg-white/70 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/70 dark:shadow-black/20">
                                     <CardHeader className="pb-4">
-                                        <CardTitle className="flex items-center gap-2">
-                                            <User className="h-5 w-5 text-emerald-500" />{' '}
+                                        <CardTitle className="flex items-center gap-2 text-lg">
+                                            <User className="h-5 w-5 text-emerald-500" />
                                             Informations personnelles
                                         </CardTitle>
                                         <CardDescription>
@@ -218,35 +256,7 @@ export default function ClientProfile() {
                                             identité.
                                         </CardDescription>
                                     </CardHeader>
-
                                     <CardContent className="space-y-6">
-                                        <div className="flex justify-center gap-3 pb-4">
-                                            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-emerald-200/50 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20">
-                                                <Camera className="h-4 w-4" />
-                                                Changer la photo
-                                                <input
-                                                    ref={fileInputRef}
-                                                    type="file"
-                                                    accept="image/*"
-                                                    className="hidden"
-                                                    onChange={
-                                                        handleAvatarChange
-                                                    }
-                                                />
-                                            </label>
-                                            {(previewUrl ||
-                                                user.avatar_url) && (
-                                                <button
-                                                    type="button"
-                                                    onClick={removeAvatar}
-                                                    className="inline-flex items-center gap-2 rounded-lg border border-red-200/50 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                    Supprimer
-                                                </button>
-                                            )}
-                                        </div>
-
                                         <div className="grid gap-6 sm:grid-cols-2">
                                             <Field
                                                 icon={
@@ -262,7 +272,6 @@ export default function ClientProfile() {
                                                     )
                                                 }
                                                 required
-                                                autoComplete="name"
                                                 error={form.errors.name}
                                             />
                                             <Field
@@ -280,7 +289,6 @@ export default function ClientProfile() {
                                                     )
                                                 }
                                                 required
-                                                autoComplete="email"
                                                 error={form.errors.email}
                                             />
                                             <Field
@@ -296,7 +304,6 @@ export default function ClientProfile() {
                                                         e.target.value,
                                                     )
                                                 }
-                                                autoComplete="tel"
                                                 error={form.errors.phone}
                                             />
                                             <Field
@@ -335,14 +342,14 @@ export default function ClientProfile() {
 
                                         {mustVerifyEmail &&
                                             !user.email_verified_at && (
-                                                <div className="flex gap-3 rounded-xl border border-amber-200/60 bg-amber-50 p-4 dark:bg-amber-500/5">
-                                                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                                                <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50/70 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+                                                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
                                                     <div className="space-y-1 text-sm">
-                                                        <p className="font-medium text-amber-900 dark:text-amber-200">
-                                                            Vérification d’email
+                                                        <p className="font-medium text-amber-900 dark:text-amber-100">
+                                                            Vérification d'email
                                                             requise
                                                         </p>
-                                                        <p className="text-amber-800 dark:text-amber-300/80">
+                                                        <p className="text-amber-800 dark:text-amber-200/80">
                                                             Pour débloquer
                                                             toutes les
                                                             fonctionnalités,
@@ -355,14 +362,14 @@ export default function ClientProfile() {
                                                             )}
                                                             method="post"
                                                             as="button"
-                                                            className="inline-block text-xs font-semibold text-amber-600 underline transition-colors hover:text-amber-800"
+                                                            className="inline-block text-xs font-semibold text-amber-600 underline hover:text-amber-800 dark:text-amber-400"
                                                         >
                                                             Renvoyer le lien de
                                                             vérification
                                                         </Link>
                                                         {status ===
                                                             'verification-link-sent' && (
-                                                            <p className="mt-1 flex items-center gap-1 text-xs text-emerald-600">
+                                                            <p className="mt-1 flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
                                                                 <CheckCircle className="h-3 w-3" />{' '}
                                                                 Lien envoyé
                                                             </p>
@@ -375,7 +382,7 @@ export default function ClientProfile() {
                                             <Button
                                                 type="submit"
                                                 disabled={form.processing}
-                                                className="gap-2 bg-emerald-600 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 disabled:opacity-70"
+                                                className="gap-2 rounded-xl bg-emerald-600 px-5 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 disabled:opacity-70"
                                             >
                                                 {form.processing ? (
                                                     <>
@@ -390,191 +397,199 @@ export default function ClientProfile() {
                                     </CardContent>
                                 </Card>
                             </div>
-
-                            {/* Colonne latérale */}
-                            <div className="space-y-8">
-                                {/* Régionalisation */}
-                                <Card className="border-slate-200/60 shadow-md dark:border-slate-800">
-                                    <CardHeader className="pb-4">
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Globe className="h-5 w-5 text-emerald-500" />{' '}
-                                            Régionalisation
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label>Langue</Label>
-                                            <Select
-                                                value={form.data.locale}
-                                                onValueChange={(v) =>
-                                                    form.setData('locale', v)
-                                                }
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Choisir une langue" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {AVAILABLE_LOCALES.map(
-                                                        (opt) => (
-                                                            <SelectItem
-                                                                key={opt.value}
-                                                                value={
-                                                                    opt.value
-                                                                }
-                                                            >
-                                                                {opt.label}
-                                                            </SelectItem>
-                                                        ),
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label>Devise</Label>
-                                            <Select
-                                                value={form.data.currency}
-                                                onValueChange={(v) =>
-                                                    form.setData('currency', v)
-                                                }
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Choisir une devise" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {AVAILABLE_CURRENCIES.map(
-                                                        (opt) => (
-                                                            <SelectItem
-                                                                key={opt.value}
-                                                                value={
-                                                                    opt.value
-                                                                }
-                                                            >
-                                                                {opt.label}
-                                                            </SelectItem>
-                                                        ),
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-
-                                {/* Notifications */}
-                                <Card className="border-slate-200/60 shadow-md dark:border-slate-800">
-                                    <CardHeader className="pb-4">
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Bell className="h-5 w-5 text-emerald-500" />{' '}
-                                            Notifications
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <ToggleItem
-                                            icon={<Bell className="h-5 w-5" />}
-                                            title="Notifications email"
-                                            description="Commandes et messages"
-                                            checked={
-                                                form.data.notifications_email
+                        </div>
+                        {/* Colonne latérale – design amélioré */}
+                        <div className="space-y-6">
+                            {/* Régionalisation */}
+                            <Card className="border-0 bg-white/70 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/70 dark:shadow-black/20">
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="flex items-center gap-2 text-base">
+                                        <Globe className="h-5 w-5 text-emerald-500" />
+                                        Régionalisation
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-sm">
+                                            Langue
+                                        </Label>
+                                        <Select
+                                            value={form.data.locale}
+                                            onValueChange={(v) =>
+                                                form.setData('locale', v)
                                             }
-                                            onCheckedChange={(v) =>
-                                                form.setData(
-                                                    'notifications_email',
-                                                    v,
-                                                )
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {AVAILABLE_LOCALES.map(
+                                                    (opt) => (
+                                                        <SelectItem
+                                                            key={opt.value}
+                                                            value={opt.value}
+                                                        >
+                                                            {opt.label}
+                                                        </SelectItem>
+                                                    ),
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-sm">
+                                            Devise
+                                        </Label>
+                                        <Select
+                                            value={form.data.currency}
+                                            onValueChange={(v) =>
+                                                form.setData('currency', v)
+                                            }
+                                        >
+                                            <SelectTrigger className="h-10 rounded-xl">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {AVAILABLE_CURRENCIES.map(
+                                                    (opt) => (
+                                                        <SelectItem
+                                                            key={opt.value}
+                                                            value={opt.value}
+                                                        >
+                                                            {opt.label}
+                                                        </SelectItem>
+                                                    ),
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Notifications */}
+                            <Card className="border-0 bg-white/70 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/70 dark:shadow-black/20">
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="flex items-center gap-2 text-base">
+                                        <Bell className="h-5 w-5 text-emerald-500" />
+                                        Notifications
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <ToggleItem
+                                        icon={<Mail className="h-5 w-5" />}
+                                        title="Notifications email"
+                                        description="Recevez les confirmations de commande et messages"
+                                        checked={form.data.notifications_email}
+                                        onCheckedChange={(v) =>
+                                            form.setData(
+                                                'notifications_email',
+                                                v,
+                                            )
+                                        }
+                                    />
+                                    <ToggleItem
+                                        icon={<Tag className="h-5 w-5" />}
+                                        title="Offres promotionnelles"
+                                        description="Soyez informé(e) des réductions exclusives"
+                                        checked={form.data.notifications_offers}
+                                        onCheckedChange={(v) =>
+                                            form.setData(
+                                                'notifications_offers',
+                                                v,
+                                            )
+                                        }
+                                    />
+                                </CardContent>
+                            </Card>
+
+                            {/* Adresses */}
+                            <Card className="border-0 bg-white/70 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/70 dark:shadow-black/20">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-base">
+                                        <MapPin className="h-5 w-5 text-emerald-500" />
+                                        Adresses
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {billingAddress ? (
+                                        <AddressCard
+                                            type="Facturation"
+                                            address={billingAddress}
+                                            icon={
+                                                <Shield className="h-4 w-4" />
                                             }
                                         />
-                                        <ToggleItem
-                                            icon={<Tag className="h-5 w-5" />}
-                                            title="Offres promotionnelles"
-                                            description="Réductions exclusives"
-                                            checked={
-                                                form.data.notifications_offers
-                                            }
-                                            onCheckedChange={(v) =>
-                                                form.setData(
-                                                    'notifications_offers',
-                                                    v,
-                                                )
-                                            }
-                                        />
-                                    </CardContent>
-                                </Card>
-
-                                {/* Adresses */}
-                                <Card className="border-slate-200/60 shadow-md dark:border-slate-800">
-                                    <CardHeader className="pb-4">
-                                        <CardTitle className="flex items-center gap-2">
-                                            <MapPin className="h-5 w-5 text-emerald-500" />{' '}
-                                            Adresses
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Adresses de facturation et de
-                                            livraison par défaut.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {billingAddress ? (
-                                            <AddressCard
-                                                type="Facturation"
-                                                address={billingAddress}
-                                                icon={
-                                                    <Shield className="h-4 w-4" />
-                                                }
-                                            />
-                                        ) : (
-                                            <p className="text-sm text-slate-500 italic">
+                                    ) : (
+                                        <div className="rounded-xl border border-dashed border-slate-300 p-4 text-center dark:border-slate-700">
+                                            <p className="text-sm text-slate-500">
                                                 Aucune adresse de facturation
                                             </p>
-                                        )}
-                                        {shippingAddress ? (
-                                            <AddressCard
-                                                type="Livraison"
-                                                address={shippingAddress}
-                                                icon={
-                                                    <MapPin className="h-4 w-4" />
-                                                }
-                                            />
-                                        ) : (
-                                            <p className="text-sm text-slate-500 italic">
+                                            <Link
+                                                href={route(
+                                                    'tenant.addresses.index',
+                                                )}
+                                                className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+                                            >
+                                                <Pencil className="h-3 w-3" />
+                                                Ajouter une adresse
+                                            </Link>
+                                        </div>
+                                    )}
+                                    {shippingAddress ? (
+                                        <AddressCard
+                                            type="Livraison"
+                                            address={shippingAddress}
+                                            icon={
+                                                <MapPin className="h-4 w-4" />
+                                            }
+                                        />
+                                    ) : (
+                                        <div className="rounded-xl border border-dashed border-slate-300 p-4 text-center dark:border-slate-700">
+                                            <p className="text-sm text-slate-500">
                                                 Aucune adresse de livraison
                                             </p>
-                                        )}
-                                        <Link
-                                            href={route(
-                                                'tenant.addresses.index',
-                                            )}
-                                            className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:underline"
-                                        >
-                                            <Pencil className="h-4 w-4" />
-                                            Gérer les adresses
-                                        </Link>
-                                    </CardContent>
-                                </Card>
+                                            <Link
+                                                href={route(
+                                                    'tenant.addresses.index',
+                                                )}
+                                                className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-600 hover:underline dark:text-emerald-400"
+                                            >
+                                                <Pencil className="h-3 w-3" />
+                                                Ajouter une adresse
+                                            </Link>
+                                        </div>
+                                    )}
+                                    <Link
+                                        href={route('tenant.addresses.index')}
+                                        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+                                    >
+                                        <Pencil className="h-4 w-4" />
+                                        Gérer les adresses
+                                    </Link>
+                                </CardContent>
+                            </Card>
 
-                                {/* Zone de danger */}
-                                <Card className="border-red-200/50 shadow-md dark:border-red-900/30">
-                                    <CardHeader className="pb-4">
-                                        <CardTitle className="flex items-center gap-2 text-red-600">
-                                            <Trash2 className="h-5 w-5" /> Zone
-                                            de danger
-                                        </CardTitle>
-                                        <CardDescription>
-                                            Actions irréversibles.
-                                        </CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        <Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
-                                            className="inline-flex w-full items-center gap-2 rounded-md border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
-                                        >
-                                            <LogOut className="h-4 w-4" />
-                                            Déconnexion
-                                        </Link>
-                                        <DeleteUser />
-                                    </CardContent>
-                                </Card>
-                            </div>
+                            {/* Zone de danger */}
+                            <Card className="border-0 bg-red-50/70 shadow-lg shadow-red-200/20 backdrop-blur-xl dark:bg-red-950/30 dark:shadow-black/20">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="flex items-center gap-2 text-base text-red-600 dark:text-red-400">
+                                        <Trash2 className="h-5 w-5" />
+                                        Zone de danger
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <Link
+                                        href={route('logout')}
+                                        method="post"
+                                        as="button"
+                                        className="inline-flex w-full items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-slate-900 dark:text-red-400 dark:hover:bg-red-950/40"
+                                    >
+                                        <LogOut className="h-4 w-4" />
+                                        Déconnexion
+                                    </Link>
+                                    <DeleteUser />
+                                </CardContent>
+                            </Card>
                         </div>
                     </form>
                 </div>
@@ -583,7 +598,7 @@ export default function ClientProfile() {
     );
 }
 
-/* ----- Composants réutilisables ----- */
+/* ----- Composants réutilisables modernisés ----- */
 function Field({
     icon,
     label,
@@ -600,7 +615,10 @@ function Field({
 } & React.InputHTMLAttributes<HTMLInputElement>) {
     return (
         <div className={`space-y-2 ${className}`}>
-            <Label htmlFor={id} className={error ? 'text-red-500' : ''}>
+            <Label
+                htmlFor={id}
+                className={cn('text-sm font-medium', error && 'text-red-500')}
+            >
                 {label}
             </Label>
             <div className="relative">
@@ -610,7 +628,7 @@ function Field({
                 <Input
                     id={id}
                     className={cn(
-                        'h-11 border-slate-200 bg-white pl-10 transition-colors hover:border-emerald-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900',
+                        'h-11 rounded-xl border-slate-200 bg-white pl-10 transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700 dark:bg-slate-900 dark:focus:border-emerald-400',
                         error &&
                             'border-red-500 focus:border-red-500 focus:ring-red-500/20',
                     )}
@@ -636,7 +654,7 @@ function ToggleItem({
     onCheckedChange: (checked: boolean) => void;
 }) {
     return (
-        <div className="group flex items-center justify-between rounded-xl border border-slate-200 p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800/40">
+        <div className="group flex items-center justify-between rounded-xl border border-slate-100 bg-white p-4 transition-all hover:border-emerald-200 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-emerald-800">
             <div className="flex items-start gap-3">
                 <span className="mt-0.5 text-slate-400 transition-colors group-hover:text-emerald-500 dark:text-slate-500">
                     {icon}
@@ -665,15 +683,17 @@ function AddressCard({
     icon: React.ReactNode;
 }) {
     return (
-        <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
-            <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+        <div className="rounded-xl border border-slate-100 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/60">
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 {icon} {type}
             </p>
             <p className="mt-1 text-sm text-slate-900 dark:text-slate-100">
                 {address.rue}, {address.code_postal} {address.ville}
             </p>
             {address.pays && (
-                <p className="text-xs text-slate-500">{address.pays}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {address.pays}
+                </p>
             )}
         </div>
     );

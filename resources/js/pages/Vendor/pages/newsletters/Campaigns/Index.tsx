@@ -1,9 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { motion } from 'framer-motion';
 import {
     Plus, Mail, Eye, MousePointerClick, Send, Clock, Edit, Trash2, Calendar
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { motion } from 'motion/react';
 import { toast } from 'sonner';
 import { SiteHeader } from '@/components/site-header';
 import { Badge } from '@/components/ui/badge';
@@ -41,7 +41,7 @@ interface CampaignsIndexProps {
 
 function KpiCard({ icon: Icon, label, value, helper, iconColorClass = "text-slate-600 dark:text-slate-400" }: { icon: LucideIcon, label: string, value: string | number, helper?: string, iconColorClass?: string }) {
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             className="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all hover:shadow-md dark:border-slate-800/60 dark:bg-slate-900/70"
@@ -92,12 +92,12 @@ export default function CampaignsIndex({ tenant, campaigns }: CampaignsIndexProp
     const totalOuvertsCurrentPage = campaigns.data.reduce((acc, c) => acc + c.total_ouverts, 0);
     const totalClicsCurrentPage = campaigns.data.reduce((acc, c) => acc + c.total_clics, 0);
 
-    const avgOpenRate = totalEnvoyesCurrentPage > 0 
-        ? Math.round((totalOuvertsCurrentPage / totalEnvoyesCurrentPage) * 100) 
+    const avgOpenRate = totalEnvoyesCurrentPage > 0
+        ? Math.round((totalOuvertsCurrentPage / totalEnvoyesCurrentPage) * 100)
         : 0;
 
-    const avgClickRate = totalEnvoyesCurrentPage > 0 
-        ? Math.round((totalClicsCurrentPage / totalEnvoyesCurrentPage) * 100) 
+    const avgClickRate = totalEnvoyesCurrentPage > 0
+        ? Math.round((totalClicsCurrentPage / totalEnvoyesCurrentPage) * 100)
         : 0;
 
     return (
@@ -141,32 +141,32 @@ export default function CampaignsIndex({ tenant, campaigns }: CampaignsIndexProp
                         </div>
 
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                            <KpiCard 
-                                icon={Mail} 
-                                label="Total Campagnes" 
-                                value={campaigns.total} 
-                                helper="Toutes vos campagnes" 
+                            <KpiCard
+                                icon={Mail}
+                                label="Total Campagnes"
+                                value={campaigns.total}
+                                helper="Toutes vos campagnes"
                                 iconColorClass="text-indigo-500"
                             />
-                            <KpiCard 
-                                icon={Send} 
-                                label="Emails Envoyés" 
-                                value={totalEnvoyesCurrentPage} 
-                                helper="Cumul de cette page" 
+                            <KpiCard
+                                icon={Send}
+                                label="Emails Envoyés"
+                                value={totalEnvoyesCurrentPage}
+                                helper="Cumul de cette page"
                                 iconColorClass="text-slate-500"
                             />
-                            <KpiCard 
-                                icon={Eye} 
-                                label="Taux d'ouverture" 
-                                value={`${avgOpenRate}%`} 
-                                helper="Moyenne (page actuelle)" 
+                            <KpiCard
+                                icon={Eye}
+                                label="Taux d'ouverture"
+                                value={`${avgOpenRate}%`}
+                                helper="Moyenne (page actuelle)"
                                 iconColorClass="text-blue-500"
                             />
-                            <KpiCard 
-                                icon={MousePointerClick} 
-                                label="Taux de clics" 
-                                value={`${avgClickRate}%`} 
-                                helper="Moyenne (page actuelle)" 
+                            <KpiCard
+                                icon={MousePointerClick}
+                                label="Taux de clics"
+                                value={`${avgClickRate}%`}
+                                helper="Moyenne (page actuelle)"
                                 iconColorClass="text-emerald-500"
                             />
                         </div>
@@ -281,8 +281,8 @@ export default function CampaignsIndex({ tenant, campaigns }: CampaignsIndexProp
                                                     href={link.url}
                                                     className={cn(
                                                         "px-3 py-1.5 rounded-lg border transition-colors",
-                                                        link.active 
-                                                            ? "bg-slate-900 text-white border-slate-900 dark:bg-emerald-600 dark:border-emerald-600" 
+                                                        link.active
+                                                            ? "bg-slate-900 text-white border-slate-900 dark:bg-emerald-600 dark:border-emerald-600"
                                                             : "bg-white text-slate-600 border-slate-200/60 hover:bg-slate-50 dark:bg-slate-900/50 dark:border-slate-800/60 dark:text-slate-400 dark:hover:bg-slate-800"
                                                     )}
                                                     dangerouslySetInnerHTML={{ __html: link.label }}

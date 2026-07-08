@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     ArrowRight,
     Building2,
@@ -82,7 +82,7 @@ export function Support() {
                         <div className="grid grid-cols-1 gap-y-8 gap-x-8 md:grid-cols-3">
                             {menuSections.map((section, sectionIdx) => (
                                 <div key={section.title} className="space-y-5">
-                                    <motion.h3 
+                                    <motion.h3
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.4, delay: sectionIdx * 0.05, ease: [0.16, 1, 0.3, 1] }}

@@ -2,7 +2,6 @@
 // resources/js/pages/Shop/Wishlist/Index.tsx
 import type { PageProps } from '@inertiajs/core';
 import { Link, router, usePage, Head } from '@inertiajs/react';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
     Heart,
     ShoppingBag,
@@ -11,13 +10,18 @@ import {
     Lock,
     Globe,
     ArrowRight,
+    ArrowUpDown,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useState, useMemo } from 'react';
+import CountUp from 'react-countup';
 import { toast } from 'sonner';
 
 import { AppSidebar } from '@/components/app-sidebar';
 import { SiteHeader } from '@/components/site-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { useCart } from '@/hooks/ecommerce/use-cart';
 import { cn } from '@/lib/utils';
@@ -49,17 +53,12 @@ interface Props extends PageProps {
 // ---------- Helpers ----------
 function getImageUrl(image?: string | null): string {
     if (!image) {
-        return '/images/loafers-leaning-along-white-wall.jpg';
-    }
+return '/images/loafers-leaning-along-white-wall.jpg';
+}
 
-    if (
-        image.startsWith('http://') ||
-        image.startsWith('https://') ||
-        image.startsWith('/storage') ||
-        image.startsWith('/')
-    ) {
-        return image;
-    }
+    if (image.startsWith('http') || image.startsWith('/')) {
+return image;
+}
 
     return `/storage/${image.replace(/^\//, '')}`;
 }
@@ -68,8 +67,8 @@ function formatPrice(amount: number | string): string {
     const value = Number(amount);
 
     if (Number.isNaN(value)) {
-        return String(amount);
-    }
+return String(amount);
+}
 
     return new Intl.NumberFormat('fr-CD', {
         style: 'currency',
@@ -78,19 +77,34 @@ function formatPrice(amount: number | string): string {
     }).format(value);
 }
 
-// ---------- Page ----------
+// Ordre cyclique des tris
+const SORT_OPTIONS = ['default', 'price_asc', 'price_desc', 'name_asc', 'name_desc'] as const;
+type SortOption = (typeof SORT_OPTIONS)[number];
+const SORT_LABELS: Record<SortOption, string> = {
+    default: 'Par défaut',
+    price_asc: 'Prix ↑',
+    price_desc: 'Prix ↓',
+    name_asc: 'Nom A-Z',
+    name_desc: 'Nom Z-A',
+};
+
+function getNextSort(current: SortOption): SortOption {
+    const idx = SORT_OPTIONS.indexOf(current);
+
+    return SORT_OPTIONS[(idx + 1) % SORT_OPTIONS.length];
+}
+
 export default function ShopWishlistPage() {
     const { wishlist, items } = usePage<Props>().props;
     const { addToCart } = useCart();
+    const [sortBy, setSortBy] = useState<SortOption>('default');
 
     const handleRemove = (productId: string) => {
         router.delete(route('tenant.wishlist.remove', productId), {
             preserveScroll: true,
             preserveState: true,
-            onSuccess: () =>
-                toast.success('Produit retiré de votre liste de souhaits'),
-            onError: () =>
-                toast.error('Une erreur est survenue lors de la suppression'),
+            onSuccess: () => toast.success('Produit retiré de votre liste de souhaits'),
+            onError: () => toast.error('Une erreur est survenue lors de la suppression'),
         });
     };
 
@@ -99,41 +113,41 @@ export default function ShopWishlistPage() {
         toast.success('Produit ajouté au panier');
     };
 
+    const sortedItems = useMemo(() => {
+        const arr = [...items];
+
+        switch (sortBy) {
+            case 'price_asc':
+                return arr.sort((a, b) => Number(a.produit.prix_actuel) - Number(b.produit.prix_actuel));
+            case 'price_desc':
+                return arr.sort((a, b) => Number(b.produit.prix_actuel) - Number(a.produit.prix_actuel));
+            case 'name_asc':
+                return arr.sort((a, b) => a.produit.nom.localeCompare(b.produit.nom));
+            case 'name_desc':
+                return arr.sort((a, b) => b.produit.nom.localeCompare(a.produit.nom));
+            default:
+                return arr;
+        }
+    }, [items, sortBy]);
+
     return (
-        <SidebarProvider
-            style={
-                {
-                    '--sidebar-width': 'calc(var(--spacing) * 72)',
-                    '--header-height': 'calc(var(--spacing) * 12)',
-                } as React.CSSProperties
-            }
-        >
+        <SidebarProvider style={{ '--sidebar-width': 'calc(var(--spacing) * 72)', '--header-height': 'calc(var(--spacing) * 12)' } as React.CSSProperties}>
             <Head title={wishlist.nom} />
             <AppSidebar />
             <SidebarInset>
                 <SiteHeader />
                 <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-emerald-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
                     <div className="flex flex-1 flex-col gap-6 p-4 pt-0 md:p-6 md:pt-0">
-                        {/* En-tête de page */}
+                        {/* En-tête */}
                         <div className="space-y-1">
-                            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                {wishlist.nom}
-                            </h1>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Retrouvez vos coups de cœur, comparez vos
-                                favoris et ajoutez-les au panier en un clic.
-                            </p>
+                            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{wishlist.nom}</h1>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">Retrouvez vos coups de cœur, comparez vos favoris et ajoutez-les au panier en un clic.</p>
                         </div>
 
                         {/* Hero card */}
-                        <div
-                            className={cn(
-                                'relative overflow-hidden rounded-3xl border',
-                                'border-slate-200/70 bg-white/80 backdrop-blur-xl',
-                                'shadow-[0_10px_40px_rgba(15,23,42,0.06)]',
-                                'dark:border-slate-800/70 dark:bg-slate-900/70',
-                            )}
-                        >
+                        <div className={cn(
+                            'relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 backdrop-blur-xl shadow-lg shadow-slate-200/20 dark:border-slate-800/70 dark:bg-slate-900/70 dark:shadow-black/20'
+                        )}>
                             <div className="absolute inset-0 bg-linear-to-br from-rose-500/4 via-transparent to-emerald-500/4" />
                             <div className="relative flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between">
                                 <div className="flex items-start gap-4">
@@ -142,63 +156,48 @@ export default function ShopWishlistPage() {
                                     </div>
                                     <div>
                                         <div className="mb-2 flex flex-wrap items-center gap-2">
-                                            <Badge
-                                                variant="secondary"
-                                                className="rounded-full border-0 bg-rose-50 px-3 py-1 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400"
-                                            >
-                                                <Sparkles className="mr-1 h-3 w-3" />
-                                                Mes favoris
+                                            <Badge variant="secondary" className="rounded-full border-0 bg-rose-50 px-3 py-1 text-rose-600 dark:bg-rose-950/30 dark:text-rose-400">
+                                                <Sparkles className="mr-1 h-3 w-3" /> Mes favoris
                                             </Badge>
-                                            <Badge
-                                                variant="outline"
-                                                className="rounded-full"
-                                            >
-                                                {wishlist.est_publique ? (
-                                                    <>
-                                                        <Globe className="mr-1 h-3 w-3" />
-                                                        Publique
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Lock className="mr-1 h-3 w-3" />
-                                                        Privée
-                                                    </>
-                                                )}
+                                            <Badge variant="outline" className="rounded-full">
+                                                {wishlist.est_publique ? <><Globe className="mr-1 h-3 w-3" /> Publique</> : <><Lock className="mr-1 h-3 w-3" /> Privée</>}
                                             </Badge>
                                         </div>
                                         <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                            {items.length}{' '}
-                                            {items.length > 1
-                                                ? 'articles sauvegardés'
-                                                : 'article sauvegardé'}
+                                            <CountUp start={0} end={items.length} duration={1} /> {items.length > 1 ? 'articles sauvegardés' : 'article sauvegardé'}
                                         </h2>
                                         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                            Gardez vos produits préférés à
-                                            portée de main et ajoutez-les au
-                                            panier au bon moment.
+                                            Gardez vos produits préférés à portée de main et ajoutez-les au panier au bon moment.
                                         </p>
+                                        {/* Barre de progression */}
+                                        <div className="mt-4">
+                                            <Progress value={Math.min(items.length * 10, 100)} className="h-1.5" />
+                                        </div>
                                     </div>
                                 </div>
                                 {items.length > 0 && (
-                                    <Button
-                                        asChild
-                                        variant="outline"
-                                        className="rounded-2xl"
-                                    >
-                                        <Link
-                                            href={route('tenant.product.index')}
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                        <Button
+                                            variant="outline"
+                                            className="rounded-2xl"
+                                            onClick={() => setSortBy(getNextSort(sortBy))}
                                         >
-                                            Continuer mes achats
-                                            <ArrowRight className="ml-2 h-4 w-4" />
-                                        </Link>
-                                    </Button>
+                                            <ArrowUpDown className="mr-2 h-4 w-4" />
+                                            Trier : {SORT_LABELS[sortBy]}
+                                        </Button>
+                                        <Button asChild variant="outline" className="rounded-2xl">
+                                            <Link href={route('tenant.product.index')}>
+                                                Continuer mes achats <ArrowRight className="ml-2 h-4 w-4" />
+                                            </Link>
+                                        </Button>
+                                    </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Contenu */}
+                        {/* Grille de produits */}
                         <AnimatePresence mode="wait">
-                            {items.length > 0 ? (
+                            {sortedItems.length > 0 ? (
                                 <motion.div
                                     key="wishlist-grid"
                                     initial={{ opacity: 0, y: 10 }}
@@ -207,100 +206,61 @@ export default function ShopWishlistPage() {
                                     transition={{ duration: 0.35 }}
                                     className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                                 >
-                                    {items.map((item, index) => (
+                                    {sortedItems.map((item, index) => (
                                         <motion.article
                                             key={item.id}
                                             initial={{ opacity: 0, y: 16 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            transition={{
-                                                duration: 0.35,
-                                                delay: index * 0.04,
-                                            }}
+                                            transition={{ duration: 0.35, delay: index * 0.04 }}
                                             className="group relative flex flex-col overflow-hidden"
                                         >
-                                            {/* Image & Overlays */}
                                             <div className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800">
                                                 <img
-                                                    src={getImageUrl(
-                                                        item.produit
-                                                            .image_principale,
-                                                    )}
+                                                    src={getImageUrl(item.produit.image_principale)}
                                                     alt={item.produit.nom}
                                                     className="h-full w-full object-cover transition-all duration-700 group-hover:scale-105"
                                                     loading="lazy"
                                                 />
-                                                {/* Dark gradient on hover for better button visibility */}
                                                 <div className="absolute inset-0 bg-black/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 dark:bg-black/20" />
                                                 <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-                                                {/* Top actions */}
                                                 <div className="absolute top-3 right-3 flex items-center gap-2">
                                                     <button
                                                         type="button"
                                                         onClick={(e) => {
-                                                            e.preventDefault();
-                                                            handleRemove(item.produit.id);
-                                                        }}
-                                                        className={cn(
-                                                            'flex h-8 w-8 items-center justify-center rounded-full',
-                                                            'bg-white/70 text-slate-700 backdrop-blur-md transition-all duration-300',
-                                                            'hover:scale-110 hover:bg-white hover:text-red-500',
-                                                            'dark:bg-slate-900/70 dark:text-slate-300 dark:hover:bg-slate-900',
-                                                        )}
+ e.preventDefault(); handleRemove(item.produit.id);
+}}
+                                                        className="flex h-8 w-8 items-center justify-center rounded-full bg-white/70 text-slate-700 backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-white hover:text-red-500 dark:bg-slate-900/70 dark:text-slate-300 dark:hover:bg-slate-900"
                                                         aria-label="Retirer"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </button>
                                                 </div>
-
-                                                {/* Floating "Add to Cart" Button on Hover */}
                                                 <div className="absolute inset-x-4 bottom-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                                                     <Button
                                                         onClick={(e) => {
-                                                            e.preventDefault();
-                                                            handleAddToCart(
-                                                                item.produit.id,
-                                                                item.quantite,
-                                                            );
-                                                        }}
-                                                        className={cn(
-                                                            'h-11 w-full rounded-xl border-0',
-                                                            'bg-white/90 text-slate-900 backdrop-blur-md',
-                                                            'hover:bg-emerald-500 hover:text-white',
-                                                            'dark:bg-slate-900/90 dark:text-white dark:hover:bg-emerald-500',
-                                                            'shadow-lg shadow-black/5',
-                                                        )}
+ e.preventDefault(); handleAddToCart(item.produit.id, item.quantite);
+}}
+                                                        className="h-11 w-full rounded-xl border-0 bg-white/90 text-slate-900 backdrop-blur-md hover:bg-emerald-500 hover:text-white dark:bg-slate-900/90 dark:text-white dark:hover:bg-emerald-500 shadow-lg shadow-black/5"
                                                     >
                                                         <ShoppingBag className="mr-2 h-4 w-4" />
                                                         Ajouter au panier
                                                     </Button>
                                                 </div>
                                             </div>
-
-                                            {/* Content Details */}
                                             <div className="mt-4 flex flex-col">
-                                                <Link
-                                                    href={item.produit.url}
-                                                    className="block"
-                                                >
+                                                <Link href={item.produit.url} className="block">
                                                     <h3 className="line-clamp-1 text-sm font-medium text-slate-900 transition-colors group-hover:text-emerald-600 dark:text-slate-100 dark:group-hover:text-emerald-400">
                                                         {item.produit.nom}
                                                     </h3>
                                                 </Link>
                                                 <div className="mt-1.5 flex items-center justify-between">
                                                     <p className="text-base font-semibold text-slate-900 dark:text-white">
-                                                        {formatPrice(
-                                                            item.produit.prix_actuel,
-                                                        )}
+                                                        {formatPrice(item.produit.prix_actuel)}
                                                     </p>
-                                                    <span className="text-xs text-slate-500 dark:text-slate-400">
-                                                        Qté: {item.quantite}
-                                                    </span>
+                                                    <span className="text-xs text-slate-500 dark:text-slate-400">Qté: {item.quantite}</span>
                                                 </div>
                                                 {item.note && (
-                                                    <p className="mt-1 line-clamp-1 text-xs text-slate-400 dark:text-slate-500">
-                                                        {item.note}
-                                                    </p>
+                                                    <p className="mt-1 line-clamp-1 text-xs text-slate-400 dark:text-slate-500">{item.note}</p>
                                                 )}
                                             </div>
                                         </motion.article>
@@ -311,12 +271,7 @@ export default function ShopWishlistPage() {
                                     key="empty"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className={cn(
-                                        'flex flex-col items-center justify-center',
-                                        'rounded-3xl border border-dashed border-slate-200/80',
-                                        'bg-white/70 px-6 py-20 text-center backdrop-blur-xl',
-                                        'dark:border-slate-800 dark:bg-slate-900/40',
-                                    )}
+                                    className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200/80 bg-white/70 px-6 py-20 text-center backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/40"
                                 >
                                     <div className="relative mb-6">
                                         <div className="absolute inset-0 rounded-full bg-rose-500/20 blur-2xl" />
@@ -324,24 +279,13 @@ export default function ShopWishlistPage() {
                                             <Heart className="h-10 w-10" />
                                         </div>
                                     </div>
-                                    <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                                        Votre wishlist est vide
-                                    </h3>
+                                    <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Votre wishlist est vide</h3>
                                     <p className="mt-3 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                        Ajoutez vos produits préférés à votre
-                                        liste de souhaits pour les retrouver
-                                        rapidement et les acheter au meilleur
-                                        moment.
+                                        Ajoutez vos produits préférés à votre liste de souhaits pour les retrouver rapidement et les acheter au meilleur moment.
                                     </p>
-                                    <Button
-                                        asChild
-                                        className="mt-8 h-11 rounded-2xl bg-linear-to-r from-emerald-600 to-emerald-500 px-6 text-white shadow-lg shadow-emerald-500/20"
-                                    >
-                                        <Link
-                                            href={route('tenant.product.index')}
-                                        >
-                                            Découvrir des produits
-                                            <ArrowRight className="ml-2 h-4 w-4" />
+                                    <Button asChild className="mt-8 h-11 rounded-2xl bg-linear-to-r from-emerald-600 to-emerald-500 px-6 text-white shadow-lg shadow-emerald-500/20">
+                                        <Link href={route('tenant.product.index')}>
+                                            Découvrir des produits <ArrowRight className="ml-2 h-4 w-4" />
                                         </Link>
                                     </Button>
                                 </motion.div>

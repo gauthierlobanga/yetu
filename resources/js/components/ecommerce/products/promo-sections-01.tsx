@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/purity */
 import { Link } from '@inertiajs/react';
 import type { Variants } from 'framer-motion';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     ArrowRight,
     Calendar,

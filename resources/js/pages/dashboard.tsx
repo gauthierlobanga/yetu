@@ -14,10 +14,10 @@ import { ChartBarLabel } from '@/components/board/ChartBarLabelPost';
 import { DashboardFilters } from '@/components/board/dashboard-filters';
 import { ChartPieInteractive } from '@/components/board/PieChartInteractivePost';
 import { DataTable } from '@/components/data-table-post';
-import { SectionCards } from '@/components/section-cards-post';
 import { SiteHeader } from '@/components/site-header';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { SectionCards } from './Vendor/stats/section-cards-post';
 
 interface DashboardProps {
     posts: {

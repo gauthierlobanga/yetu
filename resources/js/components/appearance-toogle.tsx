@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Moon, Sun } from 'lucide-react';
 import { useState, useEffect } from 'react';
 

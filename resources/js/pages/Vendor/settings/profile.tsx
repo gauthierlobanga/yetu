@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Transition } from '@headlessui/react';
 import { Form, Head, usePage } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     Camera,
     Mail,
@@ -10,6 +11,11 @@ import {
     CheckCircle2,
     Copy,
     User,
+    Sparkles,
+    Building2,
+    Globe,
+    ShieldCheck,
+    CreditCard,
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -33,7 +39,18 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VendorSidebar } from '@/components/VendorSidebar';
 import SettingsLayout from '@/layouts/Vendor/settings/layout';
+import { cn } from '@/lib/utils';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
+
+const cardAnimation: {
+    initial: Record<string, number>;
+    animate: Record<string, number>;
+    transition: { duration: number; ease: [number, number, number, number] };
+} = {
+    initial: { opacity: 0, y: 15 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] }, // courbe de Bézier standard
+};
 
 export default function VendorProfile({
     tenant,
@@ -74,9 +91,8 @@ export default function VendorProfile({
         if (file) {
             setSelectedFile(file);
             const reader = new FileReader();
-            reader.onloadend = () => {
+            reader.onloadend = () =>
                 setAvatarPreviewUrl(reader.result as string);
-            };
             reader.readAsDataURL(file);
             toast.success('Photo sélectionnée - Enregistrez pour confirmer');
         }
@@ -103,465 +119,480 @@ export default function VendorProfile({
             <SidebarInset>
                 <SiteHeader />
                 <SettingsLayout>
-                    <div className="max-w-5xl space-y-6">
-                        {/* En-tête principal */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="space-y-4"
-                        >
-                            <div>
-                                <Heading
-                                    variant="small"
-                                    title="Profil"
-                                    description={
-                                        isOwner
-                                            ? 'Gérez votre profil personnel et les détails de votre boutique'
-                                            : 'Gérez votre profil personnel'
-                                    }
-                                />
-                            </div>
-                        </motion.div>
+                    <div className="relative min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-100 dark:from-transparent dark:via-transparent dark:to-transparent">
 
-                        {/* Onglets */}
-                        <Tabs
-                            value={activeTab}
-                            onValueChange={setActiveTab}
-                            className="w-full"
-                        >
-                            {isOwner && (
-                                <TabsList className="mb-6 grid w-full max-w-md grid-cols-2 rounded-xl bg-slate-100/80 p-1 dark:bg-slate-900/50">
-                                    <TabsTrigger
-                                        value="personal"
-                                        className="flex items-center gap-2 rounded-lg data-[state=active]:shadow-sm"
-                                    >
-                                        <User className="h-4 w-4" />
-                                        Profil personnel
-                                    </TabsTrigger>
-                                    <TabsTrigger
-                                        value="shop"
-                                        className="flex items-center gap-2 rounded-lg data-[state=active]:shadow-sm"
-                                    >
-                                        <ShoppingBag className="h-4 w-4" />
-                                        Ma boutique
-                                    </TabsTrigger>
-                                </TabsList>
-                            )}
-
-                            {/* Onglet: Profil personnel */}
-                            <TabsContent
-                                value="personal"
-                                className="mt-0 space-y-8"
+                        <div className="relative z-10 mx-auto max-w-5xl space-y-6 px-4 py-6">
+                            {/* En-tête modernisé */}
+                            <motion.div
+                                {...cardAnimation}
+                                className="space-y-4"
                             >
-                                <Form
-                                    {...ParametresController.update.form()}
-                                    className="space-y-6"
-                                    encType="multipart/form-data"
-                                    options={{ preserveScroll: true }}
-                                >
-                                    {({
-                                        processing,
-                                        recentlySuccessful,
-                                        errors,
-                                    }) => (
-                                        <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md ring-1 shadow-slate-200/40 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
-                                            <div className="border-b border-slate-200/70 px-5 py-6 sm:px-6 dark:border-slate-800">
-                                                <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left">
-                                                    <div className="relative">
-                                                        <Avatar className="h-28 w-28 border-4 border-white shadow-xl ring-1 shadow-slate-900/10 ring-slate-200 dark:border-slate-950 dark:ring-slate-800">
-                                                            <AvatarImage
-                                                                src={
-                                                                    avatarPreviewUrl ||
-                                                                    user?.avatar_url ||
-                                                                    user?.avatar
-                                                                }
-                                                            />
-                                                            <AvatarFallback className="bg-slate-900 text-xl font-semibold text-white dark:bg-emerald-600">
-                                                                {userInitials}
-                                                            </AvatarFallback>
-                                                        </Avatar>
+                                <div>
+                                    <Badge className="mb-2 inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-0.5 text-xs font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                        <Sparkles className="h-3 w-3" />
+                                        Profil
+                                    </Badge>
+                                    <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+                                        {isOwner
+                                            ? 'Gérez votre profil personnel et votre boutique'
+                                            : 'Gérez votre profil personnel'}
+                                    </h1>
+                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        Mettez à jour vos informations et
+                                        personnalisez votre espace.
+                                    </p>
+                                </div>
+                            </motion.div>
 
-                                                        <label
-                                                            htmlFor="avatar"
-                                                            className="absolute right-1 bottom-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-slate-950 text-white shadow-lg transition hover:bg-emerald-600 dark:border-slate-950"
-                                                        >
-                                                            <input
-                                                                id="avatar"
-                                                                name="avatar"
-                                                                type="file"
-                                                                accept="image/jpeg,image/png,image/webp,image/gif"
-                                                                className="sr-only"
-                                                                onChange={
-                                                                    handleAvatarChange
-                                                                }
-                                                            />
-                                                            <Camera className="h-4 w-4" />
-                                                        </label>
-                                                    </div>
+                            {/* Onglets */}
+                            <Tabs
+                                value={activeTab}
+                                onValueChange={setActiveTab}
+                                className="w-full"
+                            >
+                                {isOwner && (
+                                    <TabsList className="mb-6 grid w-full max-w-md grid-cols-2 rounded bg-white/60 p-1 dark:border-slate-800/60 dark:bg-slate-900/60">
+                                        <TabsTrigger
+                                            value="personal"
+                                            className="flex items-center gap-2 rounded text-sm data-[state=active]:bg-white data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-emerald-400"
+                                        >
+                                            <User className="h-4 w-4" />
+                                            Profil personnel
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="shop"
+                                            className="flex items-center gap-2 rounded text-sm data-[state=active]:bg-white data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-emerald-400"
+                                        >
+                                            <ShoppingBag className="h-4 w-4" />
+                                            Ma boutique
+                                        </TabsTrigger>
+                                    </TabsList>
+                                )}
 
-                                                    <div className="min-w-0 flex-1">
-                                                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                                            <div className="min-w-0">
-                                                                <h2 className="truncate text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                                                                    {user?.name}
-                                                                </h2>
-                                                                <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
-                                                                    {
-                                                                        user?.email
-                                                                    }
-                                                                </p>
-                                                            </div>
-
-                                                            {user?.email_verified_at ? (
-                                                                <Badge className="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-900">
-                                                                    <CheckCircle2 className="mr-1 h-3 w-3" />
-                                                                    Email
-                                                                    vérifié
-                                                                </Badge>
-                                                            ) : (
-                                                                <Badge className="bg-amber-50 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-50 dark:bg-amber-950/40 dark:text-amber-300 dark:ring-amber-900">
-                                                                    <AlertCircle className="mr-1 h-3 w-3" />
-                                                                    Email non
-                                                                    vérifié
-                                                                </Badge>
-                                                            )}
-                                                        </div>
-
-                                                        <p className="mt-4 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                                                            {selectedFile
-                                                                ? `${selectedFile.name} sélectionné. Enregistrez pour confirmer.`
-                                                                : 'Ajoutez une photo nette au format JPG, PNG, WebP ou GIF.'}
-                                                        </p>
-                                                        <InputError
-                                                            message={
-                                                                errors.avatar
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <CardHeader>
-                                                <CardTitle className="flex items-center gap-2">
-                                                    <Settings2 className="h-5 w-5" />
-                                                    Informations personnelles
-                                                </CardTitle>
-                                                <CardDescription>
-                                                    Modifiez les informations
-                                                    visibles sur votre compte.
-                                                </CardDescription>
-                                            </CardHeader>
-
-                                            <CardContent className="space-y-6">
-                                                <div className="grid gap-6 md:grid-cols-2">
-                                                    <div className="grid gap-2">
-                                                        <Label
-                                                            htmlFor="name"
-                                                            className="text-sm font-medium"
-                                                        >
-                                                            Nom complet
-                                                        </Label>
-                                                        <Input
-                                                            id="name"
-                                                            name="name"
-                                                            defaultValue={
-                                                                user?.name
-                                                            }
-                                                            placeholder="Votre nom"
-                                                            className="h-10"
-                                                            required
-                                                        />
-                                                        <InputError
-                                                            message={
-                                                                errors.name
-                                                            }
-                                                        />
-                                                    </div>
-
-                                                    <div className="grid gap-2">
-                                                        <Label
-                                                            htmlFor="email"
-                                                            className="flex items-center gap-2 text-sm font-medium"
-                                                        >
-                                                            <Mail className="h-4 w-4" />
-                                                            Email
-                                                        </Label>
-                                                        <Input
-                                                            id="email"
-                                                            type="email"
-                                                            name="email"
-                                                            defaultValue={
-                                                                user?.email
-                                                            }
-                                                            placeholder="votre@email.com"
-                                                            className="h-10"
-                                                            required
-                                                        />
-                                                        <InputError
-                                                            message={
-                                                                errors.email
-                                                            }
-                                                        />
-                                                    </div>
-                                                </div>
-
-                                                {mustVerifyEmail &&
-                                                    !user?.email_verified_at && (
-                                                        <div className="flex gap-3 rounded-lg border border-amber-200 bg-amber-50/70 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
-                                                            <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400" />
-                                                            <div className="flex-1">
-                                                                <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-                                                                    Email non
-                                                                    vérifié
-                                                                </p>
-                                                                <p className="mt-1 text-xs text-amber-800 dark:text-amber-200">
-                                                                    Vérifiez
-                                                                    votre
-                                                                    adresse
-                                                                    email pour
-                                                                    accéder à
-                                                                    toutes les
-                                                                    fonctionnalités.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
-                                                    <Button
-                                                        disabled={processing}
-                                                        className="h-10 gap-2 bg-slate-950 px-4 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500"
-                                                    >
-                                                        Enregistrer
-                                                    </Button>
-
-                                                    <Transition
-                                                        show={
-                                                            recentlySuccessful
-                                                        }
-                                                        enter="transition ease-in-out duration-200"
-                                                        enterFrom="opacity-0"
-                                                        leave="transition ease-in-out duration-200"
-                                                        leaveTo="opacity-0"
-                                                    >
-                                                        <p className="flex items-center gap-1 text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                                                            <CheckCircle2 className="h-4 w-4" />
-                                                            Modifications
-                                                            sauvegardées
-                                                        </p>
-                                                    </Transition>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    )}
-                                </Form>
-                            </TabsContent>
-
-                            {/* Onglet: Ma boutique */}
-                            {isOwner && (
+                                {/* Onglet: Profil personnel */}
                                 <TabsContent
-                                    value="shop"
+                                    value="personal"
                                     className="mt-0 space-y-8"
                                 >
-                                    {/* Carte avec logo */}
-                                    <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md ring-1 shadow-slate-200/40 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
-                                        <div className="h-32 bg-gradient-to-br from-emerald-500/10 via-emerald-400/5 to-slate-50 dark:from-emerald-900/40 dark:via-emerald-900/10 dark:to-slate-950" />
-
-                                        <CardContent className="pt-6">
-                                            <div className="flex items-start gap-8">
-                                                {/* Logo */}
-                                                <div className="relative -mt-20">
-                                                    <Avatar className="h-40 w-40 border-4 border-white shadow-xl dark:border-slate-900">
-                                                        <AvatarImage
-                                                            src={
-                                                                tenant.logo_url
-                                                            }
-                                                        />
-                                                        <AvatarFallback className="bg-emerald-500 text-3xl font-bold text-white">
-                                                            {
-                                                                tenant
-                                                                    .raison_sociale[0]
-                                                            }
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                </div>
-
-                                                {/* Infos boutique */}
-                                                <div className="flex-1 pt-6">
-                                                    <div>
-                                                        <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                                                            {
-                                                                tenant.raison_sociale
-                                                            }
-                                                        </h2>
-                                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                                            {tenant.type_entite &&
-                                                                `Type: ${tenant.type_entite}`}
-                                                        </p>
-                                                    </div>
-
-                                                    {/* URL Boutique */}
-                                                    <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
-                                                        <p className="mb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400">
-                                                            URL de votre
-                                                            boutique
-                                                        </p>
-                                                        <div className="flex items-center gap-2">
-                                                            <code className="flex-1 font-mono text-sm break-all text-slate-900 dark:text-slate-100">
-                                                                {shopUrl}
-                                                            </code>
-                                                            <button
-                                                                onClick={
-                                                                    copyShopUrl
-                                                                }
-                                                                className="rounded-lg p-2 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+                                    <Form
+                                        {...ParametresController.update.form()}
+                                        className="space-y-6"
+                                        encType="multipart/form-data"
+                                        options={{ preserveScroll: true }}
+                                    >
+                                        {({
+                                            processing,
+                                            recentlySuccessful,
+                                            errors,
+                                        }) => (
+                                            <motion.div {...cardAnimation}>
+                                                <Card className="overflow-hidden border-0 bg-white/70 dark:bg-slate-900/70 ">
+                                                    {/* Avatar + nom */}
+                                                    <div className="flex flex-col items-center gap-6 border-b border-slate-100 p-6 sm:flex-row dark:border-slate-800">
+                                                        <div className="relative">
+                                                            <Avatar className="h-24 w-24 border-4 border-white dark:border-slate-900">
+                                                                <AvatarImage
+                                                                    src={
+                                                                        avatarPreviewUrl ||
+                                                                        user?.avatar_url ||
+                                                                        user?.avatar
+                                                                    }
+                                                                />
+                                                                <AvatarFallback className="bg-slate-900 text-xl font-semibold text-white dark:bg-emerald-600">
+                                                                    {
+                                                                        userInitials
+                                                                    }
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <label
+                                                                htmlFor="avatar"
+                                                                className="absolute right-0 bottom-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white bg-slate-950 text-white shadow-lg transition hover:bg-emerald-600 dark:border-slate-900"
                                                             >
-                                                                {copiedUrl ? (
-                                                                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                                                                <input
+                                                                    id="avatar"
+                                                                    name="avatar"
+                                                                    type="file"
+                                                                    accept="image/jpeg,image/png,image/webp,image/gif"
+                                                                    className="sr-only"
+                                                                    onChange={
+                                                                        handleAvatarChange
+                                                                    }
+                                                                />
+                                                                <Camera className="h-3.5 w-3.5" />
+                                                            </label>
+                                                        </div>
+                                                        <div className="min-w-0 flex-1 text-center sm:text-left">
+                                                            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+                                                                {user?.name}
+                                                            </h2>
+                                                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                                                {user?.email}
+                                                            </p>
+                                                            <div className="mt-2 flex flex-wrap justify-center gap-2 sm:justify-start">
+                                                                {user?.email_verified_at ? (
+                                                                    <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
+                                                                        <CheckCircle2 className="mr-1 h-3 w-3" />
+                                                                        Email
+                                                                        vérifié
+                                                                    </Badge>
                                                                 ) : (
-                                                                    <Copy className="h-4 w-4 text-slate-600 dark:text-slate-400" />
+                                                                    <Badge className="border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-400">
+                                                                        <AlertCircle className="mr-1 h-3 w-3" />
+                                                                        Email
+                                                                        non
+                                                                        vérifié
+                                                                    </Badge>
                                                                 )}
-                                                            </button>
+                                                                {selectedFile && (
+                                                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                                        {
+                                                                            selectedFile.name
+                                                                        }{' '}
+                                                                        sélectionné
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                            <InputError
+                                                                message={
+                                                                    errors.avatar
+                                                                }
+                                                            />
                                                         </div>
                                                     </div>
 
-                                                    {/* Badges */}
-                                                    <div className="mt-4 flex flex-wrap gap-2">
-                                                        {tenant.email_verified_at ||
-                                                        tenant.statut ===
-                                                            'actif' ? (
-                                                            <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                                                                <CheckCircle2 className="mr-1 h-3 w-3" />
-                                                                Actif
-                                                            </Badge>
-                                                        ) : (
-                                                            <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                                                                <AlertCircle className="mr-1 h-3 w-3" />
-                                                                En attente de
-                                                                vérification
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </CardContent>
-                                    </Card>
+                                                    <CardHeader>
+                                                        <CardTitle className="flex items-center gap-2 text-lg">
+                                                            <Settings2 className="h-5 w-5 text-emerald-500" />
+                                                            Informations
+                                                            personnelles
+                                                        </CardTitle>
+                                                        <CardDescription>
+                                                            Modifiez les
+                                                            informations
+                                                            visibles sur votre
+                                                            compte.
+                                                        </CardDescription>
+                                                    </CardHeader>
 
-                                    {/* Réglages boutique */}
-                                    <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md ring-1 shadow-slate-200/40 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center gap-2">
-                                                <ShoppingBag className="h-5 w-5" />
-                                                Réglages boutique
-                                            </CardTitle>
-                                            <CardDescription>
-                                                Les informations commerciales,
-                                                le logo et les coordonnées se
-                                                modifient dans l'espace
-                                                boutique.
-                                            </CardDescription>
-                                        </CardHeader>
+                                                    <CardContent className="space-y-6">
+                                                        <div className="grid gap-6 md:grid-cols-2">
+                                                            <div className="grid gap-2">
+                                                                <Label
+                                                                    htmlFor="name"
+                                                                    className="text-sm font-medium"
+                                                                >
+                                                                    Nom complet
+                                                                </Label>
+                                                                <Input
+                                                                    id="name"
+                                                                    name="name"
+                                                                    defaultValue={
+                                                                        user?.name
+                                                                    }
+                                                                    placeholder="Votre nom"
+                                                                    className="h-10 rounded-xl"
+                                                                    required
+                                                                />
+                                                                <InputError
+                                                                    message={
+                                                                        errors.name
+                                                                    }
+                                                                />
+                                                            </div>
+                                                            <div className="grid gap-2">
+                                                                <Label
+                                                                    htmlFor="email"
+                                                                    className="flex items-center gap-2 text-sm font-medium"
+                                                                >
+                                                                    <Mail className="h-4 w-4" />
+                                                                    Email
+                                                                </Label>
+                                                                <Input
+                                                                    id="email"
+                                                                    type="email"
+                                                                    name="email"
+                                                                    defaultValue={
+                                                                        user?.email
+                                                                    }
+                                                                    placeholder="votre@email.com"
+                                                                    className="h-10 rounded-xl"
+                                                                    required
+                                                                />
+                                                                <InputError
+                                                                    message={
+                                                                        errors.email
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        </div>
 
-                                        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                            <div className="space-y-1">
-                                                <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                                                    {tenant.raison_sociale}
-                                                </p>
-                                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                                    {tenant.telephone ||
-                                                        tenant.email ||
-                                                        'Coordonnées de boutique'}
-                                                </p>
-                                            </div>
+                                                        {mustVerifyEmail &&
+                                                            !user?.email_verified_at && (
+                                                                <div className="flex gap-3 rounded-xl border border-amber-200 bg-amber-50/70 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
+                                                                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
+                                                                    <div className="flex-1">
+                                                                        <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+                                                                            Email
+                                                                            non
+                                                                            vérifié
+                                                                        </p>
+                                                                        <p className="mt-1 text-xs text-amber-800 dark:text-amber-200">
+                                                                            Vérifiez
+                                                                            votre
+                                                                            adresse
+                                                                            email
+                                                                            pour
+                                                                            accéder
+                                                                            à
+                                                                            toutes
+                                                                            les
+                                                                            fonctionnalités.
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            )}
 
-                                            <Button
-                                                asChild
-                                                variant="outline"
-                                                className="h-10"
-                                            >
-                                                <a
-                                                    href={route(
-                                                        'vendor.settings',
-                                                    )}
-                                                >
-                                                    Ouvrir les paramètres
-                                                </a>
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-
-                                    {/* Informations supplémentaires */}
-                                    <div className="grid gap-4 md:grid-cols-2">
-                                        {/* SIRET/RCCM */}
-                                        <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md ring-1 shadow-slate-200/40 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
-                                            <CardHeader>
-                                                <CardTitle className="text-base">
-                                                    Documents légaux
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="space-y-3">
-                                                <div>
-                                                    <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                                                        RCCM
-                                                    </p>
-                                                    <p className="font-mono text-sm text-slate-900 dark:text-slate-100">
-                                                        {tenant.siret ||
-                                                            'Non renseigné'}
-                                                    </p>
-                                                </div>
-                                                <div>
-                                                    <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                                                        Type d'entité
-                                                    </p>
-                                                    <Badge variant="outline">
-                                                        {tenant.type_entite}
-                                                    </Badge>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-
-                                        {/* Abonnement */}
-                                        <Card className="overflow-hidden border-slate-200/60 bg-white/95 shadow-md ring-1 shadow-slate-200/40 ring-slate-900/5 backdrop-blur-sm transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-950/80 dark:shadow-none dark:ring-white/5">
-                                            <CardHeader>
-                                                <CardTitle className="text-base">
-                                                    Abonnement
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent className="space-y-3">
-                                                <div>
-                                                    <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                                                        Statut
-                                                    </p>
-                                                    <Badge
-                                                        className={
-                                                            tenant.statut ===
-                                                            'actif'
-                                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                                                                : 'bg-slate-100 text-slate-700'
-                                                        }
-                                                    >
-                                                        {tenant.statut ===
-                                                        'actif'
-                                                            ? 'Actif'
-                                                            : 'Inactif'}
-                                                    </Badge>
-                                                </div>
-                                                <div>
-                                                    <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
-                                                        Plan
-                                                    </p>
-                                                    <p className="text-sm text-slate-900 dark:text-slate-100">
-                                                        {tenant.plan_id
-                                                            ? 'Plan actif'
-                                                            : 'Pas de plan'}
-                                                    </p>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    </div>
+                                                        <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
+                                                            <Button
+                                                                disabled={
+                                                                    processing
+                                                                }
+                                                                className="h-10 gap-2 rounded-xl bg-slate-900 px-5 text-white hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                                                            >
+                                                                Enregistrer les
+                                                                modifications
+                                                            </Button>
+                                                            <Transition
+                                                                show={
+                                                                    recentlySuccessful
+                                                                }
+                                                                enter="transition ease-in-out duration-200"
+                                                                enterFrom="opacity-0"
+                                                                leave="transition ease-in-out duration-200"
+                                                                leaveTo="opacity-0"
+                                                            >
+                                                                <p className="flex items-center gap-1 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                                                                    <CheckCircle2 className="h-4 w-4" />
+                                                                    Modifications
+                                                                    sauvegardées
+                                                                </p>
+                                                            </Transition>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </motion.div>
+                                        )}
+                                    </Form>
                                 </TabsContent>
-                            )}
-                        </Tabs>
+
+                                {/* Onglet: Ma boutique */}
+                                {isOwner && (
+                                    <TabsContent
+                                        value="shop"
+                                        className="mt-0 space-y-6"
+                                    >
+                                        {/* Carte principale boutique */}
+                                        <motion.div {...cardAnimation}>
+                                            <Card className="overflow-hidden border-0 bg-white/70 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/70 dark:shadow-black/20">
+                                                <div className="h-8 bg-linear-to-r from-emerald-500/20 to-transparent dark:from-transparent dark:to-transparent" />
+                                                <CardContent className="pt-0">
+                                                    <div className="flex flex-col gap-6 sm:flex-row">
+                                                        <div className="relative -mt-12 flex justify-center sm:justify-start">
+                                                            <Avatar className="h-28 w-28 border-4 border-white dark:border-slate-900">
+                                                                <AvatarImage
+                                                                    src={
+                                                                        avatarPreviewUrl ??
+                                                                        user?.avatar_url ??
+                                                                        user?.avatar ??
+                                                                        undefined
+                                                                    }
+                                                                />
+                                                                <AvatarFallback className="bg-emerald-500 text-2xl font-bold text-white">
+                                                                    {
+                                                                        tenant
+                                                                            .raison_sociale[0]
+                                                                    }
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                        </div>
+                                                        <div className="flex-1 space-y-4 pt-2 sm:pt-6">
+                                                            <div>
+                                                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                                                                    {
+                                                                        tenant.raison_sociale
+                                                                    }
+                                                                </h2>
+                                                                {tenant.type_entite && (
+                                                                    <Badge
+                                                                        variant="outline"
+                                                                        className="mt-1"
+                                                                    >
+                                                                        {
+                                                                            tenant.type_entite
+                                                                        }
+                                                                    </Badge>
+                                                                )}
+                                                            </div>
+                                                            {/* URL boutique */}
+                                                            <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-700 dark:bg-slate-800/50">
+                                                                <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
+                                                                    URL de la
+                                                                    boutique
+                                                                </p>
+                                                                <div className="flex items-center gap-2">
+                                                                    <Globe className="h-4 w-4 text-emerald-500" />
+                                                                    <code className="flex-1 truncate font-mono text-sm text-slate-900 dark:text-slate-100">
+                                                                        {
+                                                                            shopUrl
+                                                                        }
+                                                                    </code>
+                                                                    <button
+                                                                        onClick={
+                                                                            copyShopUrl
+                                                                        }
+                                                                        className="shrink-0 rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
+                                                                    >
+                                                                        {copiedUrl ? (
+                                                                            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                                                                        ) : (
+                                                                            <Copy className="h-4 w-4" />
+                                                                        )}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+
+                                        {/* Réglages rapides */}
+                                        <motion.div
+                                            {...cardAnimation}
+                                            transition={{ delay: 0.1 }}
+                                        >
+                                            <Card className="border-0 bg-white/70 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/70 dark:shadow-black/20">
+                                                <CardContent className="flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                                            <Settings2 className="h-5 w-5" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-semibold text-slate-900 dark:text-white">
+                                                                Paramètres de la
+                                                                boutique
+                                                            </h3>
+                                                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                                                Modifiez le
+                                                                logo, les
+                                                                informations
+                                                                commerciales et
+                                                                plus.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <Button
+                                                        asChild
+                                                        className="rounded-xl bg-emerald-600 hover:bg-emerald-700"
+                                                    >
+                                                        <a
+                                                            href={route(
+                                                                'vendor.settings',
+                                                            )}
+                                                        >
+                                                            Ouvrir les
+                                                            paramètres
+                                                        </a>
+                                                    </Button>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+
+                                        {/* Cartes légales & abonnement */}
+                                        <div className="grid gap-6 md:grid-cols-2">
+                                            <motion.div
+                                                {...cardAnimation}
+                                                transition={{ delay: 0.15 }}
+                                            >
+                                                <Card className="border-0 bg-white/70 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/70 dark:shadow-black/20">
+                                                    <CardHeader>
+                                                        <CardTitle className="flex items-center gap-2 text-base">
+                                                            <ShieldCheck className="h-5 w-5 text-emerald-500" />
+                                                            Documents légaux
+                                                        </CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-3">
+                                                        <div>
+                                                            <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
+                                                                RCCM
+                                                            </p>
+                                                            <p className="font-mono text-sm text-slate-900 dark:text-slate-100">
+                                                                {tenant.siret ||
+                                                                    'Non renseigné'}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
+                                                                Type d'entité
+                                                            </p>
+                                                            <Badge variant="outline">
+                                                                {
+                                                                    tenant.type_entite
+                                                                }
+                                                            </Badge>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </motion.div>
+
+                                            <motion.div
+                                                {...cardAnimation}
+                                                transition={{ delay: 0.2 }}
+                                            >
+                                                <Card className="border-0 bg-white/70 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/70 dark:shadow-black/20">
+                                                    <CardHeader>
+                                                        <CardTitle className="flex items-center gap-2 text-base">
+                                                            <CreditCard className="h-5 w-5 text-emerald-500" />
+                                                            Abonnement
+                                                        </CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-3">
+                                                        <div>
+                                                            <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
+                                                                Statut
+                                                            </p>
+                                                            <Badge
+                                                                className={
+                                                                    tenant.statut ===
+                                                                    'actif'
+                                                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                                                        : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                                                                }
+                                                            >
+                                                                {tenant.statut ===
+                                                                'actif'
+                                                                    ? 'Actif'
+                                                                    : 'Inactif'}
+                                                            </Badge>
+                                                        </div>
+                                                        <div>
+                                                            <p className="mb-1 text-xs font-semibold text-slate-500 uppercase dark:text-slate-400">
+                                                                Plan
+                                                            </p>
+                                                            <p className="text-sm text-slate-900 dark:text-slate-100">
+                                                                {tenant.plan
+                                                                    ?.name ??
+                                                                    'Aucun plan'}
+                                                            </p>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </motion.div>
+                                        </div>
+                                    </TabsContent>
+                                )}
+                            </Tabs>
+                        </div>
                     </div>
                 </SettingsLayout>
             </SidebarInset>

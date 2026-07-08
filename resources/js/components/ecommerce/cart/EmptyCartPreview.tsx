@@ -1,6 +1,6 @@
 // resources/js/components/ecommerce/cart/EmptyCart.tsx (ou directement dans CartContent)
 import { Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 

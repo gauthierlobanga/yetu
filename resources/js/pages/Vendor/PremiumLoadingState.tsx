@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Loader2, ShieldCheck } from 'lucide-react';
 
 interface Props {

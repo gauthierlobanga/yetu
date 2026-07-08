@@ -4,7 +4,7 @@
 'use client';
 
 import { Head, router, usePage } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     Users,
     Eye,
@@ -271,6 +271,26 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
             positive: false,
         },
     ];
+
+    const steps = [
+        { label: 'Visiteurs', value: conversionFunnel.visitors },
+        { label: 'Pages produits', value: conversionFunnel.product_views },
+        { label: 'Ajouts panier', value: conversionFunnel.add_to_cart },
+        { label: 'Checkout', value: conversionFunnel.begin_checkout },
+        { label: 'Achats', value: conversionFunnel.purchases },
+    ];
+
+    const getPercentage = (index: number) => {
+        if (index === 0) {
+            return 100;
+        }
+
+        const previousValue = steps[index - 1].value;
+
+        return previousValue > 0
+            ? Math.round((steps[index].value / previousValue) * 100)
+            : 0;
+    };
 
     useEcho(`tenant.${tenant.id}`, 'VisitorActivity', (event: any) => {
         setRealTime((prev) => ({
@@ -1057,67 +1077,124 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 </CardContent>
                             </Card>
 
+                            {/* Tunnel de conversion amélioré */}
                             <Card className="border-0 bg-white/60 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/60 dark:shadow-slate-950/30">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-base font-semibold">
+                                    <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                        <TrendingUp className="h-5 w-5 text-emerald-500" />
                                         Tunnel de conversion
                                     </CardTitle>
+                                    <CardDescription className="text-xs">
+                                        Parcours client (taux de passage)
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-3">
-                                        {[
-                                            {
-                                                label: 'Visiteurs',
-                                                value: conversionFunnel.visitors,
-                                            },
-                                            {
-                                                label: 'Pages produits',
-                                                value: conversionFunnel.product_views,
-                                            },
-                                            {
-                                                label: 'Ajouts panier',
-                                                value: conversionFunnel.add_to_cart,
-                                            },
-                                            {
-                                                label: 'Checkout',
-                                                value: conversionFunnel.begin_checkout,
-                                            },
-                                            {
-                                                label: 'Achats',
-                                                value: conversionFunnel.purchases,
-                                            },
-                                        ].map((step) => {
-                                            const percent =
-                                                conversionFunnel.visitors > 0
-                                                    ? (step.value /
-                                                          conversionFunnel.visitors) *
-                                                      100
-                                                    : 0;
+                                    <div className="space-y-4">
+                                        {(() => {
+                                            const steps = [
+                                                {
+                                                    label: 'Visiteurs',
+                                                    value: conversionFunnel.visitors,
+                                                },
+                                                {
+                                                    label: 'Pages produits',
+                                                    value: conversionFunnel.product_views,
+                                                },
+                                                {
+                                                    label: 'Ajouts panier',
+                                                    value: conversionFunnel.add_to_cart,
+                                                },
+                                                {
+                                                    label: 'Checkout',
+                                                    value: conversionFunnel.begin_checkout,
+                                                },
+                                                {
+                                                    label: 'Achats',
+                                                    value: conversionFunnel.purchases,
+                                                },
+                                            ];
 
-                                            return (
-                                                <div key={step.label}>
-                                                    <div className="mb-1 flex justify-between text-sm">
-                                                        <span className="text-slate-600 dark:text-slate-300">
-                                                            {step.label}
-                                                        </span>
-                                                        <span className="font-medium text-slate-900 dark:text-white">
-                                                            {step.value.toLocaleString()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="h-1.5 w-full rounded bg-slate-100 dark:bg-slate-800">
-                                                        <motion.div
-                                                            initial={{
-                                                                width: 0,
-                                                            }}
-                                                            animate={{
-                                                                width: `${percent}%`,
-                                                            }}
-                                                            className="h-1.5 rounded bg-emerald-500"
-                                                        />
-                                                    </div>
-                                                </div>
+                                            // Calcule le pourcentage par rapport à l'étape précédente,
+                                            // mais seulement si la valeur est inférieure ou égale (entonnoir cohérent).
+                                            const getPercentage = (
+                                                index: number,
+                                            ): number | null => {
+                                                if (index === 0) {
+                                                    return 100;
+                                                }
+
+                                                const previousValue =
+                                                    steps[index - 1].value;
+                                                const currentValue =
+                                                    steps[index].value;
+
+                                                if (
+                                                    previousValue > 0 &&
+                                                    currentValue <=
+                                                        previousValue
+                                                ) {
+                                                    return Math.round(
+                                                        (currentValue /
+                                                            previousValue) *
+                                                            100,
+                                                    );
+                                                }
+
+                                                return null; // pourcentage non pertinent
+                                            };
+
+                                            const maxValue = Math.max(
+                                                ...steps.map((s) => s.value),
+                                                1,
                                             );
-                                        })}
+
+                                            return steps.map((step, idx) => {
+                                                const percent =
+                                                    getPercentage(idx);
+                                                const widthPercent =
+                                                    (step.value / maxValue) *
+                                                    100; // largeur relative pour visuel
+
+                                                return (
+                                                    <div
+                                                        key={step.label}
+                                                        className="space-y-1"
+                                                    >
+                                                        <div className="flex items-center justify-between text-sm">
+                                                            <span className="text-slate-600 dark:text-slate-300">
+                                                                {step.label}
+                                                            </span>
+                                                            <span className="font-medium text-slate-900 tabular-nums dark:text-white">
+                                                                {step.value.toLocaleString()}
+                                                                {percent !==
+                                                                null
+                                                                    ? ` (${percent}%)`
+                                                                    : ''}
+                                                            </span>
+                                                        </div>
+                                                        <div className="relative h-8 w-full overflow-hidden rounded-lg bg-slate-100 dark:bg-slate-800">
+                                                            <motion.div
+                                                                className="flex h-full items-center rounded-lg bg-linear-to-r from-emerald-400 to-teal-500 pl-3 text-xs font-bold text-white"
+                                                                initial={{
+                                                                    width: 0,
+                                                                }}
+                                                                animate={{
+                                                                    width: `${Math.max(5, widthPercent)}%`,
+                                                                }}
+                                                                transition={{
+                                                                    duration: 1,
+                                                                    delay:
+                                                                        idx *
+                                                                        0.2,
+                                                                }}
+                                                            >
+                                                                {step.label}
+                                                            </motion.div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            });
+                                        })()}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -1125,11 +1202,16 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
 
                         {/* Sources & Top produits */}
                         <div className="mb-8 grid gap-6 lg:grid-cols-2">
+                            {/* Sources de trafic – Barres horizontales */}
                             <Card className="border-0 bg-white/60 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/60 dark:shadow-slate-950/30">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-base font-semibold">
+                                    <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                        <BarChart3 className="h-5 w-5 text-emerald-500" />
                                         Sources de trafic
                                     </CardTitle>
+                                    <CardDescription className="text-xs">
+                                        Répartition par source
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     {trafficSources.length === 0 ? (
@@ -1137,164 +1219,448 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                             Aucune donnée
                                         </p>
                                     ) : (
-                                        <div className="space-y-3">
-                                            {trafficSources.map((source) => {
-                                                const total =
-                                                    trafficSources.reduce(
-                                                        (acc, s) =>
-                                                            acc + s.visits,
-                                                        0,
-                                                    );
-                                                const percent =
-                                                    total > 0
-                                                        ? (source.visits /
-                                                              total) *
-                                                          100
-                                                        : 0;
+                                        <ResponsiveContainer
+                                            width="100%"
+                                            height={250}
+                                        >
+                                            <BarChart
+                                                data={trafficSources.map(
+                                                    (s) => {
+                                                        const total =
+                                                            trafficSources.reduce(
+                                                                (acc, cur) =>
+                                                                    acc +
+                                                                    cur.visits,
+                                                                0,
+                                                            );
+                                                        const percent =
+                                                            total > 0
+                                                                ? (s.visits /
+                                                                      total) *
+                                                                  100
+                                                                : 0;
 
-                                                return (
-                                                    <div key={source.source}>
-                                                        <div className="mb-1 flex justify-between text-sm">
-                                                            <span className="flex items-center gap-2">
-                                                                {getSourceIcon(
-                                                                    source.source,
-                                                                )}
-                                                                {source.source}
-                                                            </span>
-                                                            <span className="text-slate-500">
-                                                                {percent.toFixed(
-                                                                    1,
-                                                                )}
-                                                                %
-                                                            </span>
-                                                        </div>
-                                                        <div className="h-1.5 w-full rounded bg-slate-100 dark:bg-slate-800">
-                                                            <motion.div
-                                                                initial={{
-                                                                    width: 0,
-                                                                }}
-                                                                animate={{
-                                                                    width: `${percent}%`,
-                                                                }}
-                                                                className="h-1.5 rounded bg-emerald-500"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
+                                                        return {
+                                                            name: s.source,
+                                                            visits: s.visits,
+                                                            percent:
+                                                                Math.round(
+                                                                    percent,
+                                                                ),
+                                                        };
+                                                    },
+                                                )}
+                                                layout="vertical"
+                                                margin={{
+                                                    top: 0,
+                                                    right: 40,
+                                                    left: 0,
+                                                    bottom: 0,
+                                                }}
+                                            >
+                                                <CartesianGrid
+                                                    strokeDasharray="3 3"
+                                                    stroke="#e2e8f0"
+                                                    strokeOpacity={0.5}
+                                                    horizontal={false}
+                                                />
+                                                <XAxis type="number" hide />
+                                                <YAxis
+                                                    type="category"
+                                                    dataKey="name"
+                                                    tick={{
+                                                        fontSize: 11,
+                                                        fill: '#64748b',
+                                                    }}
+                                                    width={100}
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tickFormatter={(val) =>
+                                                        val
+                                                            .charAt(0)
+                                                            .toUpperCase() +
+                                                        val.slice(1)
+                                                    }
+                                                />
+                                                <RechartsTooltip
+                                                    content={({
+                                                        active,
+                                                        payload,
+                                                    }) => {
+                                                        if (
+                                                            !active ||
+                                                            !payload?.length
+                                                        ) {
+                                                            return null;
+                                                        }
+
+                                                        const {
+                                                            name,
+                                                            visits,
+                                                            percent,
+                                                        } = payload[0].payload;
+
+                                                        return (
+                                                            <div className="rounded-xl border border-slate-200/60 bg-white/80 p-3 shadow-lg backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-900/80">
+                                                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                                                    {name}
+                                                                </p>
+                                                                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                                                    {visits}{' '}
+                                                                    visites (
+                                                                    {percent}%)
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    }}
+                                                />
+                                                <Bar
+                                                    dataKey="visits"
+                                                    radius={[0, 8, 8, 0]}
+                                                    barSize={20}
+                                                    fill="#10b981"
+                                                >
+                                                    <LabelList
+                                                        dataKey="percent"
+                                                        position="right"
+                                                        formatter={(
+                                                            label: any,
+                                                        ) => `${label}%`}
+                                                        style={{
+                                                            fontSize: '11px',
+                                                            fill: '#64748b',
+                                                        }}
+                                                    />
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
                                     )}
                                 </CardContent>
                             </Card>
 
-                            {/* ✅ Produits les plus vendus (corrigé avec nom) */}
+                            {/* Produits les plus vendus – Barres verticales */}
                             <Card className="border-0 bg-white/60 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/60 dark:shadow-slate-950/30">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-base font-semibold">
+                                    <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                        <ShoppingCart className="h-5 w-5 text-emerald-500" />
                                         Produits les plus vendus
                                     </CardTitle>
+                                    <CardDescription className="text-xs">
+                                        Top 5 des ventes
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-2">
-                                        {(topProducts.top_sold ?? [])
-                                            .slice(0, 5)
-                                            .map((p, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    className="group flex justify-between text-sm"
-                                                >
-                                                    <span
-                                                        className="max-w-[70%] truncate"
-                                                        title={
-                                                            p.product_name ??
-                                                            p.product_id
+                                    {!topProducts.top_sold ||
+                                    topProducts.top_sold.length === 0 ? (
+                                        <p className="text-sm text-slate-500">
+                                            Aucune donnée
+                                        </p>
+                                    ) : (
+                                        <ResponsiveContainer
+                                            width="100%"
+                                            height={250}
+                                        >
+                                            <BarChart
+                                                data={topProducts.top_sold
+                                                    .slice(0, 5)
+                                                    .map((p) => ({
+                                                        name: (
+                                                            p.product_name ||
+                                                            p.product_id ||
+                                                            ''
+                                                        ).substring(0, 20),
+                                                        sold: p.sold ?? 0,
+                                                    }))}
+                                                margin={{
+                                                    top: 10,
+                                                    right: 20,
+                                                    left: 0,
+                                                    bottom: 40,
+                                                }}
+                                            >
+                                                <CartesianGrid
+                                                    strokeDasharray="3 3"
+                                                    stroke="#e2e8f0"
+                                                    strokeOpacity={0.5}
+                                                />
+                                                <XAxis
+                                                    dataKey="name"
+                                                    tick={{
+                                                        fontSize: 10,
+                                                        fill: '#64748b',
+                                                    }}
+                                                    angle={-25}
+                                                    textAnchor="end"
+                                                    height={60}
+                                                />
+                                                <YAxis
+                                                    tick={{
+                                                        fontSize: 11,
+                                                        fill: '#94a3b8',
+                                                    }}
+                                                />
+                                                <RechartsTooltip
+                                                    content={({
+                                                        active,
+                                                        payload,
+                                                    }) => {
+                                                        if (
+                                                            !active ||
+                                                            !payload?.length
+                                                        ) {
+                                                            return null;
                                                         }
-                                                    >
-                                                        {p.product_name ??
-                                                            `#${(p.product_id ?? '').substring(0, 8)}…`}
-                                                    </span>
-                                                    <span className="font-medium text-emerald-600">
-                                                        {p.sold ?? 0} vendus
-                                                    </span>
-                                                </div>
-                                            ))}
-                                    </div>
+
+                                                        const { name, sold } =
+                                                            payload[0].payload;
+
+                                                        return (
+                                                            <div className="rounded-xl border border-slate-200/60 bg-white/80 p-3 shadow-lg backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-900/80">
+                                                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                                                    {name}
+                                                                </p>
+                                                                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                                                    {sold}{' '}
+                                                                    vendus
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    }}
+                                                />
+                                                <Bar
+                                                    dataKey="sold"
+                                                    fill="#10b981"
+                                                    radius={[8, 8, 0, 0]}
+                                                    barSize={30}
+                                                >
+                                                    <LabelList
+                                                        dataKey="sold"
+                                                        position="top"
+                                                        style={{
+                                                            fontSize: '11px',
+                                                            fill: '#64748b',
+                                                        }}
+                                                    />
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>
 
                         {/* ✅ Nouveaux graphiques modernes */}
                         <div className="mb-8 grid gap-6 lg:grid-cols-2">
-                            {/* Produits les plus consultés */}
+                            {/* Produits les plus consultés – Barres verticales */}
                             {topProducts.top_viewed &&
                                 topProducts.top_viewed.length > 0 && (
                                     <Card className="border-0 bg-white/60 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/60 dark:shadow-slate-950/30">
                                         <CardHeader className="pb-2">
-                                            <CardTitle className="text-base font-semibold">
+                                            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                                <Eye className="h-5 w-5 text-emerald-500" />
                                                 Produits les plus consultés
                                             </CardTitle>
+                                            <CardDescription className="text-xs">
+                                                Top 5 des vues
+                                            </CardDescription>
                                         </CardHeader>
                                         <CardContent>
-                                            <div className="space-y-2">
-                                                {topProducts.top_viewed
-                                                    .slice(0, 5)
-                                                    .map((p, idx) => (
-                                                        <div
-                                                            key={idx}
-                                                            className="flex justify-between text-sm"
-                                                        >
-                                                            <span
-                                                                className="max-w-[70%] truncate"
-                                                                title={
-                                                                    p.product_name ??
-                                                                    p.product_id
-                                                                }
-                                                            >
-                                                                {p.product_name ??
-                                                                    p.product_id}
-                                                            </span>
-                                                            <span className="font-medium text-blue-600">
-                                                                {p.views ?? 0}{' '}
-                                                                vues
-                                                            </span>
-                                                        </div>
-                                                    ))}
-                                            </div>
+                                            <ResponsiveContainer
+                                                width="100%"
+                                                height={250}
+                                            >
+                                                <BarChart
+                                                    data={topProducts.top_viewed
+                                                        .slice(0, 5)
+                                                        .map((p) => ({
+                                                            name: (
+                                                                p.product_name ||
+                                                                p.product_id ||
+                                                                ''
+                                                            ).substring(0, 20),
+                                                            views: p.views ?? 0,
+                                                        }))}
+                                                    margin={{
+                                                        top: 10,
+                                                        right: 20,
+                                                        left: 0,
+                                                        bottom: 40,
+                                                    }}
+                                                >
+                                                    <CartesianGrid
+                                                        strokeDasharray="3 3"
+                                                        stroke="#e2e8f0"
+                                                        strokeOpacity={0.5}
+                                                    />
+                                                    <XAxis
+                                                        dataKey="name"
+                                                        tick={{
+                                                            fontSize: 10,
+                                                            fill: '#64748b',
+                                                        }}
+                                                        angle={-25}
+                                                        textAnchor="end"
+                                                        height={60}
+                                                    />
+                                                    <YAxis
+                                                        tick={{
+                                                            fontSize: 11,
+                                                            fill: '#94a3b8',
+                                                        }}
+                                                    />
+                                                    <RechartsTooltip
+                                                        content={({
+                                                            active,
+                                                            payload,
+                                                        }) => {
+                                                            if (
+                                                                !active ||
+                                                                !payload?.length
+                                                            ) {
+                                                                return null;
+                                                            }
+
+                                                            const {
+                                                                name,
+                                                                views,
+                                                            } =
+                                                                payload[0]
+                                                                    .payload;
+
+                                                            return (
+                                                                <div className="rounded-xl border border-slate-200/60 bg-white/80 p-3 shadow-lg backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-900/80">
+                                                                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                                                        {name}
+                                                                    </p>
+                                                                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                                                        {views}{' '}
+                                                                        vues
+                                                                    </p>
+                                                                </div>
+                                                            );
+                                                        }}
+                                                    />
+                                                    <Bar
+                                                        dataKey="views"
+                                                        fill="#06b6d4"
+                                                        radius={[8, 8, 0, 0]}
+                                                        barSize={30}
+                                                    >
+                                                        <LabelList
+                                                            dataKey="views"
+                                                            position="top"
+                                                            style={{
+                                                                fontSize:
+                                                                    '11px',
+                                                                fill: '#64748b',
+                                                            }}
+                                                        />
+                                                    </Bar>
+                                                </BarChart>
+                                            </ResponsiveContainer>
                                         </CardContent>
                                     </Card>
                                 )}
 
-                            {/* Top villes */}
+                            {/* Top villes – Barres horizontales */}
                             {geographicStats.cities &&
                                 geographicStats.cities.length > 0 && (
                                     <Card className="border-0 bg-white/60 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/60 dark:shadow-slate-950/30">
                                         <CardHeader className="pb-2">
-                                            <CardTitle className="text-base font-semibold">
+                                            <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                                <MapPin className="h-5 w-5 text-emerald-500" />
                                                 Top villes
                                             </CardTitle>
+                                            <CardDescription className="text-xs">
+                                                Répartition par ville
+                                            </CardDescription>
                                         </CardHeader>
                                         <CardContent>
-                                            <div className="space-y-2">
-                                                {geographicStats.cities
-                                                    .slice(0, 8)
-                                                    .map((city, idx) => (
-                                                        <div
-                                                            key={idx}
-                                                            className="flex justify-between text-sm"
-                                                        >
-                                                            <span className="flex items-center gap-2">
-                                                                <MapPin className="h-3 w-3 text-emerald-500" />
-                                                                {city.city ??
-                                                                    'Inconnue'}
-                                                                , {city.country}
-                                                            </span>
-                                                            <span className="font-medium">
-                                                                {city.visits}{' '}
-                                                                visites
-                                                            </span>
-                                                        </div>
-                                                    ))}
-                                            </div>
+                                            <ResponsiveContainer
+                                                width="100%"
+                                                height={250}
+                                            >
+                                                <BarChart
+                                                    data={geographicStats.cities
+                                                        .slice(0, 8)
+                                                        .map((c) => ({
+                                                            name: `${c.city || 'Inconnue'}, ${c.country}`,
+                                                            visits: c.visits,
+                                                        }))}
+                                                    layout="vertical"
+                                                    margin={{
+                                                        top: 0,
+                                                        right: 40,
+                                                        left: 0,
+                                                        bottom: 0,
+                                                    }}
+                                                >
+                                                    <CartesianGrid
+                                                        strokeDasharray="3 3"
+                                                        stroke="#e2e8f0"
+                                                        strokeOpacity={0.5}
+                                                        horizontal={false}
+                                                    />
+                                                    <XAxis type="number" hide />
+                                                    <YAxis
+                                                        type="category"
+                                                        dataKey="name"
+                                                        tick={{
+                                                            fontSize: 10,
+                                                            fill: '#64748b',
+                                                        }}
+                                                        width={120}
+                                                    />
+                                                    <RechartsTooltip
+                                                        content={({
+                                                            active,
+                                                            payload,
+                                                        }) => {
+                                                            if (
+                                                                !active ||
+                                                                !payload?.length
+                                                            ) {
+                                                                return null;
+                                                            }
+
+                                                            const {
+                                                                name,
+                                                                visits,
+                                                            } =
+                                                                payload[0]
+                                                                    .payload;
+
+                                                            return (
+                                                                <div className="rounded-xl border border-slate-200/60 bg-white/80 p-3 shadow-lg backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-900/80">
+                                                                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                                                        {name}
+                                                                    </p>
+                                                                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                                                        {visits}{' '}
+                                                                        visites
+                                                                    </p>
+                                                                </div>
+                                                            );
+                                                        }}
+                                                    />
+                                                    <Bar
+                                                        dataKey="visits"
+                                                        fill="#14b8a6"
+                                                        radius={[0, 8, 8, 0]}
+                                                        barSize={18}
+                                                    >
+                                                        <LabelList
+                                                            dataKey="visits"
+                                                            position="right"
+                                                            style={{
+                                                                fontSize:
+                                                                    '11px',
+                                                                fill: '#64748b',
+                                                            }}
+                                                        />
+                                                    </Bar>
+                                                </BarChart>
+                                            </ResponsiveContainer>
                                         </CardContent>
                                     </Card>
                                 )}
@@ -1352,32 +1718,104 @@ export default function AnalyticsDashboard(props: AnalyticsProps) {
                                 </CardContent>
                             </Card>
 
-                            {/* Géolocalisation pays (classique) */}
+                            {/* Géolocalisation pays – Barres horizontales */}
                             <Card className="border-0 bg-white/60 shadow-lg shadow-slate-200/20 backdrop-blur-xl dark:bg-slate-900/60 dark:shadow-slate-950/30">
                                 <CardHeader className="pb-2">
-                                    <CardTitle className="text-base font-semibold">
+                                    <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                        <Globe className="h-5 w-5 text-emerald-500" />
                                         Géolocalisation (pays)
                                     </CardTitle>
+                                    <CardDescription className="text-xs">
+                                        Top 5 des pays
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-2">
-                                        {geographicStats.countries
-                                            .slice(0, 5)
-                                            .map((c, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    className="flex justify-between text-sm"
+                                    {geographicStats.countries.length === 0 ? (
+                                        <p className="text-sm text-slate-500">
+                                            Aucune donnée
+                                        </p>
+                                    ) : (
+                                        <ResponsiveContainer
+                                            width="100%"
+                                            height={220}
+                                        >
+                                            <BarChart
+                                                data={geographicStats.countries
+                                                    .slice(0, 5)
+                                                    .map((c) => ({
+                                                        name: c.country,
+                                                        visits: c.visits,
+                                                    }))}
+                                                layout="vertical"
+                                                margin={{
+                                                    top: 0,
+                                                    right: 40,
+                                                    left: 0,
+                                                    bottom: 0,
+                                                }}
+                                            >
+                                                <CartesianGrid
+                                                    strokeDasharray="3 3"
+                                                    stroke="#e2e8f0"
+                                                    strokeOpacity={0.5}
+                                                    horizontal={false}
+                                                />
+                                                <XAxis type="number" hide />
+                                                <YAxis
+                                                    type="category"
+                                                    dataKey="name"
+                                                    tick={{
+                                                        fontSize: 11,
+                                                        fill: '#64748b',
+                                                    }}
+                                                    width={90}
+                                                />
+                                                <RechartsTooltip
+                                                    content={({
+                                                        active,
+                                                        payload,
+                                                    }) => {
+                                                        if (
+                                                            !active ||
+                                                            !payload?.length
+                                                        ) {
+                                                            return null;
+                                                        }
+
+                                                        const { name, visits } =
+                                                            payload[0].payload;
+
+                                                        return (
+                                                            <div className="rounded-xl border border-slate-200/60 bg-white/80 p-3 shadow-lg backdrop-blur-md dark:border-slate-700/50 dark:bg-slate-900/80">
+                                                                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                                                                    {name}
+                                                                </p>
+                                                                <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                                                                    {visits}{' '}
+                                                                    visites
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    }}
+                                                />
+                                                <Bar
+                                                    dataKey="visits"
+                                                    fill="#8b5cf6"
+                                                    radius={[0, 8, 8, 0]}
+                                                    barSize={20}
                                                 >
-                                                    <span className="flex items-center gap-2">
-                                                        <MapPin className="h-3 w-3 text-emerald-500" />
-                                                        {c.country}
-                                                    </span>
-                                                    <span className="font-medium">
-                                                        {c.visits} visites
-                                                    </span>
-                                                </div>
-                                            ))}
-                                    </div>
+                                                    <LabelList
+                                                        dataKey="visits"
+                                                        position="right"
+                                                        style={{
+                                                            fontSize: '11px',
+                                                            fill: '#64748b',
+                                                        }}
+                                                    />
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    )}
                                 </CardContent>
                             </Card>
                         </div>

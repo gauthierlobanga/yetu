@@ -1,5 +1,4 @@
 // resources/js/types/ecommerce/products/index.ts
-import type { Key } from 'react';
 import type { PlatformStats } from './products';
 
 export interface HeaderCategory {
@@ -39,36 +38,39 @@ export interface ProductVariant {
 
 // Interface pour un avis client
 export interface ProductReview {
-    id: Key | null | undefined;
-    utile: number;
+    id: string | number;
+    utile?: number;
     note: number;
     commentaire: string;
     client: string;
     date: string;
 }
 
-// Interface principale Product
+// Interface principale Product (nettoyée)
 export interface Product {
+    // Identité & état
     id: number;
-    quantite_stock: number;
     nom: string;
     slug: string;
+    sku?: string | null;
+    is_nouveau?: boolean;
+    badge?: string | null;
+
+    // Prix & promotions
     prix_actuel: number;
     prix_ttc: number;
     est_en_promotion: boolean;
     reduction_pourcentage: number | null;
-    image_principale: string | null;
-    image_thumb: string | null;
-    note_moyenne: number;
-    nombre_avis: number;
-    badge: string | null;
-    url: string;
-    sold_count?: number;
     discount_label?: string;
 
-    // Champs additionnels pour la page détail
-    description?: string;
-    short_description?: string;
+    // Stock & logistique
+    quantite_stock: number;
+    stock_disponible?: number;
+    poids?: number | null;
+
+    // Images
+    image_principale: string | null;
+    image_thumb: string | null;
     images?: Array<{
         id?: number;
         medium: string;
@@ -76,13 +78,36 @@ export interface Product {
         thumb?: string;
         alt: string;
     }>;
-    brand?: { nom: string; slug: string } | null;
-    categories?: Array<{ nom: string; slug: string }>;
-    variantes?: ProductVariant[];
+
+    // Avis / notes
+    note_moyenne: number;
+    nombre_avis: number;
     avis?: ProductReview[];
-    stock_disponible?: number;
-    seller_name?: string;
+
+    // Marque
+    brand?: {
+        id?: string | number;
+        nom: string;
+        slug: string;
+    } | null;
+
+    // Catégories
+    categories?: Array<{ nom: string; slug: string }>;
+
+    // Variantes
+    variantes?: ProductVariant[];
+
+    // Contenu éditorial
+    description?: string;
+    short_description?: string;
+
+    // SEO / URLs
+    url: string;
+
+    // Ventes
+    sold_count?: number;
     orders_this_week?: number;
+    seller_name?: string;
     old_price?: number;
 }
 

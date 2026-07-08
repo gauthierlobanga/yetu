@@ -2,7 +2,7 @@
 
 // resources/js/components/ecommerce/products/ProductCardCompact.tsx
 import { Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     Heart,
     ShoppingBag,

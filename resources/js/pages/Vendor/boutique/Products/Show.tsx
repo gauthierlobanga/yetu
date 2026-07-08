@@ -20,12 +20,25 @@ import {
     ShieldCheck,
     CheckCircle2,
     AlertCircle,
+    X,
+    ChevronLeft,
+    Expand,
+    Tag,
+    Ruler,
+    Layers,
+    Info,
 } from 'lucide-react';
 import { useState, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 import ProductCard from '@/components/ecommerce/products/ProductCard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogOverlay,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MainLayout from '@/layouts/main-layout';
 import { handleImageFallback, resolveImageUrl } from '@/lib/media';
@@ -53,6 +66,9 @@ export default function ProductShow({
     const [isWishlistLoading, setIsWishlistLoading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
+    const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [lightboxIndex, setLightboxIndex] = useState(0);
+
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ['start start', 'end start'],
@@ -69,22 +85,24 @@ export default function ProductShow({
 
     const quantity = data.quantite;
     const setQuantity = (updater: number | ((prev: number) => number)) => {
-        setData('quantite', typeof updater === 'function' ? updater(data.quantite) : updater);
+        setData(
+            'quantite',
+            typeof updater === 'function' ? updater(data.quantite) : updater,
+        );
     };
 
     const addToCart = () => {
         post(route('tenant.cart.add', product.id), {
             preserveScroll: true,
-            onSuccess: () => {
+            preserveState: true,
+            showProgress: false,
+            onSuccess: () =>
                 toast.success('Produit ajouté au panier', {
                     icon: '🛍️',
                     className:
                         'bg-emerald-50 text-emerald-900 border-emerald-200',
-                });
-            },
-            onError: () => {
-                toast.error("Erreur lors de l'ajout au panier");
-            },
+                }),
+            onError: () => toast.error("Erreur lors de l'ajout au panier"),
         });
     };
 
@@ -94,16 +112,16 @@ export default function ProductShow({
         }
 
         setIsWishlistLoading(true);
-
         const routeName = isInWishlist
             ? 'tenant.wishlist.remove'
             : 'tenant.wishlist.add';
-
         router.post(
             route(routeName),
             { product_id: product.id },
             {
                 preserveScroll: true,
+                preserveState: true,
+                showProgress: false,
                 onSuccess: () => {
                     setIsInWishlist(!isInWishlist);
                     toast.success(
@@ -139,33 +157,51 @@ export default function ProductShow({
         );
     }, [product.prix_ttc, product.prix_actuel]);
 
-    // Ensure we have an array of images
+    // Images uniques (sans doublon)
     const images = useMemo(() => {
-        const imgs = [];
+        const urls = new Set<string>();
+        const result: string[] = [];
+        const add = (img: any) => {
+            if (!img) {
+                return;
+            }
 
-        if (product.image_principale) {
-            imgs.push(product.image_principale);
-        }
+            const url = resolveImageUrl(img);
+
+            if (url && !urls.has(url)) {
+                urls.add(url);
+                result.push(url);
+            }
+        };
+        add(product.image_principale);
 
         if (product.images && Array.isArray(product.images)) {
-            product.images.forEach(img => {
+            product.images.forEach((img) => {
                 if (typeof img === 'string') {
-                    imgs.push(img);
+                    add(img);
                 } else if (img.large || img.medium) {
-                    imgs.push(img.large || img.medium);
+                    add(img.large || img.medium);
                 }
             });
         }
 
-        return imgs.length > 0 ? imgs : ['/placeholder.png']; // Fallback
+        return result.length > 0 ? result : ['/placeholder.png'];
     }, [product]);
+
+    const openLightbox = (index: number) => {
+        setLightboxIndex(index);
+        setLightboxOpen(true);
+    };
+    const nextImage = () =>
+        setLightboxIndex((prev) => (prev + 1) % images.length);
+    const prevImage = () =>
+        setLightboxIndex((prev) => (prev - 1 + images.length) % images.length);
 
     return (
         <MainLayout>
             <Head title={product.nom} />
-
             <div className="bg-slate-50 dark:bg-slate-950" ref={containerRef}>
-                {/* Modernized Breadcrumb */}
+                {/* Breadcrumb */}
                 <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                     <nav className="flex flex-wrap items-center text-sm font-medium text-slate-500 dark:text-slate-400">
                         <Link
@@ -195,101 +231,127 @@ export default function ProductShow({
                 </div>
 
                 {/* Product Section */}
-                <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-7xl px-6 pb-16 sm:px-6 lg:px-8">
                     <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
-                        {/* 3D Modern Gallery Preview */}
+                        {/* Galerie moderne */}
                         <div className="relative mb-10 lg:mb-0">
                             <motion.div
                                 style={{ y, opacity }}
                                 className="sticky top-24"
                             >
-                                <div
-                                    className="group relative aspect-square w-full overflow-hidden rounded-[2.5rem] bg-slate-100 shadow-2xl shadow-slate-200/50 dark:bg-slate-900 dark:shadow-none"
-                                    style={{ perspective: '1000px' }}
-                                >
-                                    <AnimatePresence mode="wait">
-                                        <motion.div
-                                            key={selectedImage}
-                                            initial={{
-                                                opacity: 0,
-                                                rotateY: 15,
-                                                scale: 0.9,
-                                            }}
-                                            animate={{
-                                                opacity: 1,
-                                                rotateY: 0,
-                                                scale: 1,
-                                            }}
-                                            exit={{
-                                                opacity: 0,
-                                                rotateY: -15,
-                                                scale: 0.9,
-                                            }}
-                                            transition={{
-                                                type: 'spring',
-                                                stiffness: 200,
-                                                damping: 20,
-                                            }}
-                                            className="absolute inset-0"
+                                <div className="flex gap-4 lg:gap-6">
+                                    {/* Colonne de miniatures */}
+                                    {images.length > 1 && (
+                                        <div className="hidden max-h-125 scrollbar-thin p-3 scrollbar-thumb-slate-300 scrollbar-track-slate-100 flex-col gap-3 overflow-y-auto pr-2 md:flex dark:scrollbar-thumb-slate-700 dark:scrollbar-track-slate-900">
+                                            {images.map((img, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onMouseEnter={() =>
+                                                        setSelectedImage(idx)
+                                                    }
+                                                    onClick={() =>
+                                                        openLightbox(idx)
+                                                    }
+                                                    className={cn(
+                                                        'relative h-20 w-20 shrink-0 overflow-hidden rounded-xl transition-all duration-300',
+                                                        selectedImage === idx
+                                                            ? 'scale-105 opacity-100 ring-1 ring-emerald-300 ring-offset-1 dark:ring-offset-slate-950'
+                                                            : 'opacity-60 hover:scale-105 hover:opacity-90',
+                                                    )}
+                                                >
+                                                    <img
+                                                        src={img}
+                                                        alt={`${product.nom} ${idx + 1}`}
+                                                        className="h-full w-full object-cover"
+                                                        onError={handleImageFallback()}
+                                                    />
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* Image principale */}
+                                    <div className="flex-1">
+                                        <div
+                                            onClick={() =>
+                                                openLightbox(selectedImage)
+                                            }
+                                            className="group relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-900 dark:shadow-none"
+                                            style={{ perspective: '1000px' }}
                                         >
-                                            <img
-                                                src={resolveImageUrl(
-                                                    images[selectedImage],
+                                            <AnimatePresence mode="wait">
+                                                <motion.img
+                                                    key={selectedImage}
+                                                    initial={{
+                                                        opacity: 0,
+                                                        scale: 1.05,
+                                                    }}
+                                                    animate={{
+                                                        opacity: 1,
+                                                        scale: 1,
+                                                    }}
+                                                    exit={{
+                                                        opacity: 0,
+                                                        scale: 1.05,
+                                                    }}
+                                                    transition={{
+                                                        duration: 0.3,
+                                                    }}
+                                                    src={images[selectedImage]}
+                                                    alt={product.nom}
+                                                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                                                    onError={handleImageFallback()}
+                                                />
+                                            </AnimatePresence>
+                                            <div className="absolute right-4 bottom-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-slate-700 opacity-0 shadow-lg backdrop-blur-md transition-opacity group-hover:opacity-100 dark:bg-slate-900/80 dark:text-slate-300">
+                                                <Expand className="h-5 w-5" />
+                                            </div>
+                                            <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
+                                                {discountPercentage > 0 && (
+                                                    <Badge className="border-transparent bg-rose-500 px-3 py-1.5 text-sm font-bold text-white shadow-lg shadow-rose-500/30">
+                                                        -{discountPercentage}%
+                                                    </Badge>
                                                 )}
-                                                alt={product.nom}
-                                                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
-                                                onError={handleImageFallback()}
-                                            />
-                                        </motion.div>
-                                    </AnimatePresence>
-
-                                    {/* 3D Overlay Effects */}
-                                    <div className="pointer-events-none absolute inset-0 bg-linear-to-tr from-black/10 via-transparent to-white/10 opacity-0 mix-blend-overlay transition-opacity duration-500 group-hover:opacity-100" />
-
-                                    {/* Badges */}
-                                    <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
-                                        {discountPercentage > 0 && (
-                                            <Badge className="border-transparent bg-rose-500 px-3 py-1.5 text-sm font-bold text-white shadow-lg shadow-rose-500/30">
-                                                -{discountPercentage}%
-                                            </Badge>
-                                        )}
-                                        {product.is_nouveau && (
-                                            <Badge className="border-transparent bg-emerald-500 px-3 py-1.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/30">
-                                                Nouveau
-                                            </Badge>
-                                        )}
-                                    </div>
-
-                                    {/* Action Buttons Overlay */}
-                                    <div className="absolute top-6 right-6 z-10 flex flex-col gap-3">
-                                        <motion.button
-                                            whileHover={{ scale: 1.1 }}
-                                            whileTap={{ scale: 0.9 }}
-                                            onClick={toggleWishlist}
-                                            disabled={isWishlistLoading}
-                                            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow-xl backdrop-blur-md transition-colors hover:bg-white hover:text-rose-500 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:text-rose-400"
-                                        >
-                                            <Heart
-                                                className={cn(
-                                                    'h-5 w-5',
-                                                    isInWishlist &&
-                                                        'fill-rose-500 text-rose-500',
+                                                {product.is_nouveau && (
+                                                    <Badge className="border-transparent bg-emerald-500 px-3 py-1.5 text-sm font-bold text-white shadow-lg shadow-emerald-500/30">
+                                                        Nouveau
+                                                    </Badge>
                                                 )}
-                                            />
-                                        </motion.button>
-                                        <motion.button
-                                            whileHover={{ scale: 1.1 }}
-                                            whileTap={{ scale: 0.9 }}
-                                            className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow-xl backdrop-blur-md transition-colors hover:bg-white hover:text-sky-500 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:text-sky-400"
-                                        >
-                                            <Share2 className="h-5 w-5" />
-                                        </motion.button>
+                                            </div>
+                                            <div className="absolute top-6 right-6 z-10 flex flex-col gap-3">
+                                                <motion.button
+                                                    whileHover={{ scale: 1.1 }}
+                                                    whileTap={{ scale: 0.9 }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleWishlist();
+                                                    }}
+                                                    disabled={isWishlistLoading}
+                                                    className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow-xl backdrop-blur-md transition-colors hover:bg-white hover:text-rose-500 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:text-rose-400"
+                                                >
+                                                    <Heart
+                                                        className={cn(
+                                                            'h-5 w-5',
+                                                            isInWishlist &&
+                                                                'fill-rose-500 text-rose-500',
+                                                        )}
+                                                    />
+                                                </motion.button>
+                                                <motion.button
+                                                    whileHover={{ scale: 1.1 }}
+                                                    whileTap={{ scale: 0.9 }}
+                                                    className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-slate-700 shadow-xl backdrop-blur-md transition-colors hover:bg-white hover:text-sky-500 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:text-sky-400"
+                                                >
+                                                    <Share2 className="h-5 w-5" />
+                                                </motion.button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Thumbnails Gallery */}
+                                {/* Miniatures mobiles */}
                                 {images.length > 1 && (
-                                    <div className="scrollbar-hide mt-6 flex snap-x gap-4 overflow-x-auto pb-4">
+                                    <div className="scrollbar-hide mt-4 flex gap-3 overflow-x-auto pb-2 md:hidden">
                                         {images.map((img, idx) => (
                                             <button
                                                 key={idx}
@@ -297,28 +359,101 @@ export default function ProductShow({
                                                     setSelectedImage(idx)
                                                 }
                                                 className={cn(
-                                                    'relative shrink-0 snap-center overflow-hidden rounded-2xl transition-all duration-300',
+                                                    'h-16 w-16 shrink-0 overflow-hidden rounded-xl',
                                                     selectedImage === idx
-                                                        ? 'scale-100 opacity-100 ring-2 ring-emerald-500 ring-offset-2 dark:ring-offset-slate-950'
-                                                        : 'scale-95 opacity-60 hover:scale-100 hover:opacity-100',
+                                                        ? 'ring-2 ring-emerald-500 ring-offset-1'
+                                                        : 'opacity-60',
                                                 )}
                                             >
-                                                <div className="h-20 w-20 bg-slate-100 sm:h-24 sm:w-24 dark:bg-slate-800">
-                                                    <img
-                                                        src={resolveImageUrl(
-                                                            img,
-                                                        )}
-                                                        alt={`${product.nom} ${idx + 1}`}
-                                                        className="h-full w-full object-cover"
-                                                        onError={handleImageFallback()}
-                                                    />
-                                                </div>
+                                                <img
+                                                    src={img}
+                                                    alt=""
+                                                    className="h-full w-full object-cover"
+                                                    onError={handleImageFallback()}
+                                                />
                                             </button>
                                         ))}
                                     </div>
                                 )}
                             </motion.div>
                         </div>
+
+                        {/* Lightbox élargie */}
+                        <Dialog
+                            open={lightboxOpen}
+                            onOpenChange={setLightboxOpen}
+                        >
+                            <DialogOverlay className="bg-black/60 backdrop-blur-lg" />
+                            <DialogContent className="flex h-[95vh] w-[95vw] max-w-[95vw] items-center justify-center border-0 bg-transparent p-0">
+                                <DialogTitle className="sr-only">
+                                    Galerie d'images
+                                </DialogTitle>
+                                <div className="relative flex h-full w-full items-center justify-center">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setLightboxOpen(false)}
+                                        className="absolute top-4 right-4 z-50 h-10 w-10 rounded-full bg-white/20 text-white hover:bg-white/40"
+                                    >
+                                        <X className="h-6 w-6" />
+                                    </Button>
+                                    <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
+                                        <AnimatePresence mode="wait">
+                                            <motion.img
+                                                key={lightboxIndex}
+                                                initial={{
+                                                    opacity: 0,
+                                                    rotateY: 90,
+                                                    scale: 0.9,
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    rotateY: 0,
+                                                    scale: 1,
+                                                }}
+                                                exit={{
+                                                    opacity: 0,
+                                                    rotateY: -90,
+                                                    scale: 0.9,
+                                                }}
+                                                transition={{
+                                                    type: 'spring',
+                                                    stiffness: 200,
+                                                    damping: 24,
+                                                }}
+                                                src={images[lightboxIndex]}
+                                                alt={`Image ${lightboxIndex + 1}`}
+                                                className="max-h-full max-w-full rounded-2xl object-contain shadow-2xl"
+                                                onError={handleImageFallback()}
+                                            />
+                                        </AnimatePresence>
+                                    </div>
+                                    {images.length > 1 && (
+                                        <>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={prevImage}
+                                                className="absolute top-1/2 left-4 h-12 w-12 -translate-y-1/2 rounded-full bg-white/10 text-white backdrop-blur-md hover:bg-white/30"
+                                            >
+                                                <ChevronLeft className="h-8 w-8" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={nextImage}
+                                                className="absolute top-1/2 right-4 h-12 w-12 -translate-y-1/2 rounded-full bg-white/10 text-white backdrop-blur-md hover:bg-white/30"
+                                            >
+                                                <ChevronRight className="h-8 w-8" />
+                                            </Button>
+                                        </>
+                                    )}
+                                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-md">
+                                        {lightboxIndex + 1} / {images.length}
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
 
                         {/* Product Info */}
                         <div className="flex flex-col pt-4">
@@ -334,15 +469,14 @@ export default function ProductShow({
                                         })}
                                         className="mb-2 inline-block font-semibold tracking-wider text-emerald-600 uppercase hover:underline dark:text-emerald-400"
                                     >
-                                        {product.brand.name}
+                                        {product.brand.nom}
                                     </Link>
                                 )}
-                                <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl dark:text-white">
+                                <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl lg:text-3xl dark:text-white">
                                     {product.nom}
                                 </h1>
                             </motion.div>
 
-                            {/* Ratings & SKU */}
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -370,14 +504,13 @@ export default function ProductShow({
                                 )}
                             </motion.div>
 
-                            {/* Price */}
                             <motion.div
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: 0.2 }}
                                 className="mt-8 flex items-end gap-4"
                             >
-                                <span className="text-4xl font-extrabold text-slate-900 sm:text-5xl dark:text-white">
+                                <span className="text-2xl font-semibold text-slate-900 sm:text-2xl dark:text-white">
                                     {product.prix_actuel?.toLocaleString(
                                         'fr-CD',
                                     )}{' '}
@@ -386,7 +519,7 @@ export default function ProductShow({
                                 {product.prix_ttc &&
                                     product.prix_actuel &&
                                     product.prix_actuel < product.prix_ttc && (
-                                        <span className="mb-1 text-xl font-medium text-slate-400 line-through dark:text-slate-500">
+                                        <span className="mb-1 text-2xl font-medium text-slate-400 line-through dark:text-slate-500">
                                             {product.prix_ttc.toLocaleString(
                                                 'fr-CD',
                                             )}{' '}
@@ -395,7 +528,6 @@ export default function ProductShow({
                                     )}
                             </motion.div>
 
-                            {/* Stock Status Modern */}
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -447,7 +579,6 @@ export default function ProductShow({
 
                             <hr className="my-8 border-slate-200 dark:border-slate-800" />
 
-                            {/* Quantity & Actions */}
                             {inStock && (
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}
@@ -463,26 +594,31 @@ export default function ProductShow({
                                             <div className="flex items-center rounded-full border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
                                                 <button
                                                     onClick={() =>
-                                                        setQuantity((q) =>
-                                                            Math.max(1, q - 1),
+                                                        setQuantity(
+                                                            (q: number) =>
+                                                                Math.max(
+                                                                    1,
+                                                                    q - 1,
+                                                                ),
                                                         )
                                                     }
                                                     disabled={quantity <= 1}
-                                                    className="flex h-12 w-12 items-center justify-center rounded-l-full text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:hover:bg-slate-800"
+                                                    className="flex h-14 w-14 items-center justify-center rounded-l-full text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:hover:bg-slate-800"
                                                 >
-                                                    <Minus className="h-4 w-4" />
+                                                    <Minus className="h-5 w-5" />
                                                 </button>
-                                                <div className="flex h-12 w-16 items-center justify-center font-semibold text-slate-900 dark:text-white">
+                                                <div className="flex h-14 w-16 items-center justify-center text-xl font-semibold text-slate-900 dark:text-white">
                                                     {quantity}
                                                 </div>
                                                 <button
                                                     onClick={() =>
-                                                        setQuantity((q) =>
-                                                            Math.min(
-                                                                product.quantite_stock ??
-                                                                    99,
-                                                                q + 1,
-                                                            ),
+                                                        setQuantity(
+                                                            (q: number) =>
+                                                                Math.min(
+                                                                    product.quantite_stock ??
+                                                                        99,
+                                                                    q + 1,
+                                                                ),
                                                         )
                                                     }
                                                     disabled={
@@ -490,27 +626,25 @@ export default function ProductShow({
                                                         (product.quantite_stock ??
                                                             99)
                                                     }
-                                                    className="flex h-12 w-12 items-center justify-center rounded-r-full text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:hover:bg-slate-800"
+                                                    className="flex h-14 w-14 items-center justify-center rounded-r-full text-slate-500 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:hover:bg-slate-800"
                                                 >
-                                                    <Plus className="h-4 w-4" />
+                                                    <Plus className="h-5 w-5" />
                                                 </button>
                                             </div>
                                         </div>
                                     </div>
-
                                     <Button
                                         onClick={addToCart}
                                         disabled={processing}
-                                        className="relative h-14 w-full overflow-hidden rounded-full bg-slate-900 text-lg font-bold text-white transition-transform active:scale-95 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
+                                        className="relative h-16 w-full overflow-hidden rounded-full bg-slate-900 text-xl font-bold text-white transition-transform active:scale-95 dark:bg-emerald-500 dark:text-slate-950 dark:hover:bg-emerald-400"
                                     >
                                         <div className="absolute inset-0 flex items-center justify-center bg-white/20 transition-transform group-hover:translate-x-full" />
-                                        <ShoppingCart className="mr-2 h-5 w-5" />
+                                        <ShoppingCart className="mr-2 h-6 w-6" />
                                         Ajouter au panier
                                     </Button>
                                 </motion.div>
                             )}
 
-                            {/* Trust Features Modernized */}
                             <motion.div
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
@@ -561,7 +695,7 @@ export default function ProductShow({
                     </div>
                 </div>
 
-                {/* Tabs Information Section */}
+                {/* Tabs avec détails modernisés */}
                 <div className="mx-auto max-w-7xl border-t border-slate-200/50 px-4 py-16 sm:px-6 lg:px-8 dark:border-slate-800/50">
                     <Tabs defaultValue="description" className="w-full">
                         <TabsList className="mb-8 w-full justify-start rounded-full bg-slate-100 p-1 sm:w-auto dark:bg-slate-900">
@@ -569,7 +703,7 @@ export default function ProductShow({
                                 value="description"
                                 className="rounded-full px-6 py-2 text-base font-medium data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-emerald-400"
                             >
-                                Description détaillée
+                                Description
                             </TabsTrigger>
                             <TabsTrigger
                                 value="details"
@@ -589,7 +723,7 @@ export default function ProductShow({
                             value="description"
                             className="mt-0 outline-none"
                         >
-                            <div className="prose max-w-none rounded-[2rem] bg-white p-8 shadow-xs prose-slate sm:p-12 lg:prose-lg dark:bg-slate-900 dark:prose-invert prose-p:leading-relaxed prose-a:text-emerald-600">
+                            <div className="prose prose-sm max-w-none rounded-[2rem] bg-white p-8 shadow-xs sm:p-12 dark:bg-slate-900 dark:prose-invert prose-p:leading-relaxed prose-a:text-emerald-600">
                                 {product.description ? (
                                     <div
                                         dangerouslySetInnerHTML={{
@@ -613,35 +747,79 @@ export default function ProductShow({
                                 <h3 className="mb-6 text-2xl font-bold text-slate-900 dark:text-white">
                                     Caractéristiques techniques
                                 </h3>
-                                <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-                                    {/* Exemples de specs - à adapter selon votre modèle */}
-                                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
-                                        <dt className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                            Marque
-                                        </dt>
-                                        <dd className="mt-1 font-semibold text-slate-900 dark:text-white">
-                                            {product.brand?.name || 'Générique'}
-                                        </dd>
-                                    </div>
-                                    {product.sku && (
-                                        <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
-                                            <dt className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                                SKU
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                                        <div className="mt-0.5 rounded-xl bg-blue-50 p-2 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                                            <Tag className="h-4 w-4" />
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                                                Marque
                                             </dt>
-                                            <dd className="mt-1 font-semibold text-slate-900 dark:text-white">
-                                                {product.sku}
+                                            <dd className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-white">
+                                                {product.brand && (
+                                                    <Link
+                                                        href={route(
+                                                            'tenant.product.index',
+                                                            {
+                                                                brand: product
+                                                                    .brand.id,
+                                                            },
+                                                        )}
+                                                        className="mb-2 inline-block font-semibold tracking-wider text-emerald-600 uppercase hover:underline dark:text-emerald-400"
+                                                    >
+                                                        {product.brand.nom}
+                                                    </Link>
+                                                )}
                                             </dd>
                                         </div>
-                                    )}
-                                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
-                                        <dt className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                                            Disponibilité
-                                        </dt>
-                                        <dd className="mt-1 font-semibold text-slate-900 dark:text-white">
-                                            {inStock ? 'En stock' : 'Rupture'}
-                                        </dd>
                                     </div>
-                                </dl>
+                                    {product.sku && (
+                                        <div className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                                            <div className="mt-0.5 rounded-xl bg-purple-50 p-2 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400">
+                                                <Ruler className="h-4 w-4" />
+                                            </div>
+                                            <div>
+                                                <dt className="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                                                    SKU
+                                                </dt>
+                                                <dd className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-white">
+                                                    {product.sku}
+                                                </dd>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                                        <div className="mt-0.5 rounded-xl bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                            <CheckCircle2 className="h-4 w-4" />
+                                        </div>
+                                        <div>
+                                            <dt className="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                                                Disponibilité
+                                            </dt>
+                                            <dd className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-white">
+                                                {inStock
+                                                    ? 'En stock'
+                                                    : 'Rupture'}
+                                            </dd>
+                                        </div>
+                                    </div>
+                                    {product.poids && (
+                                        <div className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                                            <div className="mt-0.5 rounded-xl bg-amber-50 p-2 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                                                <Layers className="h-4 w-4" />
+                                            </div>
+                                            <div>
+                                                <dt className="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                                                    Poids
+                                                </dt>
+                                                <dd className="mt-0.5 text-sm font-semibold text-slate-900 dark:text-white">
+                                                    {product.poids} kg
+                                                </dd>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </TabsContent>
 
@@ -658,7 +836,8 @@ export default function ProductShow({
                         </TabsContent>
                     </Tabs>
                 </div>
-                {/* Similar Products Carousel Modernized */}
+
+                {/* Similar Products */}
                 {similarProducts && similarProducts.length > 0 && (
                     <div className="border-t border-slate-200/50 bg-white py-16 dark:border-slate-800/50 dark:bg-slate-900">
                         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -679,7 +858,6 @@ export default function ProductShow({
                                     Voir tout &rarr;
                                 </Link>
                             </div>
-
                             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
                                 {similarProducts.slice(0, 4).map((item) => (
                                     <motion.div

@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 // resources/js/components/navigation/ProductsMegaMenu.tsx
 import { Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     ArrowRight,
     ChevronRight,

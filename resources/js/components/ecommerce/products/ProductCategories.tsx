@@ -1,6 +1,6 @@
 import { Link } from '@inertiajs/react';
 import type { Variants } from 'framer-motion';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ArrowRight, Layers3, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

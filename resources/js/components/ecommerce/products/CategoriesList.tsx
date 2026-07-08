@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Store, Tag, ArrowRight, Sparkles, Package } from 'lucide-react';
 import { useState } from 'react';
 

@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ShieldCheck, Sparkles, Globe, BarChart3, Store } from 'lucide-react';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { home } from '@/routes';

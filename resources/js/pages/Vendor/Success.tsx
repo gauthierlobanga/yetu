@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/purity */
 // resources/js/Pages/Vendor/Success.tsx
 import { Head, Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     Rocket,
     ExternalLink,

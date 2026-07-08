@@ -1,6 +1,6 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import type { Variants } from 'framer-motion';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     Mail,
     Lock,

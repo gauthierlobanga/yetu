@@ -15,8 +15,8 @@ import { DashboardFilters } from '@/components/board/dashboard-filters';
 import { ChartPieInteractive } from '@/components/board/PieChartInteractivePost';
 import { SiteHeader } from '@/components/Central/site-header';
 import { DataTable } from '@/components/data-table-post';
-import { SectionCards } from '@/components/section-cards-post';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { SectionCards } from '@/pages/Vendor/stats/section-cards-post';
 
 interface DashboardProps {
     posts: {

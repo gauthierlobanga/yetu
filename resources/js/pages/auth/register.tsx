@@ -1,5 +1,5 @@
 import { Form, Head } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     User,
     Mail,

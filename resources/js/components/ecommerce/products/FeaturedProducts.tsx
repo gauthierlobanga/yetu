@@ -1,6 +1,6 @@
 // resources/js/components/ecommerce/products/FeaturedProducts.tsx
 import { Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { PackageSearch, Loader2, ShoppingCart, Heart, Star } from 'lucide-react';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';

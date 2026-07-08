@@ -1,5 +1,5 @@
 // resources/js/Pages/Vendor/Statistics/Partials/SummaryCards.tsx
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import {
     TrendingUp,
     TrendingDown,

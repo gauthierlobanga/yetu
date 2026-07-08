@@ -27,13 +27,13 @@ import {
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes/acheteur';
+import acheteurNotifications from '@/routes/acheteur/notifications';
 import { edit } from '@/routes/acheteur/profile';
 import tenant from '@/routes/tenant';
 import addresses from '@/routes/tenant/addresses';
 import loyalty from '@/routes/tenant/loyalty';
 import orders from '@/routes/tenant/orders';
 import wishlist from '@/routes/tenant/wishlist';
-import acheteurNotifications from '@/routes/acheteur/notifications';
 import vendor from '@/routes/vendor';
 import type { NavItem } from '@/types';
 import AppLogo from './app-logo';

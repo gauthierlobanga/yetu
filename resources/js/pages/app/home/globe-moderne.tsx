@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/purity */
 import * as react from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Building, Users, TrendingUp, MapPin, ArrowRight } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import Globe from 'react-globe.gl';

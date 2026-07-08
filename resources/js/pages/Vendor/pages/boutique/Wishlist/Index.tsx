@@ -2,7 +2,6 @@
 // resources/js/pages/Shop/Wishlist/Index.tsx
 import type { PageProps } from '@inertiajs/core';
 import { Link, router, usePage, Head } from '@inertiajs/react';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
     Heart,
     ShoppingBag,
@@ -12,6 +11,7 @@ import {
     Globe,
     ArrowRight,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { toast } from 'sonner';
 
 import { AppSidebar } from '@/components/app-sidebar';
@@ -88,17 +88,23 @@ export default function ShopWishlistPage() {
         router.delete(route('tenant.wishlist.remove', productId), {
             preserveScroll: true,
             preserveState: true,
-            showProgress:false,
+            showProgress: false,
             onSuccess: () =>
-                toast.success('Produit retiré de votre liste de souhaits',{style:getToastStyles('success')}),
+                toast.success('Produit retiré de votre liste de souhaits', {
+                    style: getToastStyles('success'),
+                }),
             onError: () =>
-                toast.error('Une erreur est survenue lors de la suppression',{style:getToastStyles('error')}),
+                toast.error('Une erreur est survenue lors de la suppression', {
+                    style: getToastStyles('error'),
+                }),
         });
     };
 
     const handleAddToCart = (productId: string, quantity: number = 1) => {
         addToCart(productId, quantity);
-        toast.success('Produit ajouté au panier',{style:getToastStyles('success')});
+        toast.success('Produit ajouté au panier', {
+            style: getToastStyles('success'),
+        });
     };
 
     return (

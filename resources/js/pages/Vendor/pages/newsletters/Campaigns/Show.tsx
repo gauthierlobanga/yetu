@@ -191,7 +191,7 @@ export default function CampaignShow({ tenant, campaign, recentSends }: Campaign
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent className="p-0 flex-1">
-                                        <div className="p-6 bg-white dark:bg-slate-900 min-h-[400px] prose max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: campaign.contenu_html }} />
+                                        <div className="p-6 bg-white dark:bg-slate-900 min-h-100 prose max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: campaign.contenu_html }} />
                                     </CardContent>
                                 </Card>
                             </div>

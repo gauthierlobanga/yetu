@@ -1,6 +1,6 @@
 // resources/js/components/ecommerce/products/ProductCard.tsx
 import { Link } from '@inertiajs/react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { Star, ShoppingCart, Heart, PackageOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
