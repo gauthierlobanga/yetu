@@ -1,9 +1,9 @@
 import { usePage } from '@inertiajs/react';
 import type { ReactNode } from 'react';
+import { AnnouncementBanner } from '@/components/global/AnnouncementBanner';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import type { AppVariant } from '@/types';
-import { AnnouncementBanner } from '@/components/global/AnnouncementBanner';
 
 type Props = {
     children: ReactNode;

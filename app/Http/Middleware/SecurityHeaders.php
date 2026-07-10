@@ -37,11 +37,12 @@ class SecurityHeaders
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",
+            "worker-src 'self' blob:",
         ];
 
         if (app()->environment('local')) {
             // Dans l'environnement local, on relaxe la politique pour ne pas bloquer Vite (et éviter les bugs IPv6 CSP)
-            $csp[1] = "script-src * 'unsafe-inline' 'unsafe-eval'";
+            $csp[1] = "script-src * blob: 'unsafe-inline' 'unsafe-eval'";
             $csp[2] = "style-src * 'unsafe-inline'";
             $csp[5] = 'connect-src * ws: wss:';
             $csp[3] = 'img-src * data: blob:';

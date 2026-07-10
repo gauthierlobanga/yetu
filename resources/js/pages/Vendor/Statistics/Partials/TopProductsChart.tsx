@@ -10,7 +10,6 @@ import {
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
-    Cell,
     ReferenceLine,
 } from 'recharts';
 
@@ -135,12 +134,12 @@ export function TopProductsChart({ data }: Props) {
                     </Badge>
                 </div>
             </CardHeader>
-            <CardContent className="px-4 py-3">
-                <div className="h-64 w-full">
+            <CardContent className="px-10 py-10">
+                <div className="h-80 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                             data={chartData}
-                            margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
+                            margin={{ top: 30, right: 40, left: -2, bottom: 20 }}
                         >
                             <CartesianGrid
                                 strokeDasharray="3 3"
@@ -149,22 +148,22 @@ export function TopProductsChart({ data }: Props) {
                             />
                             <XAxis
                                 dataKey="name"
-                                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                                tick={{ fontSize: 14, fill: '#94a3b8' }}
                                 axisLine={false}
                                 tickLine={false}
                                 interval={0}
-                                angle={-25}
+                                angle={-28}
                                 textAnchor="end"
                                 height={60}
                             />
                             <YAxis
-                                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                                tick={{ fontSize: 14, fill: '#94a3b8' }}
                                 axisLine={false}
                                 tickLine={false}
                                 width={40}
                             />
                             <Tooltip
-                                cursor={{ fill: 'rgba(148,163,184,0.06)', radius: 8 }}
+                                cursor={{ fill: 'rgba(148,163,184,0.06)', radius: 4 }}
                                 content={<CustomTooltip />}
                             />
                             <ReferenceLine
@@ -179,9 +178,9 @@ export function TopProductsChart({ data }: Props) {
                                     position: 'right',
                                 }}
                             />
-                            <Bar dataKey="value" radius={[8, 8, 0, 0]} barSize={28}>
+                            <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={70}>
                                 {chartData.map((entry, idx) => (
-                                    <Cell key={idx} fill={entry.fill} />
+                                    <rect key={idx} fill={entry.fill} />
                                 ))}
                             </Bar>
                         </BarChart>

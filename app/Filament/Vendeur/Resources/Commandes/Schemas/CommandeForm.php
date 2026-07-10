@@ -12,6 +12,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 
 class CommandeForm
 {
@@ -78,22 +79,94 @@ class CommandeForm
                                         'en_attente' => 'En attente',
                                         'en_cours' => 'En cours',
                                         'termine' => 'Terminée',
-                                        'annule' => 'Annulée',
+                                        'annulee' => 'Annulée',
                                         'rejete' => 'Rejetée',
+                                        'payee' => 'Payée',
+                                        'en_preparation' => 'En préparation',
+                                        'expediee' => 'Expédiée',
+                                        'livree' => 'Livrée',
+                                        'remboursee' => 'Remboursée',
+                                        'echec_paiement' => 'Échec de paiement',
                                     ])
+                                    ->searchable()
+                                    ->preload()
                                     ->default('en_attente')
                                     ->required()
                                     ->live()
-                                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                        if ($state === 'termine') {
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get, $record) {
+                                        // Mise à jour des dates selon le statut
+                                        if ($state === 'termine' || $state === 'livree') {
                                             $set('date_livraison', now());
                                         } elseif ($state === 'en_cours' && ! $get('date_paiement')) {
                                             $set('date_paiement', now());
-                                        } elseif ($state === 'annule') {
+                                        } elseif ($state === 'annulee') {
                                             $set('date_annulation', now());
+                                        } elseif ($state === 'payee' && ! $get('date_paiement')) {
+                                            $set('date_paiement', now());
+                                        } elseif ($state === 'expediee') {
+                                            $set('date_expedition', now());
+                                        }
+
+                                        // Gestion du suivi de livraison
+                                        $commande = $record; // Le modèle Commande lié au formulaire
+                                        if (! $commande) {
+                                            return;
+                                        }
+
+                                        // Création du DeliveryTracking lors du passage à "expediee"
+                                        if ($state === 'expediee') {
+                                            $tracking = $commande->deliveryTracking()->firstOrCreate(
+                                                ['commande_id' => $commande->id],
+                                                [
+                                                    'tracking_number' => 'TRK-'.strtoupper(Str::random(8)),
+                                                    'carrier' => 'Standard',
+                                                    'status' => 'pickup',
+                                                ]
+                                            );
+
+                                            $tracking->addEvent(
+                                                'status_change',
+                                                'Commande expédiée',
+                                                'Votre commande a été confiée au transporteur',
+                                                null
+                                            );
+                                        }
+
+                                        // Ajout d'événements pour d'autres changements de statut
+                                        if ($commande->deliveryTracking) {
+                                            match ($state) {
+                                                'en_preparation' => $commande->deliveryTracking->addEvent(
+                                                    'status_change',
+                                                    'Commande en préparation',
+                                                    'Notre équipe prépare votre commande avec soin',
+                                                    null
+                                                ),
+                                                'expediee' => $commande->deliveryTracking->addEvent(
+                                                    'status_change',
+                                                    'Commande expédiée',
+                                                    'Votre commande est en route',
+                                                    null
+                                                ),
+                                                'livree' => $commande->deliveryTracking->addEvent(
+                                                    'status_change',
+                                                    'Commande livrée',
+                                                    'Votre commande a été livrée avec succès',
+                                                    $commande->adresseLivraison ? [
+                                                        'address' => $commande->adresseLivraison->adresse_complete ?? '',
+                                                        'lat' => null,
+                                                        'lng' => null,
+                                                    ] : null
+                                                ),
+                                                'termine' => $commande->deliveryTracking->addEvent(
+                                                    'status_change',
+                                                    'Commande terminée',
+                                                    'Toutes les étapes sont terminées',
+                                                    null
+                                                ),
+                                                default => null
+                                            };
                                         }
                                     }),
-
                                 Select::make('mode_paiement')
                                     ->label('Mode de paiement')
                                     ->options([

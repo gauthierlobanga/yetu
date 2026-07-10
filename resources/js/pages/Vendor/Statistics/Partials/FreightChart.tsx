@@ -104,12 +104,12 @@ export function FreightChart({ data }: Props) {
                                 dataKey="name"
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                                tick={{ fontSize: 12, fill: '#94a3b8' }}
                             />
                             <YAxis
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                                tick={{ fontSize: 12, fill: '#94a3b8' }}
                                 width={30}
                             />
                             <Tooltip
@@ -121,7 +121,7 @@ export function FreightChart({ data }: Props) {
                             />
                             <Bar
                                 dataKey="count"
-                                radius={[8, 8, 0, 0]}
+                                radius={[4, 4, 0, 0]}
                                 barSize={24}
                             >
                                 {data.map((entry, index) => (

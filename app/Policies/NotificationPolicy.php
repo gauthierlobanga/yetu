@@ -53,6 +53,11 @@ class NotificationPolicy
         return $authUser->can('Delete Notification');
     }
 
+    public function deleteAny(AuthUser $authUser): bool
+    {
+        return $authUser->can('DeleteAny Notification');
+    }
+
     public function restore(AuthUser $authUser, Notification $notification): bool
     {
         return $authUser->can('Restore Notification');

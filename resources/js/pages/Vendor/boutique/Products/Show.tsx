@@ -27,6 +27,7 @@ import {
     Ruler,
     Layers,
     Info,
+    ShoppingCartIcon,
 } from 'lucide-react';
 import { useState, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
@@ -42,6 +43,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MainLayout from '@/layouts/main-layout';
 import { handleImageFallback, resolveImageUrl } from '@/lib/media';
+import { getToastStyles } from '@/lib/toast-style';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/types/ecommerce/products';
 import { ReviewsSection } from './avis/avis-clients';
@@ -98,9 +100,7 @@ export default function ProductShow({
             showProgress: false,
             onSuccess: () =>
                 toast.success('Produit ajouté au panier', {
-                    icon: '🛍️',
-                    className:
-                        'bg-emerald-50 text-emerald-900 border-emerald-200',
+                    style: getToastStyles('success'),
                 }),
             onError: () => toast.error("Erreur lors de l'ajout au panier"),
         });
@@ -133,7 +133,7 @@ export default function ProductShow({
                     setIsWishlistLoading(false);
                 },
                 onError: () => {
-                    toast.error('Une erreur est survenue');
+                    toast.error('Une erreur est survenue',{style: getToastStyles('error')});
                     setIsWishlistLoading(false);
                 },
             },
@@ -242,7 +242,7 @@ export default function ProductShow({
                                 <div className="flex gap-4 lg:gap-6">
                                     {/* Colonne de miniatures */}
                                     {images.length > 1 && (
-                                        <div className="hidden max-h-125 scrollbar-thin p-3 scrollbar-thumb-slate-300 scrollbar-track-slate-100 flex-col gap-3 overflow-y-auto pr-2 md:flex dark:scrollbar-thumb-slate-700 dark:scrollbar-track-slate-900">
+                                        <div className="hidden max-h-125 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100 flex-col gap-3 overflow-y-auto p-3 pr-2 md:flex dark:scrollbar-thumb-slate-700 dark:scrollbar-track-slate-900">
                                             {images.map((img, idx) => (
                                                 <button
                                                     key={idx}

@@ -746,8 +746,8 @@ function AddressStep({
     return (
         <div className="space-y-6">
             {/* Adresse de livraison */}
-            <Card className="overflow-hidden rounded-2xl border-0 bg-white shadow-md dark:bg-slate-900">
-                <div className="bg-linear-to-r from-emerald-500 to-emerald-600 px-6 py-4">
+            <Card className="overflow-hidden rounded-2xl border-0 bg-white dark:bg-slate-900">
+                <div className="px-6 py-4">
                     <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
                         <Truck className="h-5 w-5" /> Adresse de livraison
                     </h3>
@@ -1127,7 +1127,7 @@ function AddressDialogContent({
 function ShippingStep({ methods, selected, onSelect }: any) {
     return (
         <Card className="overflow-hidden rounded-2xl border-0 bg-white shadow-md dark:bg-slate-900">
-            <div className="bg-linear-to-r from-blue-500 to-blue-600 px-6 py-4">
+            <div className="px-6 py-4">
                 <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
                     <Truck className="h-5 w-5" /> Mode de livraison
                 </h3>
@@ -1207,7 +1207,7 @@ function ShippingStep({ methods, selected, onSelect }: any) {
 function PaymentStep({ methods, selected, onSelect }: any) {
     return (
         <Card className="overflow-hidden rounded-2xl border-0 bg-white shadow-md dark:bg-slate-900">
-            <div className="bg-linear-to-r from-purple-500 to-purple-600 px-6 py-4">
+            <div className="px-6 py-4">
                 <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
                     <CreditCard className="h-5 w-5" /> Mode de paiement
                 </h3>
@@ -1277,7 +1277,7 @@ function ReviewStep({
     return (
         <div className="space-y-6">
             <Card className="overflow-hidden rounded-2xl border-0 bg-white shadow-md dark:bg-slate-900">
-                <div className="bg-linear-to-r from-amber-500 to-amber-600 px-6 py-4">
+                <div className="px-6 py-4">
                     <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
                         <ShieldCheck className="h-5 w-5" /> Récapitulatif de
                         votre commande
@@ -1451,7 +1451,7 @@ function OrderSummary({
     return (
         <div className="lg:col-span-1">
             <Card className="sticky top-24 overflow-hidden rounded-2xl border-0 bg-white shadow-lg dark:bg-slate-900">
-                <div className="bg-linear-to-r from-emerald-500 to-teal-500 px-6 py-4">
+                <div className="px-6 py-4">
                     <h3 className="flex items-center gap-2 text-lg font-semibold text-white">
                         <ShoppingBag className="h-5 w-5" /> Votre commande
                     </h3>

@@ -9,8 +9,9 @@ import {
   Package,
   Star,
   Tag,
+ Truck,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import type {LucideIcon} from 'lucide-react';
 
 export const ICON_MAP: Record<string, LucideIcon> = {
   order: Package,
@@ -22,6 +23,7 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   loyalty: Gift,
   wishlist: Heart,
   error: Info,
+ delivery_update: Truck,
   default: Bell,
 };
 
@@ -35,6 +37,7 @@ export const COLOR_MAP: Record<string, string> = {
   error: 'bg-red-50 text-red-600 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800',
   message: 'bg-cyan-50 text-cyan-600 border-cyan-200 dark:bg-cyan-950/40 dark:text-cyan-400 dark:border-cyan-800',
   review: 'bg-yellow-50 text-yellow-600 border-yellow-200 dark:bg-yellow-950/40 dark:text-yellow-400 dark:border-yellow-800',
+ delivery_update: 'bg-teal-50 text-teal-600 border-teal-200 dark:bg-teal-950/40 dark:text-teal-400 dark:border-teal-800',
   default: 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700',
 };
 
@@ -48,6 +51,7 @@ export const LABEL_MAP: Record<string, string> = {
   loyalty: 'Fidélité',
   wishlist: 'Liste de souhaits',
   error: 'Erreur',
+ delivery_update: 'Livraison',
   default: 'Information',
 };
 

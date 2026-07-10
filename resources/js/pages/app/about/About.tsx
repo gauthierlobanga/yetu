@@ -54,7 +54,7 @@ export default function About() {
         Heart,
     };
 
-    const { platformStats } = props;
+    const { name, platformStats } = props;
 
     const statsRef = useRef(null);
     const statsInView = useInView(statsRef, { once: true, margin: '-100px' });
@@ -71,7 +71,7 @@ export default function About() {
 
     return (
         <MainLayout>
-            <Head title="À propos de Yetu" />
+            <Head title={`À propos de ${name}`} />
 
             {/* HERO SECTION – IMMERSIVE */}
             <section className="relative overflow-hidden pt-16 pb-20 lg:pt-24 lg:pb-28">

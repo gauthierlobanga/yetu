@@ -292,7 +292,7 @@ class CommandesTable
                     ->label('Facture')
                     ->icon('heroicon-m-document-text')
                     ->color('success')
-                    // ->url(fn ($record) => route('tenant.commandes.invoice', $record))
+                    ->url(fn ($record) => route('tenant.orders.invoice', $record))
                     ->openUrlInNewTab(),
 
                 Action::make('update_status')
@@ -302,6 +302,8 @@ class CommandesTable
                     ->schema([
                         Select::make('statut')
                             ->label('Nouveau statut')
+                            ->searchable()
+                            ->preload()
                             ->options(Commande::getStatuts())
                             ->required(),
                         Textarea::make('notes')

@@ -86,6 +86,11 @@ class TenantDocumentLegalsTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->modifyQueryUsing(fn (Builder $query) => $query->with([
+                'tenant',
+                'typeDocument',
+                'vendorRequest',
+            ]))
             ->filters([
                 TernaryFilter::make('est_verifie')
                     ->label('Statut de vérification')

@@ -12,11 +12,21 @@ interface FlashData {
     [key: string]: unknown;
 }
 
+interface SeoData {
+    appName?: string;
+    appUrl?: string;
+    defaultDescription?: string;
+    defaultImage?: string;
+    favicon?: string;
+}
+
 declare module '@inertiajs/core' {
     export interface InertiaConfig {
         sharedPageProps: {
             name: string;
+            appName: string;
             auth: Auth;
+            seo?: SeoData;
             sidebarOpen: boolean;
             flash?: FlashData;
             errors?: Record<string, string>;
@@ -29,7 +39,9 @@ declare module '@inertiajs/core' {
 declare module '@inertiajs/react' {
     export interface PageProps extends Record<string, unknown> {
         name: string;
+        appName: string;
         auth: Auth;
+        seo?: SeoData;
         sidebarOpen: boolean;
         flash?: FlashData;
         errors?: Record<string, string>;

@@ -590,7 +590,7 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
         return data_get($this->configuration, $key, $default);
     }
 
-    public function setConfiguration(string $key, $value): self
+    public function setConfiguration(string $key, ?string $value): self
     {
         $configuration = $this->configuration ?? [];
         data_set($configuration, $key, $value);
@@ -738,21 +738,6 @@ class Tenant extends BaseTenant implements HasAvatar, HasCurrentTenantLabel, Has
     /**
      * Accesseur pour obtenir l'URL du logo.
      */
-    // public function getLogoUrlAttribute(): ?string
-    // {
-    //     if (function_exists('tenancy') && tenancy()->initialized) {
-    //         return tenancy()->central(function () {
-    //             $tenant = static::query()->find($this->getKey());
-
-    //             return $tenant?->logo_url;
-    //         });
-    //     }
-
-    //     $media = $this->getFirstMedia('tenant_avatar');
-
-    //     return $media ? $media->getUrl() : null;
-    // }
-
     public function getLogoUrlAttribute(): ?string
     {
         return tenancy()->central(function () {

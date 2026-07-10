@@ -44,12 +44,69 @@ if (typeof window !== 'undefined') {
     window.Echo = echo();
 }
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+type InertiaTitleProps = {
+    appName?: string;
+    name?: string;
+    seo?: {
+        appName?: string;
+    };
+    tenant?: {
+        raison_sociale?: string;
+    };
+};
+
+const fallbackAppName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+const getAppNameFromProps = (props?: InertiaTitleProps) =>
+    props?.appName ||
+    props?.seo?.appName ||
+    props?.tenant?.raison_sociale ||
+    props?.name ||
+    fallbackAppName;
+
+const getInitialAppName = () => {
+    if (typeof document === 'undefined') {
+        return fallbackAppName;
+    }
+
+    const pageData = document.getElementById('app')?.dataset.page;
+
+    if (!pageData) {
+        return (
+            document.querySelector('title[inertia]')?.textContent ||
+            fallbackAppName
+        );
+    }
+
+    try {
+        return getAppNameFromProps(JSON.parse(pageData).props);
+    } catch {
+        return fallbackAppName;
+    }
+};
+
+const appName = getInitialAppName();
+const formatTitle = (title: string) => {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle || trimmedTitle === appName) {
+        return appName;
+    }
+
+    if (
+        trimmedTitle.endsWith(` - ${appName}`) ||
+        trimmedTitle.endsWith(` | ${appName}`)
+    ) {
+        return trimmedTitle;
+    }
+
+    return `${trimmedTitle} - ${appName}`;
+};
 
 import { GlobalLayoutWrapper } from '@/components/global/GlobalLayoutWrapper';
 
 createInertiaApp({
-    title: (title) => (title ? `${title} - ${appName}` : appName),
+    title: formatTitle,
     resolve: (name) => {
         const pagePromise = resolvePageComponent(
             `./pages/${name}.tsx`,
@@ -60,11 +117,8 @@ createInertiaApp({
             const originalLayout = module.default.layout;
             module.default.layout = (page: React.ReactNode) => {
                 const layout = originalLayout ? originalLayout(page) : page;
-                return (
-                    <GlobalLayoutWrapper>
-                        {layout}
-                    </GlobalLayoutWrapper>
-                );
+
+                return <GlobalLayoutWrapper>{layout}</GlobalLayoutWrapper>;
             };
         });
 
@@ -92,18 +146,28 @@ initializeTheme();
 if (typeof window !== 'undefined') {
     (function () {
         const getInitialHref = () => {
-            const serverLink = document.getElementById('favicon') || document.querySelector('link[rel="icon"]');
+            const serverLink =
+                document.getElementById('favicon') ||
+                document.querySelector('link[rel="icon"]');
+
             return serverLink?.getAttribute('href') || '/favicon.ico';
         };
 
         const setFavicon = (href: string | null | undefined) => {
-            if (!href) return;
-            let link = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+            if (!href) {
+                return;
+            }
+
+            let link = document.querySelector(
+                'link[rel="icon"]',
+            ) as HTMLLinkElement | null;
+
             if (!link) {
                 link = document.createElement('link');
                 link.rel = 'icon';
                 link.id = 'favicon';
             }
+
             const sep = href.includes('?') ? '&' : '?';
             link.href = href + sep + 'v=' + Date.now(); // cache buster
             document.head.appendChild(link);
@@ -113,7 +177,11 @@ if (typeof window !== 'undefined') {
         setFavicon(getInitialHref());
 
         // Re-apply after Inertia navigations (events fired by Inertia)
-        document.addEventListener('inertia:finish', () => setFavicon(getInitialHref()));
-        document.addEventListener('inertia:load', () => setFavicon(getInitialHref()));
+        document.addEventListener('inertia:finish', () =>
+            setFavicon(getInitialHref()),
+        );
+        document.addEventListener('inertia:load', () =>
+            setFavicon(getInitialHref()),
+        );
     })();
 }

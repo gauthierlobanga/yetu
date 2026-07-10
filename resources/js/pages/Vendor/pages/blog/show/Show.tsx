@@ -1,704 +1,926 @@
-/* eslint-disable import/order */
+/* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+'use client';
 
-import { Head, Link, router } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import DOMPurify from 'dompurify';
 import {
-    EyeIcon,
-    HeartIcon,
-    MessageCircleIcon,
-    SearchIcon,
-    XIcon,
-    BookOpenIcon,
-    CalendarIcon,
-    TrendingUpIcon,
-    FilterIcon,
-    SparklesIcon,
-    Loader2Icon,
-    RefreshCw,
+    Calendar,
+    Clock,
+    Eye,
+    User,
+    ArrowLeft,
+    ArrowRight,
+    Share2,
+    Bookmark,
+    Heart,
+    MessageCircle,
+    Tag,
+    Folder,
+    List,
+    ArrowUp,
+    Hash,
+    Heading1,
+    Heading2,
+    Heading3,
+    ChevronRight,
+    Sparkles,
 } from 'lucide-react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
-import { Navigation } from 'swiper/modules';
-import { Swiper, SwiperSlide } from 'swiper/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import { CommentSection } from '@/components/Comments/CommentSection';
+import Seo from '@/components/Seo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import {
-    Pagination,
-    PaginationContent,
-    PaginationItem,
-    PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
-} from '@/components/ui/pagination';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import 'swiper/css';
-import 'swiper/css/navigation';
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useInitials } from '@/hooks/use-initials';
+import NewsletterSectionVendeur from '@/layouts/app/app-newsletters';
 import MainLayout from '@/layouts/main-layout';
-import type { BreadcrumbItem } from '@/types';
-import type { Category } from '@/types/posts/category';
-import type { Post, PostsResponse } from '@/types/posts/posts';
-import tenant from '@/routes/tenant';
-import { cn } from '@/lib/utils';
-import { motion } from 'motion/react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Blog', href: tenant.blog.index().url },
-];
+import { getToastStyles } from '@/lib/toast-style';
+import { home } from '@/routes';
+import blog from '@/routes/tenant/blog';
+import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
+import type { Post, RelatedPost } from '@/types/posts/posts';
 
 interface Props {
-    posts: PostsResponse;
-    categories: { data: Category[] };
-    filters: {
-        search?: string;
-        tag?: string;
-        category_id?: string;
-        sort?: string;
-        direction?: string;
-        page?: number;
-    };
+    post: { data: Post };
+    previousPost: Post | null;
+    nextPost: Post | null;
+    relatedPosts: RelatedPost[];
 }
 
-const DEFAULT_SORT = 'published_at';
-const DEFAULT_DIRECTION = 'desc';
-const DEFAULT_SORT_VALUE = `${DEFAULT_SORT}:${DEFAULT_DIRECTION}`;
-
-const sortOptions = [
-    { value: 'published_at:desc', label: 'Plus récents', icon: TrendingUpIcon },
-    { value: 'published_at:asc', label: 'Plus anciens', icon: TrendingUpIcon },
-    { value: 'views_count:desc', label: 'Les plus vus', icon: EyeIcon },
-    { value: 'likes_count:desc', label: 'Les plus aimés', icon: HeartIcon },
-    {
-        value: 'comments_count:desc',
-        label: 'Les plus commentés',
-        icon: MessageCircleIcon,
-    },
-    { value: 'title:asc', label: 'Titre A-Z', icon: BookOpenIcon },
-    { value: 'title:desc', label: 'Titre Z-A', icon: BookOpenIcon },
-];
-
-type ProcessedPost = Post & {
-    cleanExcerpt: string;
-    formattedDate: string;
-    readingTime: number;
+// Icône selon le niveau de titre
+const HeadingIcon = ({ level }: { level: number }) => {
+    switch (level) {
+        case 1:
+            return <Heading1 className="h-3.5 w-3.5" />;
+        case 2:
+            return <Heading2 className="h-3.5 w-3.5" />;
+        case 3:
+            return <Heading3 className="h-3.5 w-3.5" />;
+        default:
+            return <Hash className="h-3.5 w-3.5" />;
+    }
 };
 
-export default function List({
-    posts: initialPosts,
-    categories,
-    filters: initialFilters,
-}: Props) {
-    const [posts, setPosts] = useState<PostsResponse>(initialPosts);
-    const [isLoading, setIsLoading] = useState(false);
-
-    const [searchTerm, setSearchTerm] = useState(initialFilters.search || '');
-    const [selectedCategory, setSelectedCategory] = useState(
-        initialFilters.tag || initialFilters.category_id || 'all',
-    );
-    const [selectedSort, setSelectedSort] = useState(
-        initialFilters.sort && initialFilters.direction
-            ? `${initialFilters.sort}:${initialFilters.direction}`
-            : DEFAULT_SORT_VALUE,
-    );
-
-    const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+// Table des matières moderne
+const TableOfContents = ({ content }: { content: string }) => {
+    const [headings, setHeadings] = useState<
+        Array<{ id: string; text: string; level: number }>
+    >([]);
+    const [activeId, setActiveId] = useState<string>('');
 
     useEffect(() => {
-        setPosts(initialPosts);
-    }, [initialPosts]);
-
-    useEffect(() => {
-        setSearchTerm(initialFilters.search || '');
-        setSelectedCategory(
-            initialFilters.tag || initialFilters.category_id || 'all',
-        );
-        const sortValue =
-            initialFilters.sort && initialFilters.direction
-                ? `${initialFilters.sort}:${initialFilters.direction}`
-                : DEFAULT_SORT_VALUE;
-        setSelectedSort(sortValue);
-    }, [initialFilters]);
-
-    const buildParams = useCallback(
-        (overrides?: {
-            search?: string;
-            category?: string;
-            sort?: string;
-            page?: number;
-        }) => {
-            const params: Record<string, unknown> = {};
-            const search = overrides?.search ?? searchTerm;
-            const category = overrides?.category ?? selectedCategory;
-            const sort = overrides?.sort ?? selectedSort;
-            const page = overrides?.page;
-
-            if (search.trim()) {
-                params.search = search.trim();
-            }
-
-            if (category !== 'all') {
-                params.tag = category;
-            }
-
-            const [field, dir] = sort.split(':');
-
-            if (field !== DEFAULT_SORT || dir !== DEFAULT_DIRECTION) {
-                params.sort = field;
-                params.direction = dir;
-            }
-
-            if (page && page > 1) {
-                params.page = page;
-            }
-
-            return params;
-        },
-        [searchTerm, selectedCategory, selectedSort],
-    );
-
-    const navigate = useCallback((params: Record<string, unknown>) => {
-        router.get(tenant.blog.index().url, params as any, {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-            showProgress: false,
-            only: ['posts', 'filters'],
-            onStart: () => setIsLoading(true),
-            onSuccess: (page) => {
-                setPosts((page.props as any).posts);
-                setIsLoading(false);
-            },
-            onError: () => setIsLoading(false),
-        });
-    }, []);
-
-    const handleSearchChange = (value: string) => {
-        setSearchTerm(value);
-
-        if (searchTimeoutRef.current) {
-            clearTimeout(searchTimeoutRef.current);
-        }
-
-        if (value.trim() === '') {
-            navigate(buildParams({ search: '' }));
-
+        if (!content) {
             return;
         }
 
-        searchTimeoutRef.current = setTimeout(() => {
-            navigate(buildParams({ search: value }));
-        }, 400);
-    };
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content;
+        const headingElements = tempDiv.querySelectorAll('h1, h2, h3');
+        const generatedHeadings = Array.from(headingElements).map(
+            (el, index) => {
+                const text = el.textContent || '';
+                const id = `heading-${index}-${text.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 
-    const handleCategoryChange = (value: string) => {
-        setSelectedCategory(value);
-        navigate(buildParams({ category: value }));
-    };
-
-    const handleSortChange = (value: string) => {
-        setSelectedSort(value);
-        navigate(buildParams({ sort: value }));
-    };
-
-    const handlePageChange = (page: number) => {
-        navigate(buildParams({ page }));
-    };
-
-    const clearFilters = () => {
-        setSearchTerm('');
-        setSelectedCategory('all');
-        setSelectedSort(DEFAULT_SORT_VALUE);
-        navigate({});
-    };
-
-    const hasActiveFilters =
-        searchTerm.trim() !== '' ||
-        selectedCategory !== 'all' ||
-        selectedSort !== DEFAULT_SORT_VALUE;
-    const activeSortLabel =
-        sortOptions.find((o) => o.value === selectedSort)?.label ||
-        'Plus récents';
-
-    const processedPosts = useMemo<ProcessedPost[]>(() => {
-        return posts.data.map((post) => {
-            const rawExcerpt = post.excerpt || post.content || '';
-            const cleanExcerpt =
-                DOMPurify.sanitize(
-                    typeof rawExcerpt === 'string'
-                        ? rawExcerpt
-                        : JSON.stringify(rawExcerpt),
-                    { ALLOWED_TAGS: [] },
-                ).substring(0, 120) + '...';
-
-            return {
-                ...post,
-                cleanExcerpt,
-                formattedDate: post.published_at
-                    ? format(new Date(post.published_at), 'dd MMMM yyyy', {
-                          locale: fr,
-                      })
-                    : 'Date non définie',
-                readingTime: Math.max(
-                    1,
-                    Math.ceil((post.content?.length || 1000) / 2000),
-                ),
-            };
-        });
-    }, [posts.data]);
-
-    // Carte article – stable, sans ombre, avec animation rapide
-    const PostCard = ({ post }: { post: ProcessedPost }) => {
-        const category = post.categories?.[0] ?? (post as any).category;
-
-        return (
-            <Link
-                href={tenant.blog.show(post.slug).url}
-                className="group block h-full focus:outline-none"
-            >
-                <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/40 bg-white/70 backdrop-blur-xl transition-transform duration-200 ease-out hover:-translate-y-1 dark:border-slate-700/40 dark:bg-slate-900/70">
-                    {/* Image – stable, sans tremblement */}
-                    <div className="relative overflow-hidden">
-                        {post.featured_image_url ? (
-                            <img
-                                src={post.featured_image_url}
-                                alt={post.title}
-                                className="aspect-16/10 w-full object-cover transition-transform duration-300 ease-out will-change-transform group-hover:scale-[1.03]"
-                                style={{ backfaceVisibility: 'hidden' }}
-                            />
-                        ) : (
-                            <div className="flex aspect-16/10 items-center justify-center bg-linear-to-br from-emerald-100 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/10">
-                                <BookOpenIcon className="h-10 w-10 text-emerald-400/60 dark:text-emerald-600/40" />
-                            </div>
-                        )}
-                        <div className="absolute inset-0 bg-linear-to-t from-slate-900/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                        <div className="absolute right-3 bottom-3">
-                            <Badge className="border-0 bg-black/50 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-md">
-                                {post.readingTime} min
-                            </Badge>
-                        </div>
-                        {category && (
-                            <div className="absolute top-3 left-3">
-                                <Badge
-                                    className="border-0 px-2.5 py-1 text-xs font-medium"
-                                    style={{
-                                        backgroundColor:
-                                            category.color || '#10b981',
-                                        color: '#fff',
-                                    }}
-                                >
-                                    {category.nom}
-                                </Badge>
-                            </div>
-                        )}
-                    </div>
-                    {/* Contenu */}
-                    <div className="flex flex-1 flex-col p-5">
-                        <h3 className="mb-2 line-clamp-2 text-lg leading-tight font-bold text-slate-900 transition-colors group-hover:text-emerald-600 dark:text-white dark:group-hover:text-emerald-400">
-                            {post.title}
-                        </h3>
-                        <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                            {post.cleanExcerpt}
-                        </p>
-                        <div className="mb-4 flex items-center justify-between text-xs text-slate-400 dark:text-slate-500">
-                            <span className="flex items-center gap-1">
-                                <CalendarIcon className="h-3.5 w-3.5" />
-                                {post.formattedDate}
-                            </span>
-                            <div className="flex items-center gap-3">
-                                <span className="flex items-center gap-1">
-                                    <EyeIcon className="h-3.5 w-3.5" />
-                                    {post.views_count}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <HeartIcon className="h-3.5 w-3.5" />
-                                    {post.likes_count}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
-                            <Avatar className="h-7 w-7 ring-2 ring-white dark:ring-slate-900">
-                                <AvatarImage src={post.user?.avatar_url} />
-                                <AvatarFallback className="bg-emerald-100 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                                    {post.user?.name
-                                        ?.charAt(0)
-                                        ?.toUpperCase() || '?'}
-                                </AvatarFallback>
-                            </Avatar>
-                            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                {post.user?.name}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </Link>
+                return { id, text, level: parseInt(el.tagName[1]) };
+            },
         );
+        setHeadings(generatedHeadings);
+
+        const observer = new IntersectionObserver(
+            (entries) =>
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        setActiveId(entry.target.id);
+                    }
+                }),
+            { rootMargin: '-100px 0px -66%', threshold: 0.3 },
+        );
+
+        setTimeout(() => {
+            const realHeadings = document.querySelectorAll(
+                '.prose h1, .prose h2, .prose h3',
+            );
+            realHeadings.forEach((el, index) => {
+                const generatedId = generatedHeadings[index]?.id;
+
+                if (generatedId) {
+                    el.id = generatedId;
+                    observer.observe(el);
+                }
+            });
+        }, 200);
+
+        return () => observer.disconnect();
+    }, [content]);
+
+    if (headings.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="rounded-2xl border border-emerald-100 bg-white/80 shadow-sm backdrop-blur-sm dark:border-emerald-900/40 dark:bg-slate-900/80">
+            <div className="border-b border-emerald-50 p-4 dark:border-emerald-900/20">
+                <div className="flex items-center gap-2">
+                    <List className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                        Table des matières
+                    </h3>
+                </div>
+            </div>
+            <nav className="p-4">
+                <ul className="space-y-1">
+                    {headings.map((heading) => (
+                        <li key={heading.id}>
+                            <a
+                                href={`#${heading.id}`}
+                                className={`group -mx-2 flex items-start gap-2 rounded-md px-2 py-1.5 text-xs transition-all duration-200 ${
+                                    activeId === heading.id
+                                        ? 'bg-emerald-50 font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400'
+                                        : 'text-slate-600 hover:bg-slate-50 hover:text-emerald-600 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-emerald-400'
+                                }`}
+                                style={{
+                                    paddingLeft: `${(heading.level - 1) * 12 + 8}px`,
+                                }}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    const element = document.getElementById(
+                                        heading.id,
+                                    );
+
+                                    if (element) {
+                                        const offset = 80;
+                                        const elementPosition =
+                                            element.getBoundingClientRect().top;
+                                        const offsetPosition =
+                                            elementPosition +
+                                            window.scrollY -
+                                            offset;
+                                        window.scrollTo({
+                                            top: offsetPosition,
+                                            behavior: 'smooth',
+                                        });
+                                    }
+                                }}
+                            >
+                                <span
+                                    className={`mt-0.5 shrink-0 ${
+                                        activeId === heading.id
+                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                            : 'text-slate-400 dark:text-slate-500'
+                                    }`}
+                                >
+                                    <HeadingIcon level={heading.level} />
+                                </span>
+                                <span className="line-clamp-2">
+                                    {heading.text}
+                                </span>
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+        </div>
+    );
+};
+
+// Barre de progression émeraude
+const ReadingProgressBar = () => {
+    const [progress, setProgress] = useState(0);
+
+    useEffect(() => {
+        const updateProgress = () => {
+            const scrollTop = window.scrollY;
+            const docHeight =
+                document.documentElement.scrollHeight - window.innerHeight;
+            setProgress((scrollTop / docHeight) * 100);
+        };
+        window.addEventListener('scroll', updateProgress);
+
+        return () => window.removeEventListener('scroll', updateProgress);
+    }, []);
+
+    return (
+        <div className="fixed top-0 right-0 left-0 z-50 h-0.5 bg-slate-200 dark:bg-slate-800">
+            <div
+                className="h-full bg-linear-to-r from-emerald-400 to-emerald-600 shadow-sm transition-all duration-150"
+                style={{ width: `${progress}%` }}
+            />
+        </div>
+    );
+};
+
+// Bouton retour en haut
+const ScrollToTop = () => {
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        const toggleVisibility = () => setVisible(window.scrollY > 500);
+        window.addEventListener('scroll', toggleVisibility);
+
+        return () => window.removeEventListener('scroll', toggleVisibility);
+    }, []);
+
+    if (!visible) {
+        return null;
+    }
+
+    return (
+        <Button
+            className="fixed right-6 bottom-6 z-50 h-10 w-10 rounded-full border border-slate-200 bg-white text-slate-600 shadow-lg transition-all hover:bg-emerald-50 hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            size="icon"
+        >
+            <ArrowUp className="h-4 w-4" />
+        </Button>
+    );
+};
+
+// Fonction utilitaire pour extraire du texte de manière sécurisée depuis un champ (string ou objet)
+const extractText = (
+    data: any,
+    preferredField: 'text' | 'body' | 'excerpt' = 'text',
+): string => {
+    if (!data) {
+        return '';
+    }
+
+    let parsedData = data;
+
+    if (typeof data === 'string') {
+        try {
+            parsedData = JSON.parse(data);
+        } catch (e) {
+            // Not JSON, return as is
+            return data;
+        }
+    }
+
+    if (typeof parsedData === 'object' && parsedData !== null) {
+        return (
+            parsedData[preferredField] ||
+            parsedData.text ||
+            parsedData.body ||
+            parsedData.excerpt ||
+            JSON.stringify(parsedData)
+        );
+    }
+
+    return String(parsedData);
+};
+
+// Composant contenu riche avec style amélioré
+const RichContentText = ({ content }: { content: string }) => {
+    return (
+        <div
+            className="prose prose-sm max-w-none whitespace-pre-wrap dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight prose-h1:mt-4 prose-h1:mb-4 prose-h1:text-2xl prose-h1:text-slate-900 dark:prose-h1:text-white prose-h2:mt-8 prose-h2:mb-4 prose-h2:border-b prose-h2:border-emerald-100 prose-h2:pb-2 prose-h2:text-xl dark:prose-h2:border-emerald-900/40 prose-h3:mt-6 prose-h3:mb-3 prose-h3:text-lg prose-h3:text-slate-800 dark:prose-h3:text-slate-200 prose-p:mt-3 prose-p:mb-3 prose-p:leading-relaxed prose-p:text-slate-600 dark:prose-p:text-slate-300 prose-a:text-emerald-600 prose-a:no-underline hover:prose-a:underline dark:prose-a:text-emerald-400 prose-blockquote:my-6 prose-blockquote:rounded-r-lg prose-blockquote:border-l-4 prose-blockquote:border-emerald-400 prose-blockquote:bg-slate-50 prose-blockquote:py-2 prose-blockquote:pl-4 prose-blockquote:text-slate-600 prose-blockquote:italic dark:prose-blockquote:border-emerald-600 dark:prose-blockquote:bg-slate-900/30 dark:prose-blockquote:text-slate-300 prose-code:rounded-md prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:text-emerald-700 dark:prose-code:bg-slate-800 dark:prose-code:text-emerald-400 prose-pre:my-6 prose-pre:rounded-xl prose-pre:border prose-pre:border-slate-200 prose-pre:bg-slate-50 dark:prose-pre:border-slate-800 dark:prose-pre:bg-slate-900/60 prose-li:text-slate-600 dark:prose-li:text-slate-300 prose-img:rounded-xl prose-img:shadow-md"
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(content) }}
+        />
+    );
+};
+
+function getCsrfToken(): string {
+    const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+
+    if (match) {
+        return decodeURIComponent(match[1]);
+    }
+
+    const meta = document.querySelector('meta[name="csrf-token"]');
+
+    return meta?.getAttribute('content') ?? '';
+}
+
+// Composant principal
+export default function Show({
+    post,
+    previousPost,
+    nextPost,
+    relatedPosts,
+}: Props) {
+    const getInitials = useInitials();
+    const [isLiked, setIsLiked] = useState(post.data.is_liked ?? false);
+    const [isBookmarked, setIsBookmarked] = useState(
+        post.data.is_bookmarked ?? false,
+    );
+    const [likesCount, setLikesCount] = useState(post.data.likes_count || 0);
+    const [bookmarksCount, setBookmarksCount] = useState(
+        post.data.bookmarks_count || 0,
+    );
+    const [showMobileToc, setShowMobileToc] = useState(false);
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    if (!post?.data) {
+        return (
+            <MainLayout breadcrumbs={[]}>
+                <div className="container mx-auto px-4 py-20 text-center">
+                    <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+                        Article non trouvé
+                    </h1>
+                </div>
+            </MainLayout>
+        );
+    }
+
+    const readingTime =
+        post.data.reading_time_minutes ||
+        Math.ceil((post.data.content?.length || 0) / 1500);
+
+    const breadcrumbs: BreadcrumbItemType[] = [
+        { title: 'Accueil', href: home() },
+        { title: 'Blog', href: blog.index().url },
+        {
+            title: post.data.title,
+            href: post.data.slug ? blog.show(post.data.slug).url : '#',
+        },
+    ];
+
+    const handleLike = async () => {
+        try {
+            const response = await fetch(blog.like(post.data.slug).url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setIsLiked(data.is_liked);
+                setLikesCount(data.likes_count);
+
+                if (data.message === 'Authentification requise') {
+                    toast.error(
+                        'Vous devez être connecté pour aimer un article',
+                        { style: getToastStyles('error') },
+                    );
+                } else {
+                    toast.success(
+                        data.is_liked ? 'Article aimé' : "J'aime retiré",
+                        { style: getToastStyles() },
+                    );
+                }
+            } else if (response.status === 401) {
+                toast.error('Vous devez être connecté pour aimer un article', {
+                    style: getToastStyles('error'),
+                });
+            }
+        } catch (error) {
+            toast.error('Une erreur est survenue', {
+                style: getToastStyles('error'),
+            });
+        }
     };
+
+    const handleBookmark = async () => {
+        try {
+            const response = await fetch(blog.bookmark(post.data.slug).url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setIsBookmarked(data.is_bookmarked);
+                setBookmarksCount(data.bookmarks_count);
+
+                if (data.message === 'Authentification requise') {
+                    toast.error(
+                        'Vous devez être connecté pour sauvegarder un article',
+                        { style: getToastStyles() },
+                    );
+                } else {
+                    toast.success(
+                        data.is_bookmarked
+                            ? 'Article sauvegardé'
+                            : 'Article retiré des favoris',
+                        { style: getToastStyles() },
+                    );
+                }
+            } else if (response.status === 401) {
+                toast.error(
+                    'Vous devez être connecté pour sauvegarder un article',
+                    { style: getToastStyles('error') },
+                );
+            }
+        } catch (error) {
+            toast.error('Une erreur est survenue', {
+                style: getToastStyles('error'),
+            });
+        }
+    };
+
+    const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: post.data.title,
+                    text:
+                        extractText(post.data.excerpt) ||
+                        'Découvrez cet article !',
+                    url: window.location.href,
+                });
+            } catch (error) {
+                console.log('Erreur lors du partage', error);
+            }
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            toast.success('Lien copié dans le presse-papiers', {
+                style: getToastStyles(),
+            });
+        }
+    };
+
+    const { seo } = usePage().props as any;
+    const baseUrl =
+        typeof window !== 'undefined'
+            ? window.location.origin
+            : seo?.appUrl || '';
+
+    const getAbsoluteUrl = (path: string) => {
+        if (!path) {
+            return '';
+        }
+
+        if (path.startsWith('http')) {
+            return path;
+        }
+
+        const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+
+        const fullPath = cleanPath.startsWith('storage/')
+            ? cleanPath
+            : `storage/${cleanPath}`;
+
+        return `${baseUrl}/${fullPath}`;
+    };
+
+    const imageUrl = post.data.featured_image_url
+        ? getAbsoluteUrl(post.data.featured_image_url)
+        : seo?.defaultImage || '';
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <Head title="Blog" />
+            <Seo
+                title={post.data.meta_title || post.data.title}
+                description={
+                    extractText(post.data.excerpt, 'text') ||
+                    post.data.meta_description ||
+                    ''
+                }
+                image={imageUrl}
+                type="article"
+                keywords={post.data.meta_keywords?.join(', ')}
+                jsonLd={{
+                    '@context': 'https://schema.org',
+                    '@type': 'BlogPosting',
+                    headline: post.data.title,
+                    image: imageUrl,
+                    datePublished: post.data.published_at,
+                    dateModified: post.data.updated_at,
+                    author: {
+                        '@type': 'Person',
+                        name: post.data.author?.name || 'Auteur',
+                    },
+                }}
+            />
 
-            <div className="relative min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-                {/* Cercles décoratifs */}
-                <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                    <div className="absolute -top-32 right-0 h-96 w-96 rounded-full bg-emerald-200/20 blur-3xl dark:bg-emerald-900/20" />
-                    <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-teal-100/30 blur-3xl dark:bg-teal-900/20" />
-                </div>
+            <ReadingProgressBar />
+            <ScrollToTop />
 
-                <div className="relative z-10">
-                    {/* Hero */}
-                    <section className="py-16 md:py-24">
-                        <div className="mx-auto max-w-6xl px-4 text-center">
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.4 }}
-                            >
-                                <Badge className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-200/60 bg-emerald-50/80 px-4 py-1.5 text-sm font-medium text-emerald-700 backdrop-blur-sm dark:border-emerald-800/40 dark:bg-emerald-950/30 dark:text-emerald-300">
-                                    <SparklesIcon className="h-4 w-4" />
-                                    Blog & Insights
-                                </Badge>
-                                <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl dark:text-white">
-                                    Explorez des contenus{' '}
-                                    <span className="bg-linear-to-r from-emerald-600 via-teal-500 to-cyan-500 bg-clip-text text-transparent dark:from-emerald-400 dark:via-teal-400 dark:to-cyan-400">
-                                        inspirants & modernes
-                                    </span>
-                                </h1>
-                                <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-500 dark:text-slate-400">
-                                    Découvrez des articles de qualité sur le
-                                    développement, l&apos;e-commerce et les
-                                    technologies modernes.
-                                </p>
-                            </motion.div>
-
-                            {/* Recherche */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="mx-auto mt-10 max-w-xl"
-                            >
-                                <div className="relative">
-                                    <Input
-                                        value={searchTerm}
-                                        onChange={(e) =>
-                                            handleSearchChange(e.target.value)
-                                        }
-                                        placeholder="Rechercher un article..."
-                                        className="h-14 rounded-full border border-slate-200/60 bg-white/60 pr-12 pl-12 text-base shadow-lg backdrop-blur-xl transition-all placeholder:text-slate-400 hover:border-emerald-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 dark:border-slate-700/50 dark:bg-slate-900/60 dark:text-white dark:placeholder:text-slate-500 dark:hover:border-emerald-700 dark:focus:border-emerald-500"
-                                    />
-                                    <SearchIcon className="absolute top-1/2 left-4 h-5 w-5 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-                                    {searchTerm && (
-                                        <button
-                                            onClick={() =>
-                                                handleSearchChange('')
-                                            }
-                                            className="absolute top-1/2 right-4 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                                        >
-                                            <XIcon className="h-4 w-4" />
-                                        </button>
-                                    )}
-                                </div>
-                            </motion.div>
-                        </div>
-                    </section>
-
-                    {/* Filtres + Grille */}
-                    <section className="pb-16">
-                        <div className="mx-auto max-w-7xl px-4">
-                            {/* Barre de filtres agrandie et élégante */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="mb-10 rounded-2xl border border-slate-200/50 bg-white/60 p-5 backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/60"
-                            >
-                                <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-                                    {/* Catégories avec Swiper */}
-                                    <div className="flex items-center gap-3">
-                                        <FilterIcon className="h-5 w-5 shrink-0 text-slate-400" />
-                                        <div className="relative w-full sm:max-w-2xl">
-                                            <Swiper
-                                                modules={[Navigation]}
-                                                spaceBetween={10}
-                                                slidesPerView="auto"
-                                                freeMode={true}
-                                                navigation={{
-                                                    prevEl: '.cat-prev',
-                                                    nextEl: '.cat-next',
-                                                }}
-                                                className="flex items-center"
-                                            >
-                                                <SwiperSlide className="w-auto!">
-                                                    <Badge
-                                                        variant={
-                                                            selectedCategory ===
-                                                            'all'
-                                                                ? 'default'
-                                                                : 'outline'
-                                                        }
-                                                        className="cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium transition-all hover:scale-105"
-                                                        onClick={() =>
-                                                            handleCategoryChange(
-                                                                'all',
-                                                            )
-                                                        }
-                                                    >
-                                                        Tous
-                                                    </Badge>
-                                                </SwiperSlide>
-                                                {categories.data.map((cat) => (
-                                                    <SwiperSlide
-                                                        key={cat.id}
-                                                        className="w-auto!"
-                                                    >
-                                                        <Badge
-                                                            variant={
-                                                                selectedCategory ===
-                                                                cat.slug
-                                                                    ? 'default'
-                                                                    : 'outline'
-                                                            }
-                                                            className="cursor-pointer rounded-full px-5 py-2.5 text-sm font-medium transition-all hover:scale-105"
-                                                            style={
-                                                                selectedCategory ===
-                                                                cat.slug
-                                                                    ? {
-                                                                          backgroundColor:
-                                                                              cat.color ||
-                                                                              '#10b981',
-                                                                          color: '#fff',
-                                                                          borderColor:
-                                                                              'transparent',
-                                                                      }
-                                                                    : {
-                                                                          color:
-                                                                              cat.color ||
-                                                                              '#64748b',
-                                                                          borderColor:
-                                                                              'transparent',
-                                                                      }
-                                                            }
-                                                            onClick={() =>
-                                                                handleCategoryChange(
-                                                                    cat.slug,
-                                                                )
-                                                            }
-                                                        >
-                                                            {cat.nom}
-                                                        </Badge>
-                                                    </SwiperSlide>
-                                                ))}
-                                            </Swiper>
-                                            <button className="cat-prev absolute top-1/2 left-0 -translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-1.5 text-slate-500 shadow-sm hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:hover:text-emerald-400">
-                                                <ChevronLeft className="h-4 w-4" />
-                                            </button>
-                                            <button className="cat-next absolute top-1/2 right-0 translate-x-1/2 -translate-y-1/2 rounded-full border border-slate-200 bg-white p-1.5 text-slate-500 shadow-sm hover:text-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:hover:text-emerald-400">
-                                                <ChevronRight className="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* Tri + Réinitialisation */}
-                                    <div className="flex items-center gap-3">
-                                        <Select
-                                            value={selectedSort}
-                                            onValueChange={handleSortChange}
-                                        >
-                                            <SelectTrigger className="h-10 w-48 rounded-full border border-slate-200 bg-white/60 text-sm shadow-sm backdrop-blur-sm transition-all hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900/60 dark:text-slate-300">
-                                                <SelectValue>
-                                                    {activeSortLabel}
-                                                </SelectValue>
-                                            </SelectTrigger>
-                                            <SelectContent
-                                                position="popper"
-                                                className="rounded-xl"
-                                            >
-                                                {sortOptions.map((opt) => (
-                                                    <SelectItem
-                                                        key={opt.value}
-                                                        value={opt.value}
-                                                        className="cursor-pointer"
-                                                    >
-                                                        <div className="flex items-center gap-2">
-                                                            <opt.icon className="h-3.5 w-3.5" />
-                                                            {opt.label}
-                                                        </div>
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        {hasActiveFilters && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={clearFilters}
-                                                className="h-9 gap-1.5 rounded-full text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
-                                            >
-                                                <RefreshCw className="h-4 w-4" />
-                                                <span className="hidden sm:inline">
-                                                    Réinitialiser
-                                                </span>
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                            </motion.div>
-
-                            {/* Compteur + État de chargement */}
-                            <div className="mb-6 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-                                <span>
-                                    <strong className="text-slate-900 dark:text-white">
-                                        {posts.total || 0}
-                                    </strong>{' '}
-                                    article{posts.total > 1 ? 's' : ''}
-                                </span>
-                                {isLoading && (
-                                    <span className="flex items-center gap-2">
-                                        <Loader2Icon className="h-4 w-4 animate-spin" />
-                                        Mise à jour...
-                                    </span>
-                                )}
+            <article className="min-h-screen bg-slate-50 dark:bg-slate-950">
+                {/* Hero section avec image de fond moderne */}
+                <div className="relative flex min-h-[60vh] flex-col items-center justify-center overflow-hidden border-b border-slate-200/50 bg-slate-800 dark:border-slate-800/50 dark:bg-slate-900">
+                    {/* Background Image with Overlay */}
+                    {post.data.featured_image_url ? (
+                        <>
+                            <div className="absolute inset-0">
+                                <img
+                                    src={post.data.featured_image_url}
+                                    alt={post.data.title}
+                                    className="h-full w-full object-cover opacity-90 dark:opacity-80"
+                                />
                             </div>
+                            {/* Gradient overlays for readability */}
+                            <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px] dark:bg-slate-950/40" />
+                            <div className="absolute inset-0 bg-linear-to-t from-slate-900/80 via-slate-900/20 to-transparent dark:from-slate-950/90 dark:via-slate-950/40" />
+                        </>
+                    ) : (
+                        <div className="absolute inset-0 bg-linear-to-br from-emerald-900 via-slate-900 to-slate-950 dark:from-emerald-950/50 dark:via-slate-900 dark:to-slate-950">
+                            <div className="absolute top-0 right-0 -mt-20 -mr-20 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl" />
+                            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl" />
+                        </div>
+                    )}
 
-                            {/* Grille d'articles */}
-                            {processedPosts.length === 0 ? (
-                                <div className="flex flex-col items-center rounded-3xl border border-dashed border-slate-300 bg-white/60 py-20 text-center backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/60">
-                                    <BookOpenIcon className="h-10 w-10 text-slate-400" />
-                                    <h3 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">
-                                        Aucun article
-                                    </h3>
-                                    <p className="mt-1 text-sm text-slate-500">
-                                        Modifiez vos filtres ou revenez plus
-                                        tard.
-                                    </p>
-                                    {hasActiveFilters && (
-                                        <Button
-                                            variant="outline"
-                                            className="mt-6 rounded-full"
-                                            onClick={clearFilters}
+                    <div className="relative z-10 w-full max-w-4xl px-4 py-20 text-center">
+                        {post.data.categories &&
+                            post.data.categories.length > 0 && (
+                                <div className="mb-6 flex flex-wrap justify-center gap-2">
+                                    {post.data.categories.map((category) => (
+                                        <Link
+                                            key={category.id}
+                                            href={
+                                                blog.index({
+                                                    query: {
+                                                        tag: category.slug,
+                                                    },
+                                                }).url
+                                            }
+                                            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-white backdrop-blur-md transition-all hover:bg-white/20 hover:text-emerald-300"
                                         >
-                                            Réinitialiser les filtres
-                                        </Button>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                                    {processedPosts.map((post, idx) => (
-                                        <motion.div
-                                            key={post.id}
-                                            initial={{ opacity: 0, y: 8 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{
-                                                duration: 0.2,
-                                                delay: idx * 0.04,
-                                            }}
-                                        >
-                                            <PostCard post={post} />
-                                        </motion.div>
+                                            <Folder className="h-3.5 w-3.5" />
+                                            {category.nom}
+                                        </Link>
                                     ))}
                                 </div>
                             )}
 
-                            {/* Pagination */}
-                            {posts.last_page > 1 && (
-                                <Pagination className="mt-12">
-                                    <PaginationContent>
-                                        <PaginationItem>
-                                            <PaginationPrevious
-                                                onClick={() =>
-                                                    handlePageChange(
-                                                        posts.current_page - 1,
-                                                    )
-                                                }
-                                                className={cn(
-                                                    posts.current_page === 1 &&
-                                                        'pointer-events-none opacity-50',
-                                                    'cursor-pointer rounded-full',
-                                                )}
+                        <h1 className="mb-8 text-4xl font-extrabold tracking-tight text-balance text-white sm:text-5xl lg:text-6xl">
+                            {post.data.title}
+                        </h1>
+
+                        <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium text-slate-200">
+                            {post.data.user && (
+                                <div className="flex items-center gap-2.5">
+                                    <Avatar className="h-10 w-10 border-2 border-white/20">
+                                        {post.data.user.avatar_url ? (
+                                            <AvatarImage
+                                                src={post.data.user.avatar_url}
+                                                alt={post.data.user.name}
                                             />
-                                        </PaginationItem>
-                                        {Array.from(
-                                            {
-                                                length: Math.min(
-                                                    5,
-                                                    posts.last_page,
-                                                ),
-                                            },
-                                            (_, i) => {
-                                                let page;
-
-                                                if (posts.last_page <= 5) {
-                                                    page = i + 1;
-                                                } else if (
-                                                    posts.current_page <= 3
-                                                ) {
-                                                    page = i + 1;
-                                                } else if (
-                                                    posts.current_page >=
-                                                    posts.last_page - 2
-                                                ) {
-                                                    page =
-                                                        posts.last_page - 4 + i;
-                                                } else {
-                                                    page =
-                                                        posts.current_page -
-                                                        2 +
-                                                        i;
-                                                }
-
-                                                return (
-                                                    <PaginationItem key={page}>
-                                                        <PaginationLink
-                                                            onClick={() =>
-                                                                handlePageChange(
-                                                                    page,
-                                                                )
-                                                            }
-                                                            isActive={
-                                                                page ===
-                                                                posts.current_page
-                                                            }
-                                                            className="rounded-full"
-                                                        >
-                                                            {page}
-                                                        </PaginationLink>
-                                                    </PaginationItem>
-                                                );
-                                            },
+                                        ) : (
+                                            <AvatarFallback className="bg-emerald-600 text-white">
+                                                {getInitials(
+                                                    post.data.user.name,
+                                                )}
+                                            </AvatarFallback>
                                         )}
-                                        <PaginationItem>
-                                            <PaginationNext
-                                                onClick={() =>
-                                                    handlePageChange(
-                                                        posts.current_page + 1,
-                                                    )
+                                    </Avatar>
+                                    <span>{post.data.user.name}</span>
+                                </div>
+                            )}
+                            <div className="flex items-center gap-2">
+                                <Calendar className="h-4 w-4 text-emerald-400" />
+                                <span>
+                                    {post.data.published_at
+                                        ? format(
+                                              new Date(post.data.published_at),
+                                              'PP',
+                                              { locale: fr },
+                                          )
+                                        : ''}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-emerald-400" />
+                                <span>{readingTime} min</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Eye className="h-4 w-4 text-emerald-400" />
+                                <span>{post.data.views_count} vues</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Layout deux colonnes */}
+                <div className="container mx-auto max-w-6xl px-4 py-8 md:py-12">
+                    <div className="mb-6 lg:hidden">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full border-emerald-200 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-800 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+                            onClick={() => setShowMobileToc(!showMobileToc)}
+                        >
+                            <List className="mr-2 h-4 w-4" />
+                            Table des matières
+                            <ChevronRight
+                                className={`ml-2 h-4 w-4 transition-transform ${showMobileToc ? 'rotate-90' : ''}`}
+                            />
+                        </Button>
+                        {showMobileToc && (
+                            <div className="mt-3">
+                                <TableOfContents
+                                    content={extractText(
+                                        post.data.content,
+                                        'body',
+                                    )}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+                        {/* Colonne principale */}
+                        <div className="lg:col-span-8">
+                            {/* Barre d'actions sticky */}
+                            <div className="sticky top-20 z-30 mb-8 flex items-center justify-between rounded-2xl border border-slate-200/60 bg-white/70 p-2 shadow-sm backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/70">
+                                <div className="flex items-center gap-1">
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-9 rounded-xl px-3 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 dark:text-slate-400 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400"
+                                                    onClick={handleLike}
+                                                >
+                                                    <Heart
+                                                        className={`mr-1.5 h-4 w-4 ${isLiked ? 'fill-rose-500 text-rose-500' : ''}`}
+                                                    />
+                                                    <span className="text-xs font-medium">
+                                                        {likesCount}
+                                                    </span>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                J'aime
+                                            </TooltipContent>
+                                        </Tooltip>
+
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-9 rounded-xl px-3 text-slate-600 hover:bg-amber-50 hover:text-amber-600 dark:text-slate-400 dark:hover:bg-amber-950/30 dark:hover:text-amber-400"
+                                                    onClick={handleBookmark}
+                                                >
+                                                    <Bookmark
+                                                        className={`mr-1.5 h-4 w-4 ${isBookmarked ? 'fill-amber-500 text-amber-500' : ''}`}
+                                                    />
+                                                    <span className="text-xs font-medium">
+                                                        {bookmarksCount}
+                                                    </span>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                Favoris
+                                            </TooltipContent>
+                                        </Tooltip>
+
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-9 rounded-xl px-3 text-slate-600 hover:bg-blue-50 hover:text-blue-600 dark:text-slate-400 dark:hover:bg-blue-950/30 dark:hover:text-blue-400"
+                                                    onClick={handleShare}
+                                                >
+                                                    <Share2 className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                Partager
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                            </div>
+
+                            {/* Extrait */}
+                            {post.data.excerpt && (
+                                <div className="mb-8 rounded-2xl border-l-4 border-emerald-400 bg-white p-5 shadow-sm dark:border-emerald-600 dark:bg-slate-900/60">
+                                    <p className="leading-relaxed text-slate-600 italic dark:text-slate-300">
+                                        {extractText(post.data.excerpt, 'text')}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Contenu */}
+                            <div ref={contentRef}>
+                                {post.data.content && (
+                                    <RichContentText
+                                        content={extractText(
+                                            post.data.content,
+                                            'body',
+                                        )}
+                                    />
+                                )}
+                            </div>
+
+                            {/* Tags */}
+                            {post.data.tags && post.data.tags.length > 0 && (
+                                <div className="mt-10 border-t border-slate-100 pt-8 dark:border-slate-800">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <Tag className="h-4 w-4 text-emerald-500" />
+                                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                            Tags :
+                                        </span>
+                                        {post.data.tags.map((tag) => (
+                                            <Badge
+                                                key={tag.id}
+                                                variant="secondary"
+                                                className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 transition-colors hover:bg-emerald-100 hover:text-emerald-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400"
+                                            >
+                                                {tag.name}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Navigation précédent/suivant */}
+                            {(previousPost || nextPost) && (
+                                <div className="mt-10 border-t border-slate-100 pt-8 dark:border-slate-800">
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        {previousPost && (
+                                            <Link
+                                                href={
+                                                    previousPost.slug
+                                                        ? blog.show(
+                                                              previousPost.slug,
+                                                          ).url
+                                                        : '#'
                                                 }
-                                                className={cn(
-                                                    posts.current_page ===
-                                                        posts.last_page &&
-                                                        'pointer-events-none opacity-50',
-                                                    'cursor-pointer rounded-full',
-                                                )}
-                                            />
-                                        </PaginationItem>
-                                    </PaginationContent>
-                                </Pagination>
+                                                className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-emerald-700"
+                                            >
+                                                <span className="mb-1 text-xs text-slate-400 dark:text-slate-500">
+                                                    ← Article précédent
+                                                </span>
+                                                <span className="line-clamp-1 font-medium text-slate-800 transition-colors group-hover:text-emerald-600 dark:text-slate-200 dark:group-hover:text-emerald-400">
+                                                    {previousPost.title}
+                                                </span>
+                                            </Link>
+                                        )}
+                                        {nextPost && (
+                                            <Link
+                                                href={
+                                                    nextPost.slug
+                                                        ? blog.show(
+                                                              nextPost.slug,
+                                                          ).url
+                                                        : '#'
+                                                }
+                                                className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 text-right transition-all hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-emerald-700"
+                                            >
+                                                <span className="mb-1 text-xs text-slate-400 dark:text-slate-500">
+                                                    Article suivant →
+                                                </span>
+                                                <span className="line-clamp-1 font-medium text-slate-800 transition-colors group-hover:text-emerald-600 dark:text-slate-200 dark:group-hover:text-emerald-400">
+                                                    {nextPost.title}
+                                                </span>
+                                            </Link>
+                                        )}
+                                    </div>
+                                </div>
                             )}
                         </div>
-                    </section>
+
+                        {/* Sidebar */}
+                        <aside className="hidden lg:col-span-4 lg:block">
+                            <div className="sticky top-24 max-h-[calc(100vh-8rem)] space-y-6 overflow-y-auto">
+                                <TableOfContents
+                                    content={extractText(
+                                        post.data.content,
+                                        'body',
+                                    )}
+                                />
+
+                                {post.data.user && (
+                                    <div className="rounded-2xl border border-slate-200/60 bg-white/60 p-5 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/60">
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-10 w-10 ring-2 ring-emerald-100 dark:ring-emerald-900/30">
+                                                {post.data.user.avatar_url ? (
+                                                    <AvatarImage
+                                                        src={
+                                                            post.data.user
+                                                                .avatar_url
+                                                        }
+                                                        alt={
+                                                            post.data.user.name
+                                                        }
+                                                    />
+                                                ) : (
+                                                    <AvatarFallback className="bg-emerald-100 text-sm text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                                                        {getInitials(
+                                                            post.data.user.name,
+                                                        )}
+                                                    </AvatarFallback>
+                                                )}
+                                            </Avatar>
+                                            <div>
+                                                <p className="font-semibold text-slate-800 dark:text-slate-200">
+                                                    {post.data.user.name}
+                                                </p>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                    Rédacteur
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </aside>
+                    </div>
                 </div>
-            </div>
+
+                {/* Articles similaires */}
+                {relatedPosts && relatedPosts.length > 0 && (
+                    <div className="border-t border-slate-100 bg-linear-to-b from-slate-50/50 to-white dark:border-slate-800 dark:from-slate-950/50 dark:to-slate-950">
+                        <div className="container mx-auto max-w-6xl px-4 py-12">
+                            <div className="mb-8 flex items-center gap-2">
+                                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+                                    Articles similaires
+                                </h2>
+                            </div>
+                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                {relatedPosts.map((relatedPost) => (
+                                    <Link
+                                        key={relatedPost.id}
+                                        href={
+                                            relatedPost.slug
+                                                ? blog.show(relatedPost.slug)
+                                                      .url
+                                                : '#'
+                                        }
+                                        className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-500/5 dark:border-slate-800 dark:bg-slate-900/60"
+                                    >
+                                        {relatedPost.featured_image_url && (
+                                            <div className="aspect-video w-full overflow-hidden">
+                                                <img
+                                                    src={
+                                                        relatedPost.featured_image_url
+                                                    }
+                                                    alt={relatedPost.title}
+                                                    className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                                                    loading="lazy"
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="flex flex-1 flex-col justify-between p-5">
+                                            <div>
+                                                <h3 className="mb-2 line-clamp-2 font-semibold text-slate-800 transition-colors group-hover:text-emerald-600 dark:text-slate-200 dark:group-hover:text-emerald-400">
+                                                    {relatedPost.title}
+                                                </h3>
+                                                <p className="line-clamp-2 text-sm text-slate-500 dark:text-slate-400">
+                                                    {extractText(
+                                                        relatedPost.excerpt,
+                                                        'text',
+                                                    )}
+                                                </p>
+                                            </div>
+                                            <div className="mt-3 flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+                                                <Calendar className="h-3 w-3" />
+                                                <span>
+                                                    {relatedPost.published_at
+                                                        ? format(
+                                                              new Date(
+                                                                  relatedPost.published_at,
+                                                              ),
+                                                              'PP',
+                                                              { locale: fr },
+                                                          )
+                                                        : ''}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Commentaires */}
+                <div className="border-t border-slate-100 dark:border-slate-800">
+                    <div className="container mx-auto max-w-6xl px-4 py-12">
+                        <div className="mb-3 flex items-center justify-between">
+                            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200">
+                                Commentaires
+                            </h2>
+                            <Badge
+                                variant="outline"
+                                className="border-emerald-200 px-3 py-1 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400"
+                            >
+                                <MessageCircle className="mr-1.5 h-3.5 w-3.5" />
+                                {post.data.comments_count || 0}
+                            </Badge>
+                        </div>
+                        <Separator className="mb-5 bg-slate-100 dark:bg-slate-800" />
+                        <CommentSection
+                            commentableType={'App\\Models\\Post'}
+                            commentableId={String(post.data.id)}
+                        />
+                    </div>
+                </div>
+            </article>
+            <NewsletterSectionVendeur />
         </MainLayout>
     );
 }

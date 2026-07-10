@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/Vendor/Settings.tsx
 'use client';
 
@@ -13,22 +12,24 @@ import {
     Globe,
     Link as LinkIcon,
     Loader2,
-    Mail,
-    Phone,
     Save,
     ShieldCheck,
     Store,
     UploadCloud,
     X,
+    CalendarIcon,
+    MapPin,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { DragEvent } from 'react';
 import { toast } from 'sonner';
 
+import { update as updateVendorSettings } from '@/actions/App/Http/Controllers/Vendor/Vendeurs/VendorSettingsController';
 import { SiteHeader } from '@/components/site-header';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import {
     Card,
     CardContent,
@@ -38,24 +39,53 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Textarea } from '@/components/ui/textarea';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { VendorSidebar } from '@/components/VendorSidebar';
 
 import getToastStyle from '@/lib/toast-style';
 import { cn } from '@/lib/utils';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 
-interface Props {
-    tenant: Tenant;
+// ---------- Types locaux ----------
+interface DocumentType {
+    id: string;
+    code: string;
+    nom: string;
+    description?: string;
+    autorite_emettrice?: string;
+    est_obligatoire: boolean;
+    forme_juridique?: string;
 }
 
+interface Props {
+    tenant: Tenant;
+    documentTypes?: DocumentType[];
+    existingDocuments?: Record<
+        string,
+        {
+            numero_document: string;
+            date_delivrance: string;
+            date_expiration: string;
+            lieu_delivrance: string;
+            autorite_delivrance: string;
+        }
+    >;
+}
+
+// Clés sociales (adresse exclue)
 type SocialFieldKey =
     | 'facebook_url'
     | 'instagram_url'
@@ -63,12 +93,128 @@ type SocialFieldKey =
     | 'youtube_url'
     | 'tiktok_url';
 
-export default function VendorSettings({ tenant }: Props) {
+// ----- Constantes des formes juridiques -----
+const FORMES_JURIDIQUES: Record<string, string> = {
+    toutes: 'Toutes formes',
+    societe_commerciale: 'Société commerciale',
+    petit_commercant: 'Petit commerçant',
+    organisation_sans_but_lucratif: 'Organisation sans but lucratif',
+};
+
+// ----- Petit composant DatePicker -----
+function DatePickerField({
+    value,
+    onChange,
+    placeholder = 'Sélectionner une date',
+}: {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+}) {
+    const [openState, setOpenState] = useState(false);
+    const date = value ? new Date(value + 'T12:00:00') : undefined;
+
+    return (
+        <Popover open={openState} onOpenChange={setOpenState}>
+            <PopoverTrigger asChild>
+                <Button
+                    variant="outline"
+                    className={cn(
+                        'h-11 w-full justify-start rounded-xl border-slate-200 bg-white/80 text-left font-normal shadow-sm backdrop-blur-sm transition-all duration-200',
+                        'hover:border-emerald-300 hover:bg-white',
+                        'dark:border-slate-700 dark:bg-slate-900/70 dark:hover:border-emerald-700',
+                        !date && 'text-slate-400 dark:text-slate-500',
+                    )}
+                >
+                    <CalendarIcon className="mr-2 h-4 w-4 text-emerald-500" />
+                    {date ? (
+                        date.toLocaleDateString('fr-FR', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                        })
+                    ) : (
+                        <span>{placeholder}</span>
+                    )}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent
+                className="w-auto rounded-2xl border-slate-200/70 bg-white/95 p-0 shadow-xl backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/95"
+                align="start"
+            >
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    defaultMonth={date || new Date()}
+                    captionLayout="dropdown"
+                    onSelect={(selected) => {
+                        if (selected) {
+                            onChange(selected.toISOString().split('T')[0]);
+                        } else {
+                            onChange('');
+                        }
+
+                        setOpenState(false);
+                    }}
+                    startMonth={new Date(1950, 0)}
+                    endMonth={new Date(new Date().getFullYear() + 10, 11)}
+                    classNames={{
+                        months: 'flex flex-col gap-4 sm:flex-row',
+                        month: 'flex flex-col gap-4',
+                        caption_label:
+                            'flex items-center gap-1 text-sm font-medium text-slate-700 dark:text-slate-200',
+                        nav: 'absolute inset-x-0 top-0 flex items-center justify-between gap-1',
+                        button_previous: cn(
+                            'h-7 w-7 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-400',
+                        ),
+                        button_next: cn(
+                            'h-7 w-7 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-400',
+                        ),
+                        weekday:
+                            'text-xs font-medium text-slate-400 dark:text-slate-500',
+                        day: 'text-sm rounded-lg hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400 aria-selected:bg-emerald-500 aria-selected:text-white dark:aria-selected:bg-emerald-600',
+                        day_button:
+                            'h-9 w-9 flex items-center justify-center rounded-lg',
+                        selected:
+                            'bg-emerald-500 text-white hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500',
+                        today: 'font-bold text-emerald-600 dark:text-emerald-400',
+                        outside: 'text-slate-300 dark:text-slate-600',
+                        disabled:
+                            'text-slate-300 opacity-50 dark:text-slate-600',
+                    }}
+                />
+            </PopoverContent>
+        </Popover>
+    );
+}
+
+export default function VendorSettings({
+    tenant,
+    documentTypes = [],
+    existingDocuments = {},
+}: Props) {
     const [logoPreview, setLogoPreview] = useState<string | null>(
         tenant.logo_url ?? null,
     );
     const [dragActive, setDragActive] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Initialisation des documents légaux
+    const initialDocuments = useMemo(() => {
+        const docs: Record<string, any> = {};
+        documentTypes.forEach((type) => {
+            docs[type.id] = existingDocuments[type.id] || {
+                type_document_id: type.id,
+                numero_document: '',
+                date_delivrance: '',
+                date_expiration: '',
+                lieu_delivrance: '',
+                autorite_delivrance: type.autorite_emettrice ?? '', // ← pré-remplissage direct
+            };
+        });
+
+        return docs;
+    }, [documentTypes, existingDocuments]);
 
     const {
         data,
@@ -78,12 +224,15 @@ export default function VendorSettings({ tenant }: Props) {
         errors,
         isDirty,
         reset,
+        setDefaults,
         recentlySuccessful,
     } = useForm({
         raison_sociale: tenant.raison_sociale ?? '',
         description: tenant.description ?? '',
         email: tenant.email ?? '',
         telephone: tenant.telephone ?? '',
+        address: tenant.address ?? '',
+        forme_juridique: tenant.type_entite ?? 'toutes',
         logo: null as File | null,
         facebook_url: tenant.facebook_url ?? '',
         instagram_url: tenant.instagram_url ?? '',
@@ -92,8 +241,53 @@ export default function VendorSettings({ tenant }: Props) {
         tiktok_url: tenant.tiktok_url ?? '',
         remove_logo: false,
         _method: 'PUT',
+        documents: initialDocuments,
     });
 
+    // Filtrage des types de documents selon la forme juridique sélectionnée
+    const filteredDocumentTypes = useMemo(() => {
+        if (!tenant?.id) {
+            return [];
+        }
+
+        return documentTypes.filter(
+            (type) =>
+                type.forme_juridique === 'toutes' ||
+                type.forme_juridique === data.forme_juridique ||
+                !type.forme_juridique,
+        );
+    }, [documentTypes, data.forme_juridique, tenant]);
+
+    // Pré-remplissage automatique de l'autorité de délivrance pour les documents affichés
+    useEffect(() => {
+        let hasChanges = false;
+        const updatedDocs = { ...data.documents };
+
+        filteredDocumentTypes.forEach((type) => {
+            const doc = updatedDocs[type.id];
+
+            // Si le document existe et que l'autorité de délivrance n'est pas encore renseignée,
+            // on la pré-remplit avec l'autorité émettrice du type de document
+            if (
+                doc &&
+                (!doc.autorite_delivrance ||
+                    doc.autorite_delivrance.trim() === '') &&
+                type.autorite_emettrice
+            ) {
+                updatedDocs[type.id] = {
+                    ...doc,
+                    autorite_delivrance: type.autorite_emettrice,
+                };
+                hasChanges = true;
+            }
+        });
+
+        if (hasChanges) {
+            setData('documents', updatedDocs);
+        }
+    }, [data.documents, filteredDocumentTypes, setData]); // Déclenché quand la liste filtrée change (forme juridique modifiée)
+
+    // Liste des champs sociaux – sans l'adresse
     const socialFields: Array<{
         label: string;
         key: SocialFieldKey;
@@ -125,12 +319,6 @@ export default function VendorSettings({ tenant }: Props) {
             placeholder: 'https://tiktok.com/@votre-compte',
         },
     ];
-
-    {
-        /* -------------------------------------------------------------------------- */
-        /*  Styles utilitaires pour les champs                                         */
-        /* -------------------------------------------------------------------------- */
-    }
 
     const inputClass =
         'h-11 rounded-xl border-slate-200 bg-white/80 shadow-xs backdrop-blur-sm ' +
@@ -167,9 +355,9 @@ export default function VendorSettings({ tenant }: Props) {
             data.raison_sociale,
             data.email,
             data.telephone,
+            data.address,
             data.description,
         ];
-
         const filled = fields.filter(
             (value) => typeof value === 'string' && value.trim() !== '',
         ).length;
@@ -210,7 +398,6 @@ export default function VendorSettings({ tenant }: Props) {
         }
 
         const preview = URL.createObjectURL(file);
-
         setData('logo', file);
         setData('remove_logo', false);
         setLogoPreview(preview);
@@ -220,7 +407,6 @@ export default function VendorSettings({ tenant }: Props) {
         e.preventDefault();
         e.stopPropagation();
         setDragActive(false);
-
         const file = e.dataTransfer.files?.[0];
 
         if (file) {
@@ -248,15 +434,22 @@ export default function VendorSettings({ tenant }: Props) {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        post(route('vendor.settings.update'), {
+        post(updateVendorSettings.url(), {
             forceFormData: true,
             preserveScroll: true,
+            preserveState: true,
+            showProgress: false,
             onSuccess: (page) => {
                 const updatedTenant = (page.props.tenant ?? tenant) as Tenant;
+                const savedData = {
+                    ...data,
+                    logo: null,
+                    remove_logo: false,
+                };
 
                 setData('logo', null);
                 setData('remove_logo', false);
+                setDefaults(savedData);
                 setLogoPreview(updatedTenant.logo_url ?? null);
 
                 if (fileInputRef.current) {
@@ -288,14 +481,15 @@ export default function VendorSettings({ tenant }: Props) {
             }
         >
             <Head title={`Paramètres - ${tenant.raison_sociale}`} />
-
             <VendorSidebar tenant={tenant} />
-
             <SidebarInset>
                 <SiteHeader />
-
-                <div className="min-h-screen bg-linear-to-b from-slate-50 via-white to-white dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-                    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                <div className="relative min-h-screen bg-linear-to-b from-slate-50 via-white to-emerald-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+                    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                        <div className="absolute -top-24 right-1/4 h-96 w-96 rounded-full bg-emerald-200/20 blur-3xl dark:bg-emerald-900/20" />
+                        <div className="absolute bottom-12 left-1/3 h-64 w-64 rounded-full bg-teal-100/30 blur-2xl dark:bg-teal-900/20" />
+                    </div>
+                    <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                         <motion.div
                             initial={{ opacity: 0, y: 24 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -315,14 +509,12 @@ export default function VendorSettings({ tenant }: Props) {
                                             <ArrowLeft className="h-4 w-4" />
                                         </Link>
                                     </Button>
-
                                     <div className="space-y-2">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <Badge className="rounded-full border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300">
                                                 <Store className="mr-1 h-3.5 w-3.5" />
                                                 Boutique
                                             </Badge>
-
                                             {tenant.plan?.name && (
                                                 <Badge
                                                     variant="outline"
@@ -331,7 +523,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                     {tenant.plan.name}
                                                 </Badge>
                                             )}
-
                                             {tenant.is_active && (
                                                 <Badge className="rounded-full border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300">
                                                     <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
@@ -339,7 +530,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                 </Badge>
                                             )}
                                         </div>
-
                                         <div>
                                             <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                                                 Paramètres de la boutique
@@ -352,8 +542,6 @@ export default function VendorSettings({ tenant }: Props) {
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* Status Card */}
                                 <Card className="w-full max-w-sm rounded-3xl border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/80">
                                     <CardContent className="p-5">
                                         <div className="mb-3 flex items-center justify-between">
@@ -364,7 +552,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                 {completion}%
                                             </span>
                                         </div>
-
                                         <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                                             <div
                                                 className="h-full rounded-full bg-linear-to-r from-emerald-500 to-teal-500 transition-all duration-500"
@@ -373,7 +560,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                 }}
                                             />
                                         </div>
-
                                         <div className="mt-4 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                                             <ShieldCheck className="h-4 w-4 text-emerald-500" />
                                             Informations sécurisées et
@@ -383,7 +569,7 @@ export default function VendorSettings({ tenant }: Props) {
                                 </Card>
                             </div>
 
-                            {/* Unsaved changes */}
+                            {/* Unsaved changes banner */}
                             <AnimatePresence>
                                 {isDirty && !recentlySuccessful && (
                                     <motion.div
@@ -405,7 +591,6 @@ export default function VendorSettings({ tenant }: Props) {
                                             <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
                                                 <AlertCircle className="h-4 w-4" />
                                             </div>
-
                                             <div className="flex-1">
                                                 <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
                                                     Vous avez des modifications
@@ -413,12 +598,11 @@ export default function VendorSettings({ tenant }: Props) {
                                                 </p>
                                                 <p className="mt-1 text-xs leading-5 text-amber-700 dark:text-amber-300/90">
                                                     Pensez à enregistrer vos
-                                                    changements afin qu’ils
+                                                    changements afin qu'ils
                                                     soient pris en compte sur
                                                     votre boutique.
                                                 </p>
                                             </div>
-
                                             <Button
                                                 type="submit"
                                                 size="sm"
@@ -437,8 +621,7 @@ export default function VendorSettings({ tenant }: Props) {
                             </AnimatePresence>
 
                             <form onSubmit={handleSubmit} className="space-y-8">
-                                {/* General Info */}
-
+                                {/* Informations générales */}
                                 <Card className="overflow-hidden border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/70">
                                     <CardHeader className="border-b border-slate-100 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/60">
                                         <CardTitle className="flex items-center gap-3 text-lg font-semibold text-slate-900 dark:text-white">
@@ -452,10 +635,8 @@ export default function VendorSettings({ tenant }: Props) {
                                             sur votre boutique.
                                         </CardDescription>
                                     </CardHeader>
-
                                     <CardContent className="space-y-8 p-6">
                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                            {/* Nom de la boutique */}
                                             <div className="space-y-2.5">
                                                 <Label
                                                     htmlFor="raison_sociale"
@@ -484,8 +665,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                     </p>
                                                 )}
                                             </div>
-
-                                            {/* Email */}
                                             <div className="space-y-2.5">
                                                 <Label
                                                     htmlFor="email"
@@ -515,8 +694,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                     </p>
                                                 )}
                                             </div>
-
-                                            {/* Téléphone */}
                                             <div className="space-y-2.5 md:col-span-2">
                                                 <Label
                                                     htmlFor="telephone"
@@ -544,8 +721,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                 )}
                                             </div>
                                         </div>
-
-                                        {/* Description */}
                                         <div className="space-y-2.5">
                                             <Label
                                                 htmlFor="description"
@@ -585,14 +760,44 @@ export default function VendorSettings({ tenant }: Props) {
                                             </div>
                                         </div>
 
-                                        {/* ------------------------------------------------------------------ */}
-                                        {/* Logo moderne premium                                               */}
-                                        {/* ------------------------------------------------------------------ */}
+                                        {/* Adresse de la boutique (unique) */}
+                                        <div className="space-y-2.5">
+                                            <Label
+                                                htmlFor="address"
+                                                className="text-sm font-medium text-slate-700 dark:text-slate-300"
+                                            >
+                                                Adresse de la boutique
+                                            </Label>
+                                            <div className="relative">
+                                                <MapPin className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                                <Input
+                                                    id="address"
+                                                    value={data.address}
+                                                    onChange={(e) =>
+                                                        setData(
+                                                            'address',
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    placeholder="Ex. 12 Avenue de la Paix, Kinshasa"
+                                                    className={cn(
+                                                        inputClass,
+                                                        'pl-10',
+                                                    )}
+                                                />
+                                            </div>
+                                            {errors.address && (
+                                                <p className="text-sm text-red-500">
+                                                    {errors.address}
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        {/* Logo */}
                                         <div className="space-y-3">
                                             <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                                 Logo de la boutique
                                             </Label>
-
                                             <div
                                                 onDragEnter={handleDrag}
                                                 onDragOver={handleDrag}
@@ -606,7 +811,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                 )}
                                             >
                                                 <div className="flex flex-col items-center gap-6 md:flex-row">
-                                                    {/* Aperçu */}
                                                     <div className="relative">
                                                         <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
                                                             {logoPreview ? (
@@ -621,7 +825,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                                 <Camera className="h-10 w-10 text-slate-300 dark:text-slate-600" />
                                                             )}
                                                         </div>
-
                                                         {logoPreview && (
                                                             <button
                                                                 type="button"
@@ -630,12 +833,10 @@ export default function VendorSettings({ tenant }: Props) {
                                                                 }
                                                                 className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border border-white bg-red-500 text-white shadow-lg transition hover:bg-red-600"
                                                             >
-                                                                ×
+                                                                <X className="h-4 w-4" />
                                                             </button>
                                                         )}
                                                     </div>
-
-                                                    {/* Texte */}
                                                     <div className="flex-1 text-center md:text-left">
                                                         <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
                                                             Téléchargez votre
@@ -652,7 +853,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                             Taille maximale : 2
                                                             Mo
                                                         </p>
-
                                                         <Button
                                                             type="button"
                                                             variant="outline"
@@ -667,7 +867,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                         </Button>
                                                     </div>
                                                 </div>
-
                                                 <input
                                                     ref={fileInputRef}
                                                     type="file"
@@ -676,7 +875,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                     className="hidden"
                                                 />
                                             </div>
-
                                             {errors.logo && (
                                                 <p className="text-sm text-red-500">
                                                     {errors.logo}
@@ -686,7 +884,7 @@ export default function VendorSettings({ tenant }: Props) {
                                     </CardContent>
                                 </Card>
 
-                                {/* Social Networks */}
+                                {/* Réseaux sociaux – sans le champ Adresse */}
                                 <Card className="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/85 shadow-sm backdrop-blur-xl transition-all duration-300 hover:shadow-lg hover:shadow-slate-200/40 dark:border-slate-800 dark:bg-slate-900/85 dark:hover:shadow-slate-950/40">
                                     <CardHeader className="border-b border-slate-100 bg-slate-50/50 px-6 py-5 dark:border-slate-800 dark:bg-slate-900/50">
                                         <CardTitle className="flex items-center gap-3 text-lg font-semibold text-slate-900 dark:text-white">
@@ -695,7 +893,6 @@ export default function VendorSettings({ tenant }: Props) {
                                             </div>
                                             Réseaux sociaux
                                         </CardTitle>
-
                                         <CardDescription className="text-sm leading-6 text-slate-500 dark:text-slate-400">
                                             Ajoutez les liens vers vos profils
                                             sociaux pour renforcer la
@@ -703,7 +900,6 @@ export default function VendorSettings({ tenant }: Props) {
                                             améliorer votre visibilité.
                                         </CardDescription>
                                     </CardHeader>
-
                                     <CardContent className="p-6">
                                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                             {socialFields.map((field) => {
@@ -719,7 +915,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                         key={field.key}
                                                         className="space-y-2.5"
                                                     >
-                                                        {/* Label */}
                                                         <Label
                                                             htmlFor={field.key}
                                                             className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300"
@@ -728,17 +923,13 @@ export default function VendorSettings({ tenant }: Props) {
                                                                 <LinkIcon className="h-3.5 w-3.5" />
                                                             </div>
                                                             {field.label}
-
                                                             {hasValue &&
                                                                 !error && (
                                                                     <CheckCircle2 className="ml-auto h-4 w-4 text-emerald-500" />
                                                                 )}
                                                         </Label>
-
-                                                        {/* Input */}
                                                         <div className="relative">
                                                             <LinkIcon className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400" />
-
                                                             <Input
                                                                 id={field.key}
                                                                 type="url"
@@ -771,23 +962,17 @@ export default function VendorSettings({ tenant }: Props) {
                                                                         : 'border-slate-200 dark:border-slate-700',
                                                                 )}
                                                             />
-
-                                                            {/* Icône d'état */}
                                                             {hasValue &&
                                                                 !error && (
                                                                     <CheckCircle2 className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-emerald-500" />
                                                                 )}
                                                         </div>
-
-                                                        {/* Error */}
                                                         {error && (
                                                             <p className="flex items-center gap-1.5 text-sm text-red-500">
                                                                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                                                                 {error}
                                                             </p>
                                                         )}
-
-                                                        {/* Preview link */}
                                                         {hasValue && !error && (
                                                             <a
                                                                 href={value}
@@ -803,8 +988,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                 );
                                             })}
                                         </div>
-
-                                        {/* Footer info */}
                                         <div className="mt-6 rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-xs leading-5 text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
                                             Les liens sociaux apparaîtront sur
                                             votre boutique et permettront à vos
@@ -814,14 +997,249 @@ export default function VendorSettings({ tenant }: Props) {
                                     </CardContent>
                                 </Card>
 
+                                {/* Documents Légaux – avec sélecteur de forme juridique */}
+                                {tenant?.id && documentTypes.length > 0 && (
+                                    <Card className="overflow-hidden border-slate-200/80 bg-white/80 shadow-sm backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/70">
+                                        <CardHeader className="border-b border-slate-100 bg-slate-50/60 dark:border-slate-800 dark:bg-slate-900/60">
+                                            <CardTitle className="flex items-center gap-3 text-lg font-semibold text-slate-900 dark:text-white">
+                                                <div className="rounded-xl bg-emerald-100 p-2 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
+                                                    <ShieldCheck className="h-5 w-5" />
+                                                </div>
+                                                Documents légaux
+                                            </CardTitle>
+                                            <CardDescription>
+                                                Sélectionnez votre forme
+                                                juridique puis renseignez vos
+                                                documents officiels.
+                                            </CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="space-y-6 p-6">
+                                            <div className="max-w-sm">
+                                                <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                    Forme juridique
+                                                </Label>
+                                                <Select
+                                                    value={data.forme_juridique}
+                                                    onValueChange={(val) =>
+                                                        setData(
+                                                            'forme_juridique',
+                                                            val,
+                                                        )
+                                                    }
+                                                >
+                                                    <SelectTrigger className="mt-2 h-11 rounded-xl border-slate-200 bg-white/80 shadow-sm backdrop-blur-sm hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900/70 dark:hover:border-emerald-700">
+                                                        <SelectValue placeholder="Choisir une forme juridique" />
+                                                    </SelectTrigger>
+                                                    <SelectContent
+                                                        position="popper"
+                                                        className="rounded-xl border-slate-200/70 bg-white/95 shadow-xl backdrop-blur-xl dark:border-slate-700/70 dark:bg-slate-900/95"
+                                                    >
+                                                        {Object.entries(
+                                                            FORMES_JURIDIQUES,
+                                                        ).map(
+                                                            ([
+                                                                value,
+                                                                label,
+                                                            ]) => (
+                                                                <SelectItem
+                                                                    key={value}
+                                                                    value={
+                                                                        value
+                                                                    }
+                                                                >
+                                                                    {label}
+                                                                </SelectItem>
+                                                            ),
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            {filteredDocumentTypes.length ===
+                                            0 ? (
+                                                <p className="text-sm text-slate-500 italic">
+                                                    Aucun document obligatoire
+                                                    pour cette forme juridique.
+                                                </p>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                                                    {filteredDocumentTypes.map(
+                                                        (type) => {
+                                                            const doc =
+                                                                data.documents[
+                                                                    type.id
+                                                                ] || {};
+                                                            const error =
+                                                                errors[
+                                                                    `documents.${type.id}.numero_document`
+                                                                ] || '';
+
+                                                            return (
+                                                                <div
+                                                                    key={
+                                                                        type.id
+                                                                    }
+                                                                    className="space-y-2"
+                                                                >
+                                                                    <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                                        {
+                                                                            type.nom
+                                                                        }
+                                                                        {type.est_obligatoire && (
+                                                                            <span className="text-red-500">
+                                                                                *
+                                                                            </span>
+                                                                        )}
+                                                                    </Label>
+                                                                    <Input
+                                                                        placeholder="N° du document"
+                                                                        value={
+                                                                            doc.numero_document
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            setData(
+                                                                                'documents',
+                                                                                {
+                                                                                    ...data.documents,
+                                                                                    [type.id]:
+                                                                                        {
+                                                                                            ...doc,
+                                                                                            numero_document:
+                                                                                                e
+                                                                                                    .target
+                                                                                                    .value,
+                                                                                        },
+                                                                                },
+                                                                            )
+                                                                        }
+                                                                        className={
+                                                                            inputClass
+                                                                        }
+                                                                    />
+                                                                    <div className="grid grid-cols-2 gap-3">
+                                                                        <DatePickerField
+                                                                            value={
+                                                                                doc.date_delivrance
+                                                                            }
+                                                                            onChange={(
+                                                                                date,
+                                                                            ) =>
+                                                                                setData(
+                                                                                    'documents',
+                                                                                    {
+                                                                                        ...data.documents,
+                                                                                        [type.id]:
+                                                                                            {
+                                                                                                ...doc,
+                                                                                                date_delivrance:
+                                                                                                    date,
+                                                                                            },
+                                                                                    },
+                                                                                )
+                                                                            }
+                                                                            placeholder="Délivrance"
+                                                                        />
+                                                                        <DatePickerField
+                                                                            value={
+                                                                                doc.date_expiration
+                                                                            }
+                                                                            onChange={(
+                                                                                date,
+                                                                            ) =>
+                                                                                setData(
+                                                                                    'documents',
+                                                                                    {
+                                                                                        ...data.documents,
+                                                                                        [type.id]:
+                                                                                            {
+                                                                                                ...doc,
+                                                                                                date_expiration:
+                                                                                                    date,
+                                                                                            },
+                                                                                    },
+                                                                                )
+                                                                            }
+                                                                            placeholder="Expiration"
+                                                                        />
+                                                                    </div>
+                                                                    <Input
+                                                                        placeholder="Lieu de délivrance"
+                                                                        value={
+                                                                            doc.lieu_delivrance
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            setData(
+                                                                                'documents',
+                                                                                {
+                                                                                    ...data.documents,
+                                                                                    [type.id]:
+                                                                                        {
+                                                                                            ...doc,
+                                                                                            lieu_delivrance:
+                                                                                                e
+                                                                                                    .target
+                                                                                                    .value,
+                                                                                        },
+                                                                                },
+                                                                            )
+                                                                        }
+                                                                        className={
+                                                                            inputClass
+                                                                        }
+                                                                    />
+                                                                    <Input
+                                                                        placeholder="Autorité de délivrance"
+                                                                        value={
+                                                                            doc.autorite_delivrance
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            setData(
+                                                                                'documents',
+                                                                                {
+                                                                                    ...data.documents,
+                                                                                    [type.id]:
+                                                                                        {
+                                                                                            ...doc,
+                                                                                            autorite_delivrance:
+                                                                                                e
+                                                                                                    .target
+                                                                                                    .value,
+                                                                                        },
+                                                                                },
+                                                                            )
+                                                                        }
+                                                                        className={
+                                                                            inputClass
+                                                                        }
+                                                                    />
+                                                                    {error && (
+                                                                        <p className="text-sm text-red-500">
+                                                                            {
+                                                                                error
+                                                                            }
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        },
+                                                    )}
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                )}
+
                                 {/* Footer Actions */}
                                 <div className="sticky bottom-4 z-30 pt-2">
                                     <div className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 shadow-2xl shadow-slate-200/40 backdrop-blur-2xl dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-slate-950/40">
-                                        {/* Gradient décoratif */}
                                         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-emerald-500/50 to-transparent" />
-
                                         <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-                                            {/* Statut */}
                                             <div className="flex items-start gap-3">
                                                 <div
                                                     className={cn(
@@ -841,7 +1259,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                         <ShieldCheck className="h-4.5 w-4.5" />
                                                     )}
                                                 </div>
-
                                                 <div className="space-y-0.5">
                                                     <p className="text-sm font-semibold text-slate-900 dark:text-white">
                                                         {recentlySuccessful
@@ -850,7 +1267,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                               ? 'Modifications non enregistrées'
                                                               : 'Toutes les données sont synchronisées'}
                                                     </p>
-
                                                     <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
                                                         {recentlySuccessful
                                                             ? 'Vos paramètres ont été sauvegardés avec succès.'
@@ -860,8 +1276,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                     </p>
                                                 </div>
                                             </div>
-
-                                            {/* Actions */}
                                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                                                 <Button
                                                     type="button"
@@ -889,7 +1303,6 @@ export default function VendorSettings({ tenant }: Props) {
                                                 >
                                                     Réinitialiser
                                                 </Button>
-
                                                 <Button
                                                     type="submit"
                                                     disabled={
@@ -929,62 +1342,4 @@ export default function VendorSettings({ tenant }: Props) {
             </SidebarInset>
         </SidebarProvider>
     );
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                   Field                                    */
-/* -------------------------------------------------------------------------- */
-
-interface FieldProps {
-    label: string;
-    children: React.ReactNode;
-    error?: string;
-    required?: boolean;
-    icon?: React.ElementType;
-}
-
-function Field({
-    label,
-    children,
-    error,
-    required = false,
-    icon: Icon,
-}: FieldProps) {
-    return (
-        <div className="space-y-2">
-            <Label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                {Icon && <Icon className="h-4 w-4 text-slate-400" />}
-                {label}
-                {required && <span className="text-red-500">*</span>}
-            </Label>
-
-            {children}
-
-            <AnimatePresence>
-                {error && (
-                    <motion.p
-                        initial={{
-                            opacity: 0,
-                            y: -4,
-                        }}
-                        animate={{
-                            opacity: 1,
-                            y: 0,
-                        }}
-                        exit={{
-                            opacity: 0,
-                            y: -4,
-                        }}
-                        className="flex items-center gap-1 text-sm text-red-500"
-                    >
-                        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                        {error}
-                    </motion.p>
-                )}
-            </AnimatePresence>
-        </div>
-    );
-}
-function usePage() {
-    throw new Error('Function not implemented.');
 }

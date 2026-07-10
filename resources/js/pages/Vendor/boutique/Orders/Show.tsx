@@ -1,7 +1,6 @@
 // resources/js/pages/Shop/Orders/Show.tsx
 import type { PageProps } from '@inertiajs/core';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { motion } from 'motion/react';
 import {
     ArrowLeft,
     Package,
@@ -18,7 +17,9 @@ import {
     Calendar,
     DollarSign,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { AppSidebar } from '@/components/app-sidebar';
+import LiveOrderTracking from '@/components/ecommerce/tracking/LiveOrderTracking';
 import { SiteHeader } from '@/components/site-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,7 @@ import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 import tenant from '@/routes/tenant';
+import type { TrackingData } from '@/types/ecommerce/products';
 
 // ---------- Types ----------
 interface OrderLine {
@@ -66,6 +68,7 @@ interface Order {
 
 interface Props extends PageProps {
     order: Order;
+    tracking?: TrackingData | null;
 }
 
 // Statuts avec icônes, couleurs et labels
@@ -129,7 +132,7 @@ const formatCurrency = (value: number | string | undefined) => {
 };
 
 export default function ShopOrderShowPage() {
-    const { order } = usePage<Props>().props;
+    const { order, tracking } = usePage<Props>().props;
     const status = statusConfig[order.statut] ?? statusConfig.en_attente;
     const StatusIcon = status.icon;
 
@@ -169,6 +172,14 @@ export default function ShopOrderShowPage() {
                                 </Link>
                             </Button>
                         </motion.div>
+
+                        {tracking && (
+                            <LiveOrderTracking
+                                commandeId={order.id}
+                                initialTracking={tracking}
+                            />
+                        )}
+
 
                         {/* En-tête avec commande et statut */}
                         <motion.div

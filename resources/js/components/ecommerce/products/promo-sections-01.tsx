@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/purity */
 import { Link } from '@inertiajs/react';
 import type { Variants } from 'framer-motion';
-import { motion } from 'motion/react';
 import {
     ArrowRight,
     Calendar,
@@ -12,6 +11,7 @@ import {
     Ticket,
     Zap,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -108,7 +108,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
     };
 
     return (
-        <section className="relative w-full overflow-hidden border-y border-slate-200/50 bg-white py-10 md:py-14 lg:py-16 dark:border-slate-800/50 dark:bg-slate-950">
+        <section className="relative w-full overflow-hidden bg-white py-10 md:py-12 lg:py-14 dark:bg-slate-950">
             {/* Animated Gradient Background */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
                 <motion.div
@@ -122,7 +122,7 @@ export default function PromoSection({ promo }: PromoSectionProps) {
                         repeat: Infinity,
                         ease: 'linear'
                     }}
-                    className="absolute -left-1/4 -top-1/2 h-200 w-200 rounded-full bg-linear-to-tr from-emerald-500/20 to-teal-400/20 blur-[100px] mix-blend-multiply dark:mix-blend-screen"
+                    className="absolute -left-1/4 -top-1/2 h-200 w-200 rounded-full blur-[100px] mix-blend-multiply dark:mix-blend-screen"
                 />
                 <motion.div
                     animate={{

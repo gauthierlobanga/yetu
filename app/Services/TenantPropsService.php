@@ -6,9 +6,6 @@ use App\Models\Tenant;
 
 class TenantPropsService
 {
-    /**
-     * Retourne un tableau normalisé des propriétés du tenant à passer à Inertia.
-     */
     public function getTenantProps(Tenant $tenant): array
     {
         return [
@@ -19,6 +16,8 @@ class TenantPropsService
             'email' => $tenant->email,
             'telephone' => $tenant->telephone,
             'logo_url' => $this->getLogoUrl($tenant),
+            'address' => $tenant->getConfiguration('address'),          // ✅ adresse physique
+            'type_entite' => $tenant->type_entite,                      // ✅ forme juridique
             'facebook_url' => $tenant->getConfiguration('facebook_url'),
             'instagram_url' => $tenant->getConfiguration('instagram_url'),
             'twitter_url' => $tenant->getConfiguration('twitter_url'),
@@ -33,18 +32,13 @@ class TenantPropsService
         ];
     }
 
-    /**
-     * Récupère l'URL du logo via Spatie Media Library.
-     */
     protected function getLogoUrl(Tenant $tenant): ?string
     {
         $resolveLogo = function () use ($tenant): ?string {
             $centralTenant = Tenant::query()->find($tenant->id);
-
             if (! $centralTenant) {
                 return null;
             }
-
             $url = $centralTenant->getFirstMediaUrl('tenant_avatar');
 
             return $url !== '' ? $url : null;
@@ -57,9 +51,6 @@ class TenantPropsService
         return $resolveLogo();
     }
 
-    /**
-     * Formate les informations du plan d’abonnement.
-     */
     protected function formatPlan($plan): ?array
     {
         if (! $plan) {

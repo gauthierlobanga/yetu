@@ -4,7 +4,6 @@
 // resources/js/pages/Shop/Orders/Index.tsx
 import type { PageProps } from '@inertiajs/core';
 import { Link, usePage, Head, router } from '@inertiajs/react';
-import { motion } from 'motion/react';
 import {
     ArrowRight,
     ShoppingBag,
@@ -20,6 +19,7 @@ import {
     TrendingUp,
     BarChart3,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useState, useMemo } from 'react';
 import CountUp from 'react-countup';
 import {

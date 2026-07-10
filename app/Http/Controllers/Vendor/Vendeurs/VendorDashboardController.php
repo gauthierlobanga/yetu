@@ -44,7 +44,7 @@ class VendorDashboardController extends Controller
             // Commandes
             $ordersCount = Commande::count();
             // Revenus basés sur les commandes valides (non annulées/rejetées)
-            $revenue = Commande::whereNotIn('statut', [Commande::STATUT_ANNULE, Commande::STATUT_REJETE])
+            $revenue = Commande::whereNotIn('statut', [Commande::STATUT_ANNULEE, Commande::STATUT_REJETEE])
                 ->sum('total');
             $averageOrderValue = $ordersCount > 0 ? $revenue / $ordersCount : 0;
 
@@ -58,7 +58,7 @@ class VendorDashboardController extends Controller
                 ->count();
 
             // Croissance mensuelle (calculée)
-            $previousMonthRevenue = Commande::whereNotIn('statut', [Commande::STATUT_ANNULE, Commande::STATUT_REJETE])
+            $previousMonthRevenue = Commande::whereNotIn('statut', [Commande::STATUT_ANNULEE, Commande::STATUT_REJETEE])
                 ->whereMonth('date_commande', now()->subMonth()->month)
                 ->whereYear('date_commande', now()->subMonth()->year)
                 ->sum('total');

@@ -3,7 +3,7 @@
 // resources/js/Pages/Vendor/Statistics/Partials/SatisfactionChart.tsx
 
 import { Star, MessageCircleMore, TrendingUp } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, ResponsiveContainer, Tooltip } from 'recharts';
 
 import { Badge } from '@/components/ui/badge';
 import {
@@ -158,7 +158,7 @@ export function SatisfactionChart({
                                         stroke="none"
                                     >
                                         {data.map((entry, index) => (
-                                            <Cell key={index} fill={entry.color} />
+                                            <rect key={index} fill={entry.color} />
                                         ))}
                                     </Pie>
                                     <Tooltip content={<CustomTooltip />} />

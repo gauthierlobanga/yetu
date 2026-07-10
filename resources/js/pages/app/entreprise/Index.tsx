@@ -1,6 +1,6 @@
 // /* eslint-disable @typescript-eslint/no-unused-vars */
 // resources/js/Pages/SaaSLanding/Home.tsx
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { motion, useInView } from 'framer-motion';
 import {
     ArrowRight,
@@ -75,9 +75,11 @@ function FadeInSection({
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function SaaSLanding(_props: Props) {
+    const { name } = usePage().props as any;
+
     return (
         <MainLayout>
-            <Head title="Créez votre boutique en ligne – Yetu" />
+            <Head title={`Créez votre boutique en ligne - ${name}`} />
 
             {/* ========== HERO ========== */}
             <section className="relative overflow-hidden bg-linear-to-br from-primary/30 via-background to-primary/20 text-foreground">

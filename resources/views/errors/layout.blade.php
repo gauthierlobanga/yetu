@@ -2,20 +2,16 @@
     $statusCode = trim($__env->yieldContent('code', '500'));
     $statusTitle = trim($__env->yieldContent('title', __('Erreur')));
     $statusMessage = trim($__env->yieldContent('message', __('Une erreur est survenue')));
-    $statusDescription = trim($__env->yieldContent('description', __('La requête n’a pas pu être traitée correctement.')));
-    $appName = config('app.name', 'Yetu');
+    $statusDescription = trim(
+        $__env->yieldContent('description', __('La requête n’a pas pu être traitée correctement.')),
+    );
+    $tenant = function_exists('tenant') ? tenant() : null;
+    $appName = $tenant ? $tenant->raison_sociale : config('app.name', 'Yetu');
     $homeUrl = url('/');
     $refreshUrl = request()->fullUrl();
     $previousUrl = url()->previous();
     $canGoBack = $previousUrl && $previousUrl !== $refreshUrl;
     $supportEmail = 'support@yetu.cd';
-
-    $tone = match ($statusCode) {
-        '401', '403', '419', '429' => 'amber',
-        '402' => 'sky',
-        '500', '503' => 'rose',
-        default => 'emerald',
-    };
 
     $statusLabel = match ($statusCode) {
         '401' => __('Accès sécurisé'),
@@ -80,695 +76,187 @@
     $primaryLabel = $statusCode === '419' ? __('Actualiser') : __('Accueil');
     $primaryUrl = $statusCode === '419' ? $refreshUrl : $homeUrl;
     $primaryIcon = $statusCode === '419' ? 'refresh' : 'home';
+
+    // Thèmes dynamiques Tailwind selon le code
+    $gradientClass = match ($statusCode) {
+        '401', '403', '419', '429' => 'from-amber-50 to-orange-100 text-amber-600',
+        '402' => 'from-sky-50 to-blue-100 text-sky-600',
+        '500', '503' => 'from-rose-50 to-red-100 text-rose-600',
+        default => 'from-emerald-50 to-teal-100 text-emerald-600',
+    };
+
+    $btnPrimaryClass = match ($statusCode) {
+        '401', '403', '419', '429' => 'bg-amber-600 hover:bg-amber-700 focus:ring-amber-200',
+        '402' => 'bg-sky-600 hover:bg-sky-700 focus:ring-sky-200',
+        '500', '503' => 'bg-rose-600 hover:bg-rose-700 focus:ring-rose-200',
+        default => 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-200',
+    };
+
+    $badgeClass = match ($statusCode) {
+        '401', '403', '419', '429' => 'bg-amber-100 text-amber-700 border-amber-200',
+        '402' => 'bg-sky-100 text-sky-700 border-sky-200',
+        '500', '503' => 'bg-rose-100 text-rose-700 border-rose-200',
+        default => 'bg-emerald-100 text-emerald-700 border-emerald-200',
+    };
 @endphp
 
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="robots" content="noindex, nofollow">
 
-        <title>{{ $statusTitle }} | {{ $appName }}</title>
-
-        <style>
-            :root {
-                --page-bg: #f8fafc;
-                --text: #0f172a;
-                --muted: #475569;
-                --soft: #f1f5f9;
-                --surface: rgba(255, 255, 255, 0.86);
-                --surface-solid: #ffffff;
-                --line: rgba(15, 23, 42, 0.12);
-                --line-strong: rgba(15, 23, 42, 0.2);
-                --shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
-                --accent: #059669;
-                --accent-dark: #047857;
-                --accent-soft: #d1fae5;
-                --accent-text: #064e3b;
-                --accent-rgb: 5, 150, 105;
-                color-scheme: light;
-            }
-
-            body.tone-emerald {
-                --accent: #059669;
-                --accent-dark: #047857;
-                --accent-soft: #d1fae5;
-                --accent-text: #064e3b;
-                --accent-rgb: 5, 150, 105;
-            }
-
-            body.tone-amber {
-                --accent: #d97706;
-                --accent-dark: #b45309;
-                --accent-soft: #fef3c7;
-                --accent-text: #78350f;
-                --accent-rgb: 217, 119, 6;
-            }
-
-            body.tone-sky {
-                --accent: #0284c7;
-                --accent-dark: #0369a1;
-                --accent-soft: #e0f2fe;
-                --accent-text: #075985;
-                --accent-rgb: 2, 132, 199;
-            }
-
-            body.tone-rose {
-                --accent: #e11d48;
-                --accent-dark: #be123c;
-                --accent-soft: #ffe4e6;
-                --accent-text: #881337;
-                --accent-rgb: 225, 29, 72;
-            }
-
-            * {
-                box-sizing: border-box;
-            }
-
-            html,
-            body {
-                min-height: 100%;
-            }
-
-            body {
-                margin: 0;
-                min-height: 100vh;
-                overflow-x: hidden;
-                color: var(--text);
-                background:
-                    linear-gradient(135deg, rgba(var(--accent-rgb), 0.12) 0%, rgba(var(--accent-rgb), 0) 34%),
-                    linear-gradient(45deg, rgba(14, 165, 233, 0.1) 0%, rgba(14, 165, 233, 0) 30%),
-                    repeating-linear-gradient(90deg, rgba(15, 23, 42, 0.045) 0 1px, transparent 1px 72px),
-                    repeating-linear-gradient(0deg, rgba(15, 23, 42, 0.04) 0 1px, transparent 1px 72px),
-                    var(--page-bg);
-                font-family:
-                    "Instrument Sans", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-                    sans-serif;
-                letter-spacing: 0;
-            }
-
-            body::before {
-                position: fixed;
-                inset: 0;
-                pointer-events: none;
-                content: "";
-                background:
-                    linear-gradient(120deg, transparent 0 24%, rgba(255, 255, 255, 0.66) 24% 25%, transparent 25% 100%),
-                    linear-gradient(300deg, transparent 0 66%, rgba(var(--accent-rgb), 0.11) 66% 67%, transparent 67% 100%);
-                opacity: 0.8;
-            }
-
-            a {
-                color: inherit;
-                text-decoration: none;
-            }
-
-            .error-shell {
-                position: relative;
-                z-index: 1;
-                display: grid;
-                grid-template-columns: minmax(0, 1fr) 392px;
-                align-items: center;
-                width: min(1120px, calc(100% - 48px));
-                min-height: 100vh;
-                margin: 0 auto;
-                padding: 48px 0;
-                gap: 40px;
-            }
-
-            .brand {
-                display: inline-flex;
-                align-items: center;
-                min-width: 0;
-                margin-bottom: 52px;
-                gap: 12px;
-                color: var(--text);
-                font-size: 15px;
-                font-weight: 700;
-            }
-
-            .brand-mark {
-                display: grid;
-                width: 42px;
-                height: 42px;
-                place-items: center;
-                flex: 0 0 auto;
-                border-radius: 8px;
-                background: var(--accent);
-                color: #ffffff;
-                box-shadow: 0 12px 28px rgba(var(--accent-rgb), 0.28);
-                font-size: 19px;
-                font-weight: 800;
-            }
-
-            .brand-name {
-                overflow-wrap: anywhere;
-            }
-
-            .status-kicker {
-                display: inline-flex;
-                align-items: center;
-                width: fit-content;
-                margin: 0 0 18px;
-                padding: 8px 11px;
-                gap: 8px;
-                border: 1px solid rgba(var(--accent-rgb), 0.28);
-                border-radius: 8px;
-                background: rgba(var(--accent-rgb), 0.1);
-                color: var(--accent-text);
-                font-size: 13px;
-                font-weight: 700;
-            }
-
-            .status-dot {
-                width: 8px;
-                height: 8px;
-                border-radius: 999px;
-                background: var(--accent);
-                box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.16);
-            }
-
-            .error-title {
-                max-width: 720px;
-                margin: 0;
-                color: var(--text);
-                font-size: 56px;
-                font-weight: 800;
-                line-height: 1.04;
-                text-wrap: balance;
-            }
-
-            .error-lead {
-                max-width: 620px;
-                margin: 22px 0 0;
-                color: var(--muted);
-                font-size: 18px;
-                line-height: 1.75;
-            }
-
-            .actions {
-                display: flex;
-                flex-wrap: wrap;
-                margin-top: 34px;
-                gap: 12px;
-            }
-
-            .button {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                min-height: 46px;
-                max-width: 100%;
-                padding: 0 16px;
-                gap: 10px;
-                border: 1px solid transparent;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 750;
-                line-height: 1;
-                transition:
-                    transform 180ms ease,
-                    border-color 180ms ease,
-                    background 180ms ease,
-                    color 180ms ease,
-                    box-shadow 180ms ease;
-                white-space: nowrap;
-            }
-
-            .button:focus-visible {
-                outline: 3px solid rgba(var(--accent-rgb), 0.28);
-                outline-offset: 3px;
-            }
-
-            .button:hover {
-                transform: translateY(-1px);
-            }
-
-            .button-primary {
-                background: var(--accent);
-                color: #ffffff;
-                box-shadow: 0 14px 32px rgba(var(--accent-rgb), 0.26);
-            }
-
-            .button-primary:hover {
-                background: var(--accent-dark);
-            }
-
-            .button-secondary {
-                border-color: var(--line);
-                background: var(--surface-solid);
-                color: var(--text);
-            }
-
-            .button-secondary:hover {
-                border-color: rgba(var(--accent-rgb), 0.3);
-                color: var(--accent-text);
-            }
-
-            .button-quiet {
-                border-color: transparent;
-                background: transparent;
-                color: var(--muted);
-            }
-
-            .button-quiet:hover {
-                background: rgba(var(--accent-rgb), 0.08);
-                color: var(--accent-text);
-            }
-
-            .button-icon {
-                width: 18px;
-                height: 18px;
-                flex: 0 0 auto;
-            }
-
-            .status-panel {
-                overflow: hidden;
-                border: 1px solid var(--line);
-                border-radius: 8px;
-                background: var(--surface);
-                box-shadow: var(--shadow);
-                backdrop-filter: blur(18px);
-            }
-
-            .panel-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 18px 18px 0;
-                gap: 16px;
-                color: var(--muted);
-                font-size: 13px;
-                font-weight: 700;
-            }
-
-            .panel-status {
-                display: inline-flex;
-                align-items: center;
-                min-width: 0;
-                gap: 8px;
-            }
-
-            .panel-code {
-                flex: 0 0 auto;
-                color: var(--accent-text);
-                font-weight: 800;
-            }
-
-            .code-plate {
-                position: relative;
-                margin: 18px;
-                min-height: 236px;
-                overflow: hidden;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-radius: 8px;
-                background:
-                    linear-gradient(135deg, rgba(var(--accent-rgb), 0.38), rgba(15, 23, 42, 0.12)),
-                    #0f172a;
-                color: #ffffff;
-            }
-
-            .code-plate::before {
-                position: absolute;
-                inset: 0;
-                content: "";
-                background:
-                    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 42px),
-                    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 42px);
-                mask-image: linear-gradient(to bottom, #000000, transparent 78%);
-            }
-
-            .code-plate::after {
-                position: absolute;
-                right: 0;
-                bottom: 0;
-                left: 0;
-                height: 3px;
-                content: "";
-                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.82), transparent);
-                animation: scan 3.8s ease-in-out infinite;
-            }
-
-            .code-number {
-                position: absolute;
-                top: 26px;
-                left: 24px;
-                z-index: 1;
-                font-size: 104px;
-                font-weight: 900;
-                line-height: 0.9;
-            }
-
-            .code-label {
-                position: absolute;
-                right: 22px;
-                bottom: 20px;
-                left: 24px;
-                z-index: 1;
-                display: flex;
-                align-items: flex-end;
-                justify-content: space-between;
-                gap: 18px;
-            }
-
-            .code-label strong {
-                display: block;
-                max-width: 210px;
-                font-size: 18px;
-                line-height: 1.35;
-            }
-
-            .code-label span {
-                color: rgba(255, 255, 255, 0.68);
-                font-size: 12px;
-                font-weight: 700;
-            }
-
-            .signal {
-                width: 62px;
-                height: 62px;
-                flex: 0 0 auto;
-                color: rgba(255, 255, 255, 0.9);
-            }
-
-            .next-steps {
-                padding: 0 20px 20px;
-            }
-
-            .next-steps-title {
-                margin: 0 0 12px;
-                color: var(--text);
-                font-size: 14px;
-                font-weight: 800;
-            }
-
-            .next-steps ul {
-                display: grid;
-                margin: 0;
-                padding: 0;
-                gap: 10px;
-                list-style: none;
-            }
-
-            .next-steps li {
-                display: grid;
-                grid-template-columns: 22px minmax(0, 1fr);
-                align-items: start;
-                gap: 10px;
-                color: var(--muted);
-                font-size: 14px;
-                line-height: 1.55;
-            }
-
-            .step-mark {
-                display: grid;
-                width: 22px;
-                height: 22px;
-                place-items: center;
-                border-radius: 999px;
-                background: var(--accent-soft);
-                color: var(--accent-text);
-            }
-
-            .step-mark svg {
-                width: 14px;
-                height: 14px;
-            }
-
-            .panel-footer {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 14px 18px;
-                gap: 12px;
-                border-top: 1px solid var(--line);
-                color: var(--muted);
-                font-size: 12px;
-                line-height: 1.4;
-            }
-
-            .panel-footer span {
-                min-width: 0;
-                overflow-wrap: anywhere;
-            }
-
-            @keyframes scan {
-                0%,
-                100% {
-                    transform: translateX(-65%);
-                    opacity: 0.24;
-                }
-
-                50% {
-                    transform: translateX(65%);
-                    opacity: 0.88;
-                }
-            }
-
-            @media (prefers-color-scheme: dark) {
-                :root {
-                    --page-bg: #060914;
-                    --text: #f8fafc;
-                    --muted: #cbd5e1;
-                    --soft: #101827;
-                    --surface: rgba(15, 23, 42, 0.78);
-                    --surface-solid: rgba(15, 23, 42, 0.92);
-                    --line: rgba(226, 232, 240, 0.16);
-                    --line-strong: rgba(226, 232, 240, 0.24);
-                    --shadow: 0 30px 80px rgba(0, 0, 0, 0.36);
-                    color-scheme: dark;
-                }
-
-                body {
-                    background:
-                        linear-gradient(135deg, rgba(var(--accent-rgb), 0.18) 0%, rgba(var(--accent-rgb), 0) 34%),
-                        linear-gradient(45deg, rgba(20, 184, 166, 0.12) 0%, rgba(20, 184, 166, 0) 30%),
-                        repeating-linear-gradient(90deg, rgba(226, 232, 240, 0.06) 0 1px, transparent 1px 72px),
-                        repeating-linear-gradient(0deg, rgba(226, 232, 240, 0.05) 0 1px, transparent 1px 72px),
-                        var(--page-bg);
-                }
-
-                body::before {
-                    background:
-                        linear-gradient(120deg, transparent 0 24%, rgba(255, 255, 255, 0.06) 24% 25%, transparent 25% 100%),
-                        linear-gradient(300deg, transparent 0 66%, rgba(var(--accent-rgb), 0.12) 66% 67%, transparent 67% 100%);
-                }
-
-                .brand,
-                .button-secondary {
-                    color: var(--text);
-                }
-
-                .status-kicker,
-                .panel-code,
-                .button-secondary:hover,
-                .button-quiet:hover {
-                    color: #ffffff;
-                }
-
-                .button-secondary {
-                    background: rgba(15, 23, 42, 0.86);
-                }
-
-                .code-plate {
-                    background:
-                        linear-gradient(135deg, rgba(var(--accent-rgb), 0.42), rgba(2, 6, 23, 0.16)),
-                        #020617;
-                }
-            }
-
-            @media (max-width: 900px) {
-                .error-shell {
-                    grid-template-columns: 1fr;
-                    width: min(720px, calc(100% - 32px));
-                    padding: 28px 0 34px;
-                    gap: 30px;
-                }
-
-                .brand {
-                    margin-bottom: 38px;
-                }
-
-                .error-title {
-                    font-size: 42px;
-                    line-height: 1.1;
-                }
-
-                .error-lead {
-                    font-size: 16px;
-                }
-
-                .status-panel {
-                    width: 100%;
-                }
-            }
-
-            @media (max-width: 560px) {
-                .error-shell {
-                    width: min(100% - 24px, 720px);
-                    padding-top: 20px;
-                }
-
-                .brand {
-                    margin-bottom: 30px;
-                }
-
-                .brand-mark {
-                    width: 38px;
-                    height: 38px;
-                }
-
-                .error-title {
-                    font-size: 34px;
-                }
-
-                .actions {
-                    display: grid;
-                    grid-template-columns: 1fr;
-                }
-
-                .button {
-                    width: 100%;
-                    white-space: normal;
-                }
-
-                .code-plate {
-                    min-height: 210px;
-                    margin: 14px;
-                }
-
-                .code-number {
-                    top: 24px;
-                    left: 18px;
-                    font-size: 78px;
-                }
-
-                .code-label {
-                    right: 18px;
-                    left: 18px;
-                }
-
-                .signal {
-                    width: 48px;
-                    height: 48px;
-                }
-
-                .panel-footer {
-                    align-items: flex-start;
-                    flex-direction: column;
-                }
-            }
-
-            @media (prefers-reduced-motion: reduce) {
-                *,
-                *::before,
-                *::after {
-                    animation-duration: 1ms !important;
-                    animation-iteration-count: 1 !important;
-                    scroll-behavior: auto !important;
-                    transition-duration: 1ms !important;
-                }
-            }
-        </style>
-    </head>
-    <body class="tone-{{ $tone }}">
-        <main class="error-shell" role="main">
-            <section class="error-copy" aria-labelledby="error-title">
-                <a class="brand" href="{{ $homeUrl }}" aria-label="{{ __('Retour à :app', ['app' => $appName]) }}">
-                    <span class="brand-mark" aria-hidden="true">{{ mb_substr($appName, 0, 1) }}</span>
-                    <span class="brand-name">{{ $appName }}</span>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{{ $statusTitle }} | {{ $appName }}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-50 min-h-screen flex items-center justify-center p-4 sm:p-8 antialiased selection:bg-slate-800 selection:text-white">
+
+    <!-- Arrière-plan décoratif subtil -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div
+            class="absolute top-[-25%] left-[-10%] w-[50%] h-[50%] rounded-full mix-blend-multiply filter blur-3xl opacity-20 {{ explode(' ', $gradientClass)[0] }}">
+        </div>
+        <div
+            class="absolute top-[20%] right-[-10%] w-[40%] h-[60%] rounded-full mix-blend-multiply filter blur-3xl opacity-20 {{ explode(' ', $gradientClass)[1] }}">
+        </div>
+    </div>
+
+    <!-- Conteneur principal (Design Figma Split Card) -->
+    <div
+        class="relative z-10 max-w-5xl w-full glass-panel rounded-[2rem] shadow-[0_3px_10px_rgb(0,0,0,0.04)] border border-white overflow-hidden flex flex-col md:flex-row">
+
+        <!-- Colonne Gauche : Code d'erreur et Visuel -->
+        <div
+            class="md:w-5/12 bg-linear-to-br {{ $gradientClass }} p-12 flex flex-col items-center justify-center text-center relative overflow-hidden">
+            <!-- Cercles décoratifs -->
+            <div
+                class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9InJnYmEoMjU1LCAyNTUsIDI1NSwgMC4xNSkiLz48L3N2Zz4=')] opacity-50 mask-image:linear-gradient(to_bottom,white,transparent)">
+            </div>
+
+            <div class="relative z-10 w-full">
+                <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest border {{ $badgeClass }} mb-6">
+                    <span class="w-1.5 h-1.5 rounded-full bg-current mr-2"></span>
+                    {{ $statusLabel }}
+                </span>
+
+                <h1 class="text-8xl lg:text-9xl font-black tracking-tighter mb-4">
+                    {{ $statusCode }}
+                </h1>
+
+                <p class="font-medium text-lg opacity-80 max-w-62.5 mx-auto leading-tight">
+                    {{ $statusTitle }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Colonne Droite : Message et Actions -->
+        <div class="md:w-7/12 p-8 sm:p-12 lg:p-16 flex flex-col bg-white/60">
+            <!-- En-tête marque -->
+            <div class="mb-12">
+                <a href="{{ $homeUrl }}"
+                    class="inline-flex items-center gap-3 text-slate-800 hover:opacity-80 transition-opacity">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-bold text-lg">
+                        {{ mb_substr($appName, 0, 1) }}
+                    </div>
+                    <span class="font-bold text-xl tracking-tight">{{ $appName }}</span>
                 </a>
+            </div>
 
-                <p class="status-kicker">
-                    <span class="status-dot" aria-hidden="true"></span>
-                    <span>{{ __('Erreur :code', ['code' => $statusCode]) }} · {{ $statusLabel }}</span>
+            <!-- Contenu d'erreur -->
+            <div class="grow">
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight leading-tight">
+                    {{ $statusMessage }}
+                </h2>
+                <p class="text-slate-500 text-base sm:text-lg mb-10 leading-relaxed max-w-lg">
+                    {{ $statusDescription }}
                 </p>
 
-                <h1 class="error-title" id="error-title">{{ $statusMessage }}</h1>
-                <p class="error-lead">{{ $statusDescription }}</p>
-
-                <nav class="actions" aria-label="{{ __('Actions de récupération') }}">
-                    <a class="button button-primary" href="{{ $primaryUrl }}">
-                        @if ($primaryIcon === 'refresh')
-                            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path d="M21 12a9 9 0 0 1-15.3 6.4" />
-                                <path d="M3 12A9 9 0 0 1 18.3 5.6" />
-                                <path d="M18 2v4h-4" />
-                                <path d="M6 22v-4h4" />
-                            </svg>
-                        @else
-                            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path d="m3 10.5 9-7 9 7" />
-                                <path d="M5 9.5V21h14V9.5" />
-                                <path d="M9 21v-6h6v6" />
-                            </svg>
-                        @endif
-                        <span>{{ $primaryLabel }}</span>
-                    </a>
-
-                    <a class="button button-secondary" href="{{ $canGoBack ? $previousUrl : $homeUrl }}">
-                        <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path d="m12 19-7-7 7-7" />
-                            <path d="M19 12H5" />
-                        </svg>
-                        <span>{{ __('Retour') }}</span>
-                    </a>
-
-                    <a class="button button-quiet" href="mailto:{{ $supportEmail }}">
-                        <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path d="M4 4h16v16H4z" />
-                            <path d="m22 6-10 7L2 6" />
-                        </svg>
-                        <span>{{ __('Support') }}</span>
-                    </a>
-                </nav>
-            </section>
-
-            <aside class="status-panel" aria-label="{{ __('Détails de l’erreur') }}">
-                <div class="panel-header">
-                    <span class="panel-status">
-                        <span class="status-dot" aria-hidden="true"></span>
-                        <span>{{ __('Statut HTTP') }}</span>
-                    </span>
-                    <span class="panel-code">{{ $statusCode }}</span>
-                </div>
-
-                <div class="code-plate" aria-hidden="true">
-                    <div class="code-number">{{ $statusCode }}</div>
-                    <div class="code-label">
-                        <div>
-                            <span>{{ __('Diagnostic') }}</span>
-                            <strong>{{ $statusLabel }}</strong>
-                        </div>
-                        <svg class="signal" viewBox="0 0 64 64" fill="none">
-                            <path d="M10 48h12l8-32 8 40 8-22h8" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-                            <path d="M10 16h10M44 16h10M10 32h6M48 32h6" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".42" />
-                        </svg>
-                    </div>
-                </div>
-
-                <div class="next-steps">
-                    <p class="next-steps-title">{{ __('Prochaines actions') }}</p>
-                    <ul>
-                        @foreach ($nextSteps as $step)
-                            <li>
-                                <span class="step-mark" aria-hidden="true">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                        <path d="m6 12 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
+                <!-- Prochaines étapes (si présentes) -->
+                @if (count($nextSteps) > 0)
+                    <div class="mb-10 bg-slate-50 border border-slate-100 rounded-2xl p-6">
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Prochaines actions
+                            possibles</h3>
+                        <ul class="space-y-3">
+                            @foreach ($nextSteps as $step)
+                                <li class="flex items-start text-sm text-slate-600">
+                                    <svg class="w-5 h-5 text-slate-400 mr-3 mt-0.5 shrink-0" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                </span>
-                                <span>{{ $step }}</span>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
+                                    <span>{{ $step }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            </div>
 
-                <div class="panel-footer">
-                    <span>{{ request()->getHost() }}</span>
-                    <span>{{ __('Aide disponible') }}</span>
-                </div>
-            </aside>
-        </main>
-    </body>
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row items-center gap-4 mt-8">
+                <a href="{{ $primaryUrl }}"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-xl text-white font-semibold text-sm transition-all duration-200 shadow-lg shadow-current/20 hover:-translate-y-0.5 focus:outline-none focus:ring-4 {{ $btnPrimaryClass }}">
+                    @if ($primaryIcon === 'refresh')
+                        <svg class="w-5 h-5 mr-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    @else
+                        <svg class="w-5 h-5 mr-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                    @endif
+                    {{ $primaryLabel }}
+                </a>
+
+                <a href="{{ $canGoBack ? $previousUrl : $homeUrl }}"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-semibold text-sm transition-all duration-200 hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-slate-100">
+                    <svg class="w-5 h-5 mr-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                        stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    {{ __('Retour') }}
+                </a>
+
+                <a href="mailto:{{ $supportEmail }}"
+                    class="hidden sm:inline-flex ml-auto items-center justify-center p-3.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+                    aria-label="Support">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="mt-8 sm:hidden text-center">
+                <a href="mailto:{{ $supportEmail }}"
+                    class="text-sm font-medium text-slate-500 hover:text-slate-800">Contacter le support</a>
+            </div>
+        </div>
+    </div>
+</body>
+
 </html>

@@ -14,7 +14,7 @@ class CommandeObserver
     public function created(Commande $commande): void
     {
         // S'il arrive qu'une commande soit créée directement comme terminée
-        if ($commande->statut === Commande::STATUT_TERMINE) {
+        if ($commande->statut === Commande::STATUT_TERMINEE) {
             $this->attribuerPointsFidelite($commande);
         }
     }
@@ -25,12 +25,12 @@ class CommandeObserver
     public function updated(Commande $commande): void
     {
         // Vérifier si le statut vient de passer à 'termine'
-        if ($commande->isDirty('statut') && $commande->statut === Commande::STATUT_TERMINE) {
+        if ($commande->isDirty('statut') && $commande->statut === Commande::STATUT_TERMINEE) {
             $this->attribuerPointsFidelite($commande);
         }
 
         // Retirer les points si la commande est annulée après coup
-        if ($commande->isDirty('statut') && in_array($commande->statut, [Commande::STATUT_ANNULE, Commande::STATUT_REJETE])) {
+        if ($commande->isDirty('statut') && in_array($commande->statut, [Commande::STATUT_ANNULEE, Commande::STATUT_REJETEE])) {
             $this->annulerPointsFidelite($commande);
         }
     }

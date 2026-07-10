@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Commande extends Model
 {
@@ -73,28 +75,51 @@ class Commande extends Model
 
     const STATUT_EN_ATTENTE = 'en_attente';
 
+    const STATUT_PAYEE = 'payee';
+
+    const STATUT_EN_PREPARATION = 'en_preparation';
+
+    const STATUT_EXPEDIEE = 'expediee';
+
+    const STATUT_LIVREE = 'livree';
+
+    const STATUT_ANNULEE = 'annulee';
+
+    const STATUT_REMBOURSEE = 'remboursee';
+
+    const STATUT_ECHEC_PAIEMENT = 'echec_paiement';
+
+    const STATUT_TERMINEE = 'termine';
+
     const STATUT_EN_COURS = 'en_cours';
 
-    const STATUT_TERMINE = 'termine';
-
-    const STATUT_ANNULE = 'annule';
-
-    const STATUT_REJETE = 'rejete';
+    const STATUT_REJETEE = 'rejete';
 
     public static function getStatuts(): array
     {
         return [
             self::STATUT_EN_ATTENTE => 'En attente',
+            self::STATUT_PAYEE => 'Payée',
+            self::STATUT_EN_PREPARATION => 'En préparation',
+            self::STATUT_EXPEDIEE => 'Expédiée',
+            self::STATUT_LIVREE => 'Livrée',
+            self::STATUT_ANNULEE => 'Annulée',
+            self::STATUT_REMBOURSEE => 'Remboursée',
+            self::STATUT_ECHEC_PAIEMENT => 'Echec paiement',
+            self::STATUT_TERMINEE => 'Terminée',
             self::STATUT_EN_COURS => 'En cours',
-            self::STATUT_TERMINE => 'Terminée',
-            self::STATUT_ANNULE => 'Annulée',
-            self::STATUT_REJETE => 'Rejetée',
+            self::STATUT_REJETEE => 'Rejetée',
         ];
     }
 
     /**
      * Relations
      */
+    public function deliveryTracking(): HasOne
+    {
+        return $this->hasOne(DeliveryTracking::class, 'commande_id');
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
@@ -148,28 +173,83 @@ class Commande extends Model
      */
     public function marquerPayee(): void
     {
-        $this->statut = self::STATUT_EN_COURS;
+        $this->statut = self::STATUT_PAYEE;
         $this->date_paiement = now();
         $this->save();
     }
 
     public function marquerExpediee(): void
     {
-        $this->statut = self::STATUT_EN_COURS;
+        $this->statut = self::STATUT_EXPEDIEE;
         $this->date_expedition = now();
         $this->save();
     }
 
     public function marquerLivree(): void
     {
-        $this->statut = self::STATUT_TERMINE;
+        $this->statut = self::STATUT_LIVREE;
         $this->date_livraison = now();
         $this->save();
     }
 
     public function annuler(): void
     {
-        $this->statut = self::STATUT_ANNULE;
+        $this->statut = self::STATUT_ANNULEE;
         $this->save();
+    }
+
+    public function enPreparation(): void
+    {
+        $this->statut = self::STATUT_EN_PREPARATION;
+        $this->save();
+    }
+
+    public function remboursee(): void
+    {
+        $this->statut = self::STATUT_REMBOURSEE;
+        $this->save();
+    }
+
+    public function terminee(): void
+    {
+        $this->statut = self::STATUT_TERMINEE;
+        $this->save();
+    }
+
+    public function rejetee(): void
+    {
+        $this->statut = self::STATUT_REJETEE;
+        $this->save();
+    }
+
+    public function enCours(): void
+    {
+        $this->statut = self::STATUT_EN_COURS;
+        $this->save();
+    }
+
+    protected static function booted(): void
+    {
+        static::updated(function (Commande $commande) {
+            // Vérifier que le statut vient de passer à 'expediee' et qu'aucun suivi n'existe déjà
+            if ($commande->wasChanged('statut') && $commande->statut === self::STATUT_EXPEDIEE) {
+                if ($commande->deliveryTracking()->exists()) {
+                    return;
+                }
+
+                $tracking = $commande->deliveryTracking()->create([
+                    'tracking_number' => 'TRK-'.strtoupper(Str::random(8)),
+                    'carrier' => 'DHL', // à adapter selon le transporteur
+                    'status' => 'pickup',
+                ]);
+
+                $tracking->addEvent(
+                    'status_change',
+                    'Commande expédiée',
+                    'Votre commande a été confiée au transporteur',
+                    null
+                );
+            }
+        });
     }
 }

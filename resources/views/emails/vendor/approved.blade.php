@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<html lang="fr">
 
 <head>
     <meta charset="utf-8">
@@ -7,249 +7,129 @@
     <meta name="x-apple-disable-message-reformatting">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Votre boutique est prête</title>
-    <!--[if mso]>
-    <noscript>
-        <xml>
-            <o:OfficeDocumentSettings>
-                <o:PixelsPerInch>96</o:PixelsPerInch>
-            </o:OfficeDocumentSettings>
-        </xml>
-    </noscript>
-    <![endif]-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Reset général pour les clients mobiles */
-        body,
-        table,
-        td,
-        p,
-        a,
-        li,
-        blockquote {
+        body {
+            font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             -webkit-text-size-adjust: 100%;
             -ms-text-size-adjust: 100%;
+            background-color: #f8fafc;
         }
 
         img {
-            border: 0;
-            line-height: 100%;
+            border: none;
             outline: none;
             text-decoration: none;
             -ms-interpolation-mode: bicubic;
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #F8FAFC;
-        }
-
-        .ExternalClass {
-            width: 100%;
-        }
-
-        .ExternalClass,
-        .ExternalClass p,
-        .ExternalClass span,
-        .ExternalClass font,
-        .ExternalClass td,
-        .ExternalClass div {
-            line-height: 100%;
-        }
-
-        /* Responsive : réduction du QR code sur petits écrans */
-        @media screen and (max-width: 599px) {
-            .responsive-table {
-                width: 100% !important;
+        @media screen and (max-width: 600px) {
+            .qr-code {
+                width: 160px !important;
+                height: auto !important;
             }
 
-            .qr-code {
-                width: 180px !important;
-                height: auto !important;
+            .hero-title {
+                font-size: 24px !important;
             }
         }
     </style>
 </head>
 
-<body
-    style="margin:0; padding:0; background-color:#F8FAFC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-    <center style="width:100%; table-layout:fixed; background-color:#F8FAFC;">
-        <!--[if mso]><table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" align="center"><tr><td><![endif]-->
-        <div
-            style="max-width:600px; margin:0 auto; background-color:#FFFFFF; border-radius:24px; overflow:hidden; border:1px solid #E5E7EB;">
-
-            <!-- ==================== EN-TÊTE ==================== -->
-            <!-- Fallback : couleur unie pour Outlook, dégradé pour les autres -->
-            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
-                style="background-color:#059669; background-image: linear-gradient(135deg, #059669 0%, #047857 100%); border-radius:24px 24px 0 0;">
-                <tr>
-                    <td style="padding:40px 30px; text-align:center;">
-                        <h1
-                            style="margin:0; font-size:28px; color:#FFFFFF; font-weight:700; letter-spacing:-0.5px; line-height:1.2;">
-                            🎉 Félicitations {{ $user->name }} !
-                        </h1>
-                        <p style="margin:10px 0 0; color:#D1FAE5; font-size:16px;">
-                            Votre boutique est officiellement en ligne
-                        </p>
-                    </td>
-                </tr>
-            </table>
-
-            <!-- ==================== CORPS DU MESSAGE ==================== -->
-            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
-                style="background-color:#FFFFFF;">
-                <tr>
-                    <td style="padding:30px 30px 20px;">
-
-                        {{-- Bloc « Votre boutique » avec logo --}}
-                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
-                            style="background-color:#F0FDF4; border-radius:16px; border:1px solid #A7F3D0;">
-                            <tr>
-                                <td style="padding:20px;">
-                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0"
-                                        width="100%">
-                                        <tr>
-                                            @if ($logoUrl)
-                                                <td width="56" style="vertical-align:top; padding-right:16px;">
-                                                    <img src="{{ $logoUrl }}" alt="{{ $shopName }}"
-                                                        width="56" height="56"
-                                                        style="display:block; border-radius:12px; object-fit:cover; background-color:#FFFFFF;">
-                                                </td>
-                                            @endif
-                                            <td style="vertical-align:middle;">
-                                                <p
-                                                    style="margin:0 0 4px; font-size:14px; color:#047857; font-weight:600;">
-                                                    Votre boutique</p>
-                                                <p style="margin:0; font-size:20px; color:#1F2937; font-weight:700;">
-                                                    {{ $shopName }}</p>
-                                                <p style="margin:6px 0 0; font-size:14px; color:#4B5563;">
-                                                    Plan <strong>{{ $planName }}</strong>
-                                                    @if ($expiration)
-                                                        · Expire le {{ $expiration }}
-                                                    @endif
-                                                </p>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-
-                        {{-- QR code + bouton d'accès --}}
-                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
-                            style="margin-top:24px;">
-                            <tr>
-                                <td style="text-align:center;">
-                                    <p style="margin:0 0 12px; font-size:16px; color:#374151; font-weight:600;">
-                                        Accédez à votre tableau de bord
-                                    </p>
-
-                                    <!-- QR code (base64) -->
-                                    <img src="data:image/png;base64,{{ $qrCode }}"
-                                        alt="QR Code pour accéder à votre boutique" width="200" height="200"
-                                        style="display:block; margin:0 auto 20px; border-radius:16px; border:1px solid #E5E7EB;"
-                                        class="qr-code">
-
-                                    <!-- Bouton CTA avec fallback de couleur pour Outlook -->
-                                    <a href="{{ $shopUrl }}" target="_blank"
-                                        style="display:inline-block; background-color:#059669; background-image: linear-gradient(135deg, #059669, #047857); color:#FFFFFF; font-weight:600; font-size:16px; text-decoration:none; padding:14px 36px; border-radius:40px; text-transform:uppercase; letter-spacing:0.5px;">
-                                        Accéder à ma boutique
-                                    </a>
-
-                                    <p style="margin:12px 0 0; font-size:12px; color:#9CA3AF;">
-                                        Ou copiez ce lien :<br>
-                                        <a href="{{ $shopUrl }}"
-                                            style="color:#059669; word-break:break-all; text-decoration:underline;">{{ $shopUrl }}</a>
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
-
-                        {{-- Prochaines étapes --}}
-                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
-                            style="margin-top:30px;">
-                            <tr>
-                                <td>
-                                    <h2 style="margin:0 0 16px; font-size:18px; color:#1F2937; font-weight:600;">
-                                        🚀 Prochaines étapes
-                                    </h2>
-                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0"
-                                        width="100%">
-                                        <tr>
-                                            <td style="padding-bottom:12px;">
-                                                <span
-                                                    style="display:inline-block; width:24px; height:24px; background:#D1FAE5; border-radius:6px; text-align:center; line-height:24px; margin-right:8px; font-size:14px; font-weight:600; color:#047857;">1</span>
-                                                <span style="font-size:15px; color:#374151;">Personnalisez votre
-                                                    boutique (logo, couleurs, domaine)</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding-bottom:12px;">
-                                                <span
-                                                    style="display:inline-block; width:24px; height:24px; background:#D1FAE5; border-radius:6px; text-align:center; line-height:24px; margin-right:8px; font-size:14px; font-weight:600; color:#047857;">2</span>
-                                                <span style="font-size:15px; color:#374151;">Ajoutez vos premiers
-                                                    produits</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style="padding-bottom:12px;">
-                                                <span
-                                                    style="display:inline-block; width:24px; height:24px; background:#D1FAE5; border-radius:6px; text-align:center; line-height:24px; margin-right:8px; font-size:14px; font-weight:600; color:#047857;">3</span>
-                                                <span style="font-size:15px; color:#374151;">Configurez vos moyens de
-                                                    paiement et de livraison</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <span
-                                                    style="display:inline-block; width:24px; height:24px; background:#D1FAE5; border-radius:6px; text-align:center; line-height:24px; margin-right:8px; font-size:14px; font-weight:600; color:#047857;">4</span>
-                                                <span style="font-size:15px; color:#374151;">Partagez votre lien et
-                                                    commencez à vendre !</span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </td>
-                            </tr>
-                        </table>
-
-                        {{-- Aide & support --}}
-                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
-                            style="margin-top:24px; background-color:#F9FAFB; border-radius:12px; border:1px solid #E5E7EB;">
-                            <tr>
-                                <td style="padding:16px 20px;">
-                                    <p style="margin:0; font-size:14px; color:#4B5563;">
-                                        Besoin d'aide ? Consultez notre
-                                        <a href="{{ $helpUrl }}"
-                                            style="color:#059669; font-weight:600; text-decoration:underline;">centre
-                                            d'aide</a>
-                                        ou contactez-nous à
-                                        <a href="mailto:{{ $supportEmail }}"
-                                            style="color:#059669; font-weight:600; text-decoration:underline;">{{ $supportEmail }}</a>
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-
-            <!-- ==================== PIED DE PAGE ==================== -->
-            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
-                style="background-color:#F9FAFB; border-top:1px solid #E5E7EB;">
-                <tr>
-                    <td style="padding:24px 30px; text-align:center;">
-                        <p style="margin:0; font-size:12px; color:#9CA3AF;">
-                            © {{ date('Y') }} {{ config('app.name') }}. Tous droits réservés.
-                        </p>
-                        <p style="margin:8px 0 0; font-size:12px; color:#9CA3AF;">
-                            Cet e-mail a été envoyé à {{ $user->email }} suite à la création de votre boutique.
-                        </p>
-                    </td>
-                </tr>
-            </table>
-
+<body class="antialiased" style="background-color:#f8fafc;">
+    <div class="max-w-xl mx-auto px-4 py-10">
+        <!-- En-tête -->
+        <div class="text-center mb-8">
+            <img src="{{ config('app.logo_url') ?? 'https://via.placeholder.com/140x32/059669/ffffff?text=YETU' }}"
+                alt="{{ config('app.name') }}" class="h-8 inline-block">
         </div>
-        <!--[if mso]></td></tr></table><![endif]-->
-    </center>
+
+        <!-- Hero -->
+        <div
+            class="rounded-3xl p-8 mb-6 text-center bg-linear-to-br from-emerald-600 to-emerald-700 text-white shadow-xl">
+            <h1 class="text-3xl font-bold leading-tight mb-2 hero-title">
+                🎉 Félicitations {{ $user->name }} !
+            </h1>
+            <p class="text-emerald-100 text-base">
+                Votre boutique est officiellement en ligne
+            </p>
+        </div>
+
+        <!-- Carte boutique -->
+        <div class="rounded-3xl p-5 mb-6 bg-white border border-gray-100 shadow-sm">
+            <div class="flex items-center">
+                @if ($logoUrl)
+                    <img src="{{ $logoUrl }}" alt="{{ $shopName }}" width="56" height="56"
+                        class="rounded-xl object-cover shrink-0 mr-4 shadow-sm">
+                @endif
+                <div>
+                    <p class="text-sm text-emerald-700 font-medium mb-0.5">Votre boutique</p>
+                    <p class="text-xl font-bold text-gray-800">{{ $shopName }}</p>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Plan <strong>{{ $planName }}</strong>
+                        @if ($expiration)
+                            · Expire le {{ $expiration }}
+                        @endif
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code + Accès -->
+        <div class="rounded-3xl p-6 mb-6 bg-white border border-gray-100 shadow-sm text-center">
+            <p class="text-base font-semibold text-gray-700 mb-4">
+                Accédez à votre tableau de bord
+            </p>
+            <img src="data:image/png;base64,{{ $qrCode }}" alt="QR Code"
+                class="mx-auto rounded-2xl border border-gray-200 shadow-sm qr-code" width="200" height="200">
+            <a href="{{ $shopUrl }}" target="_blank"
+                class="inline-block mt-5 bg-linear-to-r from-emerald-600 to-emerald-700 text-white font-semibold text-base px-8 py-3.5 rounded-full uppercase tracking-wide shadow-lg hover:shadow-emerald-500/30 transition-all duration-200">
+                Accéder à ma boutique
+            </a>
+            <p class="text-xs text-gray-400 mt-3">
+                Ou copiez ce lien :<br>
+                <a href="{{ $shopUrl }}" class="text-emerald-600 underline break-all">{{ $shopUrl }}</a>
+            </p>
+        </div>
+
+        <!-- Prochaines étapes -->
+        <div class="rounded-3xl p-6 mb-6 bg-white border border-gray-100 shadow-sm">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">🚀 Prochaines étapes</h2>
+            <div class="space-y-3">
+                @foreach (['Personnalisez votre boutique (logo, couleurs, domaine)', 'Ajoutez vos premiers produits', 'Configurez vos moyens de paiement et de livraison', 'Partagez votre lien et commencez à vendre !'] as $index => $step)
+                    <div class="flex items-start">
+                        <span
+                            class="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-sm mr-3 shrink-0">
+                            {{ $index + 1 }}
+                        </span>
+                        <span class="text-gray-700 text-sm">{{ $step }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Support -->
+        <div class="rounded-3xl p-5 mb-6 bg-gray-50 border border-gray-200">
+            <p class="text-sm text-gray-600">
+                Besoin d'aide ? Consultez notre
+                <a href="{{ $helpUrl }}" class="text-emerald-600 font-semibold underline">centre d'aide</a>
+                ou contactez-nous à
+                <a href="mailto:{{ $supportEmail }}"
+                    class="text-emerald-600 font-semibold underline">{{ $supportEmail }}</a>
+            </p>
+        </div>
+
+        <!-- Pied de page -->
+        <div class="text-center mt-8 pt-6 border-t border-gray-200">
+            <p class="text-xs text-gray-400 mb-1">© {{ date('Y') }} {{ config('app.name') }}. Tous droits
+                réservés.</p>
+            <p class="text-xs text-gray-400">Cet e-mail a été envoyé à {{ $user->email }} suite à la création de votre
+                boutique.</p>
+        </div>
+    </div>
 </body>
 
 </html>

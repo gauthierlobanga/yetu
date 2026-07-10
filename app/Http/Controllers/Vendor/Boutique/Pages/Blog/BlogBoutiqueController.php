@@ -101,8 +101,7 @@ class BlogBoutiqueController extends Controller
         $perPage = $filters['per_page'] ?? 9;
         $posts = $query->paginate($perPage);
 
-        // N'ajouter query string que s'il y a des filtres ou si pas page 1
-        if (count(array_filter($filters)) > 0 || ($posts->currentPage() > 1)) {
+        if (count(array_filter($filters)) > 0 || $posts->currentPage() > 1) {
             $posts->withQueryString();
         }
 
@@ -111,8 +110,39 @@ class BlogBoutiqueController extends Controller
             ->orderBy('nom', 'asc')
             ->get();
 
+        // 🔧 Retourne la pagination complète, pas seulement la collection
         return Inertia::render('Vendor/pages/blog/list/List', [
-            'posts' => PostResource::collection($posts),
+            'posts' => [
+                'data' => PostResource::collection($posts->items())->resolve(),
+                'current_page' => $posts->currentPage(),
+                'last_page' => $posts->lastPage(),
+                'from' => $posts->firstItem(),
+                'to' => $posts->lastItem(),
+                'total' => $posts->total(),
+                'per_page' => $posts->perPage(),
+                'links' => [
+                    'first' => $posts->url(1),
+                    'last' => $posts->url($posts->lastPage()),
+                    'next' => $posts->nextPageUrl(),
+                    'prev' => $posts->previousPageUrl(),
+                ],
+                'meta' => [
+                    'current_page' => $posts->currentPage(),
+                    'from' => $posts->firstItem(),
+                    'last_page' => $posts->lastPage(),
+                    'links' => collect($posts->linkCollection())->map(function ($link) {
+                        return [
+                            'url' => $link->url ?? $link['url'],
+                            'label' => $link->label ?? $link['label'],
+                            'active' => $link->active ?? $link['active'],
+                        ];
+                    })->toArray(),
+                    'path' => $posts->path(),
+                    'per_page' => $posts->perPage(),
+                    'to' => $posts->lastItem(),
+                    'total' => $posts->total(),
+                ],
+            ],
             'categories' => CategoryResource::collection($categories),
             'filters' => $filters,
             'statuses' => Post::getStatuses(),

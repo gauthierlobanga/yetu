@@ -323,12 +323,6 @@ export default function VendorDashboard({
                 <SiteHeader context="vendor" />
                 <ScrollArea className="min-h-0 flex-1">
                     <div ref={containerRef} className="relative min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
-                        {/* Cercles décoratifs */}
-                        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                            <div className="absolute -top-24 right-1/4 h-96 w-96 rounded-full bg-emerald-200/20 blur-3xl dark:bg-emerald-900/20" />
-                            <div className="absolute bottom-12 left-1/3 h-64 w-64 rounded-full bg-teal-100/30 blur-2xl dark:bg-teal-900/20" />
-                        </div>
-
                         <Head title={`Gérer ${tenant.raison_sociale}`} />
                         <div className="relative z-10 mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
                             {/* En-tête */}

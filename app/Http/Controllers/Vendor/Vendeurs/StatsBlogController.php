@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\PostCategory;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -40,11 +41,12 @@ class StatsBlogController extends Controller
                 $query->where('posts.status', $request->status);
             }
             if ($request->category_id) {
-                $query->whereHas('categories', fn($q) => $q->where('posts_categories.id', $request->category_id));
+                $query->whereHas('categories', fn ($q) => $q->where('posts_categories.id', $request->category_id));
             }
             if ($isSuperAdmin && $request->author_id) {
                 $query->where('user_id', $request->author_id);
             }
+
             return $query;
         };
 
@@ -68,47 +70,47 @@ class StatsBlogController extends Controller
             ->groupBy('status')
             ->tap($applyCommonFilters)
             ->get()
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'status' => $item->status,
                 'status_label' => $item->status_label,
                 'count' => (int) $item->count,
                 'fill' => match ($item->status) {
                     'published' => 'var(--chart-1)',
-                    'draft'     => 'var(--chart-2)',
+                    'draft' => 'var(--chart-2)',
                     'scheduled' => 'var(--chart-3)',
-                    'archived'  => 'var(--chart-4)',
-                    'expired'   => 'var(--chart-5)',
-                    default     => 'var(--chart-1)',
+                    'archived' => 'var(--chart-4)',
+                    'expired' => 'var(--chart-5)',
+                    default => 'var(--chart-1)',
                 },
             ])
             ->values()
             ->toArray();
 
         // 3. Catégories (top 10 avec comptage, + total)
-        $categoriesStats = $this->getCategoryStats($applyCommonFilters, 10);
+        $categoriesStats = $this->getCategoryStats($applyCommonFilters, 8);
         $totalCategoriesCount = $this->getTotalCategoriesCount($applyCommonFilters);
 
         // 4. Top articles (10)
         $topPosts = Post::with('user')
             ->where('status', 'published')
             ->orderBy('views_count', 'desc')
-            ->limit(10)
+            ->limit(8)
             ->tap($applyCommonFilters)
             ->get()
-            ->map(fn($post) => [
-                'id'             => $post->id,
-                'title'          => $post->title,
-                'slug'           => $post->slug,
-                'views_count'    => $post->views_count,
-                'likes_count'    => $post->likes_count,
+            ->map(fn ($post) => [
+                'id' => $post->id,
+                'title' => $post->title,
+                'slug' => $post->slug,
+                'views_count' => $post->views_count,
+                'likes_count' => $post->likes_count,
                 'comments_count' => $post->comments_count,
-                'user'           => [
-                    'id'         => $post->user->id,
-                    'name'       => $post->user->name,
-                    'email'      => $post->user->email,
+                'user' => [
+                    'id' => $post->user->id,
+                    'name' => $post->user->name,
+                    'email' => $post->user->email,
                     'avatar_url' => $post->user->avatar_url,
                 ],
-                'published_at'   => $post->published_at?->format('Y-m-d'),
+                'published_at' => $post->published_at?->format('Y-m-d'),
             ])
             ->toArray();
 
@@ -119,12 +121,12 @@ class StatsBlogController extends Controller
                 ->withCount(['posts' => $applyCommonFilters])
                 ->withSum(['posts' => $applyCommonFilters], 'views_count')
                 ->orderBy('posts_count', 'desc')
-                ->limit(10)
+                ->limit(8)
                 ->get()
-                ->map(fn($user) => [
-                    'id'          => $user->id,
-                    'name'        => $user->name,
-                    'avatar_url'  => $user->avatar_url,
+                ->map(fn ($user) => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'avatar_url' => $user->avatar_url,
                     'posts_count' => $user->posts_count,
                     'total_views' => $user->posts_sum_views_count ?? 0,
                 ])
@@ -141,10 +143,10 @@ class StatsBlogController extends Controller
             ->orderBy('scheduled_for')
             ->tap($applyCommonFilters)
             ->get()
-            ->map(fn($post) => [
-                'id'            => $post->id,
-                'title'         => $post->title,
-                'slug'          => $post->slug,
+            ->map(fn ($post) => [
+                'id' => $post->id,
+                'title' => $post->title,
+                'slug' => $post->slug,
                 'scheduled_for' => $post->scheduled_for,
             ])
             ->values();
@@ -187,34 +189,34 @@ class StatsBlogController extends Controller
         $stats['views_trend'] = $viewsTrend;
 
         return Inertia::render('Vendor/blog-stats', [
-            'posts'                => $posts,
-            'stats'                => $stats,
-            'chartStats'           => $chartStats,
-            'categoriesStats'      => $categoriesStats,
+            'posts' => $posts,
+            'stats' => $stats,
+            'chartStats' => $chartStats,
+            'categoriesStats' => $categoriesStats,
             'totalCategoriesCount' => $totalCategoriesCount,
-            'postsStatusStats'     => $postsStatusStats,
-            'topPosts'             => $topPosts,
-            'topAuthors'           => $topAuthors,
-            'engagementStats'      => $engagementStats,
-            'scheduledPosts'       => $scheduledPosts,
-            'weeklyActivity'       => $weeklyActivity,
-            'monthlyPostsStats'    => $monthlyPostsStats,
-            'hourlyPostsStats'     => $hourlyPostsStats,
-            'categoryPerformance'  => $categoryPerformance,
-            'topTags'              => $topTags,
-            'is_super_admin'       => $isSuperAdmin,
-            'authors'              => $authors,
-            'categories_list'      => $categoriesList,
-            'filters'              => [
-                'search'      => $request->search,
-                'status'      => $request->status,
+            'postsStatusStats' => $postsStatusStats,
+            'topPosts' => $topPosts,
+            'topAuthors' => $topAuthors,
+            'engagementStats' => $engagementStats,
+            'scheduledPosts' => $scheduledPosts,
+            'weeklyActivity' => $weeklyActivity,
+            'monthlyPostsStats' => $monthlyPostsStats,
+            'hourlyPostsStats' => $hourlyPostsStats,
+            'categoryPerformance' => $categoryPerformance,
+            'topTags' => $topTags,
+            'is_super_admin' => $isSuperAdmin,
+            'authors' => $authors,
+            'categories_list' => $categoriesList,
+            'filters' => [
+                'search' => $request->search,
+                'status' => $request->status,
                 'category_id' => $request->category_id,
-                'author_id'   => $request->author_id,
-                'period'      => $request->period,
-                'start_date'  => $request->start_date,
-                'end_date'    => $request->end_date,
-                'year'        => $request->year,
-                'month'       => $request->month,
+                'author_id' => $request->author_id,
+                'period' => $request->period,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'year' => $request->year,
+                'month' => $request->month,
             ],
         ]);
     }
@@ -228,11 +230,11 @@ class StatsBlogController extends Controller
             ->orderBy('posts_count', 'desc')
             ->limit($limit)
             ->get()
-            ->map(fn($cat) => [
-                'id'          => $cat->id,
-                'nom'         => $cat->nom,
-                'slug'        => $cat->slug,
-                'color'       => $cat->color,
+            ->map(fn ($cat) => [
+                'id' => $cat->id,
+                'nom' => $cat->nom,
+                'slug' => $cat->slug,
+                'color' => $cat->color,
                 'posts_count' => $cat->posts_count,
             ])
             ->values()
@@ -262,32 +264,36 @@ class StatsBlogController extends Controller
             case 'day':
                 $expr = $driver === 'pgsql' ? 'EXTRACT(DOW FROM posts.created_at)' : "strftime('%w', posts.created_at)";
                 $query->selectRaw($expr.' as period, COUNT(*) as count')
-                      ->groupBy($driver === 'pgsql' ? 'period' : "strftime('%w', posts.created_at)")
-                      ->orderBy('period');
-                return $query->get()->map(fn($item) => [
-                    'day'   => $this->translateDayNumber((int)$item->period),
-                    'count' => (int)$item->count,
+                    ->groupBy($driver === 'pgsql' ? 'period' : "strftime('%w', posts.created_at)")
+                    ->orderBy('period');
+
+                return $query->get()->map(fn ($item) => [
+                    'day' => $this->translateDayNumber((int) $item->period),
+                    'count' => (int) $item->count,
                 ])->toArray();
             case 'month':
                 $expr = $driver === 'pgsql' ? 'EXTRACT(MONTH FROM posts.created_at)' : "strftime('%m', posts.created_at)";
                 $query->selectRaw($expr.' as period, COUNT(*) as count')
-                      ->groupBy($driver === 'pgsql' ? 'period' : "strftime('%m', posts.created_at)")
-                      ->orderBy('period');
-                return $query->get()->map(fn($item) => [
-                    'month'      => (int)$item->period,
-                    'month_name' => $this->getMonthName((int)$item->period),
-                    'count'      => (int)$item->count,
+                    ->groupBy($driver === 'pgsql' ? 'period' : "strftime('%m', posts.created_at)")
+                    ->orderBy('period');
+
+                return $query->get()->map(fn ($item) => [
+                    'month' => (int) $item->period,
+                    'month_name' => $this->getMonthName((int) $item->period),
+                    'count' => (int) $item->count,
                 ])->toArray();
             case 'hour':
                 $expr = $driver === 'pgsql' ? 'EXTRACT(HOUR FROM posts.created_at)' : "strftime('%H', posts.created_at)";
                 $query->selectRaw($expr.' as period, COUNT(*) as count')
-                      ->groupBy($driver === 'pgsql' ? 'period' : "strftime('%H', posts.created_at)")
-                      ->orderBy('period');
-                return $query->get()->map(fn($item) => [
-                    'hour'  => (int)$item->period,
-                    'count' => (int)$item->count,
+                    ->groupBy($driver === 'pgsql' ? 'period' : "strftime('%H', posts.created_at)")
+                    ->orderBy('period');
+
+                return $query->get()->map(fn ($item) => [
+                    'hour' => (int) $item->period,
+                    'count' => (int) $item->count,
                 ])->toArray();
         }
+
         return [];
     }
 
@@ -299,16 +305,16 @@ class StatsBlogController extends Controller
             ->withSum(['posts' => $filter], 'likes_count')
             ->withSum(['posts' => $filter], 'comments_count')
             ->orderBy('posts_count', 'desc')
-            ->limit(10)
+            ->limit(8)
             ->get()
-            ->map(fn($cat) => [
-                'id'              => $cat->id,
-                'nom'             => $cat->nom,
-                'slug'            => $cat->slug,
-                'posts_count'     => $cat->posts_count,
-                'total_views'     => $cat->posts_sum_views_count ?? 0,
-                'total_likes'     => $cat->posts_sum_likes_count ?? 0,
-                'total_comments'  => $cat->posts_sum_comments_count ?? 0,
+            ->map(fn ($cat) => [
+                'id' => $cat->id,
+                'nom' => $cat->nom,
+                'slug' => $cat->slug,
+                'posts_count' => $cat->posts_count,
+                'total_views' => $cat->posts_sum_views_count ?? 0,
+                'total_likes' => $cat->posts_sum_likes_count ?? 0,
+                'total_comments' => $cat->posts_sum_comments_count ?? 0,
             ])
             ->values()
             ->toArray();
@@ -316,9 +322,13 @@ class StatsBlogController extends Controller
 
     private function getTopTags(\Closure $filter, bool $isSuperAdmin): array
     {
-        if (! $isSuperAdmin) return [];
+        if (! $isSuperAdmin) {
+            return [];
+        }
         $postIds = Post::tap($filter)->pluck('id');
-        if ($postIds->isEmpty()) return [];
+        if ($postIds->isEmpty()) {
+            return [];
+        }
 
         $tagCounts = DB::table('taggables')
             ->where('taggable_type', Post::class)
@@ -326,17 +336,17 @@ class StatsBlogController extends Controller
             ->select('tag_id', DB::raw('COUNT(*) as total'))
             ->groupBy('tag_id')
             ->orderBy('total', 'desc')
-            ->limit(20)
+            ->limit(8)
             ->get();
 
         $tagIds = $tagCounts->pluck('tag_id')->toArray();
         $tags = DB::table('tags')->whereIn('id', $tagIds)->get()->keyBy('id');
 
-        return $tagCounts->map(fn($item) => [
-            'id'          => $item->tag_id,
-            'name'        => $this->extractTagName($tags[$item->tag_id]->name ?? ''),
-            'slug'        => $tags[$item->tag_id]->slug ?? '',
-            'posts_count' => (int)$item->total,
+        return $tagCounts->map(fn ($item) => [
+            'id' => $item->tag_id,
+            'name' => $this->extractTagName($tags[$item->tag_id]->name ?? ''),
+            'slug' => $tags[$item->tag_id]->slug ?? '',
+            'posts_count' => (int) $item->total,
         ])->values()->toArray();
     }
 
@@ -353,11 +363,11 @@ class StatsBlogController extends Controller
             ->groupBy($driver === 'pgsql' ? 'date' : 'date(posts.created_at)')
             ->orderBy('date')
             ->get()
-            ->map(fn($item) => [
-                'date'     => $item->date,
-                'views'    => (int)$item->views,
-                'likes'    => (int)$item->likes,
-                'comments' => (int)$item->comments,
+            ->map(fn ($item) => [
+                'date' => $item->date,
+                'views' => (int) $item->views,
+                'likes' => (int) $item->likes,
+                'comments' => (int) $item->comments,
             ])
             ->toArray();
     }
@@ -366,17 +376,17 @@ class StatsBlogController extends Controller
     {
         $currentPeriodQuery = Post::query()->tap($filter);
         $current = [
-            'total_posts'    => $currentPeriodQuery->count(),
-            'total_views'    => $currentPeriodQuery->sum('views_count'),
-            'total_likes'    => $currentPeriodQuery->sum('likes_count'),
+            'total_posts' => $currentPeriodQuery->count(),
+            'total_views' => $currentPeriodQuery->sum('views_count'),
+            'total_likes' => $currentPeriodQuery->sum('likes_count'),
             'total_comments' => $currentPeriodQuery->sum('comments_count'),
         ];
 
         $previousPeriodQuery = $this->getPreviousPeriodQuery($filter, $request);
         $previous = [
-            'total_posts'    => $previousPeriodQuery->count(),
-            'total_views'    => $previousPeriodQuery->sum('views_count'),
-            'total_likes'    => $previousPeriodQuery->sum('likes_count'),
+            'total_posts' => $previousPeriodQuery->count(),
+            'total_views' => $previousPeriodQuery->sum('views_count'),
+            'total_likes' => $previousPeriodQuery->sum('likes_count'),
             'total_comments' => $previousPeriodQuery->sum('comments_count'),
         ];
 
@@ -392,8 +402,8 @@ class StatsBlogController extends Controller
             ->count();
         $postsThisMonthChange = $this->calculatePercentageChange($thisMonth, $previousMonth);
 
-        $activeAuthors = User::whereHas('posts', fn($q) => $q->tap($filter))->count();
-        $activeAuthorsPrevious = User::whereHas('posts', fn($q) => $q->tap($filter))->count();
+        $activeAuthors = User::whereHas('posts', fn ($q) => $q->tap($filter))->count();
+        $activeAuthorsPrevious = User::whereHas('posts', fn ($q) => $q->tap($filter))->count();
         $activeAuthorsChange = $this->calculatePercentageChange($activeAuthors, $activeAuthorsPrevious);
 
         $conversionRate = $previous['total_posts'] > 0
@@ -411,31 +421,31 @@ class StatsBlogController extends Controller
         $draftsChange = $this->calculatePercentageChange($pendingDrafts, $previousDrafts);
 
         return [
-            'total_posts'            => $current['total_posts'],
-            'published_posts'        => (clone $currentPeriodQuery)->where('posts.status', 'published')->count(),
-            'draft_posts'            => (clone $currentPeriodQuery)->where('posts.status', 'draft')->count(),
-            'scheduled_posts'        => (clone $currentPeriodQuery)->where('posts.status', 'scheduled')->count(),
-            'archived_posts'         => (clone $currentPeriodQuery)->where('posts.status', 'archived')->count(),
-            'total_views'            => $current['total_views'],
-            'total_likes'            => $current['total_likes'],
-            'total_comments'         => $current['total_comments'],
-            'views_change'           => $viewsChange,
-            'likes_change'           => $likesChange,
-            'posts_change'           => $postsChange,
-            'old_drafts_count'       => Post::where('status', 'draft')->where('updated_at', '<=', now()->subDays(30))->tap($filter)->count(),
-            'avg_engagement'         => round($this->getEngagementStats($filter)->avg_engagement ?? 0, 2),
-            'max_engagement'         => round($this->getEngagementStats($filter)->max_engagement ?? 0, 2),
-            'posts_this_month'       => $thisMonth,
+            'total_posts' => $current['total_posts'],
+            'published_posts' => (clone $currentPeriodQuery)->where('posts.status', 'published')->count(),
+            'draft_posts' => (clone $currentPeriodQuery)->where('posts.status', 'draft')->count(),
+            'scheduled_posts' => (clone $currentPeriodQuery)->where('posts.status', 'scheduled')->count(),
+            'archived_posts' => (clone $currentPeriodQuery)->where('posts.status', 'archived')->count(),
+            'total_views' => $current['total_views'],
+            'total_likes' => $current['total_likes'],
+            'total_comments' => $current['total_comments'],
+            'views_change' => $viewsChange,
+            'likes_change' => $likesChange,
+            'posts_change' => $postsChange,
+            'old_drafts_count' => Post::where('status', 'draft')->where('updated_at', '<=', now()->subDays(30))->tap($filter)->count(),
+            'avg_engagement' => round($this->getEngagementStats($filter)->avg_engagement ?? 0, 2),
+            'max_engagement' => round($this->getEngagementStats($filter)->max_engagement ?? 0, 2),
+            'posts_this_month' => $thisMonth,
             'posts_this_month_change' => $postsThisMonthChange,
-            'active_authors'         => $activeAuthors,
-            'active_authors_change'  => $activeAuthorsChange,
-            'conversion_rate'        => $conversionRate,
-            'pending_drafts'         => $pendingDrafts,
-            'pending_drafts_change'  => $draftsChange,
+            'active_authors' => $activeAuthors,
+            'active_authors_change' => $activeAuthorsChange,
+            'conversion_rate' => $conversionRate,
+            'pending_drafts' => $pendingDrafts,
+            'pending_drafts_change' => $draftsChange,
         ];
     }
 
-    private function getPreviousPeriodQuery(\Closure $filter, Request $request): \Illuminate\Database\Eloquent\Builder
+    private function getPreviousPeriodQuery(\Closure $filter, Request $request): Builder
     {
         $currentStartDate = null;
         $currentEndDate = null;
@@ -458,10 +468,13 @@ class StatsBlogController extends Controller
     private function getDaysSinceLastPost(bool $isSuperAdmin, $user): ?int
     {
         $post = Post::where('status', 'published')
-            ->when(! $isSuperAdmin, fn($q) => $q->where('user_id', $user->id))
+            ->when(! $isSuperAdmin, fn ($q) => $q->where('user_id', $user->id))
             ->latest('published_at')
             ->first();
-        if (! $post) return null;
+        if (! $post) {
+            return null;
+        }
+
         return (int) Carbon::parse($post->published_at)->startOfDay()->diffInDays(now()->startOfDay());
     }
 
@@ -469,6 +482,7 @@ class StatsBlogController extends Controller
     {
         $last7 = Post::where('status', 'published')->where('created_at', '>=', now()->subDays(7))->tap($filter)->sum('views_count');
         $prev7 = Post::where('status', 'published')->whereBetween('created_at', [now()->subDays(14), now()->subDays(7)])->tap($filter)->sum('views_count');
+
         return $this->calculatePercentageChange($last7, $prev7);
     }
 
@@ -663,7 +677,10 @@ class StatsBlogController extends Controller
 
     private function calculatePercentageChange(float $current, float $previous): float
     {
-        if ($previous == 0) return $current > 0 ? 100 : 0;
+        if ($previous == 0) {
+            return $current > 0 ? 100 : 0;
+        }
+
         return round((($current - $previous) / $previous) * 100, 1);
     }
 
@@ -829,6 +846,7 @@ class StatsBlogController extends Controller
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
             return $decoded['fr'] ?? $decoded['en'] ?? reset($decoded) ?? 'Tag';
         }
+
         return trim(preg_replace('/[{}":]/', '', $tagName));
     }
 

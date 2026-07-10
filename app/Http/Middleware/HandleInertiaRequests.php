@@ -24,6 +24,7 @@ use Inertia\Middleware;
 use Nnjeim\World\Models\Country;
 use Nnjeim\World\Models\Currency;
 use Nnjeim\World\Models\Language;
+use Throwable;
 
 /**
  * Middleware de partage des données Inertia pour toute l'application.
@@ -73,10 +74,14 @@ class HandleInertiaRequests extends Middleware
         $tenantRoutePrefix = $isTenant ? 'tenant.' : '';
         $user = $this->resolveUser($request);
         $shouldShareCommerceData = $this->shouldShareCommerceData($request);
+        $appSettings = $isTenant ? null : $this->resolveAppSettings();
+        $displayName = $this->resolveDisplayName($tenant, $appSettings);
 
         $sharedData = [
             ...parent::share($request),
             'auth' => $this->getAuthData($user),
+            'name' => $displayName,
+            'appName' => $displayName,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => $this->getFlashData($request),
             'headerData' => $shouldShareCommerceData ? $this->getHeaderData() : ['categories' => [], 'brands' => []],
@@ -162,9 +167,9 @@ class HandleInertiaRequests extends Middleware
             // Le favicon est résolu dynamiquement via Favicon::currentUrl() pour
             // correspondre au logo du locataire actuel (vendeur) ou du site central.
             'seo' => [
-                'appName' => config('app.name', 'Yetu'),
+                'appName' => $displayName,
                 'appUrl' => config('app.url', 'http://localhost:8000'),
-                'defaultDescription' => 'Bienvenue sur '.config('app.name', 'Yetu'),
+                'defaultDescription' => 'Bienvenue sur '.$displayName,
                 'defaultImage' => Storage::url('images/default.png'),
                 'favicon' => Favicon::currentUrl(),
             ],
@@ -198,26 +203,20 @@ class HandleInertiaRequests extends Middleware
         }
 
         if (! $isTenant) {
-            $appSettings = app(SettingApp::class);
-
-            $sharedData['name'] = $appSettings->name;
-            $sharedData['app_logo'] = $appSettings->logoUrl();
+            $sharedData['app_logo'] = $appSettings?->logoUrl();
 
             $sharedData['contactInfo'] = [
-                'address' => $appSettings->address,
-                'phone' => $appSettings->phone,
-                'email' => $appSettings->email,
+                'address' => $appSettings?->address,
+                'phone' => $appSettings?->phone,
+                'email' => $appSettings?->email,
             ];
             $sharedData['socialLinks'] = [
-                'facebook' => $appSettings->facebook_url,
-                'instagram' => $appSettings->instagram_url,
-                'x' => $appSettings->x_url,
-                'linkedin' => $appSettings->linkedin_url,
-                'youtube' => $appSettings->youtube_url,
+                'facebook' => $appSettings?->facebook_url,
+                'instagram' => $appSettings?->instagram_url,
+                'x' => $appSettings?->x_url,
+                'linkedin' => $appSettings?->linkedin_url,
+                'youtube' => $appSettings?->youtube_url,
             ];
-
-        } else {
-            $sharedData['name'] = config('app.name');
         }
 
         return $sharedData;
@@ -297,7 +296,7 @@ class HandleInertiaRequests extends Middleware
             // Exemple simple avec geoip2 (à adapter)
             // $country = geoip($ip)->iso_code;
             // return $country ?? 'CD';
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             report($e);
         }
 
@@ -314,6 +313,24 @@ class HandleInertiaRequests extends Middleware
         }
 
         return null;
+    }
+
+    private function resolveAppSettings(): ?SettingApp
+    {
+        try {
+            return app(SettingApp::class);
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    private function resolveDisplayName(mixed $tenant, ?SettingApp $appSettings): string
+    {
+        if ($tenant) {
+            return $tenant->raison_sociale ?: config('app.name', 'Yetu');
+        }
+
+        return $appSettings?->name ?: config('app.name', 'Yetu');
     }
 
     /**
@@ -460,7 +477,7 @@ class HandleInertiaRequests extends Middleware
                 ->get()
                 ->map(fn ($p) => $productController->formatProduct($p))
                 ->toArray();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return [];
         }
     }
@@ -500,7 +517,7 @@ class HandleInertiaRequests extends Middleware
             }
 
             return compact('categories', 'brands');
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return ['categories' => [], 'brands' => []];
         }
     }
@@ -557,7 +574,7 @@ class HandleInertiaRequests extends Middleware
                 })
                 ->values()
                 ->toArray();
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return [];
         }
     }

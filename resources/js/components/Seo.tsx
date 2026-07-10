@@ -26,9 +26,10 @@ export default function Seo({
     jsonLd,
     keywords,
 }: SeoProps) {
-    const { seo } = usePage().props as any;
+    const { name, seo } = usePage().props as any;
 
-    const metaTitle = title ? `${title} | ${seo?.appName || 'Yetu'}` : seo?.appName || 'Yetu';
+    const appName = seo?.appName || name || 'Yetu';
+    const metaTitle = title ? `${title} | ${appName}` : appName;
     const metaDescription = description || seo?.defaultDescription || '';
     const metaImage = image || seo?.defaultImage || '/default-share-image.jpg';
     const metaUrl = url || (typeof window !== 'undefined' ? window.location.href : '');

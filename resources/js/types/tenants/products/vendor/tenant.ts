@@ -7,6 +7,7 @@ export interface Tenant {
     twitter_url: string;
     youtube_url: string;
     tiktok_url: string;
+    address: string;
     raison_sociale: string;
     slug: string;
     description: string | null;

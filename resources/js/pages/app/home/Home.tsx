@@ -554,7 +554,7 @@ export default function SaaSLanding({
 
     return (
         <MainLayout>
-            <Head title="Yetu – Créez votre boutique en ligne" />
+            <Head title={`${name} - Créez votre boutique en ligne`} />
 
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-linear-to-br from-emerald-50 via-white to-slate-50 py-12 lg:py-20 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20">

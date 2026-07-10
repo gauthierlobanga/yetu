@@ -85,6 +85,38 @@ class VendeursTable
                     ->state(fn (Tenant $record) => $record->pourcentage_verification.'%')
                     ->sortable(),
 
+                TextColumn::make('configuration.address')
+                    ->label('Adresse')
+                    ->searchable()
+                    ->placeholder('Non renseignée')
+                    ->toggleable(),
+
+                TextColumn::make('configuration.facebook_url')
+                    ->label('Facebook')
+                    ->searchable()
+                    ->placeholder('Non renseigné')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('configuration.instagram_url')
+                    ->label('Instagram')
+                    ->searchable()
+                    ->placeholder('Non renseigné')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('configuration.twitter_url')
+                    ->label('Twitter')
+                    ->searchable()
+                    ->placeholder('Non renseigné')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('configuration.youtube_url')
+                    ->label('YouTube')
+                    ->searchable()
+                    ->placeholder('Non renseigné')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('configuration.tiktok_url')
+                    ->label('TikTok')
+                    ->searchable()
+                    ->placeholder('Non renseigné')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime('d/m/Y')
                     ->sortable()

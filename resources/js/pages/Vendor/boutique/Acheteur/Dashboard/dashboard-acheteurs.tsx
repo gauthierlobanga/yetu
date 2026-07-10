@@ -2,7 +2,6 @@
 // resources/js/pages/customs/dashboard-acheteurs.tsx
 import type { PageProps } from '@inertiajs/core';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { motion } from 'motion/react';
 import type { LucideIcon } from 'lucide-react';
 import {
     ArrowRight,
@@ -21,6 +20,7 @@ import {
     TrendingUp,
     Wallet,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import {
     Area,
     AreaChart,
@@ -192,7 +192,7 @@ function KpiCard({
     trendLabel?: string;
 }) {
     return (
-        <div className="group relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-sm backdrop-blur-sm transition-all hover:shadow-md dark:border-slate-800/60 dark:bg-slate-900/70">
+        <div className="group relative overflow-hidden rounded-xl border border-slate-200/60 bg-white/80 p-5 dark:border-slate-800/60 dark:bg-slate-900/70">
             <div className="flex items-start justify-between">
                 <div>
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -255,7 +255,7 @@ function AdvancedStatCard({
     progress?: number;
 }) {
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
+        <div className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 p-5 dark:border-slate-800/60 dark:bg-slate-900/70">
             <div className="flex items-start justify-between">
                 <div>
                     <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -565,7 +565,7 @@ export default function DashboardCustomerBuyer() {
                             </div>
 
                             {/* Graphique des dépenses hebdomadaires */}
-                            <Card className="rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
+                            <Card className="rounded-2xl border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/70">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
                                         <BarChart3 className="h-5 w-5 text-emerald-500" />
@@ -651,7 +651,7 @@ export default function DashboardCustomerBuyer() {
 
                             {/* Graphiques commandes + répartition */}
                             <div className="grid gap-6 xl:grid-cols-3">
-                                <Card className="rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm xl:col-span-2 dark:border-slate-800/60 dark:bg-slate-900/70">
+                                <Card className="rounded-2xl border border-slate-200/60 bg-white/80 xl:col-span-2 dark:border-slate-800/60 dark:bg-slate-900/70">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
                                             <TrendingUp className="h-5 w-5 text-emerald-500" />
@@ -709,7 +709,7 @@ export default function DashboardCustomerBuyer() {
                                     </CardContent>
                                 </Card>
 
-                                <Card className="rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
+                                <Card className="rounded-2xl border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/70">
                                     <CardHeader>
                                         <CardTitle className="text-lg font-semibold text-slate-900 dark:text-white">
                                             Répartition
@@ -779,7 +779,7 @@ export default function DashboardCustomerBuyer() {
 
                             {/* Top catégories + fidélité */}
                             <div className="grid gap-6 xl:grid-cols-2">
-                                <Card className="rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
+                                <Card className="rounded-2xl border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/70">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
                                             <Tag className="h-5 w-5 text-emerald-500" />
@@ -813,7 +813,7 @@ export default function DashboardCustomerBuyer() {
                                     </CardContent>
                                 </Card>
 
-                                <Card className="rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
+                                <Card className="rounded-2xl border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/70">
                                     <CardHeader>
                                         <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
                                             <Gift className="h-5 w-5 text-amber-500" />
@@ -856,7 +856,7 @@ export default function DashboardCustomerBuyer() {
                             </div>
 
                             {/* Dernières commandes */}
-                            <Card className="rounded-2xl border border-slate-200/60 bg-white/80 shadow-sm backdrop-blur-sm dark:border-slate-800/60 dark:bg-slate-900/70">
+                            <Card className="rounded-2xl border border-slate-200/60 bg-white/80 dark:border-slate-800/60 dark:bg-slate-900/70">
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <CardTitle className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
                                         <Package className="h-5 w-5 text-emerald-500" />

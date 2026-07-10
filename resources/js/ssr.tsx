@@ -4,13 +4,50 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import ReactDOMServer from 'react-dom/server';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+type InertiaTitleProps = {
+    appName?: string;
+    name?: string;
+    seo?: {
+        appName?: string;
+    };
+    tenant?: {
+        raison_sociale?: string;
+    };
+};
+
+const fallbackAppName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+const getAppNameFromProps = (props?: InertiaTitleProps) =>
+    props?.appName ||
+    props?.seo?.appName ||
+    props?.tenant?.raison_sociale ||
+    props?.name ||
+    fallbackAppName;
+
+const makeTitleFormatter = (appName: string) => (title: string) => {
+    const trimmedTitle = title.trim();
+
+    if (!trimmedTitle || trimmedTitle === appName) {
+        return appName;
+    }
+
+    if (
+        trimmedTitle.endsWith(` - ${appName}`) ||
+        trimmedTitle.endsWith(` | ${appName}`)
+    ) {
+        return trimmedTitle;
+    }
+
+    return `${trimmedTitle} - ${appName}`;
+};
 
 createServer((page) =>
     createInertiaApp({
         page,
         render: ReactDOMServer.renderToString,
-        title: (title) => (title ? `${title} - ${appName}` : appName),
+        title: makeTitleFormatter(
+            getAppNameFromProps(page.props as InertiaTitleProps),
+        ),
         resolve: (name) =>
             resolvePageComponent(
                 `./pages/${name}.tsx`,

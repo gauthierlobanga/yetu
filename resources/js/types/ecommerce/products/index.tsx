@@ -141,6 +141,7 @@ export interface PageProps {
     dealOfTheDay: Product[];
     brands: Brand[];
     address: Address[];
+
 }
 
 export interface Brand {
@@ -212,4 +213,22 @@ export interface Address {
     type: 'facturation' | 'livraison';
     adresse_complete?: string;
     adresse_une_ligne?: string;
+}
+
+
+export interface TrackingData {
+    id: string;
+    status: string;
+    carrier: string | null;
+    current_location: { lat: number; lng: number; address?: string } | null;
+    estimated_delivery_at: string | null;
+    tracking_number: string;
+    events: Array<{
+        id: number;
+        type: string;
+        title: string;
+        description: string | null;
+        location: { lat: number; lng: number; address?: string } | null;
+        occurred_at: string;
+    }>;
 }

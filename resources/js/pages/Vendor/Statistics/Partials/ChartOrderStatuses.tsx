@@ -64,18 +64,19 @@ export function ChartOrderStatuses({ data }: { data: StatusItem[] }) {
                                     data={data}
                                     dataKey="value"
                                     nameKey="name"
-                                    innerRadius={55}
+                                    innerRadius={45}
                                     outerRadius={75}
-                                    paddingAngle={3}
+                                    paddingAngle={4}
                                     strokeWidth={3}
                                     stroke="transparent"
-                                    cornerRadius={8}
+                                    cornerRadius={2}
                                 >
                                     {data.map((entry, index) => (
                                         <Cell
                                             key={`cell-${index}`}
                                             fill={entry.color}
                                         />
+
                                     ))}
                                 </Pie>
                             </PieChart>

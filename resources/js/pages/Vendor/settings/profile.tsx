@@ -39,7 +39,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { VendorSidebar } from '@/components/VendorSidebar';
 import SettingsLayout from '@/layouts/Vendor/settings/layout';
-import { cn } from '@/lib/utils';
+import { getToastStyles } from '@/lib/toast-style';
 import type { Tenant } from '@/types/tenants/products/vendor/tenant';
 
 const cardAnimation: {
@@ -94,14 +94,18 @@ export default function VendorProfile({
             reader.onloadend = () =>
                 setAvatarPreviewUrl(reader.result as string);
             reader.readAsDataURL(file);
-            toast.success('Photo sélectionnée - Enregistrez pour confirmer');
+            toast.success('Photo sélectionnée - Enregistrez pour confirmer', {
+                style: getToastStyles('success'),
+            });
         }
     };
 
     const copyShopUrl = () => {
         navigator.clipboard.writeText(shopUrl);
         setCopiedUrl(true);
-        toast.success('URL de la boutique copiée');
+        toast.success('URL de la boutique copiée', {
+            style: getToastStyles('success'),
+        });
         setTimeout(() => setCopiedUrl(false), 2000);
     };
 
@@ -120,7 +124,6 @@ export default function VendorProfile({
                 <SiteHeader />
                 <SettingsLayout>
                     <div className="relative min-h-screen bg-linear-to-b from-slate-50 via-white to-slate-100 dark:from-transparent dark:via-transparent dark:to-transparent">
-
                         <div className="relative z-10 mx-auto max-w-5xl space-y-6 px-4 py-6">
                             {/* En-tête modernisé */}
                             <motion.div
@@ -186,7 +189,7 @@ export default function VendorProfile({
                                             errors,
                                         }) => (
                                             <motion.div {...cardAnimation}>
-                                                <Card className="overflow-hidden border-0 bg-white/70 dark:bg-slate-900/70 ">
+                                                <Card className="overflow-hidden border-0 bg-white/70 dark:bg-slate-900/70">
                                                     {/* Avatar + nom */}
                                                     <div className="flex flex-col items-center gap-6 border-b border-slate-100 p-6 sm:flex-row dark:border-slate-800">
                                                         <div className="relative">
@@ -401,9 +404,8 @@ export default function VendorProfile({
                                                             <Avatar className="h-28 w-28 border-4 border-white dark:border-slate-900">
                                                                 <AvatarImage
                                                                     src={
+                                                                        tenant?.logo_url ??
                                                                         avatarPreviewUrl ??
-                                                                        user?.avatar_url ??
-                                                                        user?.avatar ??
                                                                         undefined
                                                                     }
                                                                 />

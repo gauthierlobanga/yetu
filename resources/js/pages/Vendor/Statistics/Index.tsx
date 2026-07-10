@@ -4,7 +4,6 @@
 'use client';
 
 import { Head, router, usePage } from '@inertiajs/react';
-import { motion } from 'motion/react';
 import {
     Users,
     Eye,
@@ -34,6 +33,7 @@ import {
     FileText,
     HomeIcon,
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import CountUp from 'react-countup';
 import {

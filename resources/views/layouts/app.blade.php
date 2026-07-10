@@ -34,11 +34,23 @@
         }
     </style>
 
-    <title inertia>{{ config('app.name', 'Laravel') }}</title>
-
     @php
+        $tenant = function_exists('tenant') ? tenant() : null;
+        $appDisplayName = $tenant?->raison_sociale;
+
+        if (blank($appDisplayName)) {
+            try {
+                $appDisplayName = app(\App\Settings\SettingApp::class)->name;
+            } catch (\Throwable) {
+                $appDisplayName = null;
+            }
+        }
+
+        $appDisplayName = $appDisplayName ?: config('app.name', 'Laravel');
         $faviconUrl = \App\Support\Branding\Favicon::currentUrl();
     @endphp
+
+    <title inertia>{{ $appDisplayName }}</title>
 
     <link id="favicon" rel="icon" href="{{ $faviconUrl }}" data-favicon-href="{{ $faviconUrl }}">
     <link id="apple-touch-icon" rel="apple-touch-icon" href="{{ $faviconUrl }}">

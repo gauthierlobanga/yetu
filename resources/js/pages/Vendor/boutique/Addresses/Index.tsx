@@ -155,6 +155,29 @@ function AddressCharts({ addresses }: { addresses: Address[] }) {
         return null;
     }
 
+    const CustomTooltip = ({ active, payload }: any) => {
+        if (active && payload && payload.length) {
+            const d = payload[0].payload;
+
+            return (
+                <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900">
+                    <p className="mb-1 font-medium text-slate-900 dark:text-white">
+                        {d.fullName}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400">
+                        <div
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: d.fill }}
+                        />
+                        {d.value} ventes
+                    </div>
+                </div>
+            );
+        }
+
+        return null;
+    };
+
     return (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Graphique circulaire */}
@@ -255,10 +278,14 @@ function AddressCharts({ addresses }: { addresses: Address[] }) {
                                 <XAxis
                                     dataKey="country"
                                     tick={{ fontSize: 11, fill: '#94a3b8' }}
+                                    axisLine={false}
+                                    tickLine={false}
                                 />
                                 <YAxis
                                     tick={{ fontSize: 11, fill: '#94a3b8' }}
                                     allowDecimals={false}
+                                    axisLine={false}
+                                    tickLine={false}
                                 />
                                 <Tooltip
                                     contentStyle={{
@@ -268,6 +295,13 @@ function AddressCharts({ addresses }: { addresses: Address[] }) {
                                         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                                     }}
                                 />
+                                {/* <Tooltip
+                                    cursor={{
+                                        fill: 'rgba(148,163,184,0.06)',
+                                        radius: 8,
+                                    }}
+                                    content={<CustomTooltip />}
+                                /> */}
                                 <Bar
                                     dataKey="count"
                                     fill="#10b981"
@@ -998,7 +1032,7 @@ export default function ShopAddressesPage() {
                                                 className={cn(
                                                     'rounded-2xl border p-4 text-left transition-all',
                                                     data.type === 'livraison'
-                                                        ? 'border-emerald-500 bg-emerald-50 shadow-lg shadow-emerald-500/10 dark:bg-emerald-950/20'
+                                                        ? 'border-emerald-500 bg-emerald-50 shadow shadow-emerald-500/10 dark:bg-emerald-950/20'
                                                         : 'border-slate-200 hover:border-slate-300 dark:border-slate-700',
                                                 )}
                                             >
@@ -1021,7 +1055,7 @@ export default function ShopAddressesPage() {
                                                 className={cn(
                                                     'rounded-2xl border p-4 text-left transition-all',
                                                     data.type === 'facturation'
-                                                        ? 'border-blue-500 bg-blue-50 shadow-lg shadow-blue-500/10 dark:bg-blue-950/20'
+                                                        ? 'border-blue-500 bg-blue-50 shadow shadow-blue-500/10 dark:bg-blue-950/20'
                                                         : 'border-slate-200 hover:border-slate-300 dark:border-slate-700',
                                                 )}
                                             >
@@ -1097,14 +1131,14 @@ function AdresseCard({
     return (
         <div
             className={cn(
-                'group relative overflow-hidden rounded-3xl border border-slate-200/60 bg-white/90 p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-2xl dark:border-slate-800/60 dark:bg-slate-900/80',
+                'group relative overflow-hidden rounded-3xl border border-slate-200/60 bg-white/90 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow dark:border-slate-800/60 dark:bg-slate-900/80',
                 isEditing && 'ring-2 ring-amber-400 dark:ring-amber-500',
             )}
         >
             <div className="absolute inset-0 bg-linear-to-br from-emerald-500/0 via-emerald-500/0 to-cyan-500/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
             <div className="absolute top-4 right-4 flex items-center gap-2">
                 {address.est_defaut && (
-                    <div className="flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-xs font-bold text-white shadow-lg">
+                    <div className="flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 text-xs font-bold text-white shadow">
                         <Star className="h-3.5 w-3.5 fill-white" />
                         Principale
                     </div>
@@ -1126,7 +1160,7 @@ function AdresseCard({
                     <div className="flex items-center gap-3">
                         <div
                             className={cn(
-                                'flex h-14 w-14 items-center justify-center rounded-2xl shadow-lg',
+                                'flex h-14 w-14 items-center justify-center rounded-2xl shadow',
                                 address.type === 'livraison'
                                     ? 'bg-linear-to-br from-emerald-500 to-teal-500'
                                     : 'bg-linear-to-br from-blue-500 to-indigo-500',

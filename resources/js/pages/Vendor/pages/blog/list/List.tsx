@@ -467,7 +467,7 @@ export default function List({
 
     // PostCard – stable, sans ombre, avec animation rapide
     const PostCard = ({ post }: { post: ProcessedPost }) => {
-        const category = post.categories?.[0] ?? post.category;
+        const category = post.categories?.[0];
 
         return (
             <Link

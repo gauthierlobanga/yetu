@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Vendor\Boutique\Ecommerce\Commande;
 
 use App\Http\Controllers\Controller;
 use App\Models\Commande;
+use App\Services\TenantPropsService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,14 @@ use Inertia\Inertia;
 class OrderController extends Controller
 {
     use AuthorizesRequests;
+
+    private array $tenantPropsService;
+
+    public function __construct(TenantPropsService $tenant_props_service)
+    {
+        $tenant = tenant();
+        $this->tenantPropsService = $tenant_props_service->getTenantProps($tenant);
+    }
 
     public function ordersIndex()
     {
@@ -82,9 +91,42 @@ class OrderController extends Controller
     public function ordersShow(Commande $commande)
     {
         $this->authorize('view', $commande);
-        $commande->load(['lignes.produit', 'lignes.variante', 'adresseFacturation', 'adresseLivraison', 'paiements']);
 
-        return Inertia::render('Vendor/boutique/Orders/Show', ['order' => $commande]);
+        // Charger les relations, y compris le suivi de livraison
+        $commande->load([
+            'lignes.produit',
+            'lignes.variante',
+            'adresseFacturation',
+            'adresseLivraison',
+            'paiements',
+            'deliveryTracking.events',   // ← chargement du tracking et des événements
+        ]);
+
+        // Préparer les données de tracking pour le frontend
+        $tracking = null;
+        if ($commande->deliveryTracking) {
+            $tracking = [
+                'id' => $commande->deliveryTracking->id,
+                'status' => $commande->deliveryTracking->status,
+                'carrier' => $commande->deliveryTracking->carrier,
+                'current_location' => $commande->deliveryTracking->current_location,
+                'estimated_delivery_at' => $commande->deliveryTracking->estimated_delivery_at?->toIso8601String(),
+                'tracking_number' => $commande->deliveryTracking->tracking_number,
+                'events' => $commande->deliveryTracking->events->map(fn ($event) => [
+                    'id' => $event->id,
+                    'type' => $event->type,
+                    'title' => $event->title,
+                    'description' => $event->description,
+                    'location' => $event->location,
+                    'occurred_at' => $event->occurred_at->toIso8601String(),
+                ])->values(),
+            ];
+        }
+
+        return Inertia::render('Vendor/boutique/Orders/Show', [
+            'order' => $commande,
+            'tracking' => $tracking,   // ← nouvelle propriété
+        ]);
     }
 
     public function ordersCancel(Commande $commande)
@@ -110,12 +152,12 @@ class OrderController extends Controller
         $pdf = Pdf::loadView('pdf.invoice', [
             'commande' => $commande,
             'company' => [
-                'name' => config('app.name'),
-                'address' => config('company_address', ''),
-                'email' => config('company_email', ''),
-                'phone' => config('company_phone', ''),
-                'siret' => config('company_siret', ''),
-                'tva' => config('company_tva', ''),
+                'name' => $this->tenantPropsService['raison_sociale'] ?? config('app.name'),
+                'address' => $this->tenantPropsService['address'] ?? config('company_address'),
+                'email' => $this->tenantPropsService['email'] ?? config('company_email'),
+                'phone' => $this->tenantPropsService['telephone'] ?? config('company_phone'),
+                'siret' => $this->tenantPropsService['siret'] ?? config('company_siret'),
+                'tva' => $this->tenantPropsService[''] ?? config('company_tva', '16%'),
             ],
         ]);
 

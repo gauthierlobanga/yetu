@@ -121,7 +121,7 @@ export function ChartRevenueOverTime({ data }: { data: SalesPoint[] }) {
             </CardHeader>
 
             {/* Stats rapides */}
-            {/* <div className="grid grid-cols-3 gap-2 border-b border-slate-100 px-4 py-2 dark:border-slate-800">
+            <div className="grid grid-cols-3 gap-2 border-b border-slate-100 px-4 dark:border-slate-800">
                 <div className="flex flex-col items-center rounded-md bg-slate-50 px-2 py-1.5 dark:bg-slate-900">
                     <Wallet className="h-3.5 w-3.5 text-emerald-500" />
                     <span className="mt-1 text-sm font-bold text-slate-900 dark:text-white">
@@ -149,7 +149,7 @@ export function ChartRevenueOverTime({ data }: { data: SalesPoint[] }) {
                         Panier moy.
                     </span>
                 </div>
-            </div> */}
+            </div>
 
             <CardContent className="px-2 pt-4 pb-2 sm:px-4">
                 <ChartContainer

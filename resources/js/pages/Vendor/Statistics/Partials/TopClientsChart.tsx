@@ -220,7 +220,7 @@ export function TopClientsChart({ data }: Props) {
                                 width={110}
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                                tick={{ fontSize: 12, fill: '#94a3b8' }}
                             />
                             <Tooltip
                                 cursor={{
@@ -231,8 +231,8 @@ export function TopClientsChart({ data }: Props) {
                             />
                             <Bar
                                 dataKey="value"
-                                radius={[0, 8, 8, 0]}
-                                barSize={18}
+                                radius={[0, 4, 4, 0]}
+                                barSize={40}
                             >
                                 {chartData.map((entry, idx) => (
                                     <Cell

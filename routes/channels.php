@@ -95,3 +95,8 @@ Broadcast::channel('product.{productId}', function ($user) {
 Broadcast::channel('notifications.global', function ($user) {
     return true;
 });
+
+Broadcast::channel('orders.{commandeId}', function ($user, $commandeId) {
+    // Vérifier que l'utilisateur est le propriétaire de la commande
+    return $user->client && $user->client->commandes()->where('id', $commandeId)->exists();
+});

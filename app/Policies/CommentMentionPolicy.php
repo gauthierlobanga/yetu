@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use App\Models\CommentMention;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 
@@ -15,7 +16,7 @@ class CommentMentionPolicy
     /**
      * Perform pre-authorization checks.
      */
-    public function before(AuthUser $user, string $ability): ?bool
+    public function before(User $user, string $ability): ?bool
     {
         if ($user->hasRole('super_admin') || $user->hasRole('vendeur')) {
             return true;
